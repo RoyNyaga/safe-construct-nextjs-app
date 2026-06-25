@@ -1,0 +1,321 @@
+{
+  "Nav": {
+    "home": "Home",
+    "about": "About",
+    "catalogue": "Catalogue",
+    "services": "Services",
+    "blog": "Blog",
+    "contact": "Contact",
+    "requestDesign": "Request a Design",
+    "language": "Language"
+  },
+  "Footer": {
+    "tagline": "Building excellence, one design at a time.",
+    "quickLinks": "Quick Links",
+    "services": "Services",
+    "legal": "Legal",
+    "privacyPolicy": "Privacy Policy",
+    "termsOfService": "Terms of Service",
+    "newsletter": "Newsletter",
+    "newsletterPlaceholder": "Your email address",
+    "subscribe": "Subscribe",
+    "allRightsReserved": "All rights reserved.",
+    "contactUs": "Contact Us"
+  },
+  "Home": {
+    "hero": {
+      "badge": "Premium Construction & Design",
+      "title": "Build Your Dream Home",
+      "titleHighlight": "With Confidence",
+      "subtitle": "Safe-Construct delivers world-class architectural designs and construction services tailored to your vision and budget.",
+      "ctaPrimary": "Explore Our Catalogue",
+      "ctaSecondary": "Request a Design"
+    },
+    "stats": {
+      "projects": "Projects Completed",
+      "clients": "Happy Clients",
+      "years": "Years of Experience",
+      "designs": "Unique Designs"
+    },
+    "services": {
+      "title": "What We Offer",
+      "subtitle": "Comprehensive construction and design services for every need",
+      "architecturalDesign": "Architectural Design",
+      "architecturalDesignDesc": "Custom architectural plans tailored to your lifestyle and budget.",
+      "generalContracting": "General Contracting",
+      "generalContractingDesc": "End-to-end project management from foundation to finishing.",
+      "supervision": "Construction Supervision",
+      "supervisionDesc": "Expert on-site oversight to ensure quality and compliance.",
+      "costEstimation": "Cost Estimation",
+      "costEstimationDesc": "Accurate and transparent budget breakdowns before you commit.",
+      "learnMore": "Learn More"
+    },
+    "catalogue": {
+      "title": "Featured Designs",
+      "subtitle": "Explore our most popular architectural plans",
+      "viewAll": "View All Designs"
+    },
+    "testimonials": {
+      "title": "What Our Clients Say",
+      "subtitle": "Trusted by hundreds of homeowners across Africa"
+    },
+    "cta": {
+      "title": "Ready to Build Your Dream?",
+      "subtitle": "Start with a free consultation and get a custom design proposal.",
+      "button": "Get Started Today"
+    }
+  },
+  "About": {
+    "hero": {
+      "badge": "Our Story",
+      "title": "Building the Future",
+      "titleHighlight": "of African Architecture",
+      "subtitle": "We are a team of passionate architects and engineers dedicated to delivering premium, affordable construction solutions."
+    },
+    "mission": {
+      "title": "Our Mission",
+      "description": "To democratize access to world-class architectural design and construction excellence across Africa and beyond."
+    },
+    "team": {
+      "title": "Meet Our Team",
+      "subtitle": "The talented people behind Safe-Construct"
+    }
+  },
+  "Catalogue": {
+    "title": "Design Catalogue",
+    "subtitle": "Browse our collection of premium architectural plans",
+    "filters": {
+      "all": "All",
+      "style": "Style",
+      "bedrooms": "Bedrooms",
+      "size": "Size (sqm)",
+      "origin": "Design Origin",
+      "africa": "Africa",
+      "europe": "Europe",
+      "america": "America",
+      "canada": "Canada"
+    },
+    "card": {
+      "bedrooms": "{count} Bedrooms",
+      "bathrooms": "{count} Bathrooms",
+      "sqm": "{size} sqm",
+      "viewDetails": "View Details",
+      "requestDesign": "Request This Design"
+    },
+    "detail": {
+      "overview": "Overview",
+      "gallery": "Gallery",
+      "costBreakdown": "Estimated Cost Breakdown",
+      "totalEstimate": "Total Estimate",
+      "requestThisDesign": "Request This Design",
+      "views": "views",
+      "likes": "likes"
+    },
+    "empty": "No designs found matching your filters."
+  },
+  "RequestDesign": {
+    "title": "Request a Custom Design",
+    "subtitle": "Tell us about your dream home in a few simple steps",
+    "step": "Step {current} of {total}",
+    "steps": {
+      "location": "Project Location",
+      "style": "Building Style",
+      "rooms": "Room Layout",
+      "features": "Special Features",
+      "documents": "Documents Needed",
+      "notes": "Additional Notes",
+      "contact": "Meeting & Contact"
+    },
+    "location": {
+      "title": "Where is your project?",
+      "country": "Country",
+      "city": "City / Town",
+      "landStatus": "Land Status",
+      "ownLand": "I own the land",
+      "searchingLand": "Still searching for land",
+      "hasSitePlan": "Do you have a site plan?",
+      "yes": "Yes",
+      "no": "No"
+    },
+    "style": {
+      "title": "What type of building do you want?",
+      "bungalow": "Bungalow",
+      "duplex": "Duplex",
+      "villa": "Villa",
+      "apartment": "Apartment",
+      "commercial": "Commercial",
+      "floors": "Number of Floors"
+    },
+    "rooms": {
+      "title": "Tell us about the room layout",
+      "bedrooms": "Bedrooms",
+      "bathrooms": "Bathrooms",
+      "parking": "Parking Spots",
+      "garden": "Include a Garden?",
+      "fence": "Include a Fence / Gate?"
+    },
+    "features": {
+      "title": "Any special features?",
+      "pool": "Swimming Pool",
+      "solar": "Solar Power System",
+      "borehole": "Borehole / Water Well",
+      "servantQuarters": "Servant Quarters",
+      "totalArea": "Total Desired Area (sqm)"
+    },
+    "documents": {
+      "title": "What documents do you need?",
+      "blueprints": "Architectural Blueprints",
+      "renders": "3D Renders & Visualizations",
+      "structural": "Structural Engineering Drawings",
+      "boq": "Bill of Quantities (BOQ)"
+    },
+    "notes": {
+      "title": "Anything else to add?",
+      "placeholder": "Describe any special requirements, preferences, or questions you have..."
+    },
+    "contact": {
+      "title": "Schedule a consultation",
+      "meetingDate": "Preferred Meeting Date",
+      "meetingTime": "Preferred Meeting Time",
+      "timezone": "Your Timezone",
+      "fullName": "Full Name",
+      "phone": "Phone Number (WhatsApp)",
+      "email": "Email Address",
+      "submit": "Submit Request"
+    },
+    "success": {
+      "title": "Request Submitted!",
+      "message": "Thank you! Our team will contact you within 24 hours to confirm your consultation.",
+      "backHome": "Back to Home"
+    },
+    "navigation": {
+      "back": "Back",
+      "next": "Next",
+      "submit": "Submit"
+    }
+  },
+  "Services": {
+    "title": "Our Services",
+    "subtitle": "Professional construction and design services tailored to your needs",
+    "architecturalDesign": {
+      "title": "Architectural Design",
+      "description": "We craft bespoke architectural plans that blend aesthetics with functionality. From concept sketches to detailed blueprints, we design homes that reflect your personality.",
+      "features": ["Custom floor plans", "3D visualizations", "Structural drawings", "Bill of quantities"]
+    },
+    "generalContracting": {
+      "title": "General Contracting",
+      "description": "Full project management from groundbreaking to handover. We coordinate all trades, manage timelines, and ensure your home is built to the highest standards.",
+      "features": ["Full project management", "Vetted subcontractors", "Quality control", "Timeline guarantees"]
+    },
+    "supervision": {
+      "title": "Construction Supervision",
+      "description": "Our experienced engineers provide on-site supervision to ensure your builder adheres to the approved plans and quality standards.",
+      "features": ["Regular site visits", "Progress reports", "Quality inspections", "Compliance verification"]
+    },
+    "costEstimation": {
+      "title": "Cost Estimation",
+      "description": "Get a detailed, itemized budget breakdown before committing to construction. We help you understand where every franc goes.",
+      "features": ["Detailed BOQ", "Material specifications", "Labor cost breakdown", "Contingency planning"]
+    },
+    "inquiryForm": {
+      "title": "Request This Service",
+      "name": "Full Name",
+      "phone": "Phone Number",
+      "email": "Email Address",
+      "message": "Tell us about your project",
+      "submit": "Send Inquiry",
+      "success": "Inquiry sent! We'll be in touch shortly."
+    }
+  },
+  "Blog": {
+    "title": "Construction Insights",
+    "subtitle": "Expert advice, design inspiration, and industry news",
+    "search": "Search articles...",
+    "filters": {
+      "all": "All Posts",
+      "featured": "Featured"
+    },
+    "card": {
+      "readMore": "Read More",
+      "minRead": "{min} min read"
+    },
+    "post": {
+      "by": "By",
+      "comments": "Comments",
+      "leaveComment": "Leave a Comment",
+      "commentName": "Your Name",
+      "commentText": "Your Comment",
+      "submitComment": "Post Comment",
+      "commentPending": "Your comment is awaiting moderation.",
+      "noComments": "Be the first to comment!"
+    }
+  },
+  "Contact": {
+    "title": "Get in Touch",
+    "subtitle": "Have a question or want to start a project? We'd love to hear from you.",
+    "form": {
+      "name": "Full Name",
+      "email": "Email Address",
+      "phone": "Phone Number (optional)",
+      "message": "Your Message",
+      "preferredChannel": "Preferred Response Channel",
+      "whatsapp": "WhatsApp",
+      "emailChannel": "Email",
+      "submit": "Send Message",
+      "success": "Message sent! We'll get back to you within 24 hours."
+    },
+    "info": {
+      "title": "Contact Information",
+      "whatsappCta": "Chat on WhatsApp",
+      "emailCta": "Send an Email"
+    }
+  },
+  "Common": {
+    "loading": "Loading...",
+    "error": "Something went wrong. Please try again.",
+    "notFound": "Page not found.",
+    "backHome": "Back to Home",
+    "seeAll": "See All",
+    "close": "Close",
+    "confirm": "Confirm",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "save": "Save",
+    "currency": "XAF",
+    "viewMore": "View More",
+    "learnMore": "Learn More"
+  },
+  "Auth": {
+    "loginTitle": "Welcome Back",
+    "loginSubtitle": "Sign in to your account",
+    "loginDescription": "Enter your phone number and password to continue.",
+    "phoneLabel": "Phone Number",
+    "passwordLabel": "Password",
+    "signIn": "Sign In",
+    "signingIn": "Signing in...",
+    "noAccount": "Don't have an account?",
+    "requestAccess": "Request Access",
+    "backToSite": "Back to Site",
+    "registerTitle": "Create Account",
+    "registerSubtitle": "Join Safe-Construct",
+    "registerDescription": "Fill in your details to create an account.",
+    "fullName": "Full Name",
+    "confirmPassword": "Confirm Password",
+    "createAccount": "Create Account",
+    "creatingAccount": "Creating account...",
+    "alreadyHaveAccount": "Already have an account?",
+    "signInLink": "Sign in",
+    "passwordMismatch": "Passwords do not match.",
+    "invalidPhone": "Please enter a valid phone number."
+  },
+  "SelectContext": {
+    "title": "Choose Your Space",
+    "subtitle": "Select a workspace context to continue your session",
+    "clientPortal": "Client Portal",
+    "clientPortalDesc": "Go to the public website, browse catalogue designs, request custom architecture, and view construction blogs.",
+    "adminPortal": "Admin Dashboard",
+    "adminPortalDesc": "Manage customer leads, approve blog comments, write articles, edit design plans, and customize team profiles.",
+    "continue": "Continue to portal"
+  }
+}

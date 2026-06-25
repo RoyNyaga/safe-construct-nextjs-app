@@ -1,0 +1,321 @@
+{
+  "Nav": {
+    "home": "Accueil",
+    "about": "À Propos",
+    "catalogue": "Catalogue",
+    "services": "Services",
+    "blog": "Blog",
+    "contact": "Contact",
+    "requestDesign": "Demander un Devis",
+    "language": "Langue"
+  },
+  "Footer": {
+    "tagline": "L'excellence en construction, un design à la fois.",
+    "quickLinks": "Liens Rapides",
+    "services": "Services",
+    "legal": "Légal",
+    "privacyPolicy": "Politique de Confidentialité",
+    "termsOfService": "Conditions d'Utilisation",
+    "newsletter": "Newsletter",
+    "newsletterPlaceholder": "Votre adresse e-mail",
+    "subscribe": "S'abonner",
+    "allRightsReserved": "Tous droits réservés.",
+    "contactUs": "Contactez-nous"
+  },
+  "Home": {
+    "hero": {
+      "badge": "Construction & Design Premium",
+      "title": "Construisez la Maison de Vos Rêves",
+      "titleHighlight": "En Toute Confiance",
+      "subtitle": "Safe-Construct offre des designs architecturaux de classe mondiale et des services de construction adaptés à votre vision et à votre budget.",
+      "ctaPrimary": "Explorer Notre Catalogue",
+      "ctaSecondary": "Demander un Design"
+    },
+    "stats": {
+      "projects": "Projets Réalisés",
+      "clients": "Clients Satisfaits",
+      "years": "Années d'Expérience",
+      "designs": "Designs Uniques"
+    },
+    "services": {
+      "title": "Nos Prestations",
+      "subtitle": "Des services complets de construction et de design pour tous les besoins",
+      "architecturalDesign": "Design Architectural",
+      "architecturalDesignDesc": "Plans architecturaux personnalisés adaptés à votre style de vie et à votre budget.",
+      "generalContracting": "Entreprise Générale",
+      "generalContractingDesc": "Gestion de projet de bout en bout, de la fondation à la finition.",
+      "supervision": "Surveillance des Travaux",
+      "supervisionDesc": "Supervision experte sur site pour garantir la qualité et la conformité.",
+      "costEstimation": "Estimation des Coûts",
+      "costEstimationDesc": "Budgets détaillés et transparents avant tout engagement.",
+      "learnMore": "En Savoir Plus"
+    },
+    "catalogue": {
+      "title": "Designs en Vedette",
+      "subtitle": "Explorez nos plans architecturaux les plus populaires",
+      "viewAll": "Voir Tous les Designs"
+    },
+    "testimonials": {
+      "title": "Ce Que Disent Nos Clients",
+      "subtitle": "La confiance de centaines de propriétaires à travers l'Afrique"
+    },
+    "cta": {
+      "title": "Prêt à Construire Votre Rêve?",
+      "subtitle": "Commencez par une consultation gratuite et recevez une proposition personnalisée.",
+      "button": "Commencer Aujourd'hui"
+    }
+  },
+  "About": {
+    "hero": {
+      "badge": "Notre Histoire",
+      "title": "Construire l'Avenir",
+      "titleHighlight": "de l'Architecture Africaine",
+      "subtitle": "Nous sommes une équipe d'architectes et d'ingénieurs passionnés, dédiés à livrer des solutions de construction premium et abordables."
+    },
+    "mission": {
+      "title": "Notre Mission",
+      "description": "Démocratiser l'accès au design architectural de classe mondiale et à l'excellence en construction à travers l'Afrique et au-delà."
+    },
+    "team": {
+      "title": "Notre Équipe",
+      "subtitle": "Les talents derrière Safe-Construct"
+    }
+  },
+  "Catalogue": {
+    "title": "Catalogue de Designs",
+    "subtitle": "Parcourez notre collection de plans architecturaux premium",
+    "filters": {
+      "all": "Tous",
+      "style": "Style",
+      "bedrooms": "Chambres",
+      "size": "Superficie (m²)",
+      "origin": "Origine du Design",
+      "africa": "Afrique",
+      "europe": "Europe",
+      "america": "Amérique",
+      "canada": "Canada"
+    },
+    "card": {
+      "bedrooms": "{count} Chambres",
+      "bathrooms": "{count} Salles de bain",
+      "sqm": "{size} m²",
+      "viewDetails": "Voir les Détails",
+      "requestDesign": "Demander ce Design"
+    },
+    "detail": {
+      "overview": "Aperçu",
+      "gallery": "Galerie",
+      "costBreakdown": "Estimation des Coûts",
+      "totalEstimate": "Estimation Totale",
+      "requestThisDesign": "Demander ce Design",
+      "views": "vues",
+      "likes": "j'aime"
+    },
+    "empty": "Aucun design trouvé correspondant à vos filtres."
+  },
+  "RequestDesign": {
+    "title": "Demander un Design Personnalisé",
+    "subtitle": "Décrivez la maison de vos rêves en quelques étapes simples",
+    "step": "Étape {current} sur {total}",
+    "steps": {
+      "location": "Localisation du Projet",
+      "style": "Style de Construction",
+      "rooms": "Disposition des Pièces",
+      "features": "Caractéristiques Spéciales",
+      "documents": "Documents Nécessaires",
+      "notes": "Notes Supplémentaires",
+      "contact": "Rendez-vous & Contact"
+    },
+    "location": {
+      "title": "Où se trouve votre projet?",
+      "country": "Pays",
+      "city": "Ville",
+      "landStatus": "Statut du Terrain",
+      "ownLand": "Je possède le terrain",
+      "searchingLand": "Je cherche encore un terrain",
+      "hasSitePlan": "Avez-vous un plan de masse?",
+      "yes": "Oui",
+      "no": "Non"
+    },
+    "style": {
+      "title": "Quel type de bâtiment souhaitez-vous?",
+      "bungalow": "Bungalow",
+      "duplex": "Duplex",
+      "villa": "Villa",
+      "apartment": "Appartement",
+      "commercial": "Commercial",
+      "floors": "Nombre d'Étages"
+    },
+    "rooms": {
+      "title": "Parlez-nous de la disposition des pièces",
+      "bedrooms": "Chambres",
+      "bathrooms": "Salles de bain",
+      "parking": "Places de Parking",
+      "garden": "Inclure un Jardin?",
+      "fence": "Inclure une Clôture / Portail?"
+    },
+    "features": {
+      "title": "Des caractéristiques spéciales?",
+      "pool": "Piscine",
+      "solar": "Système Solaire",
+      "borehole": "Forage / Puits",
+      "servantQuarters": "Quartier des Employés",
+      "totalArea": "Superficie Totale Souhaitée (m²)"
+    },
+    "documents": {
+      "title": "Quels documents vous faut-il?",
+      "blueprints": "Plans Architecturaux",
+      "renders": "Rendus 3D & Visualisations",
+      "structural": "Dessins de Structure",
+      "boq": "Bordereau des Prix (BDP)"
+    },
+    "notes": {
+      "title": "Avez-vous quelque chose à ajouter?",
+      "placeholder": "Décrivez vos exigences spéciales, vos préférences ou vos questions..."
+    },
+    "contact": {
+      "title": "Planifier une consultation",
+      "meetingDate": "Date de Réunion Souhaitée",
+      "meetingTime": "Heure de Réunion Souhaitée",
+      "timezone": "Votre Fuseau Horaire",
+      "fullName": "Nom Complet",
+      "phone": "Numéro de Téléphone (WhatsApp)",
+      "email": "Adresse E-mail",
+      "submit": "Soumettre la Demande"
+    },
+    "success": {
+      "title": "Demande Soumise!",
+      "message": "Merci! Notre équipe vous contactera dans les 24 heures pour confirmer votre consultation.",
+      "backHome": "Retour à l'Accueil"
+    },
+    "navigation": {
+      "back": "Retour",
+      "next": "Suivant",
+      "submit": "Soumettre"
+    }
+  },
+  "Services": {
+    "title": "Nos Services",
+    "subtitle": "Des services professionnels de construction et de design adaptés à vos besoins",
+    "architecturalDesign": {
+      "title": "Design Architectural",
+      "description": "Nous créons des plans architecturaux sur mesure qui allient esthétique et fonctionnalité. Des esquisses conceptuelles aux plans détaillés, nous concevons des maisons qui reflètent votre personnalité.",
+      "features": ["Plans d'étage personnalisés", "Visualisations 3D", "Dessins structurels", "Bordereau des prix"]
+    },
+    "generalContracting": {
+      "title": "Entreprise Générale",
+      "description": "Gestion complète du projet du terrassement à la remise des clés. Nous coordonnons tous les corps de métier, gérons les délais et veillons à ce que votre maison soit construite selon les normes les plus élevées.",
+      "features": ["Gestion de projet complète", "Sous-traitants vérifiés", "Contrôle qualité", "Garanties de délais"]
+    },
+    "supervision": {
+      "title": "Surveillance des Travaux",
+      "description": "Nos ingénieurs expérimentés assurent la supervision sur site pour s'assurer que votre constructeur respecte les plans approuvés et les normes de qualité.",
+      "features": ["Visites régulières du chantier", "Rapports d'avancement", "Inspections qualité", "Vérification de conformité"]
+    },
+    "costEstimation": {
+      "title": "Estimation des Coûts",
+      "description": "Obtenez un budget détaillé et ventilé avant de vous engager dans la construction. Nous vous aidons à comprendre où va chaque franc.",
+      "features": ["BDP détaillé", "Spécifications des matériaux", "Décomposition des coûts de main-d'œuvre", "Planification des imprévus"]
+    },
+    "inquiryForm": {
+      "title": "Demander ce Service",
+      "name": "Nom Complet",
+      "phone": "Numéro de Téléphone",
+      "email": "Adresse E-mail",
+      "message": "Parlez-nous de votre projet",
+      "submit": "Envoyer la Demande",
+      "success": "Demande envoyée! Nous vous contacterons bientôt."
+    }
+  },
+  "Blog": {
+    "title": "Insights Construction",
+    "subtitle": "Conseils d'experts, inspiration design et actualités du secteur",
+    "search": "Rechercher des articles...",
+    "filters": {
+      "all": "Tous les Articles",
+      "featured": "À la Une"
+    },
+    "card": {
+      "readMore": "Lire Plus",
+      "minRead": "{min} min de lecture"
+    },
+    "post": {
+      "by": "Par",
+      "comments": "Commentaires",
+      "leaveComment": "Laisser un Commentaire",
+      "commentName": "Votre Nom",
+      "commentText": "Votre Commentaire",
+      "submitComment": "Publier le Commentaire",
+      "commentPending": "Votre commentaire est en attente de modération.",
+      "noComments": "Soyez le premier à commenter!"
+    }
+  },
+  "Contact": {
+    "title": "Prendre Contact",
+    "subtitle": "Vous avez une question ou souhaitez démarrer un projet? Nous serions ravis de vous entendre.",
+    "form": {
+      "name": "Nom Complet",
+      "email": "Adresse E-mail",
+      "phone": "Numéro de Téléphone (optionnel)",
+      "message": "Votre Message",
+      "preferredChannel": "Canal de Réponse Préféré",
+      "whatsapp": "WhatsApp",
+      "emailChannel": "E-mail",
+      "submit": "Envoyer le Message",
+      "success": "Message envoyé! Nous vous répondrons dans les 24 heures."
+    },
+    "info": {
+      "title": "Informations de Contact",
+      "whatsappCta": "Discuter sur WhatsApp",
+      "emailCta": "Envoyer un E-mail"
+    }
+  },
+  "Common": {
+    "loading": "Chargement...",
+    "error": "Une erreur s'est produite. Veuillez réessayer.",
+    "notFound": "Page introuvable.",
+    "backHome": "Retour à l'Accueil",
+    "seeAll": "Voir Tout",
+    "close": "Fermer",
+    "confirm": "Confirmer",
+    "cancel": "Annuler",
+    "delete": "Supprimer",
+    "edit": "Modifier",
+    "save": "Enregistrer",
+    "currency": "XAF",
+    "viewMore": "Voir Plus",
+    "learnMore": "En Savoir Plus"
+  },
+  "Auth": {
+    "loginTitle": "Bon Retour",
+    "loginSubtitle": "Connectez-vous à votre compte",
+    "loginDescription": "Entrez votre numéro de téléphone et mot de passe pour continuer.",
+    "phoneLabel": "Numéro de Téléphone",
+    "passwordLabel": "Mot de Passe",
+    "signIn": "Se Connecter",
+    "signingIn": "Connexion...",
+    "noAccount": "Pas encore de compte?",
+    "requestAccess": "Demander un Accès",
+    "backToSite": "Retour au Site",
+    "registerTitle": "Créer un Compte",
+    "registerSubtitle": "Rejoindre Safe-Construct",
+    "registerDescription": "Remplissez vos informations pour créer un compte.",
+    "fullName": "Nom Complet",
+    "confirmPassword": "Confirmer le Mot de Passe",
+    "createAccount": "Créer un Compte",
+    "creatingAccount": "Création du compte...",
+    "alreadyHaveAccount": "Vous avez déjà un compte?",
+    "signInLink": "Se connecter",
+    "passwordMismatch": "Les mots de passe ne correspondent pas.",
+    "invalidPhone": "Veuillez entrer un numéro de téléphone valide."
+  },
+  "SelectContext": {
+    "title": "Choisissez Votre Espace",
+    "subtitle": "Sélectionnez un contexte de travail pour continuer votre session",
+    "clientPortal": "Portail Client",
+    "clientPortalDesc": "Accédez au site public, parcourez les designs du catalogue, demandez un design personnalisé et consultez le blog.",
+    "adminPortal": "Tableau de Bord Admin",
+    "adminPortalDesc": "Gérez les prospects, modérez les commentaires du blog, rédigez des articles, éditez les plans et gérez l'équipe.",
+    "continue": "Continuer vers le portail"
+  }
+}
