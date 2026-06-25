@@ -168,6 +168,7 @@ export default function RegisterForm() {
                         }
                       }}
                       slotProps={{
+                        ...params.slotProps,
                         input: {
                           ...params.slotProps.input,
                           startAdornment: (

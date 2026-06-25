@@ -249,6 +249,7 @@ export default function OnboardingClient({ locale, userPhone, userEmail }: Onboa
                     label={t('countryLabel')}
                     variant="outlined"
                     slotProps={{
+                      ...params.slotProps,
                       input: {
                         ...params.slotProps.input,
                         startAdornment: (

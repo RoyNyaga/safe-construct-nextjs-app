@@ -159,6 +159,7 @@ export default function LoginForm() {
                         }
                       }}
                       slotProps={{
+                        ...params.slotProps,
                         input: {
                           ...params.slotProps.input,
                           startAdornment: (
