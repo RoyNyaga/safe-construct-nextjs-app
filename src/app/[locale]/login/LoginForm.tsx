@@ -19,6 +19,8 @@ import NextLink from 'next/link'
 import { useTranslations, useLocale } from 'next-intl'
 import { LoadingButton } from '@/components/ui'
 import { signIn } from '../auth/actions'
+import { Autocomplete } from '@mui/material'
+import { COUNTRIES, type Country } from '@/lib/countries'
 
 export default function LoginForm() {
   const t = useTranslations('Auth')
@@ -26,11 +28,18 @@ export default function LoginForm() {
   const [isPending, startTransition] = useTransition()
   const [showPassword, setShowPassword] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [selectedCountry, setSelectedCountry] = useState<Country>(
+    COUNTRIES.find((c) => c.code === 'CM') || COUNTRIES[0]
+  )
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
     setError(null)
     const formData = new FormData(e.currentTarget)
+    const rawPhone = (formData.get('phone') as string).trim()
+    const fullPhone = rawPhone.startsWith('+') ? rawPhone : `${selectedCountry.dialCode}${rawPhone}`
+    formData.set('phone', fullPhone)
+
     formData.append('locale', locale)
 
     startTransition(async () => {
@@ -102,33 +111,90 @@ export default function LoginForm() {
             )}
 
             <Box component="form" onSubmit={handleSubmit} noValidate>
-              <TextField
-                id="login-phone"
-                name="phone"
-                label={t('phoneLabel')}
-                type="tel"
-                fullWidth
-                required
-                autoFocus
-                autoComplete="tel"
-                placeholder="671172775"
-                slotProps={{
-                  input: {
-                    startAdornment: (
-                      <InputAdornment position="start">
-                        <Phone size={18} opacity={0.6} />
-                        <Typography
-                          variant="body2"
-                          sx={{ ml: 1, mr: 0.5, color: 'text.secondary', fontWeight: 500 }}
-                        >
-                          +237
+              <Box sx={{ display: 'flex', gap: 1.5, mb: 2.5 }}>
+                <Autocomplete
+                  id="country-code-select"
+                  options={COUNTRIES}
+                  getOptionLabel={(option) => `${option.flag} ${option.dialCode}`}
+                  renderOption={(props, option) => {
+                    const { key, ...optionProps } = props
+                    return (
+                      <Box key={option.code} component="li" sx={{ fontSize: '0.875rem' }} {...optionProps}>
+                        <Typography sx={{ mr: 1.5, fontSize: '1.2rem' }}>{option.flag}</Typography>
+                        <Typography sx={{ flexGrow: 1, fontWeight: 500 }}>
+                          {locale === 'fr' ? option.nameFr : option.name}
                         </Typography>
-                      </InputAdornment>
-                    ),
-                  },
-                }}
-                sx={{ mb: 2.5 }}
-              />
+                        <Typography color="text.secondary" sx={{ fontSize: '0.8rem', ml: 1 }}>
+                          ({option.dialCode})
+                        </Typography>
+                      </Box>
+                    )
+                  }}
+                  value={selectedCountry}
+                  onChange={(event, newValue) => {
+                    if (newValue) setSelectedCountry(newValue)
+                  }}
+                  disableClearable
+                  autoHighlight
+                  filterOptions={(options, state) => {
+                    const query = state.inputValue.toLowerCase().trim()
+                    return options.filter(
+                      (o) =>
+                        o.name.toLowerCase().includes(query) ||
+                        o.nameFr.toLowerCase().includes(query) ||
+                        o.code.toLowerCase().includes(query) ||
+                        o.dialCode.toLowerCase().includes(query) ||
+                        o.dialCode.replace('+', '').includes(query)
+                    )
+                  }}
+                  renderInput={(params) => (
+                    <TextField
+                      {...params}
+                      label={t('countryCode') || 'Code'}
+                      variant="outlined"
+                      sx={{
+                        width: { xs: 110, sm: 130 },
+                        '& .MuiOutlinedInput-root': {
+                          paddingLeft: '8px !important',
+                        }
+                      }}
+                      slotProps={{
+                        input: {
+                          ...params.slotProps.input,
+                          startAdornment: (
+                            <InputAdornment position="start" sx={{ mr: -0.5 }}>
+                              <Typography sx={{ fontSize: '1.2rem' }}>{selectedCountry.flag}</Typography>
+                              {params.slotProps.input.startAdornment}
+                            </InputAdornment>
+                          ),
+                        }
+                      }}
+                    />
+                  )}
+                />
+
+                <TextField
+                  id="login-phone"
+                  name="phone"
+                  label={t('phoneLabel')}
+                  type="tel"
+                  fullWidth
+                  required
+                  autoFocus
+                  autoComplete="tel"
+                  placeholder="671172775"
+                  slotProps={{
+                    input: {
+                      startAdornment: (
+                        <InputAdornment position="start">
+                          <Phone size={18} opacity={0.6} />
+                        </InputAdornment>
+                      ),
+                    },
+                  }}
+                  sx={{ flexGrow: 1 }}
+                />
+              </Box>
 
               <TextField
                 id="login-password"

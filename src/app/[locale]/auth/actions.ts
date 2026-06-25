@@ -60,7 +60,7 @@ export async function signUp(formData: FormData) {
   }
 
   revalidatePath('/', 'layout')
-  redirect(`/${locale}/select-context`)
+  redirect(`/${locale}/onboarding`)
 }
 
 /**

@@ -307,7 +307,20 @@
     "alreadyHaveAccount": "Already have an account?",
     "signInLink": "Sign in",
     "passwordMismatch": "Passwords do not match.",
-    "invalidPhone": "Please enter a valid phone number."
+    "invalidPhone": "Please enter a valid phone number.",
+    "countryCode": "Code"
+  },
+  "Onboarding": {
+    "title": "Welcome! Complete Your Profile",
+    "description": "Please enter your profile details to finish setting up your account.",
+    "firstName": "First Name",
+    "lastName": "Last Name",
+    "email": "Email Address (Optional)",
+    "titleLabel": "Salutation / Title",
+    "countryLabel": "Country of Residence",
+    "submit": "Complete Registration",
+    "saving": "Saving...",
+    "errorMsg": "Failed to save profile. Please try again."
   },
   "SelectContext": {
     "title": "Choose Your Space",

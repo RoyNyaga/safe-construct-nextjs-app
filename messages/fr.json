@@ -307,7 +307,20 @@
     "alreadyHaveAccount": "Vous avez déjà un compte?",
     "signInLink": "Se connecter",
     "passwordMismatch": "Les mots de passe ne correspondent pas.",
-    "invalidPhone": "Veuillez entrer un numéro de téléphone valide."
+    "invalidPhone": "Veuillez entrer un numéro de téléphone valide.",
+    "countryCode": "Code"
+  },
+  "Onboarding": {
+    "title": "Bienvenue! Complétez votre profil",
+    "description": "Veuillez saisir vos coordonnées de profil pour terminer la création de votre compte.",
+    "firstName": "Prénom",
+    "lastName": "Nom",
+    "email": "Adresse Email (Optionnel)",
+    "titleLabel": "Civilité / Titre",
+    "countryLabel": "Pays de Résidence",
+    "submit": "Terminer l'Inscription",
+    "saving": "Enregistrement...",
+    "errorMsg": "Échec de l'enregistrement du profil. Veuillez réessayer."
   },
   "SelectContext": {
     "title": "Choisissez Votre Espace",

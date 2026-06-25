@@ -1,8 +1,8 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/utils/supabase/server'
-import SelectContextClient from './SelectContextClient'
+import OnboardingClient from './OnboardingClient'
 
-export default async function SelectContextPage({
+export default async function OnboardingPage({
   params,
 }: {
   params: Promise<{ locale: string }>
@@ -10,7 +10,7 @@ export default async function SelectContextPage({
   const { locale } = await params
   const supabase = await createClient()
 
-  // Verify auth session
+  // Verify authentication
   const {
     data: { user },
   } = await supabase.auth.getUser()
@@ -19,21 +19,23 @@ export default async function SelectContextPage({
     redirect(`/${locale}/login`)
   }
 
-  // Fetch profile
+  // Fetch user profile
   const { data: profile } = await supabase
     .from('profiles')
     .select('*')
     .eq('id', user.id)
     .single()
 
-  if (profile && (!profile.first_name || !profile.last_name)) {
-    redirect(`/${locale}/onboarding`)
+  // If already onboarded (has first and last names), bypass onboarding
+  if (profile && profile.first_name && profile.last_name) {
+    redirect(`/${locale}/select-context`)
   }
 
-  if (!profile || profile.role !== 'admin') {
-    // Standard client user, bypass context switcher
-    redirect(`/${locale}`)
-  }
-
-  return <SelectContextClient locale={locale} />
+  return (
+    <OnboardingClient
+      locale={locale}
+      userPhone={user.phone || ''}
+      userEmail={user.email || ''}
+    />
+  )
 }
