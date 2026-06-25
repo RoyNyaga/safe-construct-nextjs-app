@@ -16,7 +16,8 @@
 -- =========================================================================
 
 -- Enable UUID extension
-create extension if not exists "uuid-ossp";
+create extension if not exists "uuid-ossp" schema extensions;
+set search_path to public, extensions;
 
 -- =========================================================================
 -- 1. ENUMS AND CUSTOM TYPES
