@@ -54,6 +54,14 @@ export default function LanguageSwitcher() {
         sx={{
           color: 'text.secondary',
           fontWeight: 500,
+          '& .MuiButton-startIcon': {
+            display: { xs: 'none', sm: 'inline-flex' },
+          },
+          '& .MuiButton-endIcon': {
+            display: { xs: 'none', sm: 'inline-flex' },
+          },
+          px: { xs: 1, sm: 1.5 },
+          minWidth: { xs: 'auto', sm: 64 },
           '&:hover': {
             color: 'text.primary',
             backgroundColor: (t) => alpha(t.palette.primary.main, 0.08),

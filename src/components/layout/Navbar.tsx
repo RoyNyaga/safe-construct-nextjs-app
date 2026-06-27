@@ -91,7 +91,7 @@ export default function Navbar() {
         }}
       >
         <Container maxWidth="xl">
-          <Toolbar disableGutters sx={{ height: 72, gap: 2 }}>
+          <Toolbar disableGutters sx={{ height: 72, gap: { xs: 1, sm: 2 } }}>
             {/* Logo */}
             <Box
               component={Link}
@@ -100,29 +100,33 @@ export default function Navbar() {
               sx={{
                 display: 'flex',
                 alignItems: 'center',
-                gap: 1.5,
+                gap: { xs: 1, sm: 1.5 },
                 textDecoration: 'none',
                 flexShrink: 0,
               }}
             >
               <Box
                 sx={{
-                  width: 36,
-                  height: 36,
-                  borderRadius: 2,
+                  width: { xs: 30, sm: 36 },
+                  height: { xs: 30, sm: 36 },
+                  borderRadius: 1.5,
                   background: 'linear-gradient(135deg, #F26419, #F6AE2D)',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
                   flexShrink: 0,
+                  '& svg': {
+                    width: { xs: 16, sm: 20 },
+                    height: { xs: 16, sm: 20 },
+                  },
                 }}
               >
-                <HardHat size={20} color="#fff" />
+                <HardHat color="#fff" />
               </Box>
               <Box
                 sx={{
                   fontWeight: 800,
-                  fontSize: '1.1rem',
+                  fontSize: { xs: '1rem', sm: '1.1rem' },
                   color: 'text.primary',
                   letterSpacing: '-0.02em',
                   lineHeight: 1,
@@ -189,7 +193,7 @@ export default function Navbar() {
               sx={{
                 display: { xs: 'flex', md: 'none' },
                 alignItems: 'center',
-                gap: 0.5,
+                gap: { xs: 0.25, sm: 0.5 },
                 ml: 'auto',
               }}
             >
@@ -199,7 +203,11 @@ export default function Navbar() {
                 onClick={() => setMobileOpen(true)}
                 aria-label="Open menu"
                 size="medium"
-                sx={{ color: 'text.primary' }}
+                edge="end"
+                sx={{
+                  color: 'text.primary',
+                  p: { xs: 0.75, sm: 1.5 },
+                }}
               >
                 <Menu size={22} />
               </IconButton>
