@@ -17,11 +17,12 @@ import {
   Divider,
   Button,
 } from '@mui/material'
-import { Menu, X, HardHat, LogIn } from 'lucide-react'
+import { Menu, X, HardHat, LogIn, LogOut } from 'lucide-react'
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import { useTranslations, useLocale } from 'next-intl'
 import { LanguageSwitcher } from '@/components/ui'
+import { createClient } from '@/utils/supabase/client'
 
 const NAV_LINKS = [
   { key: 'home', href: '' },
@@ -36,12 +37,50 @@ export default function Navbar() {
   const t = useTranslations('Nav')
   const locale = useLocale()
   const pathname = usePathname()
+  const router = useRouter()
+  const supabase = createClient()
   const [mobileOpen, setMobileOpen] = useState(false)
   const [mounted, setMounted] = useState(false)
+  const [user, setUser] = useState<any>(null)
+  const [isAdmin, setIsAdmin] = useState(false)
 
   const scrolled = useScrollTrigger({ disableHysteresis: true, threshold: 20 })
 
-  useEffect(() => { setMounted(true) }, [])
+  useEffect(() => {
+    setMounted(true)
+
+    // Load active session
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      setUser(user)
+      if (user) {
+        supabase.from('profiles').select('role').eq('id', user.id).single().then(({ data }) => {
+          setIsAdmin(data?.role === 'admin')
+        })
+      }
+    })
+
+    // Listen for auth state changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      const u = session?.user ?? null
+      setUser(u)
+      if (u) {
+        supabase.from('profiles').select('role').eq('id', u.id).single().then(({ data }) => {
+          setIsAdmin(data?.role === 'admin')
+        })
+      } else {
+        setIsAdmin(false)
+      }
+    })
+
+    return () => subscription.unsubscribe()
+  }, [supabase])
+
+  const handleSignOut = async () => {
+    await supabase.auth.signOut()
+    setUser(null)
+    setIsAdmin(false)
+    router.refresh()
+  }
 
   const isActive = (href: string) => {
     const full = `/${locale}${href}`
@@ -169,24 +208,69 @@ export default function Navbar() {
               }}
             >
               <LanguageSwitcher />
-              <Button
-                id="nav-login-btn"
-                component={Link}
-                href={`/${locale}/login`}
-                variant="text"
-                size="small"
-                sx={{
-                  color: 'text.secondary',
-                  fontWeight: 600,
-                  px: 1.5,
-                  '&:hover': {
-                    color: 'primary.light',
-                    backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                  },
-                }}
-              >
-                {t('login')}
-              </Button>
+              {user ? (
+                <>
+                  {isAdmin && (
+                    <Button
+                      id="nav-dashboard-btn"
+                      component={Link}
+                      href={`/${locale}/select-context`}
+                      variant="outlined"
+                      size="small"
+                      sx={{
+                        borderColor: 'primary.main',
+                        color: 'primary.light',
+                        fontWeight: 600,
+                        px: 2,
+                        '&:hover': {
+                          borderColor: 'primary.light',
+                          backgroundColor: 'rgba(242, 100, 25, 0.08)',
+                        },
+                      }}
+                    >
+                      {locale === 'fr' ? 'Tableau de bord' : 'Dashboard'}
+                    </Button>
+                  )}
+                  <Button
+                    id="nav-logout-btn"
+                    onClick={handleSignOut}
+                    variant="text"
+                    size="small"
+                    startIcon={<LogOut size={14} />}
+                    sx={{
+                      color: 'text.secondary',
+                      fontWeight: 600,
+                      px: 1.5,
+                      '&:hover': {
+                        color: 'primary.light',
+                        backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                      },
+                    }}
+                  >
+                    {locale === 'fr' ? 'Se déconnecter' : 'Sign Out'}
+                  </Button>
+                </>
+              ) : (
+                <Button
+                  id="nav-login-btn"
+                  component={Link}
+                  href={`/${locale}/login`}
+                  variant="text"
+                  size="small"
+                  startIcon={<LogIn size={14} />}
+                  sx={{
+                    color: 'text.secondary',
+                    fontWeight: 600,
+                    px: 1.5,
+                    '&:hover': {
+                      color: 'primary.light',
+                      backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                    },
+                  }}
+                >
+                  {t('login')}
+                </Button>
+              )}
               <Button
                 id="nav-request-design-btn"
                 component={Link}
@@ -321,17 +405,50 @@ export default function Navbar() {
             >
               {t('requestDesign')}
             </Button>
-            <Button
-              id="mobile-nav-login"
-              component={Link}
-              href={`/${locale}/login`}
-              variant="outlined"
-              fullWidth
-              startIcon={<LogIn size={16} />}
-              onClick={() => setMobileOpen(false)}
-            >
-              {t('login')}
-            </Button>
+            {user ? (
+              <>
+                {isAdmin && (
+                  <Button
+                    id="mobile-nav-dashboard"
+                    component={Link}
+                    href={`/${locale}/select-context`}
+                    variant="outlined"
+                    fullWidth
+                    onClick={() => setMobileOpen(false)}
+                  >
+                    {locale === 'fr' ? 'Tableau de bord' : 'Dashboard'}
+                  </Button>
+                )}
+                <Button
+                  id="mobile-nav-logout"
+                  variant="contained"
+                  fullWidth
+                  startIcon={<LogOut size={16} />}
+                  onClick={() => {
+                    handleSignOut()
+                    setMobileOpen(false)
+                  }}
+                  sx={{
+                    background: 'linear-gradient(135deg, #F26419 0%, #F6AE2D 100%)',
+                    fontWeight: 700,
+                  }}
+                >
+                  {locale === 'fr' ? 'Se déconnecter' : 'Sign Out'}
+                </Button>
+              </>
+            ) : (
+              <Button
+                id="mobile-nav-login"
+                component={Link}
+                href={`/${locale}/login`}
+                variant="outlined"
+                fullWidth
+                startIcon={<LogIn size={16} />}
+                onClick={() => setMobileOpen(false)}
+              >
+                {t('login')}
+              </Button>
+            )}
           </Box>
         </Box>
       </Drawer>
