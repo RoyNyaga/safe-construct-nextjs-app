@@ -217,7 +217,7 @@ create table public.blog_comments (
 create table public.contact_messages (
     id uuid default uuid_generate_v4() primary key,
     full_name text not null,
-    email text not null,
+    email text,                          -- Optional; required only if preferred_contact = 'email'
     whatsapp_phone text not null,
     subject text not null,
     message text not null check (char_length(message) >= 20),
