@@ -164,11 +164,29 @@ export default function Navbar() {
               sx={{
                 display: { xs: 'none', md: 'flex' },
                 alignItems: 'center',
-                gap: 1,
+                gap: 1.5,
                 ml: 'auto',
               }}
             >
               <LanguageSwitcher />
+              <Button
+                id="nav-login-btn"
+                component={Link}
+                href={`/${locale}/login`}
+                variant="text"
+                size="small"
+                sx={{
+                  color: 'text.secondary',
+                  fontWeight: 600,
+                  px: 1.5,
+                  '&:hover': {
+                    color: 'primary.light',
+                    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                  },
+                }}
+              >
+                {t('login')}
+              </Button>
               <Button
                 id="nav-request-design-btn"
                 component={Link}
@@ -312,7 +330,7 @@ export default function Navbar() {
               startIcon={<LogIn size={16} />}
               onClick={() => setMobileOpen(false)}
             >
-              Sign In
+              {t('login')}
             </Button>
           </Box>
         </Box>
