@@ -79,8 +79,33 @@ export default function RequestDesignClient({
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState(false)
 
-  // Initial values, pre-seeded if initialCatalogue is provided
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<{
+    buildCountry: string
+    hasLand: boolean
+    hasSitePlan: boolean
+    style: string
+    floors: number | string
+    bedrooms: number | string
+    bathrooms: number | string
+    hasCarPark: boolean
+    hasGarden: boolean
+    hasFence: boolean
+    hasSwimmingPool: boolean
+    hasSolarProvision: boolean
+    hasBoreholeProvision: boolean
+    hasServantQuarters: boolean
+    sizeSqm: number | string
+    requestedDocuments: string[]
+    additionalNotes: string
+    meetingDate: string
+    meetingTime: string
+    meetingTimezone: string
+    fullName: string
+    phoneCountryCode: string
+    whatsappPhone: string
+    email: string
+    preferredContact: 'whatsapp' | 'email'
+  }>({
     buildCountry: 'Cameroon',
     hasLand: true,
     hasSitePlan: false,
@@ -160,9 +185,9 @@ export default function RequestDesignClient({
         hasLand: formData.hasLand,
         hasSitePlan: formData.hasSitePlan,
         style: formData.style,
-        floors: Number(formData.floors),
-        bedrooms: Number(formData.bedrooms),
-        bathrooms: Number(formData.bathrooms),
+        floors: formData.floors === '' ? 1 : Number(formData.floors),
+        bedrooms: formData.bedrooms === '' ? 0 : Number(formData.bedrooms),
+        bathrooms: formData.bathrooms === '' ? 0 : Number(formData.bathrooms),
         hasCarPark: formData.hasCarPark,
         hasGarden: formData.hasGarden,
         hasFence: formData.hasFence,
@@ -170,7 +195,7 @@ export default function RequestDesignClient({
         hasSolarProvision: formData.hasSolarProvision,
         hasBoreholeProvision: formData.hasBoreholeProvision,
         hasServantQuarters: formData.hasServantQuarters,
-        sizeSqm: Number(formData.sizeSqm),
+        sizeSqm: formData.sizeSqm === '' ? 120 : Number(formData.sizeSqm),
         requestedDocuments: formData.requestedDocuments,
         additionalNotes: formData.additionalNotes,
         meetingDate: formData.meetingDate,
@@ -431,7 +456,7 @@ export default function RequestDesignClient({
                   type="number"
                   slotProps={{ htmlInput: { min: 1 } }}
                   value={formData.floors}
-                  onChange={(e) => handleChange('floors', Math.max(1, parseInt(e.target.value) || 1))}
+                  onChange={(e) => handleChange('floors', e.target.value === '' ? '' : Math.max(1, parseInt(e.target.value) || 1))}
                   fullWidth
                 />
               </Grid>
@@ -453,7 +478,7 @@ export default function RequestDesignClient({
                   type="number"
                   slotProps={{ htmlInput: { min: 0 } }}
                   value={formData.bedrooms}
-                  onChange={(e) => handleChange('bedrooms', Math.max(0, parseInt(e.target.value) || 0))}
+                  onChange={(e) => handleChange('bedrooms', e.target.value === '' ? '' : Math.max(0, parseInt(e.target.value) || 0))}
                   fullWidth
                 />
               </Grid>
@@ -464,7 +489,7 @@ export default function RequestDesignClient({
                   type="number"
                   slotProps={{ htmlInput: { min: 0 } }}
                   value={formData.bathrooms}
-                  onChange={(e) => handleChange('bathrooms', Math.max(0, parseInt(e.target.value) || 0))}
+                  onChange={(e) => handleChange('bathrooms', e.target.value === '' ? '' : Math.max(0, parseInt(e.target.value) || 0))}
                   fullWidth
                 />
               </Grid>
@@ -525,7 +550,7 @@ export default function RequestDesignClient({
                   type="number"
                   slotProps={{ htmlInput: { min: 10 } }}
                   value={formData.sizeSqm}
-                  onChange={(e) => handleChange('sizeSqm', Math.max(10, parseFloat(e.target.value) || 0))}
+                  onChange={(e) => handleChange('sizeSqm', e.target.value === '' ? '' : Math.max(10, parseFloat(e.target.value) || 10))}
                   fullWidth
                 />
               </Grid>
