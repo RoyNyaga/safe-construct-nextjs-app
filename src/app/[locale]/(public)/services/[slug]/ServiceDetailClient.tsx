@@ -148,7 +148,9 @@ export default function ServiceDetailClient({ slug }: ServiceDetailClientProps) 
           {/* Hero CTA */}
           <Button
             id={`service-${service.slug}-hero-cta`}
-            onClick={() => setModalOpen(true)}
+            component={slug === 'architectural-design' ? Link : 'button'}
+            href={slug === 'architectural-design' ? `/${locale}/request-design` : undefined}
+            onClick={slug === 'architectural-design' ? undefined : () => setModalOpen(true)}
             variant="contained"
             size="large"
             endIcon={<ArrowRight size={18} />}
@@ -396,7 +398,9 @@ export default function ServiceDetailClient({ slug }: ServiceDetailClientProps) 
           <Box sx={{ display: 'flex', gap: 2, justifyContent: 'center', flexWrap: 'wrap' }}>
             <Button
               id={`service-${service.slug}-bottom-cta`}
-              onClick={() => setModalOpen(true)}
+              component={slug === 'architectural-design' ? Link : 'button'}
+              href={slug === 'architectural-design' ? `/${locale}/request-design` : undefined}
+              onClick={slug === 'architectural-design' ? undefined : () => setModalOpen(true)}
               variant="contained"
               size="large"
               sx={{
