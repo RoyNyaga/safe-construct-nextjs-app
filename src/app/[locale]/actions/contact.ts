@@ -9,15 +9,18 @@ export async function submitContact(formData: FormData): Promise<ContactResult> 
   const locale = (formData.get('locale') as string) || 'en'
 
   const full_name = (formData.get('full_name') as string)?.trim()
-  const email = (formData.get('email') as string)?.trim().toLowerCase()
+  const email = (formData.get('email') as string)?.trim().toLowerCase() || null
   const whatsapp_phone = (formData.get('whatsapp_phone') as string)?.trim()
   const subject = (formData.get('subject') as string)?.trim()
   const message = (formData.get('message') as string)?.trim()
   const preferred_contact = formData.get('preferred_contact') as 'whatsapp' | 'email'
 
   // Basic server-side guards (client already validates)
-  if (!full_name || !email || !whatsapp_phone || !subject || !message || !preferred_contact) {
+  if (!full_name || !whatsapp_phone || !subject || !message || !preferred_contact) {
     return { status: 'error', message: 'All fields are required.' }
+  }
+  if (preferred_contact === 'email' && !email) {
+    return { status: 'error', message: 'Email address is required when preferred response channel is Email.' }
   }
   if (message.length < 20) {
     return { status: 'error', message: 'Message must be at least 20 characters.' }

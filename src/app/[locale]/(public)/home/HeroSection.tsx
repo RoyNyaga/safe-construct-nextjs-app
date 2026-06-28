@@ -235,9 +235,9 @@ export default function HeroSection() {
               {t('hero.ctaPrimary')}
             </Button>
             <Button
-              id="hero-cta-contact"
+              id="hero-cta-request-design"
               component={Link}
-              href={`/${locale}/contact`}
+              href={`/${locale}/request-design`}
               variant="outlined"
               size="large"
               startIcon={<Play size={16} />}

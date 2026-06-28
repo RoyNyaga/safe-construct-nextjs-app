@@ -94,7 +94,20 @@ export default function ContactForm() {
   function validate(): boolean {
     const e: Partial<FormState> = {}
     if (!form.full_name.trim() || form.full_name.trim().length < 2) e.full_name = 'Full name is required (min 2 characters).'
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) e.email = 'Please enter a valid email address.'
+    
+    // Email is required only if preferred_contact is email
+    if (form.preferred_contact === 'email') {
+      if (!form.email.trim()) {
+        e.email = 'Email address is required when preferred response channel is Email.'
+      } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) {
+        e.email = 'Please enter a valid email address.'
+      }
+    } else {
+      if (form.email.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) {
+        e.email = 'Please enter a valid email address.'
+      }
+    }
+
     if (!form.whatsapp_phone.replace(/\D/g, '') || form.whatsapp_phone.replace(/\D/g, '').length < 8)
       e.whatsapp_phone = 'Enter a valid phone number (min 8 digits).'
     if (!form.subject.trim() || form.subject.trim().length < 3) e.subject = 'Subject is required.'
@@ -124,55 +137,8 @@ export default function ContactForm() {
 
   return (
     <Box>
-      {/* ── Hero ───────────────────────────────────────────────── */}
-      <Box
-        sx={{
-          minHeight: '40vh',
-          display: 'flex',
-          alignItems: 'center',
-          position: 'relative',
-          overflow: 'hidden',
-          background: `
-            radial-gradient(ellipse 80% 60% at 50% 0%, rgba(242,100,25,0.1) 0%, transparent 65%),
-            linear-gradient(180deg, #0E1420 0%, #121824 100%)
-          `,
-          borderBottom: (t) => `1px solid ${alpha(t.palette.divider, 1)}`,
-        }}
-      >
-        {/* Blueprint grid */}
-        <Box
-          sx={{
-            position: 'absolute',
-            inset: 0,
-            backgroundImage: `
-              linear-gradient(rgba(242,100,25,0.04) 1px, transparent 1px),
-              linear-gradient(90deg, rgba(242,100,25,0.04) 1px, transparent 1px)
-            `,
-            backgroundSize: '50px 50px',
-            maskImage: 'radial-gradient(ellipse at center, rgba(0,0,0,0.5) 0%, transparent 80%)',
-          }}
-        />
-        <Container maxWidth="lg" sx={{ position: 'relative', py: 10 }}>
-          <Typography
-            variant="overline"
-            sx={{ color: 'primary.main', fontWeight: 700, letterSpacing: '0.12em', display: 'block', mb: 1.5 }}
-          >
-            {t('info.title')}
-          </Typography>
-          <Typography variant="h1" sx={{ mb: 2, maxWidth: 600 }}>
-            Let&apos;s Build Something{' '}
-            <Box component="span" sx={{ background: 'linear-gradient(135deg,#F26419,#F6AE2D)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
-              Together
-            </Box>
-          </Typography>
-          <Typography variant="h6" color="text.secondary" sx={{ fontWeight: 400, maxWidth: 520 }}>
-            {t('subtitle')}
-          </Typography>
-        </Container>
-      </Box>
-
       {/* ── Form + Info ─────────────────────────────────────────── */}
-      <Container maxWidth="lg" sx={{ py: { xs: 8, md: 12 } }}>
+      <Container maxWidth="lg" sx={{ pt: { xs: 14, md: 16 }, pb: { xs: 8, md: 12 } }}>
         <Grid container spacing={{ xs: 4, md: 8 }}>
 
           {/* ── Left: Form ──────────────────────────────────── */}
@@ -243,10 +209,14 @@ export default function ContactForm() {
                     <TextField
                       id="contact-email"
                       name="email"
-                      label={t('form.email')}
+                      label={
+                        form.preferred_contact === 'email'
+                          ? t('form.email')
+                          : `${t('form.email')} (${locale === 'fr' ? 'optionnel' : 'optional'})`
+                      }
                       type="email"
                       fullWidth
-                      required
+                      required={form.preferred_contact === 'email'}
                       value={form.email}
                       onChange={set('email')}
                       error={!!errors.email}

@@ -237,6 +237,7 @@ export default async function AdminDashboardPage({
                     <ListItem disableGutters sx={{ py: 0.5, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                       <ListItemText
                         primary={req.full_name}
+                        slotProps={{ secondary: { component: 'div' } }}
                         secondary={
                           <Box component="span" sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 0.5 }}>
                             <Chip
@@ -296,6 +297,7 @@ export default async function AdminDashboardPage({
                     <ListItem disableGutters sx={{ py: 0.5, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                       <ListItemText
                         primary={req.full_name}
+                        slotProps={{ secondary: { component: 'div' } }}
                         secondary={
                           <Box component="span" sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 0.5 }}>
                             <Chip

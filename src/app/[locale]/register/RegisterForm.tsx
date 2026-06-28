@@ -125,6 +125,7 @@ export default function RegisterForm() {
                   id="country-code-select"
                   options={COUNTRIES}
                   getOptionLabel={(option) => `${option.flag} ${option.dialCode}`}
+                  slotProps={{ popper: { style: { width: 320 } } }}
                   renderOption={(props, option) => {
                     const { key, ...optionProps } = props
                     return (
@@ -165,18 +166,6 @@ export default function RegisterForm() {
                         width: { xs: 110, sm: 130 },
                         '& .MuiOutlinedInput-root': {
                           paddingLeft: '8px !important',
-                        }
-                      }}
-                      slotProps={{
-                        ...params.slotProps,
-                        input: {
-                          ...params.slotProps.input,
-                          startAdornment: (
-                            <InputAdornment position="start" sx={{ mr: -0.5 }}>
-                              <Typography sx={{ fontSize: '1.2rem' }}>{selectedCountry.flag}</Typography>
-                              {params.slotProps.input.startAdornment}
-                            </InputAdornment>
-                          ),
                         }
                       }}
                     />
