@@ -444,3 +444,145 @@ export async function deleteTeamMember(id: string) {
   revalidatePath('/[locale]/admin/team', 'layout')
   return { success: true }
 }
+
+// ─── USER & PERMISSION MANAGEMENT ───────────────────────────────────────────
+
+export async function getAllProfiles() {
+  const supabase = await createClient()
+
+  // Security check: verify caller is an admin
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'Unauthorized' }
+  const { data: callerProfile } = await supabase.from('profiles').select('role').eq('id', user.id).single()
+  if (!callerProfile || callerProfile.role !== 'admin') {
+    return { error: 'Forbidden' }
+  }
+
+  const { data: profiles, error } = await supabase
+    .from('profiles')
+    .select(`
+      *,
+      admin_permissions (
+        permission_key
+      )
+    `)
+    .order('created_at', { ascending: false })
+
+  if (error) {
+    console.error('Failed to fetch profiles:', error)
+    return { error: error.message }
+  }
+
+  return { success: true, profiles }
+}
+
+export async function updateUserRole(userId: string, newRole: 'admin' | 'client') {
+  const supabase = await createClient()
+
+  // Security check: verify caller is admin and has manage_users permission
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'Unauthorized' }
+  
+  const { data: callerPerms } = await supabase
+    .from('admin_permissions')
+    .select('permission_key')
+    .eq('admin_id', user.id)
+    .eq('permission_key', 'manage_users')
+    .single()
+
+  if (!callerPerms) {
+    return { error: 'Forbidden: You do not have permission to manage users.' }
+  }
+
+  // Prevent self-lockout
+  if (userId === user.id && newRole !== 'admin') {
+    return { error: 'You cannot revoke your own admin access.' }
+  }
+
+  const { error: profileError } = await supabase
+    .from('profiles')
+    .update({ role: newRole })
+    .eq('id', userId)
+
+  if (profileError) {
+    console.error('Failed to update profile role:', profileError)
+    return { error: profileError.message }
+  }
+
+  // If role is changed to client, clear all admin permissions
+  if (newRole === 'client') {
+    await supabase.from('admin_permissions').delete().eq('admin_id', userId)
+  } else if (newRole === 'admin') {
+    // Seed standard permissions if they do not exist
+    const { data: existingPerms } = await supabase
+      .from('admin_permissions')
+      .select('permission_key')
+      .eq('admin_id', userId)
+
+    if (!existingPerms || existingPerms.length === 0) {
+      const insertPayload = STANDARD_PERMISSIONS.map((key) => ({
+        admin_id: userId,
+        permission_key: key,
+      }))
+      await supabase.from('admin_permissions').insert(insertPayload)
+    }
+  }
+
+  revalidatePath('/[locale]/admin', 'layout')
+  return { success: true }
+}
+
+export async function updateAdminPermissions(adminId: string, permissions: string[]) {
+  const supabase = await createClient()
+
+  // Security check: verify caller is admin and has manage_users permission
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'Unauthorized' }
+  
+  const { data: callerPerms } = await supabase
+    .from('admin_permissions')
+    .select('permission_key')
+    .eq('admin_id', user.id)
+    .eq('permission_key', 'manage_users')
+    .single()
+
+  if (!callerPerms) {
+    return { error: 'Forbidden: You do not have permission to manage users.' }
+  }
+
+  // Prevent self-lockout
+  if (adminId === user.id && !permissions.includes('manage_users')) {
+    return { error: 'You cannot revoke your own manage_users permission.' }
+  }
+
+  // First delete existing permissions
+  const { error: deleteError } = await supabase
+    .from('admin_permissions')
+    .delete()
+    .eq('admin_id', adminId)
+
+  if (deleteError) {
+    console.error('Failed to clear admin permissions:', deleteError)
+    return { error: deleteError.message }
+  }
+
+  // Then insert the new permissions
+  if (permissions.length > 0) {
+    const insertPayload = permissions.map((key) => ({
+      admin_id: adminId,
+      permission_key: key,
+    }))
+
+    const { error: insertError } = await supabase
+      .from('admin_permissions')
+      .insert(insertPayload)
+
+    if (insertError) {
+      console.error('Failed to insert new admin permissions:', insertError)
+      return { error: insertError.message }
+    }
+  }
+
+  revalidatePath('/[locale]/admin', 'layout')
+  return { success: true }
+}

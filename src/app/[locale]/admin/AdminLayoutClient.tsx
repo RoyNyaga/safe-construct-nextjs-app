@@ -32,6 +32,7 @@ import {
   Menu,
   ShieldAlert,
   Globe,
+  ShieldCheck,
 } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import { LanguageSwitcher } from '@/components/ui'
@@ -99,6 +100,13 @@ export default function AdminLayoutClient({
       icon: Users,
       href: `/admin/team`,
       permission: 'manage_team',
+    },
+    {
+      key: 'users',
+      label: locale === 'fr' ? 'Utilisateurs' : 'Users & Rights',
+      icon: ShieldCheck,
+      href: `/admin/users`,
+      permission: 'manage_users',
     },
   ]
 
