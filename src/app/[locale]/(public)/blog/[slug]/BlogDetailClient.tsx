@@ -483,6 +483,13 @@ export default function BlogDetailClient({
                   '& p': { mb: 2.5, color: 'text.secondary' },
                   '& ul, & ol': { mb: 2.5, pl: 3, color: 'text.secondary' },
                   '& li': { mb: 1 },
+                  '& img': {
+                    maxWidth: '100%',
+                    height: 'auto',
+                    borderRadius: 2,
+                    my: 3,
+                    display: 'block',
+                  },
                   '& blockquote': {
                     borderLeft: '4px solid #F26419',
                     pl: 3,
