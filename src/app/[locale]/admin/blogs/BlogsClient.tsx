@@ -32,7 +32,8 @@ import {
   Grid,
   Alert,
 } from '@mui/material'
-import { Plus, Edit2, Check, X, BookOpen, MessageSquare, AlertCircle } from 'lucide-react'
+import { Plus, Edit2, Check, X, BookOpen, MessageSquare, AlertCircle, Eye } from 'lucide-react'
+import Link from 'next/link'
 import { useLocale, useTranslations } from 'next-intl'
 import { DeletePromptButton, ImageUpload, RichTextEditor } from '@/components/ui'
 import {
@@ -464,6 +465,17 @@ export default function BlogsClient({
                     <TableCell>{post.comment_count}</TableCell>
                     <TableCell align="right">
                       <Stack direction="row" spacing={0.5} sx={{ justifyContent: 'flex-end' }}>
+                        <IconButton
+                          id={`preview-blog-btn-${post.id}`}
+                          size="small"
+                          component={Link}
+                          href={`/${locale}/blog/${post.slug}?preview=true`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          title={locale === 'fr' ? 'Aperçu de l\'article' : 'Preview Post'}
+                        >
+                          <Eye size={16} />
+                        </IconButton>
                         <IconButton
                           id={`edit-blog-btn-${post.id}`}
                           size="small"

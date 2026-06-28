@@ -6,11 +6,11 @@ import BlogDetailClient, { BlogTag } from './BlogDetailClient'
 
 export const revalidate = 1800 // Revalidate cache every 30 minutes
 
-async function getPostData(slug: string) {
+async function getPostData(slug: string, isPreview: boolean = false) {
   const supabase = await createClient()
 
   // Fetch the main blog post
-  const { data: post } = await supabase
+  let query = supabase
     .from('blogs')
     .select(`
       id,
@@ -40,8 +40,12 @@ async function getPostData(slug: string) {
       )
     `)
     .eq('slug', slug)
-    .eq('status', 'published')
-    .maybeSingle()
+
+  if (!isPreview) {
+    query = query.eq('status', 'published')
+  }
+
+  const { data: post } = await query.maybeSingle()
 
   if (!post) return null
 
@@ -177,11 +181,15 @@ async function getPostData(slug: string) {
 
 export async function generateMetadata({
   params,
+  searchParams,
 }: {
   params: Promise<{ locale: string; slug: string }>
+  searchParams?: Promise<{ [key: string]: string | string[] | undefined }>
 }): Promise<Metadata> {
   const { slug, locale } = await params
-  const data = await getPostData(slug)
+  const resolvedSearchParams = searchParams ? await searchParams : {}
+  const isPreview = resolvedSearchParams.preview === 'true'
+  const data = await getPostData(slug, isPreview)
   if (!data) return {}
 
   const post = data.post
@@ -215,11 +223,15 @@ export async function generateMetadata({
 
 export default async function BlogDetailPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ locale: string; slug: string }>
+  searchParams?: Promise<{ [key: string]: string | string[] | undefined }>
 }) {
   const { slug, locale } = await params
-  const data = await getPostData(slug)
+  const resolvedSearchParams = searchParams ? await searchParams : {}
+  const isPreview = resolvedSearchParams.preview === 'true'
+  const data = await getPostData(slug, isPreview)
 
   if (!data) {
     notFound()
@@ -261,6 +273,7 @@ export default async function BlogDetailPage({
         prevPost={data.prevPost}
         nextPost={data.nextPost}
         locale={locale}
+        isPreview={isPreview}
       />
     </>
   )
