@@ -1,3 +1,5 @@
+import Script from 'next/script'
+
 // Root layout — owns the <html> and <body> shell.
 // The [locale] layout nested inside provides NextIntl + MUI context.
 export default function RootLayout({
@@ -17,7 +19,22 @@ export default function RootLayout({
           rel="stylesheet"
         />
       </head>
-      <body suppressHydrationWarning>{children}</body>
+      <body suppressHydrationWarning>
+        {children}
+        {/* Google Analytics */}
+        <Script
+          src="https://www.googletagmanager.com/gtag/js?id=G-VXC22HZCS9"
+          strategy="afterInteractive"
+        />
+        <Script id="google-analytics" strategy="afterInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', 'G-VXC22HZCS9');
+          `}
+        </Script>
+      </body>
     </html>
   )
 }
