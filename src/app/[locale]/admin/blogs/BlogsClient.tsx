@@ -32,14 +32,18 @@ import {
   Grid,
   Alert,
 } from '@mui/material'
-import { Plus, Edit2, Check, X, BookOpen, MessageSquare, AlertCircle } from 'lucide-react'
+import { Plus, Edit2, Check, X, BookOpen, MessageSquare, AlertCircle, Eye } from 'lucide-react'
+import Link from 'next/link'
 import { useLocale, useTranslations } from 'next-intl'
-import { DeletePromptButton, ImageUpload } from '@/components/ui'
+import { DeletePromptButton, ImageUpload, RichTextEditor } from '@/components/ui'
 import {
   createBlogPost,
   updateBlogPost,
   deleteBlogPost,
   moderateComment,
+  createBlogTag,
+  updateBlogTag,
+  deleteBlogTag,
 } from '@/app/[locale]/actions/admin'
 
 interface Blog {
@@ -128,6 +132,98 @@ export default function BlogsClient({
   const [blogs, setBlogs] = useState<Blog[]>(initialBlogs)
   const [comments, setComments] = useState<Comment[]>(initialComments)
   const [assignments, setAssignments] = useState<Assignment[]>(initialAssignments)
+  const [tagsState, setTagsState] = useState<Tag[]>(tags)
+
+  // Tags Dialog State
+  const [openTagDialog, setOpenTagDialog] = useState(false)
+  const [editTagId, setEditTagId] = useState<string | null>(null)
+  const [tagFormValues, setTagFormValues] = useState({ name: '', nameFr: '', slug: '' })
+
+  const handleOpenCreateTag = () => {
+    setEditTagId(null)
+    setTagFormValues({ name: '', nameFr: '', slug: '' })
+    setError(null)
+    setOpenTagDialog(true)
+  }
+
+  const handleOpenEditTag = (tag: Tag) => {
+    setEditTagId(tag.id)
+    setTagFormValues({
+      name: tag.name,
+      nameFr: tag.name_fr || '',
+      slug: tag.slug,
+    })
+    setError(null)
+    setOpenTagDialog(true)
+  }
+
+  const handleCloseTagDialog = () => {
+    setOpenTagDialog(false)
+  }
+
+  const handleTagFormChange = (key: string, value: any) => {
+    setTagFormValues((prev) => {
+      const next = { ...prev, [key]: value }
+      if (key === 'name') {
+        next.slug = value
+          .toLowerCase()
+          .replace(/[^a-z0-9]+/g, '-')
+          .replace(/(^-|-$)+/g, '')
+      }
+      return next
+    })
+  }
+
+  const handleSaveTag = async () => {
+    setError(null)
+    if (!tagFormValues.name.trim() || !tagFormValues.slug.trim()) {
+      setError(locale === 'fr' ? 'Le nom (EN) et le slug sont obligatoires.' : 'Name (EN) and Slug are required.')
+      return
+    }
+
+    startTransition(async () => {
+      let res
+      if (editTagId) {
+        res = await updateBlogTag(editTagId, tagFormValues)
+      } else {
+        res = await createBlogTag(tagFormValues)
+      }
+
+      if (res.error) {
+        setError(res.error)
+      } else {
+        if (editTagId) {
+          setTagsState((prev) =>
+            prev.map((t) =>
+              t.id === editTagId
+                ? {
+                    ...t,
+                    name: tagFormValues.name,
+                    name_fr: tagFormValues.nameFr || null,
+                    slug: tagFormValues.slug,
+                  }
+                : t
+            )
+          )
+        } else {
+          const createRes = res as { success: boolean; tag: Tag }
+          if (createRes.tag) {
+            setTagsState((prev) => [...prev, createRes.tag])
+          }
+        }
+        setOpenTagDialog(false)
+      }
+    })
+  }
+
+  const handleDeleteTag = async (id: string) => {
+    const res = await deleteBlogTag(id)
+    if (!res.error) {
+      setTagsState((prev) => prev.filter((t) => t.id !== id))
+    } else {
+      setError(res.error)
+    }
+  }
 
   // Dialog State
   const [openDialog, setOpenDialog] = useState(false)
@@ -180,8 +276,8 @@ export default function BlogsClient({
   const handleFormChange = (key: string, value: any) => {
     setFormValues((prev) => {
       const next = { ...prev, [key]: value }
-      // Auto generate slug from English title on create
-      if (key === 'title' && !editPostId) {
+      // Auto generate/update slug from English title
+      if (key === 'title') {
         next.slug = value
           .toLowerCase()
           .replace(/[^a-z0-9]+/g, '-')
@@ -290,6 +386,7 @@ export default function BlogsClient({
         <Tabs value={tabValue} onChange={handleTabChange} indicatorColor="primary" textColor="primary">
           <Tab label={locale === 'fr' ? 'Articles de Blog' : 'Blog Articles'} id="blogs-tab-0" />
           <Tab label={locale === 'fr' ? 'Modération Commentaires' : 'Comment Moderation'} id="blogs-tab-1" />
+          <Tab label={locale === 'fr' ? 'Étiquettes' : 'Tags'} id="blogs-tab-2" />
         </Tabs>
 
         {tabValue === 0 && (
@@ -305,6 +402,21 @@ export default function BlogsClient({
             }}
           >
             {locale === 'fr' ? 'Nouvel Article' : 'New Article'}
+          </Button>
+        )}
+        {tabValue === 2 && (
+          <Button
+            id="admin-create-tag-btn"
+            variant="contained"
+            color="primary"
+            startIcon={<Plus size={16} />}
+            onClick={handleOpenCreateTag}
+            sx={{
+              background: 'linear-gradient(135deg, #F26419 0%, #F6AE2D 100%)',
+              mr: 2,
+            }}
+          >
+            {locale === 'fr' ? 'Nouvelle Étiquette' : 'New Tag'}
           </Button>
         )}
       </Paper>
@@ -353,6 +465,17 @@ export default function BlogsClient({
                     <TableCell>{post.comment_count}</TableCell>
                     <TableCell align="right">
                       <Stack direction="row" spacing={0.5} sx={{ justifyContent: 'flex-end' }}>
+                        <IconButton
+                          id={`preview-blog-btn-${post.id}`}
+                          size="small"
+                          component={Link}
+                          href={`/${locale}/blog/${post.slug}?preview=true`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          title={locale === 'fr' ? 'Aperçu de l\'article' : 'Preview Post'}
+                        >
+                          <Eye size={16} />
+                        </IconButton>
                         <IconButton
                           id={`edit-blog-btn-${post.id}`}
                           size="small"
@@ -457,6 +580,60 @@ export default function BlogsClient({
         </TableContainer>
       )}
 
+      {/* TAB 2: TAGS MANAGEMENT */}
+      {tabValue === 2 && (
+        <TableContainer component={Paper} elevation={0} sx={{ border: (theme) => `1px solid ${theme.palette.divider}`, borderRadius: 3, backgroundColor: 'background.paper' }}>
+          <Table id="blog-tags-table">
+            <TableHead>
+              <TableRow>
+                <TableCell sx={{ fontWeight: 700 }}>{locale === 'fr' ? 'Nom' : 'Name'}</TableCell>
+                <TableCell sx={{ fontWeight: 700 }}>Slug</TableCell>
+                <TableCell sx={{ fontWeight: 700 }}>{locale === 'fr' ? 'Articles Associés' : 'Associated Articles'}</TableCell>
+                <TableCell align="right" sx={{ fontWeight: 700 }}>Actions</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {tagsState.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={4} align="center" sx={{ py: 6, color: 'text.secondary' }}>
+                    {locale === 'fr' ? 'Aucune étiquette.' : 'No tags found.'}
+                  </TableCell>
+                </TableRow>
+              ) : (
+                tagsState.map((tag) => (
+                  <TableRow key={tag.id}>
+                    <TableCell>
+                      <Typography sx={{ fontWeight: 600 }}>{tag.name}</Typography>
+                      {tag.name_fr && <Typography variant="caption" color="text.secondary">FR: {tag.name_fr}</Typography>}
+                    </TableCell>
+                    <TableCell sx={{ fontSize: '0.85rem', color: 'text.secondary' }}>{tag.slug}</TableCell>
+                    <TableCell>{assignments.filter((a) => a.tag_id === tag.id).length}</TableCell>
+                    <TableCell align="right">
+                      <Stack direction="row" spacing={0.5} sx={{ justifyContent: 'flex-end' }}>
+                        <IconButton
+                          id={`edit-tag-btn-${tag.id}`}
+                          size="small"
+                          onClick={() => handleOpenEditTag(tag)}
+                          title="Edit Tag"
+                        >
+                          <Edit2 size={16} />
+                        </IconButton>
+                        <DeletePromptButton
+                          id={`delete-tag-btn-${tag.id}`}
+                          itemName={tag.name}
+                          onDelete={() => handleDeleteTag(tag.id)}
+                          size="small"
+                        />
+                      </Stack>
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
+            </TableBody>
+          </Table>
+        </TableContainer>
+      )}
+
       {/* CREATE/EDIT BLOG DIALOG */}
       <Dialog
         open={openDialog}
@@ -547,27 +724,24 @@ export default function BlogsClient({
 
               {/* EN Body */}
               <Grid size={{ xs: 12, md: 6 }}>
-                <TextField
-                  id="blog-form-body"
-                  label={locale === 'fr' ? 'Contenu HTML/Texte (Anglais)' : 'HTML/Text Content (English)'}
+                <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 700 }}>
+                  {locale === 'fr' ? 'Contenu de l\'article (Anglais)' : 'Blog Article Content (English)'}
+                </Typography>
+                <RichTextEditor
                   value={formValues.body}
-                  onChange={(e) => handleFormChange('body', e.target.value)}
-                  fullWidth
-                  multiline
-                  rows={10}
-                  required
+                  onChange={(val) => handleFormChange('body', val)}
+                  locale={locale}
                 />
               </Grid>
               {/* FR Body */}
               <Grid size={{ xs: 12, md: 6 }}>
-                <TextField
-                  id="blog-form-body-fr"
-                  label={locale === 'fr' ? 'Contenu HTML/Texte (Français)' : 'HTML/Text Content (French)'}
+                <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 700 }}>
+                  {locale === 'fr' ? 'Contenu de l\'article (Français)' : 'Blog Article Content (French)'}
+                </Typography>
+                <RichTextEditor
                   value={formValues.bodyFr}
-                  onChange={(e) => handleFormChange('bodyFr', e.target.value)}
-                  fullWidth
-                  multiline
-                  rows={10}
+                  onChange={(val) => handleFormChange('bodyFr', val)}
+                  locale={locale}
                 />
               </Grid>
 
@@ -619,7 +793,7 @@ export default function BlogsClient({
                   Tags
                 </Typography>
                 <Stack direction="row" spacing={1} useFlexGap sx={{ flexWrap: 'wrap' }}>
-                  {tags.map((tag) => {
+                  {tagsState.map((tag) => {
                     const selected = selectedTags.includes(tag.id)
                     const tagName = locale === 'fr' ? (tag.name_fr || tag.name) : tag.name
                     return (
@@ -647,6 +821,79 @@ export default function BlogsClient({
             id="blog-dialog-save"
             variant="contained"
             onClick={handleSavePost}
+            disabled={isPending}
+            sx={{
+              background: 'linear-gradient(135deg, #F26419 0%, #F6AE2D 100%)',
+            }}
+          >
+            {tc('save')}
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* CREATE/EDIT TAG DIALOG */}
+      <Dialog
+        open={openTagDialog}
+        onClose={handleCloseTagDialog}
+        maxWidth="sm"
+        fullWidth
+        id="tag-crud-modal"
+      >
+        <DialogTitle sx={{ fontWeight: 800, borderBottom: (theme) => `1px solid ${theme.palette.divider}` }}>
+          {editTagId ? (locale === 'fr' ? 'Modifier l\'Étiquette' : 'Edit Tag') : (locale === 'fr' ? 'Créer une Nouvelle Étiquette' : 'Create New Tag')}
+        </DialogTitle>
+        <DialogContent sx={{ p: 4 }}>
+          <Box sx={{ mt: 2 }}>
+            {error && (
+              <Alert severity="error" sx={{ mb: 3, borderRadius: 2 }}>
+                {error}
+              </Alert>
+            )}
+
+            <Grid container spacing={3}>
+              {/* EN Name */}
+              <Grid size={{ xs: 12 }}>
+                <TextField
+                  id="tag-form-name"
+                  label={locale === 'fr' ? 'Nom (Anglais)' : 'Name (English)'}
+                  value={tagFormValues.name}
+                  onChange={(e) => handleTagFormChange('name', e.target.value)}
+                  fullWidth
+                  required
+                />
+              </Grid>
+              {/* FR Name */}
+              <Grid size={{ xs: 12 }}>
+                <TextField
+                  id="tag-form-name-fr"
+                  label={locale === 'fr' ? 'Nom (Français)' : 'Name (French)'}
+                  value={tagFormValues.nameFr}
+                  onChange={(e) => handleTagFormChange('nameFr', e.target.value)}
+                  fullWidth
+                />
+              </Grid>
+              {/* Slug */}
+              <Grid size={{ xs: 12 }}>
+                <TextField
+                  id="tag-form-slug"
+                  label="URL Slug"
+                  value={tagFormValues.slug}
+                  onChange={(e) => handleTagFormChange('slug', e.target.value)}
+                  fullWidth
+                  required
+                />
+              </Grid>
+            </Grid>
+          </Box>
+        </DialogContent>
+        <DialogActions sx={{ px: 4, py: 3, borderTop: (theme) => `1px solid ${theme.palette.divider}` }}>
+          <Button id="tag-dialog-cancel" variant="outlined" onClick={handleCloseTagDialog} disabled={isPending}>
+            {tc('cancel')}
+          </Button>
+          <Button
+            id="tag-dialog-save"
+            variant="contained"
+            onClick={handleSaveTag}
             disabled={isPending}
             sx={{
               background: 'linear-gradient(135deg, #F26419 0%, #F6AE2D 100%)',

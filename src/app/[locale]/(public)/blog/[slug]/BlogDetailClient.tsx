@@ -80,6 +80,7 @@ interface BlogDetailClientProps {
   prevPost: { title: string; title_fr: string | null; slug: string } | null
   nextPost: { title: string; title_fr: string | null; slug: string } | null
   locale: string
+  isPreview?: boolean
 }
 
 export default function BlogDetailClient({
@@ -88,7 +89,8 @@ export default function BlogDetailClient({
   relatedPosts,
   prevPost,
   nextPost,
-  locale
+  locale,
+  isPreview = false
 }: BlogDetailClientProps) {
   const t = useTranslations('Blog')
   const [localComments, setLocalComments] = useState<BlogComment[]>(comments)
@@ -106,10 +108,11 @@ export default function BlogDetailClient({
 
   // View count increment on mount
   useEffect(() => {
+    if (isPreview) return // Skip view count increment in preview mode
     incrementBlogView(post.id)
       .then(() => setViewCount((prev) => prev + 1))
       .catch(() => {})
-  }, [post.id])
+  }, [post.id, isPreview])
 
   // Check if liked in this browser session
   useEffect(() => {
@@ -148,6 +151,15 @@ export default function BlogDetailClient({
   }, [localComments])
 
   const handleLike = async () => {
+    if (isPreview) {
+      setNotification({
+        open: true,
+        message: locale === 'fr' ? 'Interactions désactivées en mode aperçu.' : 'Interactions are disabled in preview mode.',
+        severity: 'warning',
+      })
+      return
+    }
+
     if (hasLiked) {
       setNotification({
         open: true,
@@ -178,6 +190,15 @@ export default function BlogDetailClient({
 
   const handleCommentSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    if (isPreview) {
+      setNotification({
+        open: true,
+        message: locale === 'fr' ? 'Les commentaires sont désactivés en mode aperçu.' : 'Comments are disabled in preview mode.',
+        severity: 'warning',
+      })
+      return
+    }
+
     if (!commentName.trim() || !commentBody.trim()) return
 
     setSubmittingComment(true)
@@ -296,6 +317,31 @@ export default function BlogDetailClient({
 
   return (
     <Box sx={{ pb: 12 }}>
+      {isPreview && (
+        <Box
+          sx={{
+            backgroundColor: 'warning.main',
+            color: 'warning.contrastText',
+            py: 1.5,
+            px: 2,
+            textAlign: 'center',
+            fontWeight: 'bold',
+            fontSize: '0.85rem',
+            letterSpacing: '0.05rem',
+            textTransform: 'uppercase',
+            borderBottom: '1px solid',
+            borderColor: 'warning.dark',
+            zIndex: 1000,
+            position: 'sticky',
+            top: 0,
+            boxShadow: 2,
+          }}
+        >
+          {locale === 'fr'
+            ? "Mode Aperçu - Cet article n'est pas encore publié ou est affiché sans statistiques"
+            : 'Preview Mode - This article is draft/unpublished and interactions are disabled'}
+        </Box>
+      )}
       {/* ── Header Photo Banner ────────────────────────────────── */}
       <Box
         sx={{
@@ -437,6 +483,13 @@ export default function BlogDetailClient({
                   '& p': { mb: 2.5, color: 'text.secondary' },
                   '& ul, & ol': { mb: 2.5, pl: 3, color: 'text.secondary' },
                   '& li': { mb: 1 },
+                  '& img': {
+                    maxWidth: '100%',
+                    height: 'auto',
+                    borderRadius: 2,
+                    my: 3,
+                    display: 'block',
+                  },
                   '& blockquote': {
                     borderLeft: '4px solid #F26419',
                     pl: 3,

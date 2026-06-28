@@ -241,6 +241,80 @@ export async function moderateComment(commentId: string, action: 'approve' | 'un
   return { success: true }
 }
 
+export async function createBlogTag(data: { name: string; nameFr: string | null; slug: string }) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+
+  if (!user) return { error: 'Unauthorized' }
+
+  const { data: tag, error } = await supabase
+    .from('blog_tags')
+    .insert([
+      {
+        name: data.name,
+        name_fr: data.nameFr || null,
+        slug: data.slug,
+      }
+    ])
+    .select()
+    .single()
+
+  if (error) {
+    console.error('Failed to create tag:', error)
+    return { error: error.message }
+  }
+
+  revalidatePath('/[locale]/blog', 'layout')
+  revalidatePath('/[locale]/admin/blogs', 'layout')
+  return { success: true, tag }
+}
+
+export async function updateBlogTag(id: string, data: { name: string; nameFr: string | null; slug: string }) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+
+  if (!user) return { error: 'Unauthorized' }
+
+  const { error } = await supabase
+    .from('blog_tags')
+    .update({
+      name: data.name,
+      name_fr: data.nameFr || null,
+      slug: data.slug,
+    })
+    .eq('id', id)
+
+  if (error) {
+    console.error('Failed to update tag:', error)
+    return { error: error.message }
+  }
+
+  revalidatePath('/[locale]/blog', 'layout')
+  revalidatePath('/[locale]/admin/blogs', 'layout')
+  return { success: true }
+}
+
+export async function deleteBlogTag(id: string) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+
+  if (!user) return { error: 'Unauthorized' }
+
+  const { error } = await supabase
+    .from('blog_tags')
+    .delete()
+    .eq('id', id)
+
+  if (error) {
+    console.error('Failed to delete tag:', error)
+    return { error: error.message }
+  }
+
+  revalidatePath('/[locale]/blog', 'layout')
+  revalidatePath('/[locale]/admin/blogs', 'layout')
+  return { success: true }
+}
+
 // ─── CATALOGUE CRUD OPERATIONS ───────────────────────────────────────────────
 
 export async function createCatalogueItem(data: any, costItems: any[] = [], imageGalleries: any[] = []) {
