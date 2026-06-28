@@ -7,4 +7,5 @@ export { CustomButton, LoadingButton } from './CustomButton'
 export { ActionPromptButton, DeletePromptButton } from './PromptButtons'
 export { default as LanguageSwitcher } from './LanguageSwitcher'
 export { default as ImageUpload } from './ImageUpload'
+export { default as RichTextEditor } from './RichTextEditor'
 

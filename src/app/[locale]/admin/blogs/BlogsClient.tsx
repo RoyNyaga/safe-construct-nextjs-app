@@ -34,7 +34,7 @@ import {
 } from '@mui/material'
 import { Plus, Edit2, Check, X, BookOpen, MessageSquare, AlertCircle } from 'lucide-react'
 import { useLocale, useTranslations } from 'next-intl'
-import { DeletePromptButton, ImageUpload } from '@/components/ui'
+import { DeletePromptButton, ImageUpload, RichTextEditor } from '@/components/ui'
 import {
   createBlogPost,
   updateBlogPost,
@@ -180,8 +180,8 @@ export default function BlogsClient({
   const handleFormChange = (key: string, value: any) => {
     setFormValues((prev) => {
       const next = { ...prev, [key]: value }
-      // Auto generate slug from English title on create
-      if (key === 'title' && !editPostId) {
+      // Auto generate/update slug from English title
+      if (key === 'title') {
         next.slug = value
           .toLowerCase()
           .replace(/[^a-z0-9]+/g, '-')
@@ -547,27 +547,24 @@ export default function BlogsClient({
 
               {/* EN Body */}
               <Grid size={{ xs: 12, md: 6 }}>
-                <TextField
-                  id="blog-form-body"
-                  label={locale === 'fr' ? 'Contenu HTML/Texte (Anglais)' : 'HTML/Text Content (English)'}
+                <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 700 }}>
+                  {locale === 'fr' ? 'Contenu de l\'article (Anglais)' : 'Blog Article Content (English)'}
+                </Typography>
+                <RichTextEditor
                   value={formValues.body}
-                  onChange={(e) => handleFormChange('body', e.target.value)}
-                  fullWidth
-                  multiline
-                  rows={10}
-                  required
+                  onChange={(val) => handleFormChange('body', val)}
+                  locale={locale}
                 />
               </Grid>
               {/* FR Body */}
               <Grid size={{ xs: 12, md: 6 }}>
-                <TextField
-                  id="blog-form-body-fr"
-                  label={locale === 'fr' ? 'Contenu HTML/Texte (Français)' : 'HTML/Text Content (French)'}
+                <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 700 }}>
+                  {locale === 'fr' ? 'Contenu de l\'article (Français)' : 'Blog Article Content (French)'}
+                </Typography>
+                <RichTextEditor
                   value={formValues.bodyFr}
-                  onChange={(e) => handleFormChange('bodyFr', e.target.value)}
-                  fullWidth
-                  multiline
-                  rows={10}
+                  onChange={(val) => handleFormChange('bodyFr', val)}
+                  locale={locale}
                 />
               </Grid>
 
