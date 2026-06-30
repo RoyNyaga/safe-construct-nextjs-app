@@ -3,6 +3,9 @@ import { getTranslations } from 'next-intl/server'
 import { createClient } from '@/utils/supabase/server'
 import RequestDesignClient from './RequestDesignClient'
 
+export const revalidate = 120 // Revalidate every 2 minutes
+
+
 export async function generateMetadata({
   params,
 }: {
