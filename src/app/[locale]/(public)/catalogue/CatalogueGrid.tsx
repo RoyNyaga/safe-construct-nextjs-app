@@ -13,6 +13,7 @@ import { useLocale } from 'next-intl'
 type CatalogueItem = {
   id: string
   title: string
+  title_fr?: string | null
   slug: string
   style: string
   design_style_origin: string
@@ -400,7 +401,7 @@ export default function CatalogueGrid({ items }: CatalogueGridProps) {
                     {/* Content */}
                     <CardContent sx={{ p: 2.5, flex: 1, display: 'flex', flexDirection: 'column' }}>
                       <Typography variant="h6" sx={{ fontWeight: 700, mb: 1.5, fontSize: '1rem', lineHeight: 1.3 }}>
-                        {item.title}
+                        {(locale === 'fr' && item.title_fr) ? item.title_fr : item.title}
                       </Typography>
 
                       {/* Specs row */}

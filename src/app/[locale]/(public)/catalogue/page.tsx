@@ -14,7 +14,7 @@ async function getCatalogueItems() {
   const supabase = await createClient()
   const { data } = await supabase
     .from('catalogues')
-    .select('id, title, slug, style, design_style_origin, size_sqm, bedrooms, bathrooms, floors, total_cost, currency, main_image_url, is_featured, view_count, like_count')
+    .select('id, title, title_fr, slug, style, design_style_origin, size_sqm, bedrooms, bathrooms, floors, total_cost, currency, main_image_url, is_featured, view_count, like_count')
     .eq('is_published', true)
     .order('created_at', { ascending: false })
   return data ?? []

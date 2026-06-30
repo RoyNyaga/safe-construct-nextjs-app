@@ -25,11 +25,26 @@ async function getCatalogue(slug: string) {
 
   const { data: costItems } = await supabase
     .from('catalogue_cost_items')
-    .select('id, label, cost')
+    .select('id, label, label_fr, cost')
     .eq('catalogue_id', catalogue.id)
     .order('cost', { ascending: false })
 
   return { ...catalogue, images: images ?? [], costItems: costItems ?? [] }
+}
+
+async function getSimilarDesigns(catalogueId: string, bedrooms: number, style: string, origin: string) {
+  const supabase = await createClient()
+  const { data } = await supabase
+    .from('catalogues')
+    .select('id, title, title_fr, slug, style, design_style_origin, size_sqm, bedrooms, bathrooms, floors, total_cost, currency, main_image_url, is_featured, view_count, like_count')
+    .eq('is_published', true)
+    .neq('id', catalogueId)
+    .eq('bedrooms', bedrooms)
+    .eq('style', style)
+    .eq('design_style_origin', origin)
+    .order('like_count', { ascending: false })
+    .limit(6)
+  return data ?? []
 }
 
 export async function generateMetadata({
@@ -55,5 +70,12 @@ export default async function CatalogueDetailPage({
   const catalogue = await getCatalogue(slug)
   if (!catalogue) notFound()
 
-  return <CatalogueDetailClient catalogue={catalogue} />
+  const similarDesigns = await getSimilarDesigns(
+    catalogue.id,
+    catalogue.bedrooms,
+    catalogue.style,
+    catalogue.design_style_origin
+  )
+
+  return <CatalogueDetailClient catalogue={catalogue} similarDesigns={similarDesigns} />
 }
