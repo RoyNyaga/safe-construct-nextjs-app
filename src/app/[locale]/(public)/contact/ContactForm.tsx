@@ -56,7 +56,6 @@ const FAQS = [
 
 const CONTACT_INFO = [
   { icon: Phone, label: 'Phone / WhatsApp', value: '+237 671 172 775', href: 'tel:+237671172775' },
-  { icon: Mail, label: 'Email', value: 'contact@safe-construct.cm', href: 'mailto:contact@safe-construct.cm' },
   { icon: MapPin, label: 'Address', value: 'Yaoundé, Cameroon', href: null },
   { icon: Clock, label: 'Office Hours', value: 'Mon–Sat · 8:00 AM – 6:00 PM', href: null },
 ]
@@ -429,7 +428,6 @@ export default function ContactForm() {
             <Box sx={{ display: 'flex', gap: 1.5, mb: 3 }}>
               {[
                 { label: 'WhatsApp', href: 'https://wa.me/237671172775', icon: <WhatsAppIcon size={18} /> },
-                { label: 'Email', href: 'mailto:contact@safe-construct.cm', icon: <Mail size={18} /> },
                 { label: 'MessageSquare', href: '#', icon: <MessageSquare size={18} /> },
               ].map(({ label, href, icon }) => (
                 <CustomTooltip key={label} title={label}>

@@ -16,6 +16,8 @@ import {
 import { User, Mail, Compass, HardHat } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import { useRouter } from 'next/navigation'
+import Link from 'next/link'
+import logoImage from '@/assests/images/transparent-background.png'
 import { LoadingButton } from '@/components/ui'
 import { COUNTRIES, type Country } from '@/lib/countries'
 import { completeOnboarding } from '../../actions/onboarding'
@@ -89,26 +91,32 @@ export default function OnboardingClient({ locale, userPhone, userEmail }: Onboa
       }}
     >
       <Box sx={{ width: '100%', maxWidth: 480 }}>
-        {/* Brand logo */}
         <Box sx={{ textAlign: 'center', mb: 4 }}>
           <Box
+            component={Link}
+            href={`/${locale}`}
             sx={{
-              width: 64,
-              height: 64,
-              borderRadius: 3,
-              background: 'linear-gradient(135deg, #F26419, #F6AE2D)',
               display: 'inline-flex',
+              flexDirection: 'column',
               alignItems: 'center',
-              justifyContent: 'center',
-              mb: 2,
-              boxShadow: '0 8px 32px rgba(242, 100, 25, 0.35)',
+              textDecoration: 'none',
+              color: 'inherit',
+              '&:hover': {
+                opacity: 0.9,
+              },
             }}
           >
-            <HardHat size={32} color="#fff" />
+            <img
+              src={logoImage.src}
+              alt="Safe-Construct"
+              style={{
+                height: '60px',
+                width: 'auto',
+                objectFit: 'contain',
+                marginBottom: '8px',
+              }}
+            />
           </Box>
-          <Typography variant="h4" sx={{ fontWeight: 800, mb: 0.5 }}>
-            Safe-Construct
-          </Typography>
         </Box>
 
         <Card

@@ -10,8 +10,13 @@ import {
   Card,
   CardMedia,
   alpha,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Slider,
 } from '@mui/material'
-import { Upload, X, Image as ImageIcon, AlertCircle } from 'lucide-react'
+import { Upload, X, AlertCircle } from 'lucide-react'
 import { createClient } from '@/utils/supabase/client'
 import { compressImage } from '@/utils/image'
 
@@ -37,6 +42,17 @@ export default function ImageUpload({
   const fileInputRef = useRef<HTMLInputElement>(null)
   const supabase = createClient()
 
+  // Cropping states
+  const [cropDialogOpen, setCropDialogOpen] = useState(false)
+  const [cropImageSrc, setCropImageSrc] = useState<string | null>(null)
+  const [naturalSize, setNaturalSize] = useState({ width: 0, height: 0 })
+  const [fitSize, setFitSize] = useState({ width: 0, height: 0 })
+  const [pan, setPan] = useState({ x: 0, y: 0 })
+  const [zoom, setZoom] = useState(1)
+  const [isDragging, setIsDragging] = useState(false)
+  const [dragStart, setDragStart] = useState({ x: 0, y: 0 })
+  const currentFileName = useRef<string>('')
+
   const handleUploadClick = () => {
     fileInputRef.current?.click()
   }
@@ -57,12 +73,32 @@ export default function ImageUpload({
       return
     }
 
+    if (aspectRatio === '1/1') {
+      currentFileName.current = file.name
+      const reader = new FileReader()
+      reader.onload = (event) => {
+        if (event.target?.result) {
+          setCropImageSrc(event.target.result as string)
+          setCropDialogOpen(true)
+        }
+      }
+      reader.readAsDataURL(file)
+      // Reset input value so same file can be selected again if needed
+      if (fileInputRef.current) {
+        fileInputRef.current.value = ''
+      }
+    } else {
+      performUpload(file)
+    }
+  }
+
+  const performUpload = async (fileToUpload: File) => {
     setUploading(true)
     setError(null)
 
     try {
-      // Compress image client-side to optimize download speed and storage
-      const compressedFile = await compressImage(file)
+      // Compress image client-side if not pre-cropped
+      const compressedFile = aspectRatio === '1/1' ? fileToUpload : await compressImage(fileToUpload)
 
       // Limit compressed file size to 5MB
       if (compressedFile.size > 5 * 1024 * 1024) {
@@ -100,7 +136,6 @@ export default function ImageUpload({
       setError(err.message || 'Failed to upload image')
     } finally {
       setUploading(false)
-      // Reset input value so same file can be selected again if needed
       if (fileInputRef.current) {
         fileInputRef.current.value = ''
       }
@@ -110,6 +145,139 @@ export default function ImageUpload({
   const handleRemove = () => {
     onChange('')
     setError(null)
+  }
+
+  // --- CROP HANDLERS ---
+  const handleImageLoad = (e: React.SyntheticEvent<HTMLImageElement>) => {
+    const { naturalWidth, naturalHeight } = e.currentTarget
+    setNaturalSize({ width: naturalWidth, height: naturalHeight })
+
+    const viewportSize = 300
+    let w = viewportSize
+    let h = viewportSize
+
+    if (naturalWidth >= naturalHeight) {
+      w = viewportSize * (naturalWidth / naturalHeight)
+    } else {
+      h = viewportSize * (naturalHeight / naturalWidth)
+    }
+
+    setFitSize({ width: w, height: h })
+    setPan({
+      x: (viewportSize - w) / 2,
+      y: (viewportSize - h) / 2,
+    })
+    setZoom(1)
+  }
+
+  const limitX = (x: number, scaleVal: number) => {
+    const w = fitSize.width * scaleVal
+    const minX = 300 - w
+    return Math.min(0, Math.max(minX, x))
+  }
+
+  const limitY = (y: number, scaleVal: number) => {
+    const h = fitSize.height * scaleVal
+    const minY = 300 - h
+    return Math.min(0, Math.max(minY, y))
+  }
+
+  const handleMouseDown = (e: React.MouseEvent) => {
+    if (!fitSize.width) return
+    setIsDragging(true)
+    setDragStart({
+      x: e.clientX - pan.x,
+      y: e.clientY - pan.y,
+    })
+  }
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (!isDragging) return
+    const newX = e.clientX - dragStart.x
+    const newY = e.clientY - dragStart.y
+
+    setPan({
+      x: limitX(newX, zoom),
+      y: limitY(newY, zoom),
+    })
+  }
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    if (!fitSize.width || e.touches.length !== 1) return
+    setIsDragging(true)
+    const touch = e.touches[0]
+    setDragStart({
+      x: touch.clientX - pan.x,
+      y: touch.clientY - pan.y,
+    })
+  }
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (!isDragging || e.touches.length !== 1) return
+    const touch = e.touches[0]
+    const newX = touch.clientX - dragStart.x
+    const newY = touch.clientY - dragStart.y
+
+    setPan({
+      x: limitX(newX, zoom),
+      y: limitY(newY, zoom),
+    })
+  }
+
+  const handleMouseUpOrLeave = () => {
+    setIsDragging(false)
+  }
+
+  const handleZoomChange = (_: any, newValue: number | number[]) => {
+    const val = newValue as number
+    setZoom(val)
+    setPan((prev) => ({
+      x: limitX(prev.x, val),
+      y: limitY(prev.y, val),
+    }))
+  }
+
+  const handleConfirmCrop = () => {
+    setCropDialogOpen(false)
+    if (!cropImageSrc) return
+
+    const cropCanvas = document.createElement('canvas')
+    cropCanvas.width = 400
+    cropCanvas.height = 400
+    const ctx = cropCanvas.getContext('2d')
+
+    if (ctx) {
+      // Draw white background
+      ctx.fillStyle = '#FFFFFF'
+      ctx.fillRect(0, 0, 400, 400)
+
+      const imgElement = new Image()
+      imgElement.onload = () => {
+        const scaleX = naturalSize.width / (fitSize.width * zoom)
+        const scaleY = naturalSize.height / (fitSize.height * zoom)
+
+        const sx = -pan.x * scaleX
+        const sy = -pan.y * scaleY
+        const sWidth = 300 * scaleX
+        const sHeight = 300 * scaleY
+
+        ctx.drawImage(imgElement, sx, sy, sWidth, sHeight, 0, 0, 400, 400)
+
+        cropCanvas.toBlob(
+          (blob) => {
+            if (!blob) return
+            const croppedFile = new File([blob], currentFileName.current || 'cropped.jpg', {
+              type: 'image/jpeg',
+              lastModified: Date.now(),
+            })
+            performUpload(croppedFile)
+          },
+          'image/jpeg',
+          0.85
+        )
+      }
+      imgElement.src = cropImageSrc
+    }
   }
 
   return (
@@ -241,6 +409,119 @@ export default function ImageUpload({
           </Typography>
         </Box>
       )}
+
+      {/* Cropping Dialog */}
+      <Dialog
+        open={cropDialogOpen}
+        onClose={() => setCropDialogOpen(false)}
+        maxWidth="xs"
+        fullWidth
+        slotProps={{
+          paper: {
+            sx: { borderRadius: 4, p: 1 }
+          }
+        }}
+      >
+        <DialogTitle sx={{ fontWeight: 800, textAlign: 'center', pb: 1 }}>
+          Crop Image (1:1)
+        </DialogTitle>
+        <DialogContent sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3, py: 2 }}>
+          <Box
+            onMouseDown={handleMouseDown}
+            onMouseMove={handleMouseMove}
+            onMouseUp={handleMouseUpOrLeave}
+            onMouseLeave={handleMouseUpOrLeave}
+            onTouchStart={handleTouchStart}
+            onTouchMove={handleTouchMove}
+            onTouchEnd={handleMouseUpOrLeave}
+            sx={{
+              width: 300,
+              height: 300,
+              position: 'relative',
+              overflow: 'hidden',
+              borderRadius: 3,
+              border: '2px solid',
+              borderColor: 'divider',
+              cursor: isDragging ? 'grabbing' : 'grab',
+              backgroundColor: '#000',
+              userSelect: 'none',
+              touchAction: 'none',
+              boxShadow: (theme) => theme.shadows[4],
+            }}
+          >
+            {cropImageSrc && (
+              <img
+                src={cropImageSrc}
+                alt="Crop preview"
+                onLoad={handleImageLoad}
+                style={{
+                  position: 'absolute',
+                  width: fitSize.width * zoom,
+                  height: fitSize.height * zoom,
+                  left: pan.x,
+                  top: pan.y,
+                  pointerEvents: 'none',
+                  maxWidth: 'none',
+                }}
+              />
+            )}
+            {/* Circle Cutout Overlay */}
+            <Box
+              sx={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                borderRadius: '50%',
+                pointerEvents: 'none',
+                border: '2px dashed rgba(255, 255, 255, 0.8)',
+                boxShadow: '0 0 0 9999px rgba(30, 38, 53, 0.65)',
+              }}
+            />
+          </Box>
+
+          <Box sx={{ width: '80%', px: 1 }}>
+            <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600, mb: 0.5, display: 'block', textAlign: 'center' }}>
+              Drag to Position • Slider to Zoom
+            </Typography>
+            <Slider
+              value={zoom}
+              min={1}
+              max={3}
+              step={0.01}
+              onChange={handleZoomChange}
+              aria-label="Zoom"
+              valueLabelDisplay="auto"
+              valueLabelFormat={(v) => `${Math.round(v * 100)}%`}
+              sx={{
+                color: 'primary.main',
+                '& .MuiSlider-thumb': {
+                  width: 20,
+                  height: 20,
+                  backgroundColor: '#fff',
+                  border: '2px solid currentColor',
+                },
+              }}
+            />
+          </Box>
+        </DialogContent>
+        <DialogActions sx={{ justifyContent: 'space-between', px: 3, pb: 2 }}>
+          <Button variant="outlined" onClick={() => setCropDialogOpen(false)} color="inherit">
+            Cancel
+          </Button>
+          <Button
+            variant="contained"
+            onClick={handleConfirmCrop}
+            sx={{
+              background: 'linear-gradient(135deg, #F26419 0%, #F6AE2D 100%)',
+              px: 3,
+            }}
+          >
+            Apply Crop
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   )
 }

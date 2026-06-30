@@ -56,9 +56,30 @@
       "subtitle": "Explore our most popular architectural plans",
       "viewAll": "View All Designs"
     },
+    "process": {
+      "overline": "Our Process",
+      "title": "How It Works",
+      "step1_title": "Consult & Design",
+      "step1_desc": "We listen to your vision and create custom architectural plans tailored to your lifestyle.",
+      "step2_title": "Plan & Estimate",
+      "step2_desc": "Get a transparent, itemised cost breakdown before any commitment is made.",
+      "step3_title": "Build & Supervise",
+      "step3_desc": "Our team oversees every phase of construction, ensuring quality at every step.",
+      "step4_title": "Deliver & Handover",
+      "step4_desc": "We hand over your completed project — on time, on budget, to specification."
+    },
     "testimonials": {
       "title": "What Our Clients Say",
-      "subtitle": "Trusted by hundreds of homeowners across Africa"
+      "subtitle": "Trusted by hundreds of homeowners across Africa",
+      "overline": "Client Stories",
+      "quote1": "Safe-Construct transformed our vision into reality. The architectural plans were exactly what we wanted, and the supervision ensured everything was built to perfection.",
+      "quote1_type": "Villa Construction",
+      "quote2": "From cost estimation to final handover, the team was professional and transparent every step of the way. Our duplex was completed on time and within budget.",
+      "quote2_type": "Duplex Development",
+      "quote3": "The 3D renders gave us a perfect preview of our future home. We made several adjustments before construction — saving us significant costs and regrets.",
+      "quote3_type": "Residential Design",
+      "quote4": "Exceptional quality and attention to detail. The Safe-Construct team went above and beyond to ensure our commercial building met all regulatory requirements.",
+      "quote4_type": "Commercial Building"
     },
     "cta": {
       "title": "Ready to Build Your Dream?",
@@ -198,25 +219,35 @@
   "Services": {
     "title": "Our Services",
     "subtitle": "Professional construction and design services tailored to your needs",
-    "architecturalDesign": {
-      "title": "Architectural Design",
-      "description": "We craft bespoke architectural plans that blend aesthetics with functionality. From concept sketches to detailed blueprints, we design homes that reflect your personality.",
-      "features": ["Custom floor plans", "3D visualizations", "Structural drawings", "Bill of quantities"]
-    },
-    "generalContracting": {
-      "title": "General Contracting",
-      "description": "Full project management from groundbreaking to handover. We coordinate all trades, manage timelines, and ensure your home is built to the highest standards.",
-      "features": ["Full project management", "Vetted subcontractors", "Quality control", "Timeline guarantees"]
-    },
-    "supervision": {
-      "title": "Construction Supervision",
-      "description": "Our experienced engineers provide on-site supervision to ensure your builder adheres to the approved plans and quality standards.",
-      "features": ["Regular site visits", "Progress reports", "Quality inspections", "Compliance verification"]
-    },
-    "costEstimation": {
-      "title": "Cost Estimation",
-      "description": "Get a detailed, itemized budget breakdown before committing to construction. We help you understand where every franc goes.",
-      "features": ["Detailed BOQ", "Material specifications", "Labor cost breakdown", "Contingency planning"]
+    "overline": "What We Offer",
+    "heroTitle": "What We Build.",
+    "heroTitleHighlight": "How We Help.",
+    "heroSubtitle": "From architectural design to full construction management — choose the service that fits where you are today.",
+    "learnMore": "Learn More",
+    "notSureTitle": "Not sure which service you need?",
+    "notSureSubtitle": "Let's talk. Describe your project and we'll recommend the right path forward — no commitment required.",
+    "contactUsBtn": "Contact Us",
+    "items": {
+      "architectural-design": {
+        "name": "Architectural Design",
+        "summary": "Custom architectural plans tailored to your lifestyle, budget and location. Floor plans, 3D renders, elevations and full documentation.",
+        "tagline": "From your vision to a complete set of construction-ready drawings."
+      },
+      "general-contracting": {
+        "name": "General Contracting",
+        "summary": "We coordinate every trade, manage your timeline and budget, and build your project to the highest standard — start to finish.",
+        "tagline": "End-to-end construction management from foundation to handover."
+      },
+      "construction-supervision": {
+        "name": "Construction Supervision",
+        "summary": "Regular on-site inspections, photo-documented reports, and defect tracking — protecting your investment throughout the build.",
+        "tagline": "Independent quality assurance so your builder stays accountable."
+      },
+      "cost-estimation": {
+        "name": "Cost Estimation",
+        "summary": "Detailed Bill of Quantities with current local market rates. Reduce guesswork and negotiate with confidence.",
+        "tagline": "Know the real cost before a single brick is laid."
+      }
     },
     "inquiryForm": {
       "title": "Request This Service",

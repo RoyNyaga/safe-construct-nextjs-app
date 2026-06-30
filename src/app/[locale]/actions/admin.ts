@@ -454,20 +454,23 @@ export async function deleteCatalogueItem(id: string) {
 
 // ─── TEAM MEMBERS CRUD OPERATIONS ────────────────────────────────────────────
 
-export async function createTeamMember(data: any) {
+export async function createTeamMember(data: any): Promise<{ success?: boolean; data?: any; error?: string }> {
   const supabase = await createClient()
 
-  const { error } = await supabase.from('team_members').insert([
-    {
-      full_name: data.fullName,
-      title: data.title,
-      title_fr: data.titleFr || null,
-      phone: data.phone || null,
-      photo_url: data.photoUrl || null,
-      order_index: parseInt(data.orderIndex) || 0,
-      is_visible: data.isVisible || true,
-    },
-  ])
+  const { data: inserted, error } = await supabase
+    .from('team_members')
+    .insert([
+      {
+        full_name: data.fullName,
+        title: data.title,
+        title_fr: data.titleFr || null,
+        phone: data.phone || null,
+        photo_url: data.photoUrl || null,
+        order_index: parseInt(data.orderIndex) || 0,
+        is_visible: data.isVisible || true,
+      },
+    ])
+    .select()
 
   if (error) {
     console.error('Failed to create team member:', error)
@@ -476,7 +479,7 @@ export async function createTeamMember(data: any) {
 
   revalidatePath('/[locale]/about', 'layout')
   revalidatePath('/[locale]/admin/team', 'layout')
-  return { success: true }
+  return { success: true, data: inserted?.[0] }
 }
 
 export async function updateTeamMember(id: string, data: any) {

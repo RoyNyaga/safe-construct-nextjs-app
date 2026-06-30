@@ -4,9 +4,9 @@ import { useState, useEffect, useCallback } from 'react'
 import {
   Box, Container, Typography, Grid, Chip, Button,
   Table, TableBody, TableCell, TableRow, Divider,
-  IconButton, alpha,
+  IconButton, alpha, Card, CardMedia, CardContent,
 } from '@mui/material'
-import { Heart, Eye, Bed, Bath, Layers, Maximize2, ArrowLeft, ChevronLeft, ChevronRight, ArrowRight } from 'lucide-react'
+import { Heart, Eye, Bed, Bath, Layers, Maximize2, ArrowLeft, ChevronLeft, ChevronRight, ArrowRight, ChevronDown, ChevronUp } from 'lucide-react'
 import Link from 'next/link'
 import { useLocale } from 'next-intl'
 import { CustomTooltip } from '@/components/ui'
@@ -15,8 +15,10 @@ import { incrementView, incrementLike } from '@/app/[locale]/actions/catalogue'
 type CatalogueDetail = {
   id: string
   title: string
+  title_fr: string | null
   slug: string
   description: string | null
+  description_fr: string | null
   style: string
   design_style_origin: string
   size_sqm: number
@@ -30,7 +32,7 @@ type CatalogueDetail = {
   view_count: number
   like_count: number
   images: { id: string; image_url: string; caption: string | null; order_index: number }[]
-  costItems: { id: string; label: string; cost: number }[]
+  costItems: { id: string; label: string; label_fr?: string | null; cost: number }[]
 }
 
 function formatCurrency(amount: number, currency = 'XAF') {
@@ -43,13 +45,17 @@ const ORIGIN_COLORS: Record<string, string> = {
   africa: '#F26419', europe: '#42A5F5', america: '#66BB6A', canada: '#CE93D8',
 }
 
-interface Props { catalogue: CatalogueDetail }
+interface Props {
+  catalogue: CatalogueDetail
+  similarDesigns: any[]
+}
 
-export default function CatalogueDetailClient({ catalogue }: Props) {
+export default function CatalogueDetailClient({ catalogue, similarDesigns }: Props) {
   const locale = useLocale()
   const [activeImageIdx, setActiveImageIdx] = useState(0)
   const [likeCount, setLikeCount] = useState(catalogue.like_count)
   const [liked, setLiked] = useState(false)
+  const [descExpanded, setDescExpanded] = useState(false)
 
   // Build unified gallery: main image first, then extras
   const allImages = [
@@ -123,9 +129,19 @@ export default function CatalogueDetailClient({ catalogue }: Props) {
               backdropFilter: 'blur(8px)',
               borderRadius: 2,
               '&:hover': { background: 'rgba(0,0,0,0.6)' },
+              px: { xs: 1.25, sm: 2 },
+              py: { xs: 0.5, sm: 1 },
+              fontSize: { xs: '0.75rem', sm: '0.875rem' },
+              '& .MuiButton-startIcon': {
+                marginRight: { xs: 0.5, sm: 1 },
+                '& svg': {
+                  width: { xs: 14, sm: 16 },
+                  height: { xs: 14, sm: 16 },
+                }
+              }
             }}
           >
-            Back to Catalogue
+            Back<Box component="span" sx={{ display: { xs: 'none', sm: 'inline' } }}> to Catalogue</Box>
           </Button>
         </Box>
 
@@ -150,7 +166,18 @@ export default function CatalogueDetailClient({ catalogue }: Props) {
         {/* Caption & engagement */}
         <Box sx={{ position: 'absolute', bottom: 20, left: 20, right: 20, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
           {activeImage.caption && (
-            <Typography sx={{ color: 'rgba(255,255,255,0.85)', fontSize: '0.85rem', maxWidth: '70%', backdropFilter: 'blur(4px)', bgcolor: 'rgba(0,0,0,0.3)', px: 1.5, py: 0.5, borderRadius: 1 }}>
+            <Typography
+              sx={{
+                color: 'rgba(255,255,255,0.85)',
+                fontSize: { xs: '0.7rem', sm: '0.85rem' },
+                maxWidth: '70%',
+                backdropFilter: 'blur(4px)',
+                bgcolor: 'rgba(0,0,0,0.3)',
+                px: { xs: 1, sm: 1.5 },
+                py: { xs: 0.25, sm: 0.5 },
+                borderRadius: 1,
+              }}
+            >
               {activeImage.caption}
             </Typography>
           )}
@@ -228,31 +255,108 @@ export default function CatalogueDetailClient({ catalogue }: Props) {
               )}
             </Box>
 
-            <Typography variant="h2" sx={{ mb: 2.5 }}>{catalogue.title}</Typography>
+            <Typography
+              variant="h2"
+              sx={{
+                mb: 2.5,
+                fontSize: { xs: '1.75rem', sm: '2.5rem' },
+              }}
+            >
+              {(locale === 'fr' && catalogue.title_fr) ? catalogue.title_fr : catalogue.title}
+            </Typography>
 
-            {catalogue.description && (
-              <Typography color="text.secondary" sx={{ lineHeight: 1.85, mb: 4 }}>
-                {catalogue.description}
-              </Typography>
-            )}
+            {catalogue.description && (() => {
+              const desc = (locale === 'fr' && catalogue.description_fr) ? catalogue.description_fr : catalogue.description
+              const words = desc.split(/\s+/)
+              const isLong = words.length > 70
+              const displayDescription = (isLong && !descExpanded)
+                ? words.slice(0, 70).join(' ') + '...'
+                : desc
+
+              return (
+                <Box sx={{ mb: 4 }}>
+                  <Typography color="text.secondary" sx={{ lineHeight: 1.85 }}>
+                    {displayDescription}
+                  </Typography>
+                  {isLong && (
+                    <Button
+                      size="small"
+                      onClick={() => setDescExpanded(!descExpanded)}
+                      endIcon={descExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+                      sx={{
+                        mt: 1,
+                        fontWeight: 700,
+                        textTransform: 'none',
+                        color: 'primary.main',
+                        p: 0,
+                        '&:hover': { background: 'transparent', textDecoration: 'underline' },
+                      }}
+                    >
+                      {descExpanded ? 'Show Less' : 'Read More'}
+                    </Button>
+                  )}
+                </Box>
+              )
+            })()}
 
             {/* Spec grid */}
-            <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 2, mb: 4 }}>
+            <Box
+              sx={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(4, 1fr)',
+                gap: { xs: 1, sm: 2 },
+                mb: 4,
+              }}
+            >
               {SPECS.map(({ icon: Icon, label, value, color }) => (
                 <Box
                   key={label}
                   sx={{
-                    p: 2,
-                    borderRadius: 2.5,
+                    p: { xs: 1, sm: 2 },
+                    borderRadius: { xs: 2, sm: 2.5 },
                     border: (t) => `1px solid ${alpha(t.palette.divider, 1)}`,
                     textAlign: 'center',
                     '&:hover': { borderColor: color, background: alpha(color, 0.05) },
                     transition: 'all 0.2s',
                   }}
                 >
-                  <Icon size={22} color={color} style={{ marginBottom: 8 }} />
-                  <Typography variant="h6" sx={{ fontWeight: 800, fontSize: '1rem', color }}>{value}</Typography>
-                  <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600 }}>{label}</Typography>
+                  <Box
+                    sx={{
+                      display: 'flex',
+                      justifyContent: 'center',
+                      mb: { xs: 0.5, sm: 1 },
+                      '& svg': {
+                        width: { xs: 16, sm: 22 },
+                        height: { xs: 16, sm: 22 },
+                      },
+                    }}
+                  >
+                    <Icon color={color} />
+                  </Box>
+                  <Typography
+                    variant="h6"
+                    sx={{
+                      fontWeight: 800,
+                      fontSize: { xs: '0.85rem', sm: '1rem' },
+                      color,
+                      lineHeight: 1.2,
+                      mb: 0.25,
+                    }}
+                  >
+                    {value}
+                  </Typography>
+                  <Typography
+                    variant="caption"
+                    color="text.secondary"
+                    sx={{
+                      fontWeight: 600,
+                      fontSize: { xs: '0.65rem', sm: '0.75rem' },
+                      display: 'block',
+                      whiteSpace: 'nowrap',
+                    }}
+                  >
+                    {label}
+                  </Typography>
                 </Box>
               ))}
             </Box>
@@ -261,7 +365,7 @@ export default function CatalogueDetailClient({ catalogue }: Props) {
             <Divider sx={{ mb: 4 }} />
 
             {/* CTA */}
-            <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
+            <Box sx={{ display: { xs: 'none', md: 'flex' }, gap: 2, flexWrap: 'wrap' }}>
               <Button
                 id="catalogue-request-design-cta"
                 component={Link}
@@ -309,18 +413,21 @@ export default function CatalogueDetailClient({ catalogue }: Props) {
               ) : (
                 <Table size="small">
                   <TableBody>
-                    {catalogue.costItems.map(({ id, label, cost }) => (
-                      <TableRow key={id} sx={{ '&:last-child td': { border: 0 } }}>
-                        <TableCell sx={{ pl: 0, color: 'text.secondary', fontSize: '0.85rem', py: 1.25 }}>
-                          <CustomTooltip title={`The ${label.toLowerCase()} phase of construction.`}>
-                            <span>{label}</span>
-                          </CustomTooltip>
-                        </TableCell>
-                        <TableCell align="right" sx={{ pr: 0, fontWeight: 600, fontSize: '0.85rem', py: 1.25 }}>
-                          {formatCurrency(cost, catalogue.currency)}
-                        </TableCell>
-                      </TableRow>
-                    ))}
+                    {catalogue.costItems.map(({ id, label, label_fr, cost }) => {
+                      const displayLabel = (locale === 'fr' && label_fr) ? label_fr : label
+                      return (
+                        <TableRow key={id} sx={{ '&:last-child td': { border: 0 } }}>
+                          <TableCell sx={{ pl: 0, color: 'text.secondary', fontSize: '0.85rem', py: 1.25 }}>
+                            <CustomTooltip title={`The ${displayLabel.toLowerCase()} phase of construction.`}>
+                              <span>{displayLabel}</span>
+                            </CustomTooltip>
+                          </TableCell>
+                          <TableCell align="right" sx={{ pr: 0, fontWeight: 600, fontSize: '0.85rem', py: 1.25 }}>
+                            {formatCurrency(cost, catalogue.currency)}
+                          </TableCell>
+                        </TableRow>
+                      )
+                    })}
                     {/* Total */}
                     <TableRow>
                       <TableCell sx={{ pl: 0, fontWeight: 800, fontSize: '0.95rem', borderTop: (t) => `2px solid ${t.palette.primary.main}` }}>
@@ -337,8 +444,140 @@ export default function CatalogueDetailClient({ catalogue }: Props) {
                 * This is a rough estimate based on current local market rates. Actual costs vary by site, material availability, and finish quality.
               </Typography>
             </Box>
+
+            {/* Mobile Only CTA */}
+            <Box sx={{ display: { xs: 'flex', md: 'none' }, gap: 2, flexWrap: 'wrap', mt: 4 }}>
+              <Button
+                id="catalogue-request-design-cta-mobile"
+                component={Link}
+                href={`/${locale}/request-design?catalogue=${catalogue.slug}`}
+                variant="contained"
+                size="large"
+                endIcon={<ArrowRight size={18} />}
+                sx={{
+                  background: 'linear-gradient(135deg,#F26419 0%,#F6AE2D 100%)',
+                  fontWeight: 700,
+                  flex: 1,
+                  minWidth: '200px',
+                  '&:hover': { background: 'linear-gradient(135deg,#C44E10 0%,#C48B1A 100%)' },
+                }}
+              >
+                Request This Design
+              </Button>
+              <Button
+                id="catalogue-contact-cta-mobile"
+                component={Link}
+                href={`/${locale}/contact`}
+                variant="outlined"
+                size="large"
+                sx={{ fontWeight: 600, flex: 1, minWidth: '200px' }}
+              >
+                Ask a Question
+              </Button>
+            </Box>
           </Grid>
         </Grid>
+
+        {/* Similar Designs Section */}
+        {similarDesigns && similarDesigns.length > 0 && (
+          <Box sx={{ borderTop: (t) => `1px solid ${t.palette.divider}`, pt: 8, mt: 8 }}>
+            <Typography variant="h3" sx={{ fontWeight: 800, mb: 4, textAlign: 'center', fontSize: { xs: '1.75rem', sm: '2.25rem' } }}>
+              Similar Designs
+            </Typography>
+            <Grid container spacing={3}>
+              {similarDesigns.map((item) => (
+                <Grid key={item.id} size={{ xs: 12, sm: 6, md: 4 }}>
+                  <Card
+                    sx={{
+                      height: '100%',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      '&:hover': { transform: 'translateY(-4px)', boxShadow: '0 20px 60px rgba(0,0,0,0.4)' },
+                      transition: 'transform 0.2s, box-shadow 0.2s',
+                    }}
+                  >
+                    {/* Image */}
+                    <Box sx={{ position: 'relative', pt: '66.66%', overflow: 'hidden' }}>
+                      <CardMedia
+                        component="img"
+                        image={item.main_image_url}
+                        alt={item.title}
+                        sx={{
+                          position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover',
+                          transition: 'transform 0.4s ease',
+                          '.MuiCard-root:hover &': { transform: 'scale(1.04)' },
+                        }}
+                      />
+                      <Box sx={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(0,0,0,0.65) 0%, transparent 55%)' }} />
+
+                      {/* Badges */}
+                      <Box sx={{ position: 'absolute', top: 12, left: 12, display: 'flex', gap: 0.75 }}>
+                        <Chip
+                          label={capitalize(item.design_style_origin)}
+                          size="small"
+                          sx={{
+                            background: alpha(ORIGIN_COLORS[item.design_style_origin] || '#F26419', 0.85),
+                            color: '#fff',
+                            fontWeight: 700,
+                            fontSize: '0.68rem',
+                          }}
+                        />
+                        <Chip
+                          label={capitalize(item.style)}
+                          size="small"
+                          sx={{
+                            background: 'rgba(0,0,0,0.5)',
+                            color: '#fff',
+                            fontWeight: 600,
+                            fontSize: '0.68rem',
+                            border: '1px solid rgba(255,255,255,0.15)',
+                          }}
+                        />
+                      </Box>
+                    </Box>
+
+                    {/* Content */}
+                    <CardContent sx={{ p: 2.5, flex: 1, display: 'flex', flexDirection: 'column' }}>
+                      <Typography variant="h6" sx={{ fontWeight: 700, mb: 1.5, fontSize: '0.95rem', lineHeight: 1.3 }}>
+                        {(locale === 'fr' && item.title_fr) ? item.title_fr : item.title}
+                      </Typography>
+
+                      {/* Specs */}
+                      <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1.5, mb: 2, color: 'text.secondary' }}>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                          <Bed size={13} color="#F26419" />
+                          <Typography variant="caption" sx={{ fontWeight: 600 }}>{item.bedrooms} bed</Typography>
+                        </Box>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                          <Bath size={13} color="#42A5F5" />
+                          <Typography variant="caption" sx={{ fontWeight: 600 }}>{item.bathrooms} bath</Typography>
+                        </Box>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                          <Maximize2 size={13} color="#F6AE2D" />
+                          <Typography variant="caption" sx={{ fontWeight: 600 }}>{item.size_sqm} m²</Typography>
+                        </Box>
+                      </Box>
+
+                      {/* CTA */}
+                      <Button
+                        id={`similar-view-${item.slug}`}
+                        component={Link}
+                        href={`/${locale}/catalogue/${item.slug}`}
+                        variant="outlined"
+                        size="small"
+                        fullWidth
+                        endIcon={<ArrowRight size={13} />}
+                        sx={{ mt: 'auto', fontWeight: 600 }}
+                      >
+                        View Details
+                      </Button>
+                    </CardContent>
+                  </Card>
+                </Grid>
+              ))}
+            </Grid>
+          </Box>
+        )}
       </Container>
     </Box>
   )
