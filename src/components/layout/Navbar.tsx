@@ -23,6 +23,7 @@ import { usePathname, useRouter } from 'next/navigation'
 import { useTranslations, useLocale } from 'next-intl'
 import { LanguageSwitcher } from '@/components/ui'
 import { createClient } from '@/utils/supabase/client'
+import logoImage from '@/assests/images/transparent-background.png'
 
 const NAV_LINKS = [
   { key: 'home', href: '' },
@@ -147,40 +148,19 @@ export default function Navbar() {
               sx={{
                 display: 'flex',
                 alignItems: 'center',
-                gap: { xs: 1, sm: 1.5 },
                 textDecoration: 'none',
                 flexShrink: 0,
               }}
             >
-              <Box
-                sx={{
-                  width: { xs: 30, sm: 36 },
-                  height: { xs: 30, sm: 36 },
-                  borderRadius: 1.5,
-                  background: 'linear-gradient(135deg, #F26419, #F6AE2D)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  flexShrink: 0,
-                  '& svg': {
-                    width: { xs: 16, sm: 20 },
-                    height: { xs: 16, sm: 20 },
-                  },
+              <img
+                src={logoImage.src}
+                alt="Safe-Construct"
+                style={{
+                  height: '36px',
+                  width: 'auto',
+                  objectFit: 'contain',
                 }}
-              >
-                <HardHat color="#fff" />
-              </Box>
-              <Box
-                sx={{
-                  fontWeight: 800,
-                  fontSize: { xs: '1rem', sm: '1.1rem' },
-                  color: 'text.primary',
-                  letterSpacing: '-0.02em',
-                  lineHeight: 1,
-                }}
-              >
-                Safe<Box component="span" sx={{ color: 'primary.main' }}>Construct</Box>
-              </Box>
+              />
             </Box>
 
             {/* Desktop Nav Links */}

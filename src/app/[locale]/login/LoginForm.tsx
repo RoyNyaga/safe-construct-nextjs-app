@@ -16,6 +16,7 @@ import {
 } from '@mui/material'
 import { Phone, Lock, Eye, EyeOff, HardHat } from 'lucide-react'
 import NextLink from 'next/link'
+import logoImage from '@/assests/images/transparent-background.png'
 import { useTranslations, useLocale } from 'next-intl'
 import { LoadingButton } from '@/components/ui'
 import { signIn } from '../auth/actions'
@@ -68,23 +69,30 @@ export default function LoginForm() {
         {/* Logo / Brand */}
         <Box sx={{ textAlign: 'center', mb: 4 }}>
           <Box
+            component={NextLink}
+            href={`/${locale}`}
             sx={{
-              width: 64,
-              height: 64,
-              borderRadius: 3,
-              background: 'linear-gradient(135deg, #F26419, #F6AE2D)',
               display: 'inline-flex',
+              flexDirection: 'column',
               alignItems: 'center',
-              justifyContent: 'center',
-              mb: 2,
-              boxShadow: '0 8px 32px rgba(242, 100, 25, 0.35)',
+              textDecoration: 'none',
+              color: 'inherit',
+              '&:hover': {
+                opacity: 0.9,
+              },
             }}
           >
-            <HardHat size={32} color="#fff" />
+            <img
+              src={logoImage.src}
+              alt="Safe-Construct"
+              style={{
+                height: '60px',
+                width: 'auto',
+                objectFit: 'contain',
+                marginBottom: '8px',
+              }}
+            />
           </Box>
-          <Typography variant="h4" sx={{ fontWeight: 800, mb: 0.5 }}>
-            Safe-Construct
-          </Typography>
           <Typography variant="body2" color="text.secondary">
             {t('loginSubtitle')}
           </Typography>

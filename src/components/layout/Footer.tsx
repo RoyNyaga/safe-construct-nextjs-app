@@ -13,6 +13,7 @@ import {
 } from '@mui/material'
 import { HardHat, Send } from 'lucide-react'
 import Link from 'next/link'
+import logoImage from '@/assests/images/transparent-background.png'
 import { useState, useTransition } from 'react'
 import { useTranslations, useLocale } from 'next-intl'
 import { LoadingButton, CustomNotification, CustomTooltip } from '@/components/ui'
@@ -104,23 +105,28 @@ export default function Footer() {
         <Grid container spacing={6}>
           {/* Brand column */}
           <Grid size={{ xs: 12, md: 4 }}>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 2 }}>
-              <Box
-                sx={{
-                  width: 36,
-                  height: 36,
-                  borderRadius: 2,
-                  background: 'linear-gradient(135deg, #F26419, #F6AE2D)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
+            <Box
+              component={Link}
+              href={`/${locale}`}
+              sx={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                textDecoration: 'none',
+                mb: 2,
+                '&:hover': {
+                  opacity: 0.9,
+                },
+              }}
+            >
+              <img
+                src={logoImage.src}
+                alt="Safe-Construct"
+                style={{
+                  height: '40px',
+                  width: 'auto',
+                  objectFit: 'contain',
                 }}
-              >
-                <HardHat size={20} color="#fff" />
-              </Box>
-              <Typography sx={{ fontWeight: 800, fontSize: '1.15rem', letterSpacing: '-0.02em' }}>
-                Safe<Box component="span" sx={{ color: 'primary.main' }}>Construct</Box>
-              </Typography>
+              />
             </Box>
             <Typography variant="body2" color="text.secondary" sx={{ mb: 3, maxWidth: 300, lineHeight: 1.8 }}>
               {t('Footer.tagline')}

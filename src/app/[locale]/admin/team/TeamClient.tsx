@@ -113,7 +113,7 @@ export default function TeamClient({
     }
 
     startTransition(async () => {
-      let res
+      let res: { success?: boolean; data?: any; error?: string }
       if (editMemberId) {
         res = await updateTeamMember(editMemberId, formValues)
       } else {
@@ -145,7 +145,7 @@ export default function TeamClient({
           // On create, reload list from server or simply re-fetch. Since we want an instant reload,
           // we can just re-fetch in local state. But let's build local sync:
           const newMember: TeamMember = {
-            id: Math.random().toString(), // temp id, list gets sorted anyway
+            id: res.data?.id || Math.random().toString(), // Use the real database UUID returned from backend
             full_name: formValues.fullName,
             title: formValues.title,
             title_fr: formValues.titleFr || null,

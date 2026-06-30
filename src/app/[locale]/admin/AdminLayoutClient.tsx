@@ -38,6 +38,7 @@ import { useTranslations } from 'next-intl'
 import { LanguageSwitcher } from '@/components/ui'
 import { signOut } from '@/app/[locale]/auth/actions'
 import Link from 'next/link'
+import logoImage from '@/assests/images/transparent-background.png'
 
 interface AdminLayoutClientProps {
   children: React.ReactNode
@@ -135,23 +136,27 @@ export default function AdminLayoutClient({
           borderBottom: (theme) => `1px solid ${alpha(theme.palette.divider, 1)}`,
         }}
       >
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-          <Box
-            sx={{
-              width: 32,
-              height: 32,
-              borderRadius: 1.5,
-              background: 'linear-gradient(135deg, #F26419, #F6AE2D)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
+        <Box
+          component={Link}
+          href={`/${locale}`}
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            textDecoration: 'none',
+            '&:hover': {
+              opacity: 0.9,
+            },
+          }}
+        >
+          <img
+            src={logoImage.src}
+            alt="Safe-Construct"
+            style={{
+              height: '32px',
+              width: 'auto',
+              objectFit: 'contain',
             }}
-          >
-            <HardHat size={18} color="#fff" />
-          </Box>
-          <Typography variant="h6" sx={{ fontWeight: 800, color: 'text.primary', letterSpacing: '-0.02em' }}>
-            Safe<Box component="span" sx={{ color: 'primary.main' }}>Admin</Box>
-          </Typography>
+          />
         </Box>
       </Box>
 
