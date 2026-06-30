@@ -5,7 +5,7 @@ import {
 } from '@mui/material'
 import { ArrowRight, MessageSquare } from 'lucide-react'
 import Link from 'next/link'
-import { SERVICES, SERVICE_META } from '@/lib/services-data'
+import { SERVICES } from '@/lib/services-data'
 import servicesHeader from '@/assests/images/services-header.jpeg'
 
 export async function generateMetadata({
@@ -24,6 +24,7 @@ export default async function ServicesPage({
   params: Promise<{ locale: string }>
 }) {
   const { locale } = await params
+  const t = await getTranslations({ locale, namespace: 'Services' })
 
   return (
     <Box>
@@ -66,17 +67,16 @@ export default async function ServicesPage({
             variant="overline"
             sx={{ color: 'primary.main', fontWeight: 700, letterSpacing: '0.12em', display: 'block', mb: 1.5 }}
           >
-            What We Offer
+            {t('overline')}
           </Typography>
           <Typography variant="h1" sx={{ mb: 2.5, maxWidth: 640 }}>
-            What We{' '}
+            {t('heroTitle')}{' '}
             <Box component="span" sx={{ background: 'linear-gradient(135deg,#F26419,#F6AE2D)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
-              Build.
-            </Box>{' '}
-            How We Help.
+              {t('heroTitleHighlight')}
+            </Box>
           </Typography>
           <Typography variant="h6" color="text.secondary" sx={{ fontWeight: 400, maxWidth: 560 }}>
-            From architectural design to full construction management — choose the service that fits where you are today.
+            {t('heroSubtitle')}
           </Typography>
         </Container>
       </Box>
@@ -85,7 +85,10 @@ export default async function ServicesPage({
       <Container maxWidth="lg" sx={{ py: { xs: 8, md: 12 } }}>
         <Grid container spacing={3}>
           {SERVICES.map(({ slug, icon: Icon, color }) => {
-            const meta = SERVICE_META[slug]
+            const name = t(`items.${slug}.name`)
+            const summary = t(`items.${slug}.summary`)
+            const tagline = t(`items.${slug}.tagline`)
+
             return (
               <Grid key={slug} size={{ xs: 12, sm: 6 }}>
                 <Card
@@ -126,16 +129,16 @@ export default async function ServicesPage({
                     {/* Text */}
                     <Box sx={{ flex: 1 }}>
                       <Typography variant="h5" sx={{ fontWeight: 700, mb: 1 }}>
-                        {meta.name}
+                        {name}
                       </Typography>
                       <Typography variant="body1" color="text.secondary" sx={{ lineHeight: 1.75, mb: 1.5 }}>
-                        {meta.summary}
+                        {summary}
                       </Typography>
                       <Typography
                         variant="body2"
                         sx={{ color, fontWeight: 600, fontStyle: 'italic' }}
                       >
-                        &ldquo;{meta.tagline}&rdquo;
+                        &ldquo;{tagline}&rdquo;
                       </Typography>
                     </Box>
 
@@ -159,7 +162,7 @@ export default async function ServicesPage({
                           '&:hover': { borderColor: color, background: alpha(color, 0.06) },
                         }}
                       >
-                        Learn More
+                        {t('learnMore')}
                       </Button>
                     </Link>
                   </CardContent>
@@ -184,10 +187,10 @@ export default async function ServicesPage({
         <Container maxWidth="md" sx={{ textAlign: 'center' }}>
           <MessageSquare size={36} color="#F26419" style={{ marginBottom: 16 }} />
           <Typography variant="h4" sx={{ fontWeight: 700, mb: 1.5 }}>
-            Not sure which service you need?
+            {t('notSureTitle')}
           </Typography>
           <Typography color="text.secondary" sx={{ mb: 4, maxWidth: 480, mx: 'auto' }}>
-            Let&apos;s talk. Describe your project and we&apos;ll recommend the right path forward — no commitment required.
+            {t('notSureSubtitle')}
           </Typography>
           <Link href={`/${locale}/contact`} style={{ textDecoration: 'none' }}>
             <Button
@@ -202,7 +205,7 @@ export default async function ServicesPage({
                 '&:hover': { background: 'linear-gradient(135deg,#C44E10 0%,#C48B1A 100%)' },
               }}
             >
-              Contact Us
+              {t('contactUsBtn')}
             </Button>
           </Link>
         </Container>

@@ -3,15 +3,10 @@
 import { useEffect, useRef, useState } from 'react'
 import { Box, Container, Typography, alpha } from '@mui/material'
 import { MessageSquare, FileText, Building2, Key } from 'lucide-react'
-
-const STEPS = [
-  { icon: MessageSquare, color: '#F26419', titleKey: 'Consult & Design', desc: 'We listen to your vision and create custom architectural plans tailored to your lifestyle.' },
-  { icon: FileText, color: '#F6AE2D', titleKey: 'Plan & Estimate', desc: 'Get a transparent, itemised cost breakdown before any commitment is made.' },
-  { icon: Building2, color: '#42A5F5', titleKey: 'Build & Supervise', desc: 'Our team oversees every phase of construction, ensuring quality at every step.' },
-  { icon: Key, color: '#66BB6A', titleKey: 'Deliver & Handover', desc: 'We hand over your completed project — on time, on budget, to specification.' },
-]
+import { useTranslations } from 'next-intl'
 
 export default function ProcessSection() {
+  const t = useTranslations('Home.process')
   const ref = useRef<HTMLDivElement>(null)
   const [progress, setProgress] = useState(0)
 
@@ -26,6 +21,13 @@ export default function ProcessSection() {
     return () => obs.disconnect()
   }, [])
 
+  const STEPS = [
+    { icon: MessageSquare, color: '#F26419', title: t('step1_title'), desc: t('step1_desc') },
+    { icon: FileText, color: '#F6AE2D', title: t('step2_title'), desc: t('step2_desc') },
+    { icon: Building2, color: '#42A5F5', title: t('step3_title'), desc: t('step3_desc') },
+    { icon: Key, color: '#66BB6A', title: t('step4_title'), desc: t('step4_desc') },
+  ]
+
   return (
     <Box id="process" sx={{ py: { xs: 10, md: 14 }, backgroundColor: 'background.default' }}>
       <Container maxWidth="lg">
@@ -34,9 +36,9 @@ export default function ProcessSection() {
             variant="overline"
             sx={{ color: 'primary.main', fontWeight: 700, letterSpacing: '0.12em', display: 'block', mb: 1.5 }}
           >
-            Our Process
+            {t('overline')}
           </Typography>
-          <Typography variant="h2">How It Works</Typography>
+          <Typography variant="h2">{t('title')}</Typography>
         </Box>
 
         <Box
@@ -72,9 +74,9 @@ export default function ProcessSection() {
             />
           </Box>
 
-          {STEPS.map(({ icon: Icon, color, titleKey, desc }, i) => (
+          {STEPS.map(({ icon: Icon, color, title, desc }, i) => (
             <Box
-              key={titleKey}
+              key={title}
               sx={{
                 display: 'flex',
                 flexDirection: 'column',
@@ -126,7 +128,7 @@ export default function ProcessSection() {
               </Box>
 
               <Typography variant="h6" sx={{ fontWeight: 700, mb: 1, px: { md: 2 } }}>
-                {titleKey}
+                {title}
               </Typography>
               <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.7, px: { md: 2 } }}>
                 {desc}

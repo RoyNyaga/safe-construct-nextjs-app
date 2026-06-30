@@ -3,42 +3,44 @@
 import { useState, useEffect, useRef } from 'react'
 import { Box, Container, Typography, Card, CardContent, IconButton, alpha } from '@mui/material'
 import { Star, ChevronLeft, ChevronRight } from 'lucide-react'
-
-const TESTIMONIALS = [
-  {
-    quote: 'Safe-Construct transformed our vision into reality. The architectural plans were exactly what we wanted, and the supervision ensured everything was built to perfection.',
-    name: 'Jean-Baptiste N.',
-    location: 'Yaoundé, Cameroon',
-    type: 'Villa Construction',
-    rating: 5,
-  },
-  {
-    quote: 'From cost estimation to final handover, the team was professional and transparent every step of the way. Our duplex was completed on time and within budget.',
-    name: 'Marie-Claire F.',
-    location: 'Douala, Cameroon',
-    type: 'Duplex Development',
-    rating: 5,
-  },
-  {
-    quote: 'The 3D renders gave us a perfect preview of our future home. We made several adjustments before construction — saving us significant costs and regrets.',
-    name: 'Emmanuel T.',
-    location: 'Bafoussam, Cameroon',
-    type: 'Residential Design',
-    rating: 5,
-  },
-  {
-    quote: 'Exceptional quality and attention to detail. The Safe-Construct team went above and beyond to ensure our commercial building met all regulatory requirements.',
-    name: 'Patricia M.',
-    location: 'Limbe, Cameroon',
-    type: 'Commercial Building',
-    rating: 5,
-  },
-]
+import { useTranslations } from 'next-intl'
 
 export default function TestimonialsSection() {
+  const t = useTranslations('Home.testimonials')
   const [current, setCurrent] = useState(0)
   const [autoPlay, setAutoPlay] = useState(true)
   const timerRef = useRef<NodeJS.Timeout | null>(null)
+
+  const TESTIMONIALS = [
+    {
+      quote: t('quote1'),
+      name: 'Jean-Baptiste N.',
+      location: 'Yaoundé, Cameroon',
+      type: t('quote1_type'),
+      rating: 5,
+    },
+    {
+      quote: t('quote2'),
+      name: 'Marie-Claire F.',
+      location: 'Douala, Cameroon',
+      type: t('quote2_type'),
+      rating: 5,
+    },
+    {
+      quote: t('quote3'),
+      name: 'Emmanuel T.',
+      location: 'Bafoussam, Cameroon',
+      type: t('quote3_type'),
+      rating: 5,
+    },
+    {
+      quote: t('quote4'),
+      name: 'Patricia M.',
+      location: 'Limbe, Cameroon',
+      type: t('quote4_type'),
+      rating: 5,
+    },
+  ]
 
   const next = () => setCurrent((c) => (c + 1) % TESTIMONIALS.length)
   const prev = () => setCurrent((c) => (c - 1 + TESTIMONIALS.length) % TESTIMONIALS.length)
@@ -57,9 +59,9 @@ export default function TestimonialsSection() {
             variant="overline"
             sx={{ color: 'primary.main', fontWeight: 700, letterSpacing: '0.12em', display: 'block', mb: 1.5 }}
           >
-            Client Stories
+            {t('overline')}
           </Typography>
-          <Typography variant="h2">What Our Clients Say</Typography>
+          <Typography variant="h2">{t('title')}</Typography>
         </Box>
 
         <Box sx={{ position: 'relative' }}>
@@ -112,7 +114,7 @@ export default function TestimonialsSection() {
                 <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
                   {TESTIMONIALS[current].name}
                 </Typography>
-                <Typography variant="body2" color="text.secondary">
+                <Typography variant="body2" color="text.secondary" sx={{ textTransform: 'capitalize' }}>
                   {TESTIMONIALS[current].location} · {TESTIMONIALS[current].type}
                 </Typography>
               </Box>

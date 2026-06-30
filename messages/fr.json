@@ -56,9 +56,30 @@
       "subtitle": "Explorez nos plans architecturaux les plus populaires",
       "viewAll": "Voir Tous les Designs"
     },
+    "process": {
+      "overline": "Notre Processus",
+      "title": "Comment Ça Marche",
+      "step1_title": "Consulter & Concevoir",
+      "step1_desc": "Nous écoutons votre vision et créons des plans architecturaux personnalisés et adaptés à votre style de vie.",
+      "step2_title": "Planifier & Estimer",
+      "step2_desc": "Bénéficiez d'une estimation détaillée et transparente des coûts avant tout engagement.",
+      "step3_title": "Construire & Superviser",
+      "step3_desc": "Notre équipe supervise chaque phase des travaux pour garantir la qualité à chaque étape.",
+      "step4_title": "Livrer & Remettre",
+      "step4_desc": "Nous vous remettons votre projet achevé — dans les délais, selon le budget et les spécifications."
+    },
     "testimonials": {
       "title": "Ce Que Disent Nos Clients",
-      "subtitle": "La confiance de centaines de propriétaires à travers l'Afrique"
+      "subtitle": "La confiance de centaines de propriétaires à travers l'Afrique",
+      "overline": "Témoignages",
+      "quote1": "Safe-Construct a transformé notre vision en réalité. Les plans d'architecture correspondaient exactement à nos attentes, et la supervision a permis une construction impeccable.",
+      "quote1_type": "Construction de Villa",
+      "quote2": "De l'estimation des coûts à la livraison finale, l'équipe a fait preuve de professionnalisme et de transparence. Notre duplex a été livré à temps et sans dépassement de budget.",
+      "quote2_type": "Développement de Duplex",
+      "quote3": "Les modélisations 3D nous ont offert un aperçu idéal de notre future maison. Nous avons pu faire des ajustements avant le chantier — économisant ainsi des coûts et des regrets.",
+      "quote3_type": "Conception Résidentielle",
+      "quote4": "Une qualité exceptionnelle et un grand souci du détail. L'équipe de Safe-Construct s'est surpassée pour s'assurer que notre bâtiment commercial respecte toutes les normes réglementaires.",
+      "quote4_type": "Bâtiment Commercial"
     },
     "cta": {
       "title": "Prêt à Construire Votre Rêve?",
@@ -197,26 +218,36 @@
   },
   "Services": {
     "title": "Nos Services",
-    "subtitle": "Des services professionnels de construction et de design adaptés à vos besoins",
-    "architecturalDesign": {
-      "title": "Design Architectural",
-      "description": "Nous créons des plans architecturaux sur mesure qui allient esthétique et fonctionnalité. Des esquisses conceptuelles aux plans détaillés, nous concevons des maisons qui reflètent votre personnalité.",
-      "features": ["Plans d'étage personnalisés", "Visualisations 3D", "Dessins structurels", "Bordereau des prix"]
-    },
-    "generalContracting": {
-      "title": "Entreprise Générale",
-      "description": "Gestion complète du projet du terrassement à la remise des clés. Nous coordonnons tous les corps de métier, gérons les délais et veillons à ce que votre maison soit construite selon les normes les plus élevées.",
-      "features": ["Gestion de projet complète", "Sous-traitants vérifiés", "Contrôle qualité", "Garanties de délais"]
-    },
-    "supervision": {
-      "title": "Surveillance des Travaux",
-      "description": "Nos ingénieurs expérimentés assurent la supervision sur site pour s'assurer que votre constructeur respecte les plans approuvés et les normes de qualité.",
-      "features": ["Visites régulières du chantier", "Rapports d'avancement", "Inspections qualité", "Vérification de conformité"]
-    },
-    "costEstimation": {
-      "title": "Estimation des Coûts",
-      "description": "Obtenez un budget détaillé et ventilé avant de vous engager dans la construction. Nous vous aidons à comprendre où va chaque franc.",
-      "features": ["BDP détaillé", "Spécifications des matériaux", "Décomposition des coûts de main-d'œuvre", "Planification des imprévus"]
+    "subtitle": "Des prestations de construction et de conception adaptées à vos besoins",
+    "overline": "Nos Prestations",
+    "heroTitle": "Ce Que Nous Construisons.",
+    "heroTitleHighlight": "Comment Nous Aidons.",
+    "heroSubtitle": "Du plan d'architecture à la gestion complète du chantier — choisissez la prestation qui correspond à votre étape actuelle.",
+    "learnMore": "En Savoir Plus",
+    "notSureTitle": "Vous hésitez sur le service à choisir ?",
+    "notSureSubtitle": "Discutons-en. Décrivez-nous votre projet et nous vous guiderons vers la meilleure option — sans engagement.",
+    "contactUsBtn": "Contactez-nous",
+    "items": {
+      "architectural-design": {
+        "name": "Conception Architecturale",
+        "summary": "Plans architecturaux personnalisés selon votre style, budget et terrain. Plans de distribution, modélisations 3D, façades et dossier complet.",
+        "tagline": "De votre idée de départ à un dossier complet prêt pour les travaux."
+      },
+      "general-contracting": {
+        "name": "Entreprise Générale",
+        "summary": "Nous coordonnons tous les corps d'état, gérons le planning et le budget, pour livrer votre projet selon les meilleures normes de qualité.",
+        "tagline": "Prise en charge intégrale de la construction, des fondations à la remise des clés."
+      },
+      "construction-supervision": {
+        "name": "Suivi de Chantier",
+        "summary": "Visites de chantier régulières, rapports illustrés et suivi des réserves — protégez votre investissement pendant les travaux.",
+        "tagline": "Un contrôle qualité indépendant pour responsabiliser votre constructeur."
+      },
+      "cost-estimation": {
+        "name": "Estimation des Coûts",
+        "summary": "Devis quantitatif estimatif (DQE) détaillé basé sur les tarifs actuels du marché local. Évitez les surprises et négociez sereinement.",
+        "tagline": "Connaissez le coût réel avant de poser la première brique."
+      }
     },
     "inquiryForm": {
       "title": "Demander ce Service",
