@@ -4,7 +4,7 @@ import { useState, useMemo } from 'react'
 import {
   Box, Container, Typography, Card, CardMedia, CardContent,
   Chip, Button, Select, MenuItem, FormControl, InputLabel,
-  Slider, Grid, alpha, InputAdornment, TextField, IconButton,
+  Slider, Grid, alpha, IconButton,
 } from '@mui/material'
 import { Bed, Bath, Layers, Maximize2, Eye, Heart, ArrowRight, SlidersHorizontal, X } from 'lucide-react'
 import Link from 'next/link'
@@ -63,14 +63,13 @@ export default function CatalogueGrid({ items }: CatalogueGridProps) {
   const [origin, setOrigin] = useState('all')
   const [bedrooms, setBedrooms] = useState('all')
   const [sort, setSort] = useState('newest')
-  const [search, setSearch] = useState('')
   const [areaRange, setAreaRange] = useState<[number, number]>([0, 1000])
+  const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false)
 
   const maxArea = useMemo(() => Math.max(...items.map((i) => Number(i.size_sqm)), 500), [items])
 
   const filtered = useMemo(() => {
     let list = [...items]
-    if (search) list = list.filter((i) => i.title.toLowerCase().includes(search.toLowerCase()))
     if (style !== 'all') list = list.filter((i) => i.style === style)
     if (origin !== 'all') list = list.filter((i) => i.design_style_origin === origin)
     if (bedrooms !== 'all') {
@@ -85,14 +84,14 @@ export default function CatalogueGrid({ items }: CatalogueGridProps) {
       case 'cost_desc': list.sort((a, b) => Number(b.total_cost) - Number(a.total_cost)); break
     }
     return list
-  }, [items, search, style, origin, bedrooms, sort, areaRange])
+  }, [items, style, origin, bedrooms, sort, areaRange])
 
   function resetFilters() {
     setStyle('all'); setOrigin('all'); setBedrooms('all')
-    setSort('newest'); setSearch(''); setAreaRange([0, maxArea])
+    setSort('newest'); setAreaRange([0, maxArea])
   }
 
-  const hasActiveFilters = style !== 'all' || origin !== 'all' || bedrooms !== 'all' || search !== ''
+  const hasActiveFilters = style !== 'all' || origin !== 'all' || bedrooms !== 'all' || areaRange[0] !== 0 || areaRange[1] !== maxArea
 
   return (
     <Box>
@@ -109,27 +108,47 @@ export default function CatalogueGrid({ items }: CatalogueGridProps) {
         }}
       >
         <Container maxWidth="xl">
-          <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap', alignItems: 'center' }}>
-            {/* Search */}
-            <TextField
-              id="catalogue-search"
-              size="small"
-              placeholder="Search designs..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              sx={{ minWidth: 200 }}
-              slotProps={{
-                input: {
-                  startAdornment: <InputAdornment position="start"><SlidersHorizontal size={16} opacity={0.5} /></InputAdornment>,
-                  endAdornment: search ? (
-                    <InputAdornment position="end">
-                      <IconButton size="small" onClick={() => setSearch('')}><X size={14} /></IconButton>
-                    </InputAdornment>
-                  ) : null,
-                },
+          {/* Mobile view toggle row */}
+          <Box
+            sx={{
+              display: { xs: 'flex', md: 'none' },
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              width: '100%',
+            }}
+          >
+            <Typography variant="subtitle2" sx={{ fontWeight: 700, color: 'text.secondary' }}>
+              Filters
+            </Typography>
+            <IconButton
+              id="mobile-filter-toggle"
+              onClick={() => setMobileFiltersOpen(!mobileFiltersOpen)}
+              color={mobileFiltersOpen ? 'primary' : 'default'}
+              sx={{
+                border: '1px solid',
+                borderColor: mobileFiltersOpen ? 'primary.main' : 'divider',
+                borderRadius: 2,
+                p: 1,
               }}
-            />
+            >
+              <SlidersHorizontal size={18} />
+            </IconButton>
+          </Box>
 
+          {/* Filters controls */}
+          <Box
+            sx={{
+              display: {
+                xs: mobileFiltersOpen ? 'flex' : 'none',
+                md: 'flex',
+              },
+              flexDirection: { xs: 'column', md: 'row' },
+              gap: 2,
+              flexWrap: 'wrap',
+              alignItems: { xs: 'stretch', md: 'center' },
+              mt: { xs: 2, md: 0 },
+            }}
+          >
             {/* Style */}
             <FormControl size="small" sx={{ minWidth: 130 }}>
               <InputLabel id="filter-style-label">Style</InputLabel>
@@ -158,7 +177,7 @@ export default function CatalogueGrid({ items }: CatalogueGridProps) {
             </FormControl>
 
             {/* Sort */}
-            <FormControl size="small" sx={{ minWidth: 150, ml: 'auto' }}>
+            <FormControl size="small" sx={{ minWidth: 150, ml: { xs: 0, md: 'auto' } }}>
               <InputLabel id="filter-sort-label">Sort By</InputLabel>
               <Select id="filter-sort" labelId="filter-sort-label" label="Sort By" value={sort} onChange={(e) => setSort(e.target.value)}>
                 {SORT_OPTIONS.map((o) => <MenuItem key={o.value} value={o.value}>{o.label}</MenuItem>)}
@@ -167,28 +186,39 @@ export default function CatalogueGrid({ items }: CatalogueGridProps) {
 
             {/* Reset */}
             {hasActiveFilters && (
-              <Button id="catalogue-reset-filters" size="small" onClick={resetFilters} startIcon={<X size={14} />} sx={{ color: 'text.secondary' }}>
+              <Button id="catalogue-reset-filters" size="small" onClick={resetFilters} startIcon={<X size={14} />} sx={{ color: 'text.secondary', alignSelf: { xs: 'flex-start', md: 'center' } }}>
                 Reset
               </Button>
             )}
           </Box>
 
           {/* Area range slider */}
-          <Box sx={{ mt: 1.5, display: 'flex', alignItems: 'center', gap: 3, maxWidth: 420 }}>
-            <Typography variant="caption" color="text.secondary" sx={{ whiteSpace: 'nowrap', fontWeight: 600 }}>
-              Area: {areaRange[0]}–{areaRange[1]} m²
-            </Typography>
-            <Slider
-              id="catalogue-area-slider"
-              value={areaRange}
-              onChange={(_, v) => setAreaRange(v as [number, number])}
-              min={0}
-              max={maxArea}
-              step={10}
-              valueLabelDisplay="auto"
-              size="small"
-              sx={{ color: 'primary.main' }}
-            />
+          <Box
+            sx={{
+              display: {
+                xs: mobileFiltersOpen ? 'block' : 'none',
+                md: 'block',
+              },
+              mt: 1.5,
+              width: '100%',
+            }}
+          >
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 3, maxWidth: 420 }}>
+              <Typography variant="caption" color="text.secondary" sx={{ whiteSpace: 'nowrap', fontWeight: 600 }}>
+                Area: {areaRange[0]}–{areaRange[1]} m²
+              </Typography>
+              <Slider
+                id="catalogue-area-slider"
+                value={areaRange}
+                onChange={(_, v) => setAreaRange(v as [number, number])}
+                min={0}
+                max={maxArea}
+                step={10}
+                valueLabelDisplay="auto"
+                size="small"
+                sx={{ color: 'primary.main' }}
+              />
+            </Box>
           </Box>
         </Container>
       </Box>
@@ -203,11 +233,39 @@ export default function CatalogueGrid({ items }: CatalogueGridProps) {
 
         {filtered.length === 0 ? (
           /* Empty state */
-          <Box sx={{ textAlign: 'center', py: 14 }}>
-            <Typography variant="h1" sx={{ fontSize: '4rem', mb: 2 }}>🏗️</Typography>
+          <Box
+            sx={{
+              textAlign: 'center',
+              py: 10,
+              px: 3,
+              borderRadius: 4,
+              border: '1px dashed',
+              borderColor: 'divider',
+              backgroundColor: alpha('#121824', 0.4),
+              mt: 4,
+            }}
+          >
+            <Typography variant="h1" sx={{ fontSize: '3.5rem', mb: 2 }}>📐</Typography>
             <Typography variant="h5" sx={{ fontWeight: 700, mb: 1 }}>No designs match your filters</Typography>
-            <Typography color="text.secondary" sx={{ mb: 4 }}>Try adjusting or resetting your search criteria.</Typography>
-            <Button id="catalogue-empty-reset" variant="outlined" onClick={resetFilters}>Reset Filters</Button>
+            <Typography color="text.secondary" sx={{ mb: 4, maxWidth: 500, mx: 'auto' }}>
+              We design from scratch — bespoke architectural plans tailored exactly to your vision and site. Request a custom design to build your dream home!
+            </Typography>
+            <Box sx={{ display: 'flex', gap: 2, justifyContent: 'center', flexWrap: 'wrap' }}>
+              <Button id="catalogue-empty-reset" variant="outlined" onClick={resetFilters}>Reset Filters</Button>
+              <Button
+                id="catalogue-empty-request-design"
+                component={Link}
+                href={`/${locale}/request-design`}
+                variant="contained"
+                sx={{
+                  background: 'linear-gradient(135deg,#F26419 0%,#F6AE2D 100%)',
+                  fontWeight: 700,
+                  px: 4,
+                }}
+              >
+                Request a Custom Design
+              </Button>
+            </Box>
           </Box>
         ) : (
           <Grid container spacing={3}>

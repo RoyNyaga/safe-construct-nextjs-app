@@ -71,21 +71,6 @@ export default async function CataloguePage() {
               Designs
             </Box>
           </Typography>
-          <Typography variant="h6" color="text.secondary" sx={{ fontWeight: 400, maxWidth: 520 }}>
-            Browse our full portfolio of architectural plans — filter by style, origin, size and more.
-          </Typography>
-          <Box sx={{ mt: 3, display: 'flex', gap: 3, flexWrap: 'wrap' }}>
-            {[
-              { label: `${items.length} Designs`, color: '#F26419' },
-              { label: `${items.filter((i) => i.is_featured).length} Featured`, color: '#F6AE2D' },
-              { label: 'XAF Pricing', color: '#66BB6A' },
-            ].map(({ label, color }) => (
-              <Box key={label} sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                <Box sx={{ width: 8, height: 8, borderRadius: '50%', background: color }} />
-                <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 600 }}>{label}</Typography>
-              </Box>
-            ))}
-          </Box>
         </Container>
       </Box>
 
