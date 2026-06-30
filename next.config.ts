@@ -4,6 +4,12 @@ import createNextIntlPlugin from 'next-intl/plugin'
 const withNextIntl = createNextIntlPlugin('./src/i18n/request.ts')
 
 const nextConfig: NextConfig = {
+  experimental: {
+    staleTimes: {
+      dynamic: 120, // Cache dynamic pages client-side for 2 minutes
+      static: 180,  // Cache static/prefetched pages client-side for 3 minutes
+    },
+  },
   images: {
     remotePatterns: [
       {

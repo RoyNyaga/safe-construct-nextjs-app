@@ -2,6 +2,9 @@ import type { Metadata } from 'next'
 import { getTranslations } from 'next-intl/server'
 import ContactForm from './ContactForm'
 
+export const revalidate = 120 // Revalidate every 2 minutes
+
+
 export async function generateMetadata({
   params,
 }: {

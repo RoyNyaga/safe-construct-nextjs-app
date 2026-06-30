@@ -1,5 +1,8 @@
 import type { Metadata } from 'next'
 import { getTranslations } from 'next-intl/server'
+
+export const revalidate = 120 // Revalidate every 2 minutes
+
 import { Suspense } from 'react'
 import { Box, Skeleton } from '@mui/material'
 import HeroSection from './home/HeroSection'

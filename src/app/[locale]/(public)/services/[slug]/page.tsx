@@ -3,6 +3,9 @@ import { notFound } from 'next/navigation'
 import { SERVICES, SERVICE_META } from '@/lib/services-data'
 import ServiceDetailClient from './ServiceDetailClient'
 
+export const revalidate = 120 // Revalidate every 2 minutes
+
+
 export function generateStaticParams() {
   return SERVICES.map((s) => ({ slug: s.slug }))
 }

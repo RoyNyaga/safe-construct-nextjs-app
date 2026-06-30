@@ -8,6 +8,9 @@ import Link from 'next/link'
 import { SERVICES } from '@/lib/services-data'
 import servicesHeader from '@/assests/images/services-header.jpeg'
 
+export const revalidate = 120 // Revalidate every 2 minutes
+
+
 export async function generateMetadata({
   params,
 }: {

@@ -3,6 +3,9 @@ import { getTranslations } from 'next-intl/server'
 import { createClient } from '@/utils/supabase/server'
 import AboutClient from './AboutClient'
 
+export const revalidate = 120 // Revalidate every 2 minutes
+
+
 interface TeamMember {
   id: string
   full_name: string
