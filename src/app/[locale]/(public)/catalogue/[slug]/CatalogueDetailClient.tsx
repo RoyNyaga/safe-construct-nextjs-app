@@ -123,9 +123,19 @@ export default function CatalogueDetailClient({ catalogue }: Props) {
               backdropFilter: 'blur(8px)',
               borderRadius: 2,
               '&:hover': { background: 'rgba(0,0,0,0.6)' },
+              px: { xs: 1.25, sm: 2 },
+              py: { xs: 0.5, sm: 1 },
+              fontSize: { xs: '0.75rem', sm: '0.875rem' },
+              '& .MuiButton-startIcon': {
+                marginRight: { xs: 0.5, sm: 1 },
+                '& svg': {
+                  width: { xs: 14, sm: 16 },
+                  height: { xs: 14, sm: 16 },
+                }
+              }
             }}
           >
-            Back to Catalogue
+            Back<Box component="span" sx={{ display: { xs: 'none', sm: 'inline' } }}> to Catalogue</Box>
           </Button>
         </Box>
 
@@ -150,7 +160,18 @@ export default function CatalogueDetailClient({ catalogue }: Props) {
         {/* Caption & engagement */}
         <Box sx={{ position: 'absolute', bottom: 20, left: 20, right: 20, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
           {activeImage.caption && (
-            <Typography sx={{ color: 'rgba(255,255,255,0.85)', fontSize: '0.85rem', maxWidth: '70%', backdropFilter: 'blur(4px)', bgcolor: 'rgba(0,0,0,0.3)', px: 1.5, py: 0.5, borderRadius: 1 }}>
+            <Typography
+              sx={{
+                color: 'rgba(255,255,255,0.85)',
+                fontSize: { xs: '0.7rem', sm: '0.85rem' },
+                maxWidth: '70%',
+                backdropFilter: 'blur(4px)',
+                bgcolor: 'rgba(0,0,0,0.3)',
+                px: { xs: 1, sm: 1.5 },
+                py: { xs: 0.25, sm: 0.5 },
+                borderRadius: 1,
+              }}
+            >
               {activeImage.caption}
             </Typography>
           )}
@@ -237,22 +258,63 @@ export default function CatalogueDetailClient({ catalogue }: Props) {
             )}
 
             {/* Spec grid */}
-            <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 2, mb: 4 }}>
+            <Box
+              sx={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(4, 1fr)',
+                gap: { xs: 1, sm: 2 },
+                mb: 4,
+              }}
+            >
               {SPECS.map(({ icon: Icon, label, value, color }) => (
                 <Box
                   key={label}
                   sx={{
-                    p: 2,
-                    borderRadius: 2.5,
+                    p: { xs: 1, sm: 2 },
+                    borderRadius: { xs: 2, sm: 2.5 },
                     border: (t) => `1px solid ${alpha(t.palette.divider, 1)}`,
                     textAlign: 'center',
                     '&:hover': { borderColor: color, background: alpha(color, 0.05) },
                     transition: 'all 0.2s',
                   }}
                 >
-                  <Icon size={22} color={color} style={{ marginBottom: 8 }} />
-                  <Typography variant="h6" sx={{ fontWeight: 800, fontSize: '1rem', color }}>{value}</Typography>
-                  <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600 }}>{label}</Typography>
+                  <Box
+                    sx={{
+                      display: 'flex',
+                      justifyContent: 'center',
+                      mb: { xs: 0.5, sm: 1 },
+                      '& svg': {
+                        width: { xs: 16, sm: 22 },
+                        height: { xs: 16, sm: 22 },
+                      },
+                    }}
+                  >
+                    <Icon color={color} />
+                  </Box>
+                  <Typography
+                    variant="h6"
+                    sx={{
+                      fontWeight: 800,
+                      fontSize: { xs: '0.85rem', sm: '1rem' },
+                      color,
+                      lineHeight: 1.2,
+                      mb: 0.25,
+                    }}
+                  >
+                    {value}
+                  </Typography>
+                  <Typography
+                    variant="caption"
+                    color="text.secondary"
+                    sx={{
+                      fontWeight: 600,
+                      fontSize: { xs: '0.65rem', sm: '0.75rem' },
+                      display: 'block',
+                      whiteSpace: 'nowrap',
+                    }}
+                  >
+                    {label}
+                  </Typography>
                 </Box>
               ))}
             </Box>
@@ -261,7 +323,7 @@ export default function CatalogueDetailClient({ catalogue }: Props) {
             <Divider sx={{ mb: 4 }} />
 
             {/* CTA */}
-            <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
+            <Box sx={{ display: { xs: 'none', md: 'flex' }, gap: 2, flexWrap: 'wrap' }}>
               <Button
                 id="catalogue-request-design-cta"
                 component={Link}
@@ -336,6 +398,37 @@ export default function CatalogueDetailClient({ catalogue }: Props) {
               <Typography variant="caption" color="text.secondary" sx={{ mt: 2, display: 'block', lineHeight: 1.6 }}>
                 * This is a rough estimate based on current local market rates. Actual costs vary by site, material availability, and finish quality.
               </Typography>
+            </Box>
+
+            {/* Mobile Only CTA */}
+            <Box sx={{ display: { xs: 'flex', md: 'none' }, gap: 2, flexWrap: 'wrap', mt: 4 }}>
+              <Button
+                id="catalogue-request-design-cta-mobile"
+                component={Link}
+                href={`/${locale}/request-design?catalogue=${catalogue.slug}`}
+                variant="contained"
+                size="large"
+                endIcon={<ArrowRight size={18} />}
+                sx={{
+                  background: 'linear-gradient(135deg,#F26419 0%,#F6AE2D 100%)',
+                  fontWeight: 700,
+                  flex: 1,
+                  minWidth: '200px',
+                  '&:hover': { background: 'linear-gradient(135deg,#C44E10 0%,#C48B1A 100%)' },
+                }}
+              >
+                Request This Design
+              </Button>
+              <Button
+                id="catalogue-contact-cta-mobile"
+                component={Link}
+                href={`/${locale}/contact`}
+                variant="outlined"
+                size="large"
+                sx={{ fontWeight: 600, flex: 1, minWidth: '200px' }}
+              >
+                Ask a Question
+              </Button>
             </Box>
           </Grid>
         </Grid>
