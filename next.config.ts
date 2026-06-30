@@ -7,7 +7,7 @@ const nextConfig: NextConfig = {
   experimental: {
     staleTimes: {
       dynamic: 120, // Cache dynamic pages client-side for 2 minutes
-      static: 180,  // Cache static/prefetched pages client-side for 3 minutes
+      static: 600,  // Cache static/prefetched pages client-side for 10 minutes
     },
   },
   images: {
