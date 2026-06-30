@@ -62,8 +62,8 @@ function FacebookIcon({ size = 18 }: { size?: number }) {
 const SOCIAL_LINKS = [
   { icon: WhatsAppIcon, label: 'WhatsApp', href: 'https://wa.me/237671172775' },
   { icon: InstagramIcon, label: 'Instagram', href: '#' },
-  { icon: LinkedinIcon, label: 'LinkedIn', href: '#' },
-  { icon: FacebookIcon, label: 'Facebook', href: '#' },
+  { icon: LinkedinIcon, label: 'LinkedIn', href: 'https://www.linkedin.com/company/safe-construct-plc' },
+  { icon: FacebookIcon, label: 'Facebook', href: 'https://web.facebook.com/SafeConstruct2005' },
 ]
 
 export default function Footer() {
