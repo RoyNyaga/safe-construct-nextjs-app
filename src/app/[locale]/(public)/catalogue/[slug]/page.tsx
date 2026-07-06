@@ -50,14 +50,43 @@ async function getSimilarDesigns(catalogueId: string, bedrooms: number, style: s
 export async function generateMetadata({
   params,
 }: {
-  params: Promise<{ slug: string }>
+  params: Promise<{ locale: string; slug: string }>
 }): Promise<Metadata> {
-  const { slug } = await params
+  const { slug, locale } = await params
   const catalogue = await getCatalogue(slug)
   if (!catalogue) return {}
+
+  const title = (locale === 'fr' && catalogue.title_fr) ? catalogue.title_fr : catalogue.title
+  const description = (locale === 'fr' && catalogue.description_fr) ? catalogue.description_fr : (catalogue.description ?? `View details for ${catalogue.title}`)
+  const imageUrl = catalogue.main_image_url
+
   return {
-    title: catalogue.title,
-    description: catalogue.description ?? `View details for ${catalogue.title}`,
+    title,
+    description,
+    alternates: {
+      canonical: `https://safe-construct.cm/${locale}/catalogue/${catalogue.slug}`,
+    },
+    openGraph: {
+      title,
+      description,
+      url: `https://safe-construct.cm/${locale}/catalogue/${catalogue.slug}`,
+      siteName: 'Safe-Construct',
+      type: 'website',
+      images: [
+        {
+          url: imageUrl,
+          width: 1200,
+          height: 630,
+          alt: title,
+        },
+      ],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title,
+      description,
+      images: [imageUrl],
+    },
   }
 }
 
