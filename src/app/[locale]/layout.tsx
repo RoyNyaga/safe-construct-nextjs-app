@@ -26,6 +26,18 @@ export async function generateMetadata({
       siteName: 'Safe-Construct',
       locale: locale === 'fr' ? 'fr_FR' : 'en_US',
       type: 'website',
+      images: [
+        {
+          url: '/opengraph-image.jpeg',
+          width: 1200,
+          height: 630,
+          alt: 'Safe-Construct — Premium Architectural Design & Construction',
+        },
+      ],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      images: ['/twitter-image.jpeg'],
     },
   }
 }
