@@ -1,4 +1,9 @@
+import type { Metadata } from 'next'
 import Script from 'next/script'
+
+export const metadata: Metadata = {
+  metadataBase: new URL('https://safe-construct.cm'),
+}
 
 // Root layout — owns the <html> and <body> shell.
 // The [locale] layout nested inside provides NextIntl + MUI context.

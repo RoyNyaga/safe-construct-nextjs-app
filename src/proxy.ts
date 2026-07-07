@@ -15,8 +15,9 @@ export async function proxy(request: NextRequest) {
 export const config = {
   // Match all pathnames except for
   // - … if they start with `/api`, `/_next` or `/_vercel`
+  // - … standard Next.js metadata routes (e.g. icon, apple-icon, opengraph-image, twitter-image, sitemap, robots, manifest)
   // - … the ones containing a dot (e.g. `favicon.ico`)
   matcher: [
-    '/((?!api|_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
+    '/((?!api|_next/static|_next/image|favicon.ico|sitemap.xml|robots.txt|manifest.json|.*\\/icon|.*\\/apple-icon|.*\\/opengraph-image|.*\\/twitter-image|.*\\..*$).*)',
   ],
 }
