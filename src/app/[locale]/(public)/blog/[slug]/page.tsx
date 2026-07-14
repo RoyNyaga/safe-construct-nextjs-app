@@ -195,18 +195,19 @@ export async function generateMetadata({
   const post = data.post
   const title = locale === 'fr' && post.titleFr ? post.titleFr : post.title
   const description = locale === 'fr' && post.excerptFr ? post.excerptFr : post.excerpt || ''
-  const imageUrl = post.headerPhotoUrl || 'https://safe-construct.cm/default-blog.jpg'
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://safe-construct.org'
+  const imageUrl = post.headerPhotoUrl || `${baseUrl}/default-blog.jpg`
 
   return {
     title,
     description,
     alternates: {
-      canonical: `https://safe-construct.cm/${locale}/blog/${post.slug}`,
+      canonical: `${baseUrl}/${locale}/blog/${post.slug}`,
     },
     openGraph: {
       title,
       description,
-      url: `https://safe-construct.cm/${locale}/blog/${post.slug}`,
+      url: `${baseUrl}/${locale}/blog/${post.slug}`,
       siteName: 'Safe-Construct',
       type: 'article',
       publishedTime: post.publishedAt || undefined,
@@ -238,11 +239,12 @@ export default async function BlogDetailPage({
   }
 
   // Prepare structured JSON-LD data
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://safe-construct.org'
   const jsonLd = {
     '@context': 'https://schema.org',
     '@type': 'BlogPosting',
     headline: locale === 'fr' && data.post.titleFr ? data.post.titleFr : data.post.title,
-    image: data.post.headerPhotoUrl || 'https://safe-construct.cm/default-blog.jpg',
+    image: data.post.headerPhotoUrl || `${baseUrl}/default-blog.jpg`,
     datePublished: data.post.publishedAt,
     dateModified: data.post.createdAt,
     author: {
@@ -254,7 +256,7 @@ export default async function BlogDetailPage({
       name: 'Safe-Construct',
       logo: {
         '@type': 'ImageObject',
-        url: 'https://safe-construct.cm/logo.png',
+        url: `${baseUrl}/logo.png`,
       },
     },
     description: locale === 'fr' && data.post.excerptFr ? data.post.excerptFr : data.post.excerpt,
