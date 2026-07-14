@@ -21,7 +21,7 @@ export async function generateMetadata({
       template: '%s | Safe-Construct',
     },
     description: t('subtitle'),
-    metadataBase: new URL('https://safe-construct.cm'),
+    metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || 'https://safe-construct.org'),
     openGraph: {
       siteName: 'Safe-Construct',
       locale: locale === 'fr' ? 'fr_FR' : 'en_US',

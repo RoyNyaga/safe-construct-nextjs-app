@@ -60,16 +60,18 @@ export async function generateMetadata({
   const description = (locale === 'fr' && catalogue.description_fr) ? catalogue.description_fr : (catalogue.description ?? `View details for ${catalogue.title}`)
   const imageUrl = catalogue.main_image_url
 
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://safe-construct.org'
+
   return {
     title,
     description,
     alternates: {
-      canonical: `https://safe-construct.cm/${locale}/catalogue/${catalogue.slug}`,
+      canonical: `${baseUrl}/${locale}/catalogue/${catalogue.slug}`,
     },
     openGraph: {
       title,
       description,
-      url: `https://safe-construct.cm/${locale}/catalogue/${catalogue.slug}`,
+      url: `${baseUrl}/${locale}/catalogue/${catalogue.slug}`,
       siteName: 'Safe-Construct',
       type: 'website',
       images: [

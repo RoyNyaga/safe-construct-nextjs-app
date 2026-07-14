@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import Script from 'next/script'
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://safe-construct.cm'),
+  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || 'https://safe-construct.org'),
 }
 
 // Root layout — owns the <html> and <body> shell.
