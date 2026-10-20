@@ -77,6 +77,10 @@ export default function BalanceClient({
 
   const [currency, setCurrency] = useState(bankroll?.currency || 'FCFA')
   const [currentBal, setCurrentBal] = useState(Number(bankroll?.current_balance || 0))
+  const [totalDeposited, setTotalDeposited] = useState(Number(bankroll?.total_deposited || 0))
+  const [totalWithdrawn, setTotalWithdrawn] = useState(Number(bankroll?.total_withdrawn || 0))
+  const [totalStaked, setTotalStaked] = useState(Number(bankroll?.total_staked || 0))
+  const [totalPayout, setTotalPayout] = useState(Number(bankroll?.total_payout || 0))
   const [deletingTx, setDeletingTx] = useState<BettingTransaction | null>(null)
   const [isDeletingTx, setIsDeletingTx] = useState(false)
 
@@ -114,6 +118,7 @@ export default function BalanceClient({
     } else if (res.transaction) {
       setTransactions([res.transaction, ...transactions])
       setCurrentBal((prev) => prev + val)
+      setTotalDeposited((prev) => prev + val)
       setIsDepositOpen(false)
       setDepositAmount('')
       setDepositNotes('')
@@ -145,6 +150,7 @@ export default function BalanceClient({
     } else if (res.transaction) {
       setTransactions([res.transaction, ...transactions])
       setCurrentBal((prev) => prev - val)
+      setTotalWithdrawn((prev) => prev + val)
       setIsWithdrawOpen(false)
       setWithdrawAmount('')
       setWithdrawNotes('')
@@ -182,6 +188,15 @@ export default function BalanceClient({
     } else {
       const removedAmount = Number(deletingTx.amount || 0)
       setCurrentBal((prev) => prev - removedAmount)
+      if (deletingTx.transaction_type === 'deposit') {
+        setTotalDeposited((prev) => Math.max(0, prev - removedAmount))
+      } else if (deletingTx.transaction_type === 'withdrawal') {
+        setTotalWithdrawn((prev) => Math.max(0, prev - Math.abs(removedAmount)))
+      } else if (deletingTx.transaction_type === 'bet_stake') {
+        setTotalStaked((prev) => Math.max(0, prev - Math.abs(removedAmount)))
+      } else if (deletingTx.transaction_type === 'bet_win') {
+        setTotalPayout((prev) => Math.max(0, prev - removedAmount))
+      }
       setTransactions(transactions.filter((t) => t.id !== deletingTx.id))
       setDeletingTx(null)
       setNotification({
@@ -316,7 +331,7 @@ export default function BalanceClient({
                     {locale === 'fr' ? 'Dépôts Cumulés' : 'Total Deposited'}
                   </Typography>
                   <Typography variant="body1" sx={{ fontWeight: 700 }}>
-                    {formatCurrency(bankroll?.total_deposited || 0, currency)}
+                    {formatCurrency(totalDeposited, currency)}
                   </Typography>
                 </Box>
                 <Divider orientation="vertical" flexItem sx={{ borderColor: 'divider' }} />
@@ -325,7 +340,7 @@ export default function BalanceClient({
                     {locale === 'fr' ? 'Retraits Cumulés' : 'Total Withdrawn'}
                   </Typography>
                   <Typography variant="body1" sx={{ fontWeight: 700 }}>
-                    {formatCurrency(bankroll?.total_withdrawn || 0, currency)}
+                    {formatCurrency(totalWithdrawn, currency)}
                   </Typography>
                 </Box>
                 <Divider orientation="vertical" flexItem sx={{ borderColor: 'divider' }} />
@@ -334,7 +349,7 @@ export default function BalanceClient({
                     {locale === 'fr' ? 'Total Misé' : 'Total Staked'}
                   </Typography>
                   <Typography variant="body1" sx={{ fontWeight: 700 }}>
-                    {formatCurrency(bankroll?.total_staked || 0, currency)}
+                    {formatCurrency(totalStaked, currency)}
                   </Typography>
                 </Box>
                 <Divider orientation="vertical" flexItem sx={{ borderColor: 'divider' }} />
@@ -343,7 +358,7 @@ export default function BalanceClient({
                     {locale === 'fr' ? 'Gains Reçus' : 'Total Payouts'}
                   </Typography>
                   <Typography variant="body1" sx={{ fontWeight: 700, color: '#66BB6A' }}>
-                    {formatCurrency(bankroll?.total_payout || 0, currency)}
+                    {formatCurrency(totalPayout, currency)}
                   </Typography>
                 </Box>
               </Box>

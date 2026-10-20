@@ -17,7 +17,8 @@ export async function getActiveBankroll(): Promise<{
     .from('betting_bankrolls')
     .select('*')
     .eq('is_active', true)
-    .order('id', { ascending: true })
+    .order('updated_at', { ascending: false })
+    .order('id', { ascending: false })
     .limit(1)
     .maybeSingle()
 
