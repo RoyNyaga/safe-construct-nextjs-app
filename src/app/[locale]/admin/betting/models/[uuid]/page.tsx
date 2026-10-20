@@ -10,15 +10,16 @@ export default async function BettingModelDetailPage({
 }) {
   const { locale, uuid } = await params
 
-  const [{ bankroll }, { model }, calibration] = await Promise.all([
-    getActiveBankroll(),
-    getBettingModelByUuid(uuid),
-    getCalibrationStats(),
-  ])
+  const { model } = await getBettingModelByUuid(uuid)
 
   if (!model) {
     notFound()
   }
+
+  const [{ bankroll }, calibration] = await Promise.all([
+    getActiveBankroll(),
+    getCalibrationStats(model.id),
+  ])
 
   return (
     <ModelDetailClient

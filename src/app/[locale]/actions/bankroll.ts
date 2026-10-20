@@ -263,3 +263,80 @@ export async function updateBankrollCurrency(currency: string): Promise<{ succes
   return { success: true }
 }
 
+/**
+ * Deletes a bankroll transaction and reconciles balances.
+ */
+export async function deleteBankrollTransaction(transactionId: number): Promise<{ success: boolean; error?: string }> {
+  const supabase = await createClient()
+
+  // 1. Fetch transaction
+  const { data: tx, error: fetchErr } = await supabase
+    .from('betting_transactions')
+    .select('*')
+    .eq('id', transactionId)
+    .single()
+
+  if (fetchErr || !tx) {
+    return { success: false, error: fetchErr?.message || 'Transaction not found' }
+  }
+
+  // 2. Fetch associated bankroll
+  const { data: bankroll, error: bankErr } = await supabase
+    .from('betting_bankrolls')
+    .select('*')
+    .eq('id', tx.bankroll_id)
+    .single()
+
+  if (!bankErr && bankroll) {
+    const currentBal = Number(bankroll.current_balance || 0)
+    const txAmount = Number(tx.amount || 0)
+    // Revert balance: subtract txAmount
+    const newBal = Number((currentBal - txAmount).toFixed(2))
+
+    const updatePayload: Record<string, any> = {
+      current_balance: newBal,
+      updated_at: new Date().toISOString(),
+    }
+
+    if (tx.transaction_type === 'deposit') {
+      updatePayload.total_deposited = Math.max(0, Number((Number(bankroll.total_deposited || 0) - txAmount).toFixed(2)))
+    } else if (tx.transaction_type === 'withdrawal') {
+      updatePayload.total_withdrawn = Math.max(0, Number((Number(bankroll.total_withdrawn || 0) - Math.abs(txAmount)).toFixed(2)))
+    } else if (tx.transaction_type === 'bet_stake') {
+      updatePayload.total_staked = Math.max(0, Number((Number(bankroll.total_staked || 0) - Math.abs(txAmount)).toFixed(2)))
+    } else if (tx.transaction_type === 'bet_win') {
+      updatePayload.total_payout = Math.max(0, Number((Number(bankroll.total_payout || 0) - txAmount).toFixed(2)))
+    }
+
+    await supabase.from('betting_bankrolls').update(updatePayload).eq('id', tx.bankroll_id)
+  }
+
+  // 3. Delete the transaction record
+  const { error: delErr } = await supabase.from('betting_transactions').delete().eq('id', transactionId)
+  if (delErr) {
+    return { success: false, error: delErr.message }
+  }
+
+  revalidatePath('/[locale]/admin/betting', 'layout')
+  return { success: true }
+}
+
+/**
+ * Updates a bankroll transaction description.
+ */
+export async function updateBankrollTransaction(transactionId: number, description: string): Promise<{ success: boolean; error?: string }> {
+  const supabase = await createClient()
+
+  const { error } = await supabase
+    .from('betting_transactions')
+    .update({ description })
+    .eq('id', transactionId)
+
+  if (error) {
+    return { success: false, error: error.message }
+  }
+
+  revalidatePath('/[locale]/admin/betting', 'layout')
+  return { success: true }
+}
+

@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import {
   Box,
   Card,
@@ -11,6 +12,10 @@ import {
   Chip,
   Paper,
   TextField,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
   IconButton,
   alpha,
   Divider,
@@ -32,9 +37,20 @@ import {
   Check,
   ChevronRight,
   TrendingUp,
+  Pencil,
+  Trash2,
+  AlertTriangle,
 } from 'lucide-react'
-import { BettingTicket, BettingSelection, BettingAlternative, SelectionResultStatus } from '@/types/betting'
-import { updateSelectionResult, updateAlternativeResult, exportTicketAsJson } from '@/app/[locale]/actions/betting'
+import { BettingTicket, BettingSelection, BettingAlternative, SelectionResultStatus, TicketStatus } from '@/types/betting'
+import {
+  updateSelectionResult,
+  updateAlternativeResult,
+  exportTicketAsJson,
+  updateBettingTicket,
+  deleteBettingTicket,
+  deleteBettingSelection,
+  deleteBettingAlternative,
+} from '@/app/[locale]/actions/betting'
 import { CustomModal, CustomDrawer, CustomNotification, CustomTooltip } from '@/components/ui'
 import CustomButton from '@/components/ui/CustomButton'
 import { LoadingButton } from '@/components/ui/PromptButtons'
@@ -51,7 +67,21 @@ export default function TicketDetailClient({
   ticket: initialTicket,
   currency = 'USD',
 }: TicketDetailClientProps) {
+  const router = useRouter()
   const [ticket, setTicket] = useState<BettingTicket>(initialTicket)
+
+  // Edit Ticket State
+  const [isEditTicketOpen, setIsEditTicketOpen] = useState(false)
+  const [editTicketNumber, setEditTicketNumber] = useState(ticket.ticket_number || '')
+  const [editTicketDate, setEditTicketDate] = useState(ticket.ticket_date)
+  const [editStake, setEditStake] = useState(ticket.stake ? ticket.stake.toString() : '')
+  const [editNotes, setEditNotes] = useState(ticket.notes || '')
+  const [editStatus, setEditStatus] = useState<TicketStatus>(ticket.status as TicketStatus)
+  const [isUpdatingTicket, setIsUpdatingTicket] = useState(false)
+
+  // Delete Ticket State
+  const [isDeleteTicketOpen, setIsDeleteTicketOpen] = useState(false)
+  const [isDeletingTicket, setIsDeletingTicket] = useState(false)
 
   // Drawer for selection statistical snapshot
   const [snapshotSelection, setSnapshotSelection] = useState<BettingSelection | null>(null)
@@ -184,6 +214,107 @@ export default function TicketDetailClient({
     }
   }
 
+  // Open Edit Ticket Dialog
+  const handleOpenEditTicket = () => {
+    setEditTicketNumber(ticket.ticket_number || '')
+    setEditTicketDate(ticket.ticket_date)
+    setEditStake(ticket.stake ? ticket.stake.toString() : '')
+    setEditNotes(ticket.notes || '')
+    setEditStatus(ticket.status as TicketStatus)
+    setIsEditTicketOpen(true)
+  }
+
+  // Save Edit Ticket
+  const handleSaveEditTicket = async () => {
+    setIsUpdatingTicket(true)
+    const stakeNum = parseFloat(editStake)
+    const res = await updateBettingTicket(ticket.id, {
+      ticket_number: editTicketNumber,
+      ticket_date: editTicketDate,
+      stake: !isNaN(stakeNum) ? stakeNum : Number(ticket.stake),
+      notes: editNotes,
+      status: editStatus,
+    })
+    setIsUpdatingTicket(false)
+
+    if (res.error) {
+      setNotification({ open: true, message: res.error, type: 'error' })
+    } else {
+      setTicket({
+        ...ticket,
+        ticket_number: editTicketNumber,
+        ticket_date: editTicketDate,
+        stake: !isNaN(stakeNum) ? stakeNum : Number(ticket.stake),
+        notes: editNotes,
+        status: editStatus,
+        actual_result: editStatus,
+      })
+      setIsEditTicketOpen(false)
+      setNotification({
+        open: true,
+        message: locale === 'fr' ? 'Ticket modifié avec succès !' : 'Ticket updated successfully!',
+        type: 'success',
+      })
+    }
+  }
+
+  // Delete Ticket
+  const handleDeleteTicket = async () => {
+    setIsDeletingTicket(true)
+    const res = await deleteBettingTicket(ticket.id)
+    setIsDeletingTicket(false)
+
+    if (res.error) {
+      setNotification({ open: true, message: res.error, type: 'error' })
+    } else {
+      setIsDeleteTicketOpen(false)
+      setNotification({
+        open: true,
+        message: locale === 'fr' ? 'Ticket supprimé avec succès !' : 'Ticket deleted successfully!',
+        type: 'success',
+      })
+      router.push(`/${locale}/admin/betting/tickets`)
+    }
+  }
+
+  // Delete Individual Selection
+  const handleDeleteSelection = async (selectionId: number) => {
+    if (!confirm(locale === 'fr' ? 'Supprimer cette sélection du ticket ?' : 'Delete this selection from the ticket?')) return
+    const res = await deleteBettingSelection(selectionId)
+    if (res.error) {
+      setNotification({ open: true, message: res.error, type: 'error' })
+    } else {
+      setTicket({
+        ...ticket,
+        betting_selections: (ticket.betting_selections || []).filter((s) => s.id !== selectionId),
+      })
+      setNotification({
+        open: true,
+        message: locale === 'fr' ? 'Sélection supprimée !' : 'Selection removed!',
+        type: 'success',
+      })
+    }
+  }
+
+  // Delete Individual Alternative
+  const handleDeleteAlternative = async (altId: number) => {
+    if (!confirm(locale === 'fr' ? 'Supprimer cette alternative ?' : 'Delete this rejected candidate?')) return
+    const res = await deleteBettingAlternative(altId)
+    if (res.error) {
+      setNotification({ open: true, message: res.error, type: 'error' })
+    } else {
+      setTicket({
+        ...ticket,
+        betting_alternatives: (ticket.betting_alternatives || []).filter((a) => a.id !== altId),
+      })
+      setNotification({
+        open: true,
+        message: locale === 'fr' ? 'Alternative supprimée !' : 'Alternative removed!',
+        type: 'success',
+      })
+    }
+  }
+
   const statusColor =
     ticket.status === 'won'
       ? '#66BB6A'
@@ -221,7 +352,36 @@ export default function TicketDetailClient({
           <span>{locale === 'fr' ? 'Retour aux tickets' : 'Back to tickets list'}</span>
         </Box>
 
-        <Box sx={{ display: 'flex', gap: 1.5 }}>
+        <Box sx={{ display: 'flex', gap: 1.5, flexWrap: 'wrap' }}>
+          <CustomButton
+            variant="outlined"
+            onClick={handleOpenEditTicket}
+            startIcon={<Pencil size={16} />}
+            sx={{
+              borderColor: 'rgba(255, 255, 255, 0.2)',
+              color: '#FFFFFF',
+              fontWeight: 700,
+              '&:hover': { borderColor: '#F26419', backgroundColor: alpha('#F26419', 0.1) },
+            }}
+          >
+            {locale === 'fr' ? 'Modifier' : 'Edit Ticket'}
+          </CustomButton>
+
+          <CustomButton
+            variant="contained"
+            onClick={() => setIsDeleteTicketOpen(true)}
+            startIcon={<Trash2 size={16} />}
+            sx={{
+              backgroundColor: alpha('#EF5350', 0.15),
+              color: '#EF5350',
+              border: '1px solid rgba(239, 83, 80, 0.3)',
+              fontWeight: 700,
+              '&:hover': { backgroundColor: '#EF5350', color: '#FFFFFF' },
+            }}
+          >
+            {locale === 'fr' ? 'Supprimer' : 'Delete'}
+          </CustomButton>
+
           <CustomButton
             variant="contained"
             onClick={handleOpenExport}
@@ -483,6 +643,18 @@ export default function TicketDetailClient({
                           >
                             {locale === 'fr' ? 'Score' : 'Record Score'}
                           </CustomButton>
+
+                          <IconButton
+                            size="small"
+                            onClick={() => handleDeleteSelection(sel.id)}
+                            sx={{
+                              color: 'text.secondary',
+                              '&:hover': { color: '#EF5350', backgroundColor: alpha('#EF5350', 0.1) },
+                            }}
+                            title="Delete Selection"
+                          >
+                            <Trash2 size={15} />
+                          </IconButton>
                         </Box>
                       </td>
                     </tr>
@@ -592,14 +764,28 @@ export default function TicketDetailClient({
                           {alt.comment || '—'}
                         </td>
                         <td style={{ padding: '14px', textAlign: 'right' }}>
-                          <CustomButton
-                            size="small"
-                            variant="outlined"
-                            onClick={() => openAlternativeScoreDialog(alt)}
-                            sx={{ fontSize: '0.75rem', py: 0.5 }}
-                          >
-                            {locale === 'fr' ? 'Score' : 'Record'}
-                          </CustomButton>
+                          <Box sx={{ display: 'inline-flex', alignItems: 'center', gap: 1 }}>
+                            <CustomButton
+                              size="small"
+                              variant="outlined"
+                              onClick={() => openAlternativeScoreDialog(alt)}
+                              sx={{ fontSize: '0.75rem', py: 0.5 }}
+                            >
+                              {locale === 'fr' ? 'Score' : 'Record'}
+                            </CustomButton>
+
+                            <IconButton
+                              size="small"
+                              onClick={() => handleDeleteAlternative(alt.id)}
+                              sx={{
+                                color: 'text.secondary',
+                                '&:hover': { color: '#EF5350', backgroundColor: alpha('#EF5350', 0.1) },
+                              }}
+                              title="Delete Alternative"
+                            >
+                              <Trash2 size={15} />
+                            </IconButton>
+                          </Box>
                         </td>
                       </tr>
                     )
@@ -957,6 +1143,143 @@ export default function TicketDetailClient({
               },
             }}
           />
+        </Box>
+      </CustomModal>
+
+      {/* ─── EDIT TICKET MODAL ───────────────────────────────────────────── */}
+      <CustomModal
+        open={isEditTicketOpen}
+        onClose={() => setIsEditTicketOpen(false)}
+        title={
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <Pencil size={20} color="#F26419" />
+            <span>{locale === 'fr' ? 'Modifier le Ticket' : 'Edit Ticket'}</span>
+          </Box>
+        }
+        actions={
+          <Box sx={{ display: 'flex', gap: 1.5, width: '100%', justifyContent: 'flex-end' }}>
+            <CustomButton variant="outlined" onClick={() => setIsEditTicketOpen(false)}>
+              {locale === 'fr' ? 'Annuler' : 'Cancel'}
+            </CustomButton>
+            <LoadingButton
+              variant="contained"
+              loading={isUpdatingTicket}
+              onClick={handleSaveEditTicket}
+              sx={{
+                backgroundColor: 'primary.main',
+                color: '#FFFFFF',
+                fontWeight: 700,
+              }}
+            >
+              {locale === 'fr' ? 'Enregistrer' : 'Save Changes'}
+            </LoadingButton>
+          </Box>
+        }
+      >
+        <Box sx={{ pt: 1 }}>
+          <Grid container spacing={2} sx={{ mb: 2 }}>
+            <Grid size={{ xs: 6 }}>
+              <TextField
+                fullWidth
+                label="Ticket #"
+                placeholder="001"
+                value={editTicketNumber}
+                onChange={(e) => setEditTicketNumber(e.target.value)}
+              />
+            </Grid>
+            <Grid size={{ xs: 6 }}>
+              <TextField
+                fullWidth
+                type="date"
+                label="Date"
+                value={editTicketDate}
+                onChange={(e) => setEditTicketDate(e.target.value)}
+                slotProps={{ inputLabel: { shrink: true } }}
+              />
+            </Grid>
+          </Grid>
+
+          <Grid container spacing={2} sx={{ mb: 2 }}>
+            <Grid size={{ xs: 6 }}>
+              <TextField
+                fullWidth
+                type="number"
+                label="Stake ($)"
+                value={editStake}
+                onChange={(e) => setEditStake(e.target.value)}
+              />
+            </Grid>
+            <Grid size={{ xs: 6 }}>
+              <FormControl fullWidth>
+                <InputLabel>Status</InputLabel>
+                <Select
+                  value={editStatus}
+                  label="Status"
+                  onChange={(e) => setEditStatus(e.target.value as any)}
+                >
+                  <MenuItem value="pending">Pending</MenuItem>
+                  <MenuItem value="won">Won</MenuItem>
+                  <MenuItem value="lost">Lost</MenuItem>
+                  <MenuItem value="void">Void</MenuItem>
+                </Select>
+              </FormControl>
+            </Grid>
+          </Grid>
+
+          <TextField
+            fullWidth
+            multiline
+            rows={3}
+            label="Notes"
+            placeholder="Add general ticket rationale..."
+            value={editNotes}
+            onChange={(e) => setEditNotes(e.target.value)}
+          />
+        </Box>
+      </CustomModal>
+
+      {/* ─── DELETE TICKET CONFIRMATION MODAL ─────────────────────────────── */}
+      <CustomModal
+        open={isDeleteTicketOpen}
+        onClose={() => setIsDeleteTicketOpen(false)}
+        title={
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <AlertTriangle size={20} color="#EF5350" />
+            <span>{locale === 'fr' ? 'Confirmer la Suppression' : 'Confirm Ticket Deletion'}</span>
+          </Box>
+        }
+        actions={
+          <Box sx={{ display: 'flex', gap: 1.5, width: '100%', justifyContent: 'flex-end' }}>
+            <CustomButton variant="outlined" onClick={() => setIsDeleteTicketOpen(false)}>
+              {locale === 'fr' ? 'Annuler' : 'Cancel'}
+            </CustomButton>
+            <LoadingButton
+              variant="contained"
+              loading={isDeletingTicket}
+              onClick={handleDeleteTicket}
+              sx={{
+                backgroundColor: '#EF5350',
+                color: '#FFFFFF',
+                fontWeight: 700,
+                '&:hover': { backgroundColor: '#D32F2F' },
+              }}
+            >
+              {locale === 'fr' ? 'Supprimer Définitivement' : 'Permanently Delete'}
+            </LoadingButton>
+          </Box>
+        }
+      >
+        <Box sx={{ py: 1 }}>
+          <Typography variant="body1" sx={{ fontWeight: 600, mb: 1 }}>
+            {locale === 'fr'
+              ? `Supprimer définitivement le Ticket #${ticket.ticket_number || ticket.id} ?`
+              : `Permanently delete Ticket #${ticket.ticket_number || ticket.id}?`}
+          </Typography>
+          <Typography variant="body2" color="text.secondary">
+            {locale === 'fr'
+              ? 'Toutes les sélections, alternatives et écritures comptables liées à ce ticket seront supprimées et le solde de la bankroll sera rétabli.'
+              : 'All selections, alternative matches, and ledger transactions associated with this ticket will be removed and bankroll balance reconciled.'}
+          </Typography>
         </Box>
       </CustomModal>
     </Box>

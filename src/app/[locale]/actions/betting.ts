@@ -15,7 +15,7 @@ import {
   SelectedVsAlternativesComparison,
 } from '@/types/betting'
 import { autoSettleSelection, calculateTicketStatus, calculateProfitLoss } from '@/utils/bettingSettlement'
-import { executeTransaction, getActiveBankroll } from './bankroll'
+import { executeTransaction, getActiveBankroll, deleteBankrollTransaction } from './bankroll'
 
 // ─── 1. MODEL OPERATIONS ─────────────────────────────────────────────────────
 
@@ -164,6 +164,7 @@ export async function createBettingModel(data: {
 export async function updateBettingModel(
   id: number,
   data: {
+    version?: string
     name?: string
     description?: string
     content?: string
@@ -173,9 +174,15 @@ export async function updateBettingModel(
 ) {
   const supabase = await createClient()
 
+  // If set to active, deactivate other models
+  if (data.isActive) {
+    await supabase.from('betting_models').update({ is_active: false }).neq('id', id)
+  }
+
   const { error } = await supabase
     .from('betting_models')
     .update({
+      ...(data.version && { version: data.version }),
       ...(data.name && { name: data.name }),
       ...(data.description !== undefined && { description: data.description }),
       ...(data.content !== undefined && { content: data.content }),
@@ -191,6 +198,26 @@ export async function updateBettingModel(
   }
 
   revalidatePath('/[locale]/admin/betting/models', 'layout')
+  revalidatePath('/[locale]/admin/betting', 'layout')
+  return { success: true }
+}
+
+export async function deleteBettingModel(id: number): Promise<{ success: boolean; error?: string }> {
+  const supabase = await createClient()
+
+  // 1. Unlink any tickets referencing this model so delete restrict does not fail
+  await supabase.from('betting_tickets').update({ model_id: null }).eq('model_id', id)
+
+  // 2. Delete the model
+  const { error } = await supabase.from('betting_models').delete().eq('id', id)
+
+  if (error) {
+    console.error('Failed to delete betting model:', error)
+    return { success: false, error: error.message }
+  }
+
+  revalidatePath('/[locale]/admin/betting/models', 'layout')
+  revalidatePath('/[locale]/admin/betting', 'layout')
   return { success: true }
 }
 
@@ -604,6 +631,168 @@ export async function updateAlternativeResult(params: {
     return { error: updateError.message }
   }
 
+  revalidatePath('/[locale]/admin/betting', 'layout')
+  return { success: true }
+}
+
+export async function deleteBettingTicket(ticketId: number): Promise<{ success: boolean; error?: string }> {
+  const supabase = await createClient()
+
+  // 1. Fetch ticket to see transactions
+  const { data: ticket, error: fetchErr } = await supabase
+    .from('betting_tickets')
+    .select('*, betting_transactions(*)')
+    .eq('id', ticketId)
+    .single()
+
+  if (fetchErr || !ticket) {
+    return { success: false, error: fetchErr?.message || 'Ticket not found' }
+  }
+
+  // 2. Revert any automatic transactions linked to this ticket
+  const transactions = ticket.betting_transactions || []
+  for (const tx of transactions) {
+    await deleteBankrollTransaction(tx.id)
+  }
+
+  // 3. Delete ticket (CASCADE deletes selections and alternatives)
+  const { error: delErr } = await supabase.from('betting_tickets').delete().eq('id', ticketId)
+  if (delErr) {
+    console.error('Failed to delete ticket:', delErr)
+    return { success: false, error: delErr.message }
+  }
+
+  revalidatePath('/[locale]/admin/betting', 'layout')
+  revalidatePath('/[locale]/admin/betting/tickets', 'layout')
+  return { success: true }
+}
+
+export async function updateBettingTicket(
+  ticketId: number,
+  data: {
+    ticket_number?: string
+    ticket_date?: string
+    stake?: number
+    notes?: string
+    status?: TicketStatus
+    model_id?: number | null
+  }
+): Promise<{ success: boolean; error?: string }> {
+  const supabase = await createClient()
+
+  const { error } = await supabase
+    .from('betting_tickets')
+    .update({
+      ...(data.ticket_number !== undefined && { ticket_number: data.ticket_number }),
+      ...(data.ticket_date && { ticket_date: data.ticket_date }),
+      ...(data.stake !== undefined && { stake: data.stake }),
+      ...(data.notes !== undefined && { notes: data.notes }),
+      ...(data.status && { status: data.status, actual_result: data.status }),
+      ...(data.model_id !== undefined && { model_id: data.model_id }),
+      updated_at: new Date().toISOString(),
+    })
+    .eq('id', ticketId)
+
+  if (error) {
+    return { success: false, error: error.message }
+  }
+
+  revalidatePath('/[locale]/admin/betting', 'layout')
+  revalidatePath('/[locale]/admin/betting/tickets', 'layout')
+  return { success: true }
+}
+
+export async function deleteBettingSelection(selectionId: number): Promise<{ success: boolean; error?: string }> {
+  const supabase = await createClient()
+
+  const { data: sel } = await supabase.from('betting_selections').select('ticket_id').eq('id', selectionId).single()
+  if (!sel) return { success: false, error: 'Selection not found' }
+
+  const { error } = await supabase.from('betting_selections').delete().eq('id', selectionId)
+  if (error) return { success: false, error: error.message }
+
+  // Re-evaluate remaining selections for the ticket
+  const { data: remaining } = await supabase
+    .from('betting_selections')
+    .select('id, odds, result')
+    .eq('ticket_id', sel.ticket_id)
+
+  const remainingList = remaining || []
+  const newCombinedOdds = remainingList.length > 0 ? remainingList.reduce((acc, s) => acc * Number(s.odds || 1), 1) : 1
+
+  const { data: ticket } = await supabase.from('betting_tickets').select('*').eq('id', sel.ticket_id).single()
+  if (ticket) {
+    const newStatus = calculateTicketStatus(remainingList)
+    const newProfitLoss = calculateProfitLoss(newStatus, ticket.stake, Number(newCombinedOdds.toFixed(4)), remainingList)
+
+    await supabase
+      .from('betting_tickets')
+      .update({
+        combined_odds: Number(newCombinedOdds.toFixed(4)),
+        status: newStatus,
+        actual_result: newStatus,
+        profit_loss: newProfitLoss,
+        updated_at: new Date().toISOString(),
+      })
+      .eq('id', sel.ticket_id)
+  }
+
+  revalidatePath('/[locale]/admin/betting', 'layout')
+  return { success: true }
+}
+
+export async function updateBettingSelectionDetails(
+  selectionId: number,
+  data: {
+    home_team?: string
+    away_team?: string
+    market?: string
+    selection?: string
+    odds?: number | null
+    estimated_probability?: number | null
+    edge_percentage_points?: number | null
+    comment?: string
+    notes?: string
+  }
+): Promise<{ success: boolean; error?: string }> {
+  const supabase = await createClient()
+
+  const { error } = await supabase
+    .from('betting_selections')
+    .update({
+      ...(data.home_team && { home_team: data.home_team }),
+      ...(data.away_team && { away_team: data.away_team }),
+      ...(data.market && { market: data.market }),
+      ...(data.selection && { selection: data.selection }),
+      ...(data.odds !== undefined && { odds: data.odds }),
+      ...(data.estimated_probability !== undefined && { estimated_probability: data.estimated_probability }),
+      ...(data.edge_percentage_points !== undefined && { edge_percentage_points: data.edge_percentage_points }),
+      ...(data.comment !== undefined && { comment: data.comment }),
+      ...(data.notes !== undefined && { notes: data.notes }),
+      updated_at: new Date().toISOString(),
+    })
+    .eq('id', selectionId)
+
+  if (error) return { success: false, error: error.message }
+
+  // If odds were updated, recalculate ticket combined odds
+  if (data.odds !== undefined) {
+    const { data: sel } = await supabase.from('betting_selections').select('ticket_id').eq('id', selectionId).single()
+    if (sel) {
+      const { data: allSel } = await supabase.from('betting_selections').select('odds').eq('ticket_id', sel.ticket_id)
+      const newOdds = (allSel || []).reduce((acc, s) => acc * Number(s.odds || 1), 1)
+      await supabase.from('betting_tickets').update({ combined_odds: Number(newOdds.toFixed(4)) }).eq('id', sel.ticket_id)
+    }
+  }
+
+  revalidatePath('/[locale]/admin/betting', 'layout')
+  return { success: true }
+}
+
+export async function deleteBettingAlternative(altId: number): Promise<{ success: boolean; error?: string }> {
+  const supabase = await createClient()
+  const { error } = await supabase.from('betting_alternatives').delete().eq('id', altId)
+  if (error) return { success: false, error: error.message }
   revalidatePath('/[locale]/admin/betting', 'layout')
   return { success: true }
 }

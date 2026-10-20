@@ -15,6 +15,7 @@ import {
   MenuItem,
   FormControl,
   InputLabel,
+  IconButton,
   alpha,
 } from '@mui/material'
 import {
@@ -27,10 +28,14 @@ import {
   Clock,
   RotateCcw,
   ArrowRight,
+  Trash2,
+  AlertTriangle,
 } from 'lucide-react'
 import { BettingTicket, BettingModel } from '@/types/betting'
-import { CustomTooltip } from '@/components/ui'
+import { deleteBettingTicket } from '@/app/[locale]/actions/betting'
+import { CustomModal, CustomNotification, CustomTooltip } from '@/components/ui'
 import CustomButton from '@/components/ui/CustomButton'
+import { LoadingButton } from '@/components/ui/PromptButtons'
 import { formatCurrency, formatCurrencySign } from '@/utils/bettingCurrency'
 
 interface TicketsClientProps {
@@ -46,11 +51,23 @@ export default function TicketsClient({
   models,
   currency = 'USD',
 }: TicketsClientProps) {
+  const [tickets, setTickets] = useState<BettingTicket[]>(initialTickets)
   const [statusFilter, setStatusFilter] = useState<string>('all')
   const [modelFilter, setModelFilter] = useState<string>('all')
   const [search, setSearch] = useState('')
 
-  const filteredTickets = initialTickets.filter((t) => {
+  // Delete Modal State
+  const [deletingTicket, setDeletingTicket] = useState<BettingTicket | null>(null)
+  const [isDeleting, setIsDeleting] = useState(false)
+
+  // Notification State
+  const [notification, setNotification] = useState<{
+    open: boolean
+    message: string
+    type: 'success' | 'error' | 'info'
+  }>({ open: false, message: '', type: 'info' })
+
+  const filteredTickets = tickets.filter((t) => {
     if (statusFilter !== 'all' && t.status !== statusFilter) return false
     if (modelFilter !== 'all' && t.model_id?.toString() !== modelFilter) return false
     if (search) {
@@ -58,30 +75,58 @@ export default function TicketsClient({
       const matchNum = (t.ticket_number || '').toLowerCase().includes(q)
       const matchNotes = (t.notes || '').toLowerCase().includes(q)
       const matchTeam = (t.betting_selections || []).some(
-        (s) => s.home_team.toLowerCase().includes(q) || s.away_team.toLowerCase().includes(q)
+        (sel) => sel.home_team.toLowerCase().includes(q) || sel.away_team.toLowerCase().includes(q)
       )
       return matchNum || matchNotes || matchTeam
     }
     return true
   })
 
+  const handleDeleteTicket = async () => {
+    if (!deletingTicket) return
+    setIsDeleting(true)
+    const res = await deleteBettingTicket(deletingTicket.id)
+    setIsDeleting(false)
+
+    if (res.error) {
+      setNotification({ open: true, message: res.error, type: 'error' })
+    } else {
+      setTickets(tickets.filter((t) => t.id !== deletingTicket.id))
+      setDeletingTicket(null)
+      setNotification({
+        open: true,
+        message: locale === 'fr' ? 'Ticket supprimé et solde synchronisé !' : 'Ticket deleted and bankroll synchronized!',
+        type: 'success',
+      })
+    }
+  }
+
   return (
     <Box>
-      {/* Header & Controls */}
+      <CustomNotification
+        open={notification.open}
+        message={notification.message}
+        type={notification.type}
+        onClose={() => setNotification({ ...notification, open: false })}
+      />
+
+      {/* Header and Actions */}
       <Box sx={{ mb: 3, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 2 }}>
         <Box>
           <Typography variant="h4" sx={{ fontWeight: 800, mb: 0.5 }}>
-            {locale === 'fr' ? 'Tickets de Paris' : 'Betting Tickets'}
+            {locale === 'fr' ? 'Historique des Tickets' : 'Betting Ticket History'}
           </Typography>
           <Typography variant="body2" color="text.secondary">
             {locale === 'fr'
-              ? 'Tous les tickets historiques et leurs sélections avec les résultats effectifs et snapshots de prédiction.'
-              : 'Historical tickets registry preserving pre-match probability predictions alongside match outcomes.'}
+              ? 'Consultez, filtrez et suivez l\'ensemble de vos tickets de paris enregistrés avec leur dénouement.'
+              : 'Complete ledger of all placed tickets, combined odds, stake allocation, and automatic settlement.'}
           </Typography>
         </Box>
 
-        <Box component={Link} href={`/${locale}/admin/betting/import`} sx={{ textDecoration: 'none' }}>
+        <Box sx={{ display: 'flex', gap: 1.5 }}>
           <CustomButton
+            component={Link}
+            href={`/${locale}/admin/betting/import`}
             variant="contained"
             startIcon={<PlusCircle size={18} />}
             sx={{
@@ -90,21 +135,22 @@ export default function TicketsClient({
               fontWeight: 700,
             }}
           >
-            {locale === 'fr' ? 'Créer un Ticket' : 'Import New Ticket'}
+            {locale === 'fr' ? 'Importer un Ticket (JSON)' : 'Import New Ticket (JSON)'}
           </CustomButton>
         </Box>
       </Box>
 
-      {/* Filter Toolbar */}
+      {/* Filter Toolbar Card */}
       <Card
         sx={{
           mb: 3,
-          backgroundColor: alpha('#1E2635', 0.9),
+          backgroundColor: alpha('#1E2635', 0.95),
           border: (theme) => `1px solid ${alpha(theme.palette.divider, 1)}`,
         }}
       >
         <CardContent sx={{ p: 2.5 }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 2 }}>
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 2 }}>
+            {/* Status Tabs */}
             <Tabs
               value={statusFilter}
               onChange={(_, v) => setStatusFilter(v)}
@@ -131,23 +177,42 @@ export default function TicketsClient({
               }}
             >
               <Tab label={locale === 'fr' ? 'Tous' : 'All'} value="all" />
-              <Tab label={locale === 'fr' ? 'En Cours' : 'Pending'} value="pending" />
-              <Tab label={locale === 'fr' ? 'Gagnés' : 'Won'} value="won" />
-              <Tab label={locale === 'fr' ? 'Perdus' : 'Lost'} value="lost" />
-              <Tab label={locale === 'fr' ? 'Annulés' : 'Void'} value="void" />
+              <Tab
+                icon={<Clock size={14} style={{ marginRight: 4 }} />}
+                iconPosition="start"
+                label={locale === 'fr' ? 'En cours' : 'Pending'}
+                value="pending"
+              />
+              <Tab
+                icon={<CheckCircle2 size={14} style={{ marginRight: 4 }} />}
+                iconPosition="start"
+                label={locale === 'fr' ? 'Gagnés' : 'Won'}
+                value="won"
+              />
+              <Tab
+                icon={<XCircle size={14} style={{ marginRight: 4 }} />}
+                iconPosition="start"
+                label={locale === 'fr' ? 'Perdus' : 'Lost'}
+                value="lost"
+              />
+              <Tab
+                icon={<RotateCcw size={14} style={{ marginRight: 4 }} />}
+                iconPosition="start"
+                label={locale === 'fr' ? 'Annulés' : 'Void'}
+                value="void"
+              />
             </Tabs>
 
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, flexWrap: 'wrap' }}>
-              {/* Model Select */}
+            <Box sx={{ display: 'flex', gap: 1.5, flexWrap: 'wrap', alignItems: 'center' }}>
+              {/* Model Filter */}
               <FormControl size="small" sx={{ minWidth: 160 }}>
-                <InputLabel sx={{ fontSize: '0.85rem' }}>Model</InputLabel>
+                <InputLabel>{locale === 'fr' ? 'Modèle' : 'Model'}</InputLabel>
                 <Select
                   value={modelFilter}
-                  label="Model"
+                  label={locale === 'fr' ? 'Modèle' : 'Model'}
                   onChange={(e) => setModelFilter(e.target.value)}
-                  sx={{ fontSize: '0.85rem' }}
                 >
-                  <MenuItem value="all">All Models</MenuItem>
+                  <MenuItem value="all">{locale === 'fr' ? 'Tous les modèles' : 'All Models'}</MenuItem>
                   {models.map((m) => (
                     <MenuItem key={m.id} value={m.id.toString()}>
                       v{m.version} - {m.name}
@@ -159,7 +224,7 @@ export default function TicketsClient({
               {/* Search */}
               <TextField
                 size="small"
-                placeholder={locale === 'fr' ? 'Rechercher équipe ou ticket...' : 'Search team, ticket #...'}
+                placeholder={locale === 'fr' ? 'Chercher équipe, ticket...' : 'Search team, ticket #...'}
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 slotProps={{
@@ -205,7 +270,7 @@ export default function TicketsClient({
                     <th style={{ padding: '14px 18px', color: '#9AA3B2', fontSize: '0.75rem', textTransform: 'uppercase', fontWeight: 600 }}>Stake</th>
                     <th style={{ padding: '14px 18px', color: '#9AA3B2', fontSize: '0.75rem', textTransform: 'uppercase', fontWeight: 600 }}>Status</th>
                     <th style={{ padding: '14px 18px', color: '#9AA3B2', fontSize: '0.75rem', textTransform: 'uppercase', fontWeight: 600 }}>Profit / Loss</th>
-                    <th style={{ padding: '14px 18px', color: '#9AA3B2', fontSize: '0.75rem', textTransform: 'uppercase', fontWeight: 600, textAlign: 'right' }}>Action</th>
+                    <th style={{ padding: '14px 18px', color: '#9AA3B2', fontSize: '0.75rem', textTransform: 'uppercase', fontWeight: 600, textAlign: 'right' }}>Actions</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -290,21 +355,35 @@ export default function TicketsClient({
                             : formatCurrencySign(t.profit_loss, currency)}
                         </td>
                         <td style={{ padding: '16px 18px', textAlign: 'right' }}>
-                          <Link
-                            href={`/${locale}/admin/betting/tickets/${t.uuid}`}
-                            style={{
-                              color: '#F26419',
-                              fontSize: '0.875rem',
-                              fontWeight: 700,
-                              textDecoration: 'none',
-                              display: 'inline-flex',
-                              alignItems: 'center',
-                              gap: 4,
-                            }}
-                          >
-                            <span>{locale === 'fr' ? 'Détails' : 'Details'}</span>
-                            <ArrowRight size={15} />
-                          </Link>
+                          <Box sx={{ display: 'inline-flex', alignItems: 'center', gap: 1 }}>
+                            <Link
+                              href={`/${locale}/admin/betting/tickets/${t.uuid}`}
+                              style={{
+                                color: '#F26419',
+                                fontSize: '0.875rem',
+                                fontWeight: 700,
+                                textDecoration: 'none',
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: 4,
+                              }}
+                            >
+                              <span>{locale === 'fr' ? 'Détails' : 'Details'}</span>
+                              <ArrowRight size={15} />
+                            </Link>
+
+                            <IconButton
+                              size="small"
+                              onClick={() => setDeletingTicket(t)}
+                              sx={{
+                                color: 'text.secondary',
+                                '&:hover': { color: '#EF5350', backgroundColor: alpha('#EF5350', 0.1) },
+                              }}
+                              title="Delete Ticket"
+                            >
+                              <Trash2 size={15} />
+                            </IconButton>
+                          </Box>
                         </td>
                       </tr>
                     )
@@ -315,6 +394,51 @@ export default function TicketsClient({
           )}
         </CardContent>
       </Card>
+
+      {/* ─── DELETE TICKET CONFIRMATION MODAL ─────────────────────────────── */}
+      <CustomModal
+        open={Boolean(deletingTicket)}
+        onClose={() => setDeletingTicket(null)}
+        title={
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <AlertTriangle size={20} color="#EF5350" />
+            <span>{locale === 'fr' ? 'Confirmer la Suppression' : 'Confirm Ticket Deletion'}</span>
+          </Box>
+        }
+        actions={
+          <Box sx={{ display: 'flex', gap: 1.5, width: '100%', justifyContent: 'flex-end' }}>
+            <CustomButton variant="outlined" onClick={() => setDeletingTicket(null)}>
+              {locale === 'fr' ? 'Annuler' : 'Cancel'}
+            </CustomButton>
+            <LoadingButton
+              variant="contained"
+              loading={isDeleting}
+              onClick={handleDeleteTicket}
+              sx={{
+                backgroundColor: '#EF5350',
+                color: '#FFFFFF',
+                fontWeight: 700,
+                '&:hover': { backgroundColor: '#D32F2F' },
+              }}
+            >
+              {locale === 'fr' ? 'Supprimer le Ticket' : 'Delete Ticket'}
+            </LoadingButton>
+          </Box>
+        }
+      >
+        <Box sx={{ py: 1 }}>
+          <Typography variant="body1" sx={{ fontWeight: 600, mb: 1 }}>
+            {locale === 'fr'
+              ? `Supprimer définitivement le Ticket #${deletingTicket?.ticket_number || deletingTicket?.id} ?`
+              : `Permanently delete Ticket #${deletingTicket?.ticket_number || deletingTicket?.id}?`}
+          </Typography>
+          <Typography variant="body2" color="text.secondary">
+            {locale === 'fr'
+              ? 'Toutes les sélections, alternatives et écritures comptables liées à ce ticket seront supprimées et le solde de bankroll sera rétabli.'
+              : 'All selections, rejected alternatives, and linked ledger transactions for this ticket will be removed and bankroll balance will be reversed.'}
+          </Typography>
+        </Box>
+      </CustomModal>
     </Box>
   )
 }

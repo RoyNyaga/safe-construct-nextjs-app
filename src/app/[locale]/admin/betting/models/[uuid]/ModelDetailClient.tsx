@@ -1,6 +1,8 @@
 'use client'
 
+import { useState } from 'react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import {
   Box,
   Card,
@@ -9,6 +11,13 @@ import {
   Typography,
   Chip,
   Paper,
+  TextField,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  FormControlLabel,
+  Switch,
   alpha,
   Divider,
 } from '@mui/material'
@@ -16,9 +25,16 @@ import {
   Cpu,
   ArrowLeft,
   Percent,
+  Pencil,
+  Trash2,
+  AlertTriangle,
 } from 'lucide-react'
 import BettingSubNav from '../../BettingSubNav'
 import { BettingBankroll, BettingModel, CalibrationBucket } from '@/types/betting'
+import { updateBettingModel, deleteBettingModel } from '@/app/[locale]/actions/betting'
+import { CustomModal, CustomNotification } from '@/components/ui'
+import CustomButton from '@/components/ui/CustomButton'
+import { LoadingButton } from '@/components/ui/PromptButtons'
 
 interface ModelDetailClientProps {
   locale: string
@@ -29,23 +45,126 @@ interface ModelDetailClientProps {
 
 export default function ModelDetailClient({
   locale,
-  model,
+  model: initialModel,
   calibration,
   bankroll,
 }: ModelDetailClientProps) {
+  const router = useRouter()
+  const [model, setModel] = useState<BettingModel>(initialModel)
   const currentBalance = Number(bankroll?.current_balance || 0)
   const currency = bankroll?.currency || 'USD'
 
+  // Edit Modal State
+  const [isEditOpen, setIsEditOpen] = useState(false)
+  const [version, setVersion] = useState(model.version)
+  const [name, setName] = useState(model.name)
+  const [description, setDescription] = useState(model.description || '')
+  const [content, setContent] = useState(model.content || '')
+  const [status, setStatus] = useState<'draft' | 'active' | 'retired'>(model.status as any || 'active')
+  const [isActive, setIsActive] = useState(model.is_active)
+  const [isUpdating, setIsUpdating] = useState(false)
+
+  // Delete Modal State
+  const [isDeleteOpen, setIsDeleteOpen] = useState(false)
+  const [isDeleting, setIsDeleting] = useState(false)
+
+  // Notification State
+  const [notification, setNotification] = useState<{
+    open: boolean
+    message: string
+    type: 'success' | 'error' | 'info'
+  }>({ open: false, message: '', type: 'info' })
+
+  // Open Edit Dialog
+  const handleOpenEdit = () => {
+    setVersion(model.version)
+    setName(model.name)
+    setDescription(model.description || '')
+    setContent(model.content || '')
+    setStatus(model.status as any || 'active')
+    setIsActive(model.is_active)
+    setIsEditOpen(true)
+  }
+
+  // Save Edit
+  const handleSaveEdit = async () => {
+    if (!version.trim() || !name.trim()) {
+      setNotification({
+        open: true,
+        message: locale === 'fr' ? 'La version et le nom sont requis.' : 'Version and Name are required.',
+        type: 'error',
+      })
+      return
+    }
+
+    setIsUpdating(true)
+    const res = await updateBettingModel(model.id, {
+      version,
+      name,
+      description,
+      content,
+      status,
+      isActive,
+    })
+    setIsUpdating(false)
+
+    if (res.error) {
+      setNotification({ open: true, message: res.error, type: 'error' })
+    } else {
+      setModel({
+        ...model,
+        version,
+        name,
+        description,
+        content,
+        status,
+        is_active: isActive,
+      })
+      setIsEditOpen(false)
+      setNotification({
+        open: true,
+        message: locale === 'fr' ? 'Modèle mis à jour avec succès !' : 'Model updated successfully!',
+        type: 'success',
+      })
+    }
+  }
+
+  // Delete Model
+  const handleDeleteModel = async () => {
+    setIsDeleting(true)
+    const res = await deleteBettingModel(model.id)
+    setIsDeleting(false)
+
+    if (res.error) {
+      setNotification({ open: true, message: res.error, type: 'error' })
+    } else {
+      setIsDeleteOpen(false)
+      setNotification({
+        open: true,
+        message: locale === 'fr' ? 'Modèle supprimé avec succès !' : 'Model deleted successfully!',
+        type: 'success',
+      })
+      router.push(`/${locale}/admin/betting/models`)
+    }
+  }
+
   return (
     <Box sx={{ pb: 6 }}>
+      <CustomNotification
+        open={notification.open}
+        message={notification.message}
+        type={notification.type}
+        onClose={() => setNotification({ ...notification, open: false })}
+      />
+
       <BettingSubNav
         locale={locale}
         currentBalance={currentBalance}
         currency={currency}
       />
 
-      {/* Back Link */}
-      <Box sx={{ mb: 3 }}>
+      {/* Top Bar with Back Link & Actions */}
+      <Box sx={{ mb: 3, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 2 }}>
         <Box
           component={Link}
           href={`/${locale}/admin/betting/models`}
@@ -61,6 +180,37 @@ export default function ModelDetailClient({
         >
           <ArrowLeft size={16} />
           <span>{locale === 'fr' ? 'Retour aux modèles' : 'Back to models list'}</span>
+        </Box>
+
+        <Box sx={{ display: 'flex', gap: 1.5 }}>
+          <CustomButton
+            variant="outlined"
+            onClick={handleOpenEdit}
+            startIcon={<Pencil size={16} />}
+            sx={{
+              borderColor: 'rgba(255, 255, 255, 0.2)',
+              color: '#FFFFFF',
+              fontWeight: 700,
+              '&:hover': { borderColor: '#F26419', backgroundColor: alpha('#F26419', 0.1) },
+            }}
+          >
+            {locale === 'fr' ? 'Modifier le modèle' : 'Edit Model'}
+          </CustomButton>
+
+          <CustomButton
+            variant="contained"
+            onClick={() => setIsDeleteOpen(true)}
+            startIcon={<Trash2 size={16} />}
+            sx={{
+              backgroundColor: alpha('#EF5350', 0.15),
+              color: '#EF5350',
+              border: '1px solid rgba(239, 83, 80, 0.3)',
+              fontWeight: 700,
+              '&:hover': { backgroundColor: '#EF5350', color: '#FFFFFF' },
+            }}
+          >
+            {locale === 'fr' ? 'Supprimer' : 'Delete'}
+          </CustomButton>
         </Box>
       </Box>
 
@@ -95,6 +245,14 @@ export default function ModelDetailClient({
                     }}
                   />
                 )}
+                <Chip
+                  label={model.status.toUpperCase()}
+                  size="small"
+                  sx={{
+                    fontWeight: 700,
+                    backgroundColor: alpha('#FFFFFF', 0.08),
+                  }}
+                />
               </Box>
               <Typography variant="h3" sx={{ fontWeight: 800, mb: 1 }}>
                 {model.name}
@@ -159,11 +317,23 @@ export default function ModelDetailClient({
         }}
       >
         <CardContent sx={{ p: 3 }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
-            <Cpu size={20} color="#F26419" />
-            <Typography variant="h6" sx={{ fontWeight: 700 }}>
-              {locale === 'fr' ? 'Notes & Règles Méthodologiques (Prompt / Rules Reference)' : 'Methodology Notes & Calculation Rules'}
-            </Typography>
+          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              <Cpu size={20} color="#F26419" />
+              <Typography variant="h6" sx={{ fontWeight: 700 }}>
+                {locale === 'fr' ? 'Notes & Règles Méthodologiques (Prompt / Rules Reference)' : 'Methodology Notes & Calculation Rules'}
+              </Typography>
+            </Box>
+
+            <CustomButton
+              size="small"
+              variant="outlined"
+              onClick={handleOpenEdit}
+              startIcon={<Pencil size={14} />}
+              sx={{ borderColor: 'rgba(255, 255, 255, 0.15)', fontSize: '0.75rem' }}
+            >
+              {locale === 'fr' ? 'Modifier les règles' : 'Edit Rules'}
+            </CustomButton>
           </Box>
 
           <Paper
@@ -251,6 +421,151 @@ export default function ModelDetailClient({
           </Box>
         </CardContent>
       </Card>
+
+      {/* ─── EDIT MODEL MODAL ───────────────────────────────────────────── */}
+      <CustomModal
+        open={isEditOpen}
+        onClose={() => setIsEditOpen(false)}
+        title={
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <Pencil size={20} color="#F26419" />
+            <span>{locale === 'fr' ? 'Modifier le Modèle de Betting' : 'Edit Betting Model'}</span>
+          </Box>
+        }
+        actions={
+          <Box sx={{ display: 'flex', gap: 1.5, width: '100%', justifyContent: 'flex-end' }}>
+            <CustomButton variant="outlined" onClick={() => setIsEditOpen(false)}>
+              {locale === 'fr' ? 'Annuler' : 'Cancel'}
+            </CustomButton>
+            <LoadingButton
+              variant="contained"
+              loading={isUpdating}
+              onClick={handleSaveEdit}
+              sx={{
+                backgroundColor: 'primary.main',
+                color: '#FFFFFF',
+                fontWeight: 700,
+              }}
+            >
+              {locale === 'fr' ? 'Enregistrer les Modifications' : 'Save Changes'}
+            </LoadingButton>
+          </Box>
+        }
+      >
+        <Box sx={{ pt: 1 }}>
+          <Grid container spacing={2} sx={{ mb: 2 }}>
+            <Grid size={{ xs: 4 }}>
+              <TextField
+                fullWidth
+                label="Version"
+                placeholder="1.0"
+                value={version}
+                onChange={(e) => setVersion(e.target.value)}
+              />
+            </Grid>
+            <Grid size={{ xs: 8 }}>
+              <TextField
+                fullWidth
+                label="Model Name"
+                placeholder="e.g. Poisson Goal-Rate Model"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+              />
+            </Grid>
+          </Grid>
+
+          <TextField
+            fullWidth
+            label="Short Description"
+            placeholder="e.g. Home/away goal distribution using Poisson to estimate Over 1.5 and BTTS."
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            sx={{ mb: 2 }}
+          />
+
+          <TextField
+            fullWidth
+            multiline
+            rows={6}
+            label="Methodology Notes / Rules Content"
+            placeholder="Document the exact rules, equations, and data constraints here..."
+            value={content}
+            onChange={(e) => setContent(e.target.value)}
+            sx={{ mb: 2 }}
+          />
+
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <FormControl size="small" sx={{ minWidth: 140 }}>
+              <InputLabel>Status</InputLabel>
+              <Select
+                value={status}
+                label="Status"
+                onChange={(e) => setStatus(e.target.value as any)}
+              >
+                <MenuItem value="draft">Draft</MenuItem>
+                <MenuItem value="active">Active</MenuItem>
+                <MenuItem value="retired">Retired</MenuItem>
+              </Select>
+            </FormControl>
+
+            <FormControlLabel
+              control={
+                <Switch
+                  checked={isActive}
+                  onChange={(e) => setIsActive(e.target.checked)}
+                  color="primary"
+                />
+              }
+              label="Set as current active model"
+            />
+          </Box>
+        </Box>
+      </CustomModal>
+
+      {/* ─── DELETE MODEL CONFIRMATION MODAL ─────────────────────────────── */}
+      <CustomModal
+        open={isDeleteOpen}
+        onClose={() => setIsDeleteOpen(false)}
+        title={
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <AlertTriangle size={20} color="#EF5350" />
+            <span>{locale === 'fr' ? 'Confirmer la Suppression' : 'Confirm Model Deletion'}</span>
+          </Box>
+        }
+        actions={
+          <Box sx={{ display: 'flex', gap: 1.5, width: '100%', justifyContent: 'flex-end' }}>
+            <CustomButton variant="outlined" onClick={() => setIsDeleteOpen(false)}>
+              {locale === 'fr' ? 'Annuler' : 'Cancel'}
+            </CustomButton>
+            <LoadingButton
+              variant="contained"
+              loading={isDeleting}
+              onClick={handleDeleteModel}
+              sx={{
+                backgroundColor: '#EF5350',
+                color: '#FFFFFF',
+                fontWeight: 700,
+                '&:hover': { backgroundColor: '#D32F2F' },
+              }}
+            >
+              {locale === 'fr' ? 'Supprimer Définitivement' : 'Permanently Delete'}
+            </LoadingButton>
+          </Box>
+        }
+      >
+        <Box sx={{ py: 1 }}>
+          <Typography variant="body1" sx={{ fontWeight: 600, mb: 1 }}>
+            {locale === 'fr'
+              ? `Êtes-vous sûr de vouloir supprimer le modèle "${model.name}" (v${model.version}) ?`
+              : `Are you sure you want to delete model "${model.name}" (v${model.version})?`}
+          </Typography>
+          <Typography variant="body2" color="text.secondary">
+            {locale === 'fr'
+              ? 'Cette action retirera le modèle de la liste. Les tickets existants resteront enregistrés mais seront détachés de ce modèle.'
+              : 'This action will remove the model definition. Any existing tickets will be unlinked from this model and will remain in your betting history.'}
+          </Typography>
+        </Box>
+      </CustomModal>
     </Box>
   )
 }

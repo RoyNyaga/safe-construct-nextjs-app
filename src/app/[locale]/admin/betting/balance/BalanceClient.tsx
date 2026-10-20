@@ -13,6 +13,7 @@ import {
   TextField,
   Tabs,
   Tab,
+  IconButton,
   alpha,
   Divider,
 } from '@mui/material'
@@ -29,10 +30,12 @@ import {
   Sparkles,
   Search,
   Filter,
+  Trash2,
+  AlertTriangle,
 } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { BettingBankroll, BettingTransaction, TriggerType } from '@/types/betting'
-import { recordManualDeposit, recordManualWithdrawal, updateBankrollCurrency } from '@/app/[locale]/actions/bankroll'
+import { recordManualDeposit, recordManualWithdrawal, updateBankrollCurrency, deleteBankrollTransaction } from '@/app/[locale]/actions/bankroll'
 import { CustomModal, CustomTooltip, CustomNotification } from '@/components/ui'
 import CustomButton from '@/components/ui/CustomButton'
 import { LoadingButton } from '@/components/ui/PromptButtons'
@@ -73,7 +76,9 @@ export default function BalanceClient({
   }>({ open: false, message: '', type: 'info' })
 
   const [currency, setCurrency] = useState(bankroll?.currency || 'USD')
-  const currentBal = Number(bankroll?.current_balance || 0)
+  const [currentBal, setCurrentBal] = useState(Number(bankroll?.current_balance || 0))
+  const [deletingTx, setDeletingTx] = useState<BettingTransaction | null>(null)
+  const [isDeletingTx, setIsDeletingTx] = useState(false)
 
   // Filter Transactions
   const filteredTransactions = transactions.filter((tx) => {
@@ -108,6 +113,7 @@ export default function BalanceClient({
       setNotification({ open: true, message: res.error, type: 'error' })
     } else if (res.transaction) {
       setTransactions([res.transaction, ...transactions])
+      setCurrentBal((prev) => prev + val)
       setIsDepositOpen(false)
       setDepositAmount('')
       setDepositNotes('')
@@ -138,6 +144,7 @@ export default function BalanceClient({
       setNotification({ open: true, message: res.error, type: 'error' })
     } else if (res.transaction) {
       setTransactions([res.transaction, ...transactions])
+      setCurrentBal((prev) => prev - val)
       setIsWithdrawOpen(false)
       setWithdrawAmount('')
       setWithdrawNotes('')
@@ -159,6 +166,27 @@ export default function BalanceClient({
       setNotification({
         open: true,
         message: locale === 'fr' ? `Devise active : ${newCurr}` : `Active currency: ${newCurr}`,
+        type: 'success',
+      })
+    }
+  }
+
+  const handleDeleteTransaction = async () => {
+    if (!deletingTx) return
+    setIsDeletingTx(true)
+    const res = await deleteBankrollTransaction(deletingTx.id)
+    setIsDeletingTx(false)
+
+    if (res.error) {
+      setNotification({ open: true, message: res.error, type: 'error' })
+    } else {
+      const removedAmount = Number(deletingTx.amount || 0)
+      setCurrentBal((prev) => prev - removedAmount)
+      setTransactions(transactions.filter((t) => t.id !== deletingTx.id))
+      setDeletingTx(null)
+      setNotification({
+        open: true,
+        message: locale === 'fr' ? 'Transaction supprimée et solde recalculé !' : 'Transaction deleted and balance reconciled!',
         type: 'success',
       })
     }
@@ -477,6 +505,7 @@ export default function BalanceClient({
                     <th style={{ padding: '12px 16px', color: '#9AA3B2', fontSize: '0.75rem', textTransform: 'uppercase', fontWeight: 600 }}>Balance (Before &rarr; After)</th>
                     <th style={{ padding: '12px 16px', color: '#9AA3B2', fontSize: '0.75rem', textTransform: 'uppercase', fontWeight: 600 }}>Ticket</th>
                     <th style={{ padding: '12px 16px', color: '#9AA3B2', fontSize: '0.75rem', textTransform: 'uppercase', fontWeight: 600 }}>Description</th>
+                    <th style={{ padding: '12px 16px', color: '#9AA3B2', fontSize: '0.75rem', textTransform: 'uppercase', fontWeight: 600, textAlign: 'right' }}>Action</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -566,6 +595,21 @@ export default function BalanceClient({
                         {/* Description */}
                         <td style={{ padding: '14px 16px', fontSize: '0.85rem', color: 'text.secondary' }}>
                           {tx.description || '—'}
+                        </td>
+
+                        {/* Action */}
+                        <td style={{ padding: '14px 16px', textAlign: 'right' }}>
+                          <IconButton
+                            size="small"
+                            onClick={() => setDeletingTx(tx)}
+                            sx={{
+                              color: 'text.secondary',
+                              '&:hover': { color: '#EF5350', backgroundColor: alpha('#EF5350', 0.1) },
+                            }}
+                            title="Delete Transaction"
+                          >
+                            <Trash2 size={15} />
+                          </IconButton>
                         </td>
                       </tr>
                     )
@@ -711,6 +755,51 @@ export default function BalanceClient({
             value={withdrawNotes}
             onChange={(e) => setWithdrawNotes(e.target.value)}
           />
+        </Box>
+      </CustomModal>
+
+      {/* ─── DELETE TRANSACTION MODAL ─────────────────────────────────────── */}
+      <CustomModal
+        open={Boolean(deletingTx)}
+        onClose={() => setDeletingTx(null)}
+        title={
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <AlertTriangle size={20} color="#EF5350" />
+            <span>{locale === 'fr' ? 'Supprimer la Transaction' : 'Delete Transaction Entry'}</span>
+          </Box>
+        }
+        actions={
+          <Box sx={{ display: 'flex', gap: 1.5, width: '100%', justifyContent: 'flex-end' }}>
+            <CustomButton variant="outlined" onClick={() => setDeletingTx(null)}>
+              {locale === 'fr' ? 'Annuler' : 'Cancel'}
+            </CustomButton>
+            <LoadingButton
+              variant="contained"
+              loading={isDeletingTx}
+              onClick={handleDeleteTransaction}
+              sx={{
+                backgroundColor: '#EF5350',
+                color: '#FFFFFF',
+                fontWeight: 700,
+                '&:hover': { backgroundColor: '#D32F2F' },
+              }}
+            >
+              {locale === 'fr' ? 'Supprimer' : 'Delete Entry'}
+            </LoadingButton>
+          </Box>
+        }
+      >
+        <Box sx={{ py: 1 }}>
+          <Typography variant="body1" sx={{ fontWeight: 600, mb: 1 }}>
+            {locale === 'fr'
+              ? `Voulez-vous supprimer cette écriture de ${formatCurrency(deletingTx?.amount || 0, currency)} ?`
+              : `Delete this ledger transaction of ${formatCurrency(deletingTx?.amount || 0, currency)}?`}
+          </Typography>
+          <Typography variant="body2" color="text.secondary">
+            {locale === 'fr'
+              ? 'Le solde actif de votre bankroll sera automatiquement recalculé pour annuler l\'impact de cette transaction.'
+              : 'Your active bankroll balance will be automatically recalculated to reverse this transaction amount.'}
+          </Typography>
         </Box>
       </CustomModal>
     </Box>

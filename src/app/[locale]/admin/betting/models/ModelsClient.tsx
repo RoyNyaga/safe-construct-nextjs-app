@@ -17,21 +17,20 @@ import {
   MenuItem,
   FormControlLabel,
   Switch,
+  IconButton,
   alpha,
 } from '@mui/material'
 import {
   Cpu,
   PlusCircle,
-  ShieldCheck,
-  TrendingUp,
-  Percent,
-  Receipt,
   ArrowRight,
-  Sparkles,
+  Pencil,
+  Trash2,
+  AlertTriangle,
 } from 'lucide-react'
 import { BettingModel } from '@/types/betting'
-import { createBettingModel } from '@/app/[locale]/actions/betting'
-import { CustomModal, CustomNotification, CustomTooltip } from '@/components/ui'
+import { createBettingModel, updateBettingModel, deleteBettingModel } from '@/app/[locale]/actions/betting'
+import { CustomModal, CustomNotification } from '@/components/ui'
 import CustomButton from '@/components/ui/CustomButton'
 import { LoadingButton } from '@/components/ui/PromptButtons'
 
@@ -42,6 +41,8 @@ interface ModelsClientProps {
 
 export default function ModelsClient({ locale, models: initialModels }: ModelsClientProps) {
   const [models, setModels] = useState<BettingModel[]>(initialModels)
+
+  // Create Modal State
   const [isCreateOpen, setIsCreateOpen] = useState(false)
   const [version, setVersion] = useState('')
   const [name, setName] = useState('')
@@ -50,6 +51,20 @@ export default function ModelsClient({ locale, models: initialModels }: ModelsCl
   const [status, setStatus] = useState<'draft' | 'active' | 'retired'>('active')
   const [isActive, setIsActive] = useState(true)
   const [isSubmitting, setIsSubmitting] = useState(false)
+
+  // Edit Modal State
+  const [editingModel, setEditingModel] = useState<BettingModel | null>(null)
+  const [editVersion, setEditVersion] = useState('')
+  const [editName, setEditName] = useState('')
+  const [editDescription, setEditDescription] = useState('')
+  const [editContent, setEditContent] = useState('')
+  const [editStatus, setEditStatus] = useState<'draft' | 'active' | 'retired'>('active')
+  const [editIsActive, setEditIsActive] = useState(false)
+  const [isUpdating, setIsUpdating] = useState(false)
+
+  // Delete Modal State
+  const [deletingModel, setDeletingModel] = useState<BettingModel | null>(null)
+  const [isDeleting, setIsDeleting] = useState(false)
 
   const [notification, setNotification] = useState<{
     open: boolean
@@ -90,6 +105,90 @@ export default function ModelsClient({ locale, models: initialModels }: ModelsCl
       setNotification({
         open: true,
         message: locale === 'fr' ? 'Modèle enregistré avec succès !' : 'Model registered successfully!',
+        type: 'success',
+      })
+    }
+  }
+
+  const handleOpenEdit = (model: BettingModel) => {
+    setEditingModel(model)
+    setEditVersion(model.version)
+    setEditName(model.name)
+    setEditDescription(model.description || '')
+    setEditContent(model.content || '')
+    setEditStatus(model.status as any || 'active')
+    setEditIsActive(model.is_active)
+  }
+
+  const handleSaveEdit = async () => {
+    if (!editingModel) return
+    if (!editVersion.trim() || !editName.trim()) {
+      setNotification({
+        open: true,
+        message: locale === 'fr' ? 'La version et le nom sont requis.' : 'Version and Name are required.',
+        type: 'error',
+      })
+      return
+    }
+
+    setIsUpdating(true)
+    const res = await updateBettingModel(editingModel.id, {
+      version: editVersion,
+      name: editName,
+      description: editDescription,
+      content: editContent,
+      status: editStatus,
+      isActive: editIsActive,
+    })
+    setIsUpdating(false)
+
+    if (res.error) {
+      setNotification({ open: true, message: res.error, type: 'error' })
+    } else {
+      setModels(
+        models.map((m) =>
+          m.id === editingModel.id
+            ? {
+                ...m,
+                version: editVersion,
+                name: editName,
+                description: editDescription,
+                content: editContent,
+                status: editStatus,
+                is_active: editIsActive,
+              }
+            : editIsActive
+            ? { ...m, is_active: false }
+            : m
+        )
+      )
+      setEditingModel(null)
+      setNotification({
+        open: true,
+        message: locale === 'fr' ? 'Modèle mis à jour avec succès !' : 'Model updated successfully!',
+        type: 'success',
+      })
+    }
+  }
+
+  const handleOpenDelete = (model: BettingModel) => {
+    setDeletingModel(model)
+  }
+
+  const handleDeleteModel = async () => {
+    if (!deletingModel) return
+    setIsDeleting(true)
+    const res = await deleteBettingModel(deletingModel.id)
+    setIsDeleting(false)
+
+    if (res.error) {
+      setNotification({ open: true, message: res.error, type: 'error' })
+    } else {
+      setModels(models.filter((m) => m.id !== deletingModel.id))
+      setDeletingModel(null)
+      setNotification({
+        open: true,
+        message: locale === 'fr' ? 'Modèle supprimé avec succès !' : 'Model deleted successfully!',
         type: 'success',
       })
     }
@@ -228,23 +327,50 @@ export default function ModelsClient({ locale, models: initialModels }: ModelsCl
                   </Box>
                 </Box>
 
-                {/* Footer link */}
-                <Box
-                  component={Link}
-                  href={`/${locale}/admin/betting/models/${model.uuid}`}
-                  sx={{
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: 1,
-                    color: 'primary.main',
-                    fontWeight: 700,
-                    fontSize: '0.875rem',
-                    textDecoration: 'none',
-                    '&:hover': { textDecoration: 'underline' },
-                  }}
-                >
-                  <span>{locale === 'fr' ? 'Détails & Méthodologie' : 'Methodology & Calibration'}</span>
-                  <ArrowRight size={16} />
+                {/* Footer link & Actions */}
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 'auto', pt: 1 }}>
+                  <Box
+                    component={Link}
+                    href={`/${locale}/admin/betting/models/${model.uuid}`}
+                    sx={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: 1,
+                      color: 'primary.main',
+                      fontWeight: 700,
+                      fontSize: '0.875rem',
+                      textDecoration: 'none',
+                      '&:hover': { textDecoration: 'underline' },
+                    }}
+                  >
+                    <span>{locale === 'fr' ? 'Détails & Méthodologie' : 'Methodology & Calibration'}</span>
+                    <ArrowRight size={16} />
+                  </Box>
+
+                  <Box sx={{ display: 'flex', gap: 0.5 }}>
+                    <IconButton
+                      size="small"
+                      onClick={() => handleOpenEdit(model)}
+                      sx={{
+                        color: 'text.secondary',
+                        '&:hover': { color: 'primary.main', backgroundColor: alpha('#F26419', 0.1) },
+                      }}
+                      title="Edit Model"
+                    >
+                      <Pencil size={15} />
+                    </IconButton>
+                    <IconButton
+                      size="small"
+                      onClick={() => handleOpenDelete(model)}
+                      sx={{
+                        color: 'text.secondary',
+                        '&:hover': { color: '#EF5350', backgroundColor: alpha('#EF5350', 0.1) },
+                      }}
+                      title="Delete Model"
+                    >
+                      <Trash2 size={15} />
+                    </IconButton>
+                  </Box>
                 </Box>
               </CardContent>
             </Card>
@@ -355,6 +481,147 @@ export default function ModelsClient({ locale, models: initialModels }: ModelsCl
               label="Set as current active model"
             />
           </Box>
+        </Box>
+      </CustomModal>
+
+      {/* ─── EDIT MODEL MODAL ───────────────────────────────────────────── */}
+      <CustomModal
+        open={Boolean(editingModel)}
+        onClose={() => setEditingModel(null)}
+        title={
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <Pencil size={20} color="#F26419" />
+            <span>{locale === 'fr' ? 'Modifier le Modèle' : 'Edit Model'}</span>
+          </Box>
+        }
+        actions={
+          <Box sx={{ display: 'flex', gap: 1.5, width: '100%', justifyContent: 'flex-end' }}>
+            <CustomButton variant="outlined" onClick={() => setEditingModel(null)}>
+              {locale === 'fr' ? 'Annuler' : 'Cancel'}
+            </CustomButton>
+            <LoadingButton
+              variant="contained"
+              loading={isUpdating}
+              onClick={handleSaveEdit}
+              sx={{
+                backgroundColor: 'primary.main',
+                color: '#FFFFFF',
+                fontWeight: 700,
+              }}
+            >
+              {locale === 'fr' ? 'Enregistrer' : 'Save Changes'}
+            </LoadingButton>
+          </Box>
+        }
+      >
+        <Box sx={{ pt: 1 }}>
+          <Grid container spacing={2} sx={{ mb: 2 }}>
+            <Grid size={{ xs: 4 }}>
+              <TextField
+                fullWidth
+                label="Version"
+                value={editVersion}
+                onChange={(e) => setEditVersion(e.target.value)}
+              />
+            </Grid>
+            <Grid size={{ xs: 8 }}>
+              <TextField
+                fullWidth
+                label="Model Name"
+                value={editName}
+                onChange={(e) => setEditName(e.target.value)}
+              />
+            </Grid>
+          </Grid>
+
+          <TextField
+            fullWidth
+            label="Short Description"
+            value={editDescription}
+            onChange={(e) => setEditDescription(e.target.value)}
+            sx={{ mb: 2 }}
+          />
+
+          <TextField
+            fullWidth
+            multiline
+            rows={5}
+            label="Methodology Notes / Rules Content"
+            value={editContent}
+            onChange={(e) => setEditContent(e.target.value)}
+            sx={{ mb: 2 }}
+          />
+
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <FormControl size="small" sx={{ minWidth: 140 }}>
+              <InputLabel>Status</InputLabel>
+              <Select
+                value={editStatus}
+                label="Status"
+                onChange={(e) => setEditStatus(e.target.value as any)}
+              >
+                <MenuItem value="draft">Draft</MenuItem>
+                <MenuItem value="active">Active</MenuItem>
+                <MenuItem value="retired">Retired</MenuItem>
+              </Select>
+            </FormControl>
+
+            <FormControlLabel
+              control={
+                <Switch
+                  checked={editIsActive}
+                  onChange={(e) => setEditIsActive(e.target.checked)}
+                  color="primary"
+                />
+              }
+              label="Set as current active model"
+            />
+          </Box>
+        </Box>
+      </CustomModal>
+
+      {/* ─── DELETE MODEL CONFIRMATION MODAL ─────────────────────────────── */}
+      <CustomModal
+        open={Boolean(deletingModel)}
+        onClose={() => setDeletingModel(null)}
+        title={
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <AlertTriangle size={20} color="#EF5350" />
+            <span>{locale === 'fr' ? 'Confirmer la Suppression' : 'Confirm Model Deletion'}</span>
+          </Box>
+        }
+        actions={
+          <Box sx={{ display: 'flex', gap: 1.5, width: '100%', justifyContent: 'flex-end' }}>
+            <CustomButton variant="outlined" onClick={() => setDeletingModel(null)}>
+              {locale === 'fr' ? 'Annuler' : 'Cancel'}
+            </CustomButton>
+            <LoadingButton
+              variant="contained"
+              loading={isDeleting}
+              onClick={handleDeleteModel}
+              sx={{
+                backgroundColor: '#EF5350',
+                color: '#FFFFFF',
+                fontWeight: 700,
+                '&:hover': { backgroundColor: '#D32F2F' },
+              }}
+            >
+              {locale === 'fr' ? 'Supprimer' : 'Delete'}
+            </LoadingButton>
+          </Box>
+        }
+      >
+        <Box sx={{ py: 1 }}>
+          <Typography variant="body1" sx={{ fontWeight: 600, mb: 1 }}>
+            {locale === 'fr'
+              ? `Supprimer définitivement "${deletingModel?.name}" (v${deletingModel?.version}) ?`
+              : `Permanently delete "${deletingModel?.name}" (v${deletingModel?.version})?`}
+          </Typography>
+          <Typography variant="body2" color="text.secondary">
+            {locale === 'fr'
+              ? 'Cette action retirera le modèle. Les tickets associés seront détachés.'
+              : 'This action will remove the model definition. Associated tickets will be unlinked.'}
+          </Typography>
         </Box>
       </CustomModal>
     </Box>
