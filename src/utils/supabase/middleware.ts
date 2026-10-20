@@ -15,10 +15,12 @@ export async function updateSession(request: NextRequest, response?: NextRespons
           return request.cookies.getAll()
         },
         setAll(cookiesToSet) {
-          cookiesToSet.forEach(({ name, value, options }) => request.cookies.set(name, value))
-          supabaseResponse = NextResponse.next({
-            request,
-          })
+          cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value))
+          if (!response) {
+            supabaseResponse = NextResponse.next({
+              request,
+            })
+          }
           cookiesToSet.forEach(({ name, value, options }) =>
             supabaseResponse.cookies.set(name, value, options)
           )
@@ -29,7 +31,11 @@ export async function updateSession(request: NextRequest, response?: NextRespons
 
   // IMPORTANT: Avoid writing lightweight, fragile session checks.
   // Calling getUser() on every request ensures session validity.
-  await supabase.auth.getUser()
+  try {
+    await supabase.auth.getUser()
+  } catch (err) {
+    console.error('Supabase session refresh error in proxy:', err)
+  }
 
   return supabaseResponse
 }

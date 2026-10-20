@@ -11,7 +11,12 @@ export interface NotificationOptions {
 }
 
 interface CustomNotificationProps extends Omit<SnackbarProps, 'open'> {
-  options: NotificationOptions
+  options?: NotificationOptions
+  open?: boolean
+  message?: string
+  severity?: AlertColor
+  type?: AlertColor
+  autoHideDuration?: number
   onClose: () => void
 }
 
@@ -24,15 +29,24 @@ const severityIcons: Record<AlertColor, React.ReactNode> = {
 
 /**
  * CustomNotification — wraps MUI Snackbar + Alert to provide toast notifications.
- * Usage: control via the `options` prop. Call `onClose` to dismiss.
+ * Usage: control via either the `options` prop or flat props (`open`, `message`, `severity` / `type`).
+ * Call `onClose` to dismiss.
  */
 export default function CustomNotification({
   options,
+  open: flatOpen,
+  message: flatMessage,
+  severity: flatSeverity,
+  type: flatType,
+  autoHideDuration: flatDuration,
   onClose,
   anchorOrigin = { vertical: 'bottom', horizontal: 'center' },
   ...props
 }: CustomNotificationProps) {
-  const { open, message, severity = 'success', autoHideDuration = 4000 } = options
+  const open = options?.open ?? flatOpen ?? false
+  const message = options?.message ?? flatMessage ?? ''
+  const severity: AlertColor = options?.severity ?? flatSeverity ?? flatType ?? 'success'
+  const autoHideDuration = options?.autoHideDuration ?? flatDuration ?? 4000
 
   return (
     <Snackbar

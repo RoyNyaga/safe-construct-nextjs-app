@@ -62,6 +62,7 @@ const ALL_PERMISSIONS = [
   { key: 'manage_leads', labelEn: 'Manage Leads Inbox', labelFr: 'Gérer la Boîte de Réception' },
   { key: 'manage_team', labelEn: 'Manage Team Members', labelFr: 'Gérer les Membres de l\'Équipe' },
   { key: 'manage_users', labelEn: 'Manage Users & Permissions', labelFr: 'Gérer les Utilisateurs & Droits' },
+  { key: 'manage_betting', labelEn: 'Manage Betting Tracker & Bankroll', labelFr: 'Gérer le Suivi des Paris & Bankroll' },
 ]
 
 export default function UsersClient({ locale, initialProfiles }: UsersClientProps) {

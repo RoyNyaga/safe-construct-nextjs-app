@@ -11,6 +11,7 @@ import {
 } from '@mui/material'
 import { AlertTriangle, Trash2 } from 'lucide-react'
 import { LoadingButton } from './CustomButton'
+export { LoadingButton }
 
 // ─── ActionPromptButton ───────────────────────────────────────────────────────
 
