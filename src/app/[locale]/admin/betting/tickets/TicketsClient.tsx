@@ -31,17 +31,20 @@ import {
 import { BettingTicket, BettingModel } from '@/types/betting'
 import { CustomTooltip } from '@/components/ui'
 import CustomButton from '@/components/ui/CustomButton'
+import { formatCurrency, formatCurrencySign } from '@/utils/bettingCurrency'
 
 interface TicketsClientProps {
   locale: string
   tickets: BettingTicket[]
   models: BettingModel[]
+  currency?: string
 }
 
 export default function TicketsClient({
   locale,
   tickets: initialTickets,
   models,
+  currency = 'USD',
 }: TicketsClientProps) {
   const [statusFilter, setStatusFilter] = useState<string>('all')
   const [modelFilter, setModelFilter] = useState<string>('all')
@@ -259,7 +262,7 @@ export default function TicketsClient({
                           {t.combined_odds ? Number(t.combined_odds).toFixed(2) : '—'}
                         </td>
                         <td style={{ padding: '16px 18px', fontSize: '0.9rem' }}>
-                          ${Number(t.stake || 0).toFixed(2)}
+                          {formatCurrency(t.stake, currency)}
                         </td>
                         <td style={{ padding: '16px 18px' }}>
                           <Chip
@@ -284,7 +287,7 @@ export default function TicketsClient({
                         >
                           {t.status === 'pending'
                             ? '—'
-                            : `${Number(t.profit_loss) >= 0 ? '+' : ''}$${Number(t.profit_loss).toFixed(2)}`}
+                            : formatCurrencySign(t.profit_loss, currency)}
                         </td>
                         <td style={{ padding: '16px 18px', textAlign: 'right' }}>
                           <Link

@@ -24,7 +24,12 @@ export default async function BettingTicketsPage({
         currentBalance={Number(bankroll?.current_balance || 0)}
         currency={bankroll?.currency || 'USD'}
       />
-      <TicketsClient locale={locale} tickets={tickets} models={models} />
+      <TicketsClient
+        locale={locale}
+        tickets={tickets}
+        models={models}
+        currency={bankroll?.currency || 'USD'}
+      />
     </Box>
   )
 }

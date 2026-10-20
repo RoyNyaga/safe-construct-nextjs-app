@@ -38,13 +38,19 @@ import { updateSelectionResult, updateAlternativeResult, exportTicketAsJson } fr
 import { CustomModal, CustomDrawer, CustomNotification, CustomTooltip } from '@/components/ui'
 import CustomButton from '@/components/ui/CustomButton'
 import { LoadingButton } from '@/components/ui/PromptButtons'
+import { formatCurrency, formatCurrencySign } from '@/utils/bettingCurrency'
 
 interface TicketDetailClientProps {
   locale: string
   ticket: BettingTicket
+  currency?: string
 }
 
-export default function TicketDetailClient({ locale, ticket: initialTicket }: TicketDetailClientProps) {
+export default function TicketDetailClient({
+  locale,
+  ticket: initialTicket,
+  currency = 'USD',
+}: TicketDetailClientProps) {
   const [ticket, setTicket] = useState<BettingTicket>(initialTicket)
 
   // Drawer for selection statistical snapshot
@@ -281,7 +287,7 @@ export default function TicketDetailClient({ locale, ticket: initialTicket }: Ti
               >
                 {ticket.status === 'pending'
                   ? 'Pending Settlement'
-                  : `${Number(ticket.profit_loss) >= 0 ? '+' : ''}$${Number(ticket.profit_loss).toFixed(2)}`}
+                  : formatCurrencySign(ticket.profit_loss, currency)}
               </Typography>
             </Box>
           </Box>
@@ -293,7 +299,7 @@ export default function TicketDetailClient({ locale, ticket: initialTicket }: Ti
             <Grid size={{ xs: 6, sm: 3 }}>
               <Typography variant="caption" color="text.secondary">Stake</Typography>
               <Typography variant="h6" sx={{ fontWeight: 700 }}>
-                ${Number(ticket.stake).toFixed(2)}
+                {formatCurrency(ticket.stake, currency)}
               </Typography>
             </Grid>
             <Grid size={{ xs: 6, sm: 3 }}>
@@ -311,7 +317,7 @@ export default function TicketDetailClient({ locale, ticket: initialTicket }: Ti
             <Grid size={{ xs: 6, sm: 3 }}>
               <Typography variant="caption" color="text.secondary">Potential Payout</Typography>
               <Typography variant="h6" sx={{ fontWeight: 700, color: '#F6AE2D' }}>
-                ${(Number(ticket.stake) * (Number(ticket.combined_odds) || 1)).toFixed(2)}
+                {formatCurrency((Number(ticket.stake) * (Number(ticket.combined_odds) || 1)), currency)}
               </Typography>
             </Grid>
           </Grid>

@@ -32,10 +32,11 @@ import {
 } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { BettingBankroll, BettingTransaction, TriggerType } from '@/types/betting'
-import { recordManualDeposit, recordManualWithdrawal } from '@/app/[locale]/actions/bankroll'
+import { recordManualDeposit, recordManualWithdrawal, updateBankrollCurrency } from '@/app/[locale]/actions/bankroll'
 import { CustomModal, CustomTooltip, CustomNotification } from '@/components/ui'
 import CustomButton from '@/components/ui/CustomButton'
 import { LoadingButton } from '@/components/ui/PromptButtons'
+import { formatCurrency, formatCurrencySign } from '@/utils/bettingCurrency'
 
 interface BalanceClientProps {
   locale: string
@@ -71,7 +72,7 @@ export default function BalanceClient({
     type: 'success' | 'error' | 'info'
   }>({ open: false, message: '', type: 'info' })
 
-  const currency = bankroll?.currency || 'USD'
+  const [currency, setCurrency] = useState(bankroll?.currency || 'USD')
   const currentBal = Number(bankroll?.current_balance || 0)
 
   // Filter Transactions
@@ -148,6 +149,21 @@ export default function BalanceClient({
     }
   }
 
+  const handleCurrencyChange = async (newCurr: string) => {
+    if (newCurr === currency) return
+    setCurrency(newCurr)
+    const res = await updateBankrollCurrency(newCurr)
+    if (res.error) {
+      setNotification({ open: true, message: res.error, type: 'error' })
+    } else {
+      setNotification({
+        open: true,
+        message: locale === 'fr' ? `Devise active : ${newCurr}` : `Active currency: ${newCurr}`,
+        type: 'success',
+      })
+    }
+  }
+
   return (
     <Box>
       {/* Toast Feedback */}
@@ -213,10 +229,56 @@ export default function BalanceClient({
                     border: '1px solid rgba(242, 100, 25, 0.3)',
                   }}
                 />
+
+                {/* Currency Switcher (FCFA vs USD) */}
+                <Box
+                  sx={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: 0.5,
+                    p: 0.35,
+                    borderRadius: 2,
+                    backgroundColor: alpha('#000000', 0.35),
+                    border: '1px solid rgba(255, 255, 255, 0.1)',
+                  }}
+                >
+                  <Chip
+                    label="FCFA"
+                    size="small"
+                    onClick={() => handleCurrencyChange('FCFA')}
+                    sx={{
+                      height: 22,
+                      fontSize: '0.68rem',
+                      fontWeight: 700,
+                      cursor: 'pointer',
+                      backgroundColor: currency === 'FCFA' ? '#F26419' : 'transparent',
+                      color: currency === 'FCFA' ? '#fff' : 'text.secondary',
+                      '&:hover': {
+                        backgroundColor: currency === 'FCFA' ? '#F26419' : alpha('#fff', 0.1),
+                      },
+                    }}
+                  />
+                  <Chip
+                    label="USD ($)"
+                    size="small"
+                    onClick={() => handleCurrencyChange('USD')}
+                    sx={{
+                      height: 22,
+                      fontSize: '0.68rem',
+                      fontWeight: 700,
+                      cursor: 'pointer',
+                      backgroundColor: currency === 'USD' ? '#2F80ED' : 'transparent',
+                      color: currency === 'USD' ? '#fff' : 'text.secondary',
+                      '&:hover': {
+                        backgroundColor: currency === 'USD' ? '#2F80ED' : alpha('#fff', 0.1),
+                      },
+                    }}
+                  />
+                </Box>
               </Box>
 
               <Typography variant="h2" sx={{ fontWeight: 800, color: '#66BB6A', mb: 2 }}>
-                {new Intl.NumberFormat('en-US', { style: 'currency', currency }).format(currentBal)}
+                {formatCurrency(currentBal, currency)}
               </Typography>
 
               {/* Sub Metrics */}
@@ -226,7 +288,7 @@ export default function BalanceClient({
                     {locale === 'fr' ? 'Dépôts Cumulés' : 'Total Deposited'}
                   </Typography>
                   <Typography variant="body1" sx={{ fontWeight: 700 }}>
-                    ${Number(bankroll?.total_deposited || 0).toFixed(2)}
+                    {formatCurrency(bankroll?.total_deposited || 0, currency)}
                   </Typography>
                 </Box>
                 <Divider orientation="vertical" flexItem sx={{ borderColor: 'divider' }} />
@@ -235,7 +297,7 @@ export default function BalanceClient({
                     {locale === 'fr' ? 'Retraits Cumulés' : 'Total Withdrawn'}
                   </Typography>
                   <Typography variant="body1" sx={{ fontWeight: 700 }}>
-                    ${Number(bankroll?.total_withdrawn || 0).toFixed(2)}
+                    {formatCurrency(bankroll?.total_withdrawn || 0, currency)}
                   </Typography>
                 </Box>
                 <Divider orientation="vertical" flexItem sx={{ borderColor: 'divider' }} />
@@ -244,7 +306,7 @@ export default function BalanceClient({
                     {locale === 'fr' ? 'Total Misé' : 'Total Staked'}
                   </Typography>
                   <Typography variant="body1" sx={{ fontWeight: 700 }}>
-                    ${Number(bankroll?.total_staked || 0).toFixed(2)}
+                    {formatCurrency(bankroll?.total_staked || 0, currency)}
                   </Typography>
                 </Box>
                 <Divider orientation="vertical" flexItem sx={{ borderColor: 'divider' }} />
@@ -253,7 +315,7 @@ export default function BalanceClient({
                     {locale === 'fr' ? 'Gains Reçus' : 'Total Payouts'}
                   </Typography>
                   <Typography variant="body1" sx={{ fontWeight: 700, color: '#66BB6A' }}>
-                    ${Number(bankroll?.total_payout || 0).toFixed(2)}
+                    {formatCurrency(bankroll?.total_payout || 0, currency)}
                   </Typography>
                 </Box>
               </Box>
@@ -465,14 +527,14 @@ export default function BalanceClient({
 
                         {/* Amount */}
                         <td style={{ padding: '14px 16px', fontWeight: 800, fontSize: '0.9rem', color: isCredit ? '#66BB6A' : '#EF5350', whiteSpace: 'nowrap' }}>
-                          {isCredit ? `+` : ``}${Number(tx.amount).toFixed(2)}
+                          {formatCurrencySign(isCredit ? Math.abs(Number(tx.amount)) : -Math.abs(Number(tx.amount)), currency)}
                         </td>
 
                         {/* Balance Before -> After */}
                         <td style={{ padding: '14px 16px', fontSize: '0.8rem', color: '#9AA3B2', whiteSpace: 'nowrap' }}>
-                          ${Number(tx.balance_before).toFixed(2)} &rarr;{' '}
+                          {formatCurrency(tx.balance_before, currency)} &rarr;{' '}
                           <span style={{ fontWeight: 700, color: '#F0F2F5' }}>
-                            ${Number(tx.balance_after).toFixed(2)}
+                            {formatCurrency(tx.balance_after, currency)}
                           </span>
                         </td>
 

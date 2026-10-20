@@ -15,6 +15,7 @@ import {
 } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { CustomTooltip } from '@/components/ui'
+import { formatCurrency } from '@/utils/bettingCurrency'
 
 interface BettingSubNavProps {
   locale: string
@@ -65,10 +66,7 @@ export default function BettingSubNav({
 
   const formattedBalance =
     currentBalance !== undefined
-      ? new Intl.NumberFormat('en-US', {
-          style: 'currency',
-          currency: currency || 'USD',
-        }).format(currentBalance)
+      ? formatCurrency(currentBalance, currency)
       : null
 
   return (
@@ -79,7 +77,7 @@ export default function BettingSubNav({
         p: 1,
         borderRadius: 3,
         backgroundColor: alpha('#1E2635', 0.8),
-        border: (theme) => `1px solid ${alpha(theme.palette.divider, 1)}`,
+        border: '1px solid rgba(255, 255, 255, 0.08)',
         backdropFilter: 'blur(12px)',
         display: 'flex',
         alignItems: 'center',

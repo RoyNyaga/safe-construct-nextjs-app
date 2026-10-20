@@ -242,3 +242,24 @@ export async function getBankrollTransactions(options?: {
 
   return { transactions: (data || []) as BettingTransaction[] }
 }
+
+/**
+ * Updates the currency for the active bankroll (e.g., 'FCFA' or 'USD').
+ */
+export async function updateBankrollCurrency(currency: string): Promise<{ success: boolean; error?: string }> {
+  const supabase = await createClient()
+
+  const { error } = await supabase
+    .from('betting_bankrolls')
+    .update({ currency: currency.toUpperCase().trim() })
+    .eq('is_active', true)
+
+  if (error) {
+    console.error('Failed to update bankroll currency:', error)
+    return { success: false, error: error.message }
+  }
+
+  revalidatePath('/[locale]/admin/betting', 'layout')
+  return { success: true }
+}
+

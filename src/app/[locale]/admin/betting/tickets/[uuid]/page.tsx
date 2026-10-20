@@ -28,7 +28,11 @@ export default async function BettingTicketDetailPage({
         currentBalance={Number(bankroll?.current_balance || 0)}
         currency={bankroll?.currency || 'USD'}
       />
-      <TicketDetailClient locale={locale} ticket={ticket} />
+      <TicketDetailClient
+        locale={locale}
+        ticket={ticket}
+        currency={bankroll?.currency || 'USD'}
+      />
     </Box>
   )
 }

@@ -25,6 +25,7 @@ import {
   Percent,
 } from 'lucide-react'
 import { CustomTooltip } from '@/components/ui'
+import { formatCurrency, formatCurrencySign } from '@/utils/bettingCurrency'
 import BettingSubNav from './BettingSubNav'
 import {
   BettingBankroll,
@@ -78,8 +79,8 @@ export default function BettingSummaryClient({
   const statCards = [
     {
       title: locale === 'fr' ? 'Solde du Bankroll' : 'Bankroll Balance',
-      value: new Intl.NumberFormat('en-US', { style: 'currency', currency }).format(currentBal),
-      subtitle: `${locale === 'fr' ? 'Dépôts' : 'Deposits'}: $${Number(bankroll?.total_deposited || 0).toFixed(0)}`,
+      value: formatCurrency(currentBal, currency),
+      subtitle: `${locale === 'fr' ? 'Dépôts' : 'Deposits'}: ${formatCurrency(bankroll?.total_deposited || 0, currency)}`,
       icon: Wallet,
       color: '#66BB6A',
       href: `/${locale}/admin/betting/balance`,
@@ -87,7 +88,7 @@ export default function BettingSummaryClient({
     },
     {
       title: locale === 'fr' ? 'Profit / Perte Net' : 'Net Profit / Loss',
-      value: `${stats.tickets.totalProfit >= 0 ? '+' : ''}$${stats.tickets.totalProfit.toFixed(2)}`,
+      value: formatCurrencySign(stats.tickets.totalProfit, currency),
       subtitle: `ROI: ${stats.tickets.roi >= 0 ? '+' : ''}${stats.tickets.roi}%`,
       icon: TrendingUp,
       color: stats.tickets.totalProfit >= 0 ? '#66BB6A' : '#EF5350',
@@ -531,7 +532,7 @@ export default function BettingSummaryClient({
                           {t.combined_odds ? Number(t.combined_odds).toFixed(2) : '—'}
                         </td>
                         <td style={{ padding: '14px 16px', fontSize: '0.875rem' }}>
-                          ${Number(t.stake || 0).toFixed(2)}
+                          {formatCurrency(t.stake, currency)}
                         </td>
                         <td style={{ padding: '14px 16px' }}>
                           <Chip
@@ -549,7 +550,7 @@ export default function BettingSummaryClient({
                         <td style={{ padding: '14px 16px', fontWeight: 800, fontSize: '0.875rem', color: Number(t.profit_loss) >= 0 ? '#66BB6A' : '#EF5350' }}>
                           {t.status === 'pending'
                             ? '—'
-                            : `${Number(t.profit_loss) >= 0 ? '+' : ''}$${Number(t.profit_loss).toFixed(2)}`}
+                            : formatCurrencySign(t.profit_loss, currency)}
                         </td>
                         <td style={{ padding: '14px 16px', textAlign: 'right' }}>
                           <Link
