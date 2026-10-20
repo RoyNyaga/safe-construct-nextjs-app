@@ -26,7 +26,7 @@ interface BettingSubNavProps {
 export default function BettingSubNav({
   locale,
   currentBalance,
-  currency = 'USD',
+  currency = 'FCFA',
 }: BettingSubNavProps) {
   const pathname = usePathname()
 

@@ -16,7 +16,7 @@ export default async function BettingImportPage({
       <BettingSubNav
         locale={locale}
         currentBalance={Number(bankroll?.current_balance || 0)}
-        currency={bankroll?.currency || 'USD'}
+        currency={bankroll?.currency || 'FCFA'}
       />
       <ImportClient locale={locale} />
     </Box>

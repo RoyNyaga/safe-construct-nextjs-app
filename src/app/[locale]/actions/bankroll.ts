@@ -36,7 +36,7 @@ export async function getActiveBankroll(): Promise<{
     .insert([
       {
         name: 'Main Bankroll',
-        currency: 'USD',
+        currency: 'FCFA',
         current_balance: 0.00,
         initial_deposit: 0.00,
         total_deposited: 0.00,
@@ -57,7 +57,7 @@ export async function getActiveBankroll(): Promise<{
         id: 1,
         uuid: '00000000-0000-0000-0000-000000000000',
         name: 'Main Bankroll',
-        currency: 'USD',
+        currency: 'FCFA',
         current_balance: 0.00,
         initial_deposit: 0.00,
         total_deposited: 0.00,

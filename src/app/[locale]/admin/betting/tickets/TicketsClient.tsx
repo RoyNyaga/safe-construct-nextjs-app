@@ -49,7 +49,7 @@ export default function TicketsClient({
   locale,
   tickets: initialTickets,
   models,
-  currency = 'USD',
+  currency = 'FCFA',
 }: TicketsClientProps) {
   const [tickets, setTickets] = useState<BettingTicket[]>(initialTickets)
   const [statusFilter, setStatusFilter] = useState<string>('all')

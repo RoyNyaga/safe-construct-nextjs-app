@@ -32,13 +32,14 @@ export default async function BettingStatisticsPage({
       <BettingSubNav
         locale={locale}
         currentBalance={Number(bankroll?.current_balance || 0)}
-        currency={bankroll?.currency || 'USD'}
+        currency={bankroll?.currency || 'FCFA'}
       />
       <StatisticsClient
         locale={locale}
         summary={summary}
         calibration={calibration}
         comparison={comparison}
+        currency={bankroll?.currency || 'FCFA'}
       />
     </Box>
   )

@@ -1,14 +1,14 @@
 /**
  * Utility functions for formatting and handling currency across the betting tracker subsystem.
- * Supports USD ($) and FCFA (XAF/XOF).
+ * Defaults to FCFA for Cameroon/Central Africa, while supporting USD ($).
  */
 
 export function formatCurrency(
   amount: number | string | null | undefined,
-  currency: string = 'USD'
+  currency: string = 'FCFA'
 ): string {
   const num = Number(amount || 0)
-  const norm = (currency || 'USD').toUpperCase().trim()
+  const norm = (currency || 'FCFA').toUpperCase().trim()
 
   if (norm === 'FCFA' || norm === 'XAF' || norm === 'XOF') {
     // FCFA does not use decimal cents in practice
@@ -30,15 +30,15 @@ export function formatCurrency(
 
 export function formatCurrencySign(
   amount: number | string | null | undefined,
-  currency: string = 'USD'
+  currency: string = 'FCFA'
 ): string {
   const num = Number(amount || 0)
   const sign = num > 0 ? '+' : ''
   return `${sign}${formatCurrency(num, currency)}`
 }
 
-export function getCurrencySymbol(currency: string = 'USD'): string {
-  const norm = (currency || 'USD').toUpperCase().trim()
+export function getCurrencySymbol(currency: string = 'FCFA'): string {
+  const norm = (currency || 'FCFA').toUpperCase().trim()
   if (norm === 'FCFA' || norm === 'XAF' || norm === 'XOF') {
     return 'FCFA'
   }

@@ -16,7 +16,7 @@ export default async function BettingBalancePage({
   ])
 
   const currentBal = Number(bankroll?.current_balance || 0)
-  const currency = bankroll?.currency || 'USD'
+  const currency = bankroll?.currency || 'FCFA'
 
   return (
     <Box sx={{ pb: 6 }}>

@@ -52,7 +52,7 @@ export default function ModelDetailClient({
   const router = useRouter()
   const [model, setModel] = useState<BettingModel>(initialModel)
   const currentBalance = Number(bankroll?.current_balance || 0)
-  const currency = bankroll?.currency || 'USD'
+  const currency = bankroll?.currency || 'FCFA'
 
   // Edit Modal State
   const [isEditOpen, setIsEditOpen] = useState(false)

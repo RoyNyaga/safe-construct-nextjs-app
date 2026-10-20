@@ -28,6 +28,7 @@ import {
 } from 'lucide-react'
 import { CalibrationBucket, SelectedVsAlternativesComparison } from '@/types/betting'
 import { CustomTooltip } from '@/components/ui'
+import { formatCurrencySign } from '@/utils/bettingCurrency'
 
 interface StatisticsClientProps {
   locale: string
@@ -54,6 +55,7 @@ interface StatisticsClientProps {
   }
   calibration: CalibrationBucket[]
   comparison: SelectedVsAlternativesComparison
+  currency?: string
 }
 
 export default function StatisticsClient({
@@ -61,6 +63,7 @@ export default function StatisticsClient({
   summary,
   calibration,
   comparison,
+  currency = 'FCFA',
 }: StatisticsClientProps) {
   const winRateDelta = Number(
     (comparison.selected.winRate - comparison.alternatives.winRate).toFixed(1)
@@ -131,7 +134,7 @@ export default function StatisticsClient({
                 {summary.tickets.roi >= 0 ? '+' : ''}{summary.tickets.roi}%
               </Typography>
               <Typography variant="caption" color="text.secondary">
-                Net P&L: {summary.tickets.totalProfit >= 0 ? '+' : ''}${summary.tickets.totalProfit.toFixed(2)}
+                Net P&L: {formatCurrencySign(summary.tickets.totalProfit, currency)}
               </Typography>
             </CardContent>
           </Card>

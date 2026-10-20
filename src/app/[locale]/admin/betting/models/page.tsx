@@ -21,7 +21,7 @@ export default async function BettingModelsPage({
       <BettingSubNav
         locale={locale}
         currentBalance={Number(bankroll?.current_balance || 0)}
-        currency={bankroll?.currency || 'USD'}
+        currency={bankroll?.currency || 'FCFA'}
       />
       <ModelsClient locale={locale} models={models} />
     </Box>

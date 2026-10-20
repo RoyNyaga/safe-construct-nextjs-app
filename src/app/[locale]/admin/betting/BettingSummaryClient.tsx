@@ -74,7 +74,7 @@ export default function BettingSummaryClient({
   const recentTickets = tickets.slice(0, 5)
 
   const currentBal = Number(bankroll?.current_balance || 0)
-  const currency = bankroll?.currency || 'USD'
+  const currency = bankroll?.currency || 'FCFA'
 
   const statCards = [
     {

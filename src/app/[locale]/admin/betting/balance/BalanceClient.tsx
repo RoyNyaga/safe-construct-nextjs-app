@@ -75,7 +75,7 @@ export default function BalanceClient({
     type: 'success' | 'error' | 'info'
   }>({ open: false, message: '', type: 'info' })
 
-  const [currency, setCurrency] = useState(bankroll?.currency || 'USD')
+  const [currency, setCurrency] = useState(bankroll?.currency || 'FCFA')
   const [currentBal, setCurrentBal] = useState(Number(bankroll?.current_balance || 0))
   const [deletingTx, setDeletingTx] = useState<BettingTransaction | null>(null)
   const [isDeletingTx, setIsDeletingTx] = useState(false)
@@ -661,7 +661,7 @@ export default function BalanceClient({
           <TextField
             fullWidth
             type="number"
-            label={locale === 'fr' ? 'Montant à Déposer ($)' : 'Deposit Amount ($)'}
+            label={locale === 'fr' ? `Montant à Déposer (${currency})` : `Deposit Amount (${currency})`}
             placeholder="100.00"
             value={depositAmount}
             onChange={(e) => setDepositAmount(e.target.value)}
@@ -739,7 +739,7 @@ export default function BalanceClient({
           <TextField
             fullWidth
             type="number"
-            label={locale === 'fr' ? 'Montant à Retirer ($)' : 'Withdrawal Amount ($)'}
+            label={locale === 'fr' ? `Montant à Retirer (${currency})` : `Withdrawal Amount (${currency})`}
             placeholder="50.00"
             value={withdrawAmount}
             onChange={(e) => setWithdrawAmount(e.target.value)}

@@ -22,13 +22,13 @@ export default async function BettingTicketsPage({
       <BettingSubNav
         locale={locale}
         currentBalance={Number(bankroll?.current_balance || 0)}
-        currency={bankroll?.currency || 'USD'}
+        currency={bankroll?.currency || 'FCFA'}
       />
       <TicketsClient
         locale={locale}
         tickets={tickets}
         models={models}
-        currency={bankroll?.currency || 'USD'}
+        currency={bankroll?.currency || 'FCFA'}
       />
     </Box>
   )

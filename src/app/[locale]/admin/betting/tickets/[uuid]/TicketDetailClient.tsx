@@ -65,7 +65,7 @@ interface TicketDetailClientProps {
 export default function TicketDetailClient({
   locale,
   ticket: initialTicket,
-  currency = 'USD',
+  currency = 'FCFA',
 }: TicketDetailClientProps) {
   const router = useRouter()
   const [ticket, setTicket] = useState<BettingTicket>(initialTicket)
@@ -1204,7 +1204,7 @@ export default function TicketDetailClient({
               <TextField
                 fullWidth
                 type="number"
-                label="Stake ($)"
+                label={locale === 'fr' ? `Mise (${currency})` : `Stake (${currency})`}
                 value={editStake}
                 onChange={(e) => setEditStake(e.target.value)}
               />
