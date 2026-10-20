@@ -182,7 +182,7 @@ export default function BalanceClient({
         />
 
         <CardContent sx={{ p: { xs: 3, md: 4 } }}>
-          <Grid container spacing={3} alignItems="center">
+          <Grid container spacing={3} sx={{ alignItems: 'center' }}>
             <Grid size={{ xs: 12, md: 7 }}>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 1 }}>
                 <Box

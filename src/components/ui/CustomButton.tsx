@@ -11,7 +11,7 @@ import { forwardRef } from 'react'
 // ─── CustomButton ────────────────────────────────────────────────────────────
 
 interface CustomButtonProps extends ButtonProps {
-  id: string // required for testability
+  id?: string // recommended for testability
 }
 
 /**

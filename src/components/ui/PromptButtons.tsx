@@ -10,7 +10,8 @@ import {
   alpha,
 } from '@mui/material'
 import { AlertTriangle, Trash2 } from 'lucide-react'
-export { LoadingButton } from './CustomButton'
+import { LoadingButton } from './CustomButton'
+export { LoadingButton }
 
 // ─── ActionPromptButton ───────────────────────────────────────────────────────
 

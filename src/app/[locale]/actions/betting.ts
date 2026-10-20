@@ -506,7 +506,7 @@ export async function updateSelectionResult(params: {
   // 4. Fetch all selections of this ticket to re-evaluate overall ticket
   const { data: allSelections } = await supabase
     .from('betting_selections')
-    .select('odds, result')
+    .select('id, odds, result')
     .eq('ticket_id', ticket.id)
 
   const updatedSelections = (allSelections || []).map((s) =>
@@ -715,12 +715,16 @@ export async function getBettingSummaryStats() {
 
   const totalStake = ticketList.reduce((acc, t) => acc + Number(t.stake || 0), 0)
   const totalProfit = ticketList.reduce((acc, t) => acc + Number(t.profit_loss || 0), 0)
+  const totalPayout = ticketList
+    .filter((t) => t.status === 'won')
+    .reduce((acc, t) => acc + Number(t.stake || 0) + Number(t.profit_loss || 0), 0)
   const roi = totalStake > 0 ? Number(((totalProfit / totalStake) * 100).toFixed(1)) : 0
 
   // Selections stats
   const totalSelections = selList.length
   const wonSelections = selList.filter((s) => s.result === 'won').length
   const lostSelections = selList.filter((s) => s.result === 'lost').length
+  const pendingSelections = selList.filter((s) => s.result === 'pending').length
   const settledSelections = wonSelections + lostSelections
   const selectionWinRate = settledSelections > 0 ? Number(((wonSelections / settledSelections) * 100).toFixed(1)) : 0
 
@@ -733,6 +737,7 @@ export async function getBettingSummaryStats() {
       void: voidTickets,
       winRate: ticketWinRate,
       totalStake: Number(totalStake.toFixed(2)),
+      totalPayout: Number(totalPayout.toFixed(2)),
       totalProfit: Number(totalProfit.toFixed(2)),
       roi: roi,
     },
@@ -740,6 +745,7 @@ export async function getBettingSummaryStats() {
       total: totalSelections,
       won: wonSelections,
       lost: lostSelections,
+      pending: pendingSelections,
       winRate: selectionWinRate,
     },
     totalModels: modelsCount || 0,
