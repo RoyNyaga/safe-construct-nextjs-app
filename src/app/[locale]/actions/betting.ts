@@ -133,6 +133,9 @@ export async function createBettingModel(data: {
   isActive?: boolean
 }) {
   const supabase = await createClient()
+  const { data: { user }, error: authErr } = await supabase.auth.getUser()
+  console.log('>>> createBettingModel user:', user ? { id: user.id, email: user.email, role: user.role } : null)
+  if (authErr) console.log('>>> createBettingModel authErr:', authErr.message)
 
   const { data: inserted, error } = await supabase
     .from('betting_models')
