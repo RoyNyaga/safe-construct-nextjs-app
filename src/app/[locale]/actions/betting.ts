@@ -94,11 +94,15 @@ export async function getBettingModelByUuid(uuid: string): Promise<{ model: Bett
       )
     `)
     .eq('uuid', uuid)
-    .single()
+    .maybeSingle()
 
   if (error) {
     console.error('Failed to get model by uuid:', error)
     return { model: null, error: error.message }
+  }
+
+  if (!model) {
+    return { model: null }
   }
 
   const tickets = model.betting_tickets || []
@@ -216,8 +220,8 @@ export async function deleteBettingModel(id: number): Promise<{ success: boolean
     return { success: false, error: error.message }
   }
 
-  revalidatePath('/[locale]/admin/betting/models', 'layout')
-  revalidatePath('/[locale]/admin/betting', 'layout')
+  revalidatePath('/[locale]/admin/betting/models', 'page')
+  revalidatePath('/[locale]/admin/betting', 'page')
   return { success: true }
 }
 
@@ -474,11 +478,15 @@ export async function getBettingTicketByUuid(uuid: string): Promise<{
       )
     `)
     .eq('uuid', uuid)
-    .single()
+    .maybeSingle()
 
   if (error) {
     console.error('Failed to get ticket by uuid:', error)
     return { ticket: null, error: error.message }
+  }
+
+  if (!ticket) {
+    return { ticket: null }
   }
 
   return { ticket: ticket as BettingTicket }
