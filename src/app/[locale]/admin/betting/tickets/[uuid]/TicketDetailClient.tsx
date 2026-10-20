@@ -561,7 +561,7 @@ export default function TicketDetailClient({
                           {sel.home_team} vs {sel.away_team}
                         </Typography>
                         <Typography variant="caption" color="text.secondary">
-                          {sel.league || '—'} &bull; {sel.match_date || ticket.ticket_date}
+                          {sel.country ? `${sel.country} • ` : ''}{sel.league || '—'} &bull; {sel.match_date || ticket.ticket_date}
                         </Typography>
                       </td>
 
@@ -727,6 +727,11 @@ export default function TicketDetailClient({
                       >
                         <td style={{ padding: '14px', fontWeight: 600, color: 'text.secondary' }}>
                           {alt.home_team} vs {alt.away_team}
+                          {(alt.country || alt.league) && (
+                            <Typography variant="caption" color="text.secondary" sx={{ display: 'block', fontSize: '0.75rem' }}>
+                              {alt.country ? `${alt.country} • ` : ''}{alt.league || ''}
+                            </Typography>
+                          )}
                         </td>
                         <td style={{ padding: '14px', color: 'text.secondary', fontSize: '0.85rem' }}>
                           {alt.market}: {alt.selection}
@@ -815,7 +820,7 @@ export default function TicketDetailClient({
               {snapshotSelection.home_team} vs {snapshotSelection.away_team}
             </Typography>
             <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 3 }}>
-              {snapshotSelection.league} &bull; Stored on {snapshotSelection.match_date || ticket.ticket_date}
+              {snapshotSelection.country ? `${snapshotSelection.country} • ` : ''}{snapshotSelection.league || '—'} &bull; Stored on {snapshotSelection.match_date || ticket.ticket_date}
             </Typography>
 
             <Paper

@@ -23,6 +23,7 @@ import {
   Send,
   Sparkles,
   Info,
+  Copy,
 } from 'lucide-react'
 import { TicketImportJSON } from '@/types/betting'
 import { importBettingTicket } from '@/app/[locale]/actions/betting'
@@ -33,67 +34,50 @@ import { LoadingButton } from '@/components/ui/PromptButtons'
 const SAMPLE_CHATGPT_JSON: TicketImportJSON = {
   ticket: {
     ticket_number: '001',
-    date: new Date().toISOString().split('T')[0],
+    date: '2026-10-20',
     model_version: '1.0',
     stake: 100,
-    combined_odds: 2.1736,
-    estimated_ticket_probability: 0.49,
+    combined_odds: 2.28,
+    estimated_ticket_probability: 0.491,
     status: 'pending',
-    notes: 'Two-leg statistical ticket based on our Poisson goal-rate model.',
+    notes: 'Two-leg statistical ticket based on our Poisson goal-rate model. Selected goal markets prioritize estimated probability above bookmaker break-even and positive expected value.',
   },
   selections: [
     {
-      match_date: new Date().toISOString().split('T')[0],
-      league: 'La Liga',
-      home_team: 'Getafe',
-      away_team: 'Rayo Vallecano',
-      home_league_position: 14,
-      away_league_position: 13,
-      home_goals_scored: 4,
-      home_goals_conceded: 10,
-      away_goals_scored: 11,
-      away_goals_conceded: 16,
-      home_goals_per_game: 0.5,
-      home_conceded_per_game: 1.25,
-      away_goals_per_game: 1.375,
-      away_conceded_per_game: 2.0,
+      match_date: '2026-10-20',
+      country: 'England',
+      league: 'League One',
+      home_team: 'Bromley',
+      away_team: 'Leicester City',
       market: 'Over/Under',
-      selection: 'Over 1.5',
-      odds: 1.52,
-      estimated_probability: 0.723,
-      breakeven_probability: 0.658,
-      edge_percentage_points: 6.5,
-      expected_value: 0.099,
-      comment: 'Strongest goal-market candidate; model probability comfortably above break-even.',
+      selection: 'Under 3.5',
+      odds: 1.57,
+      estimated_probability: 0.675,
+      breakeven_probability: 0.637,
+      edge_percentage_points: 3.8,
+      expected_value: 0.06,
+      comment: 'Selected because the statistical goal profile supports four or more goals being relatively unlikely. The estimated probability is above bookmaker break-even, providing a positive but modest value edge.',
     },
     {
-      match_date: new Date().toISOString().split('T')[0],
-      league: 'Serie A',
-      home_team: 'Parma',
-      away_team: 'Torino',
-      home_league_position: 15,
-      away_league_position: 9,
-      home_goals_scored: 11,
-      home_goals_conceded: 14,
-      away_goals_scored: 14,
-      away_goals_conceded: 14,
-      home_goals_per_game: 1.375,
-      home_conceded_per_game: 1.75,
-      away_goals_per_game: 1.75,
-      away_conceded_per_game: 1.75,
+      match_date: '2026-10-20',
+      country: 'Colombia',
+      league: 'Primera B',
+      home_team: 'Tigres FC',
+      away_team: 'Real Cundinamarca',
       market: 'Over/Under',
-      selection: 'Over 1.5',
-      odds: 1.43,
-      estimated_probability: 0.755,
-      breakeven_probability: 0.699,
-      edge_percentage_points: 5.6,
-      expected_value: 0.08,
-      comment: 'Both teams profiling over 3.0 match expected goals; high probability buffer.',
+      selection: 'Under 2.5',
+      odds: 1.45,
+      estimated_probability: 0.728,
+      breakeven_probability: 0.690,
+      edge_percentage_points: 3.8,
+      expected_value: 0.056,
+      comment: 'Selected because both the home/away goal profile and recent league scoring pattern support a low-scoring match. Model probability is above bookmaker break-even.',
     },
   ],
   alternatives: [
     {
-      match_date: new Date().toISOString().split('T')[0],
+      match_date: '2026-10-20',
+      country: 'Portugal',
       league: 'Primeira Liga',
       home_team: 'Braga',
       away_team: 'Gil Vicente',
@@ -105,20 +89,6 @@ const SAMPLE_CHATGPT_JSON: TicketImportJSON = {
       edge_percentage_points: 1.3,
       expected_value: 0.026,
       comment: 'Positive value but lower confidence than the selected matches.',
-    },
-    {
-      match_date: new Date().toISOString().split('T')[0],
-      league: 'Serie A',
-      home_team: 'Monza',
-      away_team: 'Cagliari',
-      market: 'Over/Under',
-      selection: 'Over 1.5',
-      odds: 1.36,
-      estimated_probability: 0.702,
-      breakeven_probability: 0.735,
-      edge_percentage_points: -3.3,
-      expected_value: -0.045,
-      comment: 'Rejected because bookmaker odds offered negative expected value.',
     },
   ],
 }
@@ -182,6 +152,28 @@ export default function ImportClient({ locale }: ImportClientProps) {
     setJsonText(JSON.stringify(SAMPLE_CHATGPT_JSON, null, 2))
     setParseError(null)
     setParsedPayload(SAMPLE_CHATGPT_JSON)
+  }
+
+  // Copy ChatGPT prompt template with country instruction
+  const handleCopyPromptTemplate = () => {
+    const template = `Analyze today's football fixtures using our statistical betting model and generate the betting ticket.
+
+CRITICAL INSTRUCTIONS:
+1. Output MUST be ONLY a single valid JSON object adhering to the schema below.
+2. Country of League: Because leagues in different countries often share similar names (e.g. League One, Primera B, Premier League), you MUST specify the "country" field for each match in both "selections" and "alternatives".
+3. Use the exact JSON format below:
+
+${JSON.stringify(SAMPLE_CHATGPT_JSON, null, 2)}`
+
+    navigator.clipboard.writeText(template)
+    setNotification({
+      open: true,
+      message:
+        locale === 'fr'
+          ? 'Modèle de prompt ChatGPT copié avec instructions pour le pays !'
+          : 'ChatGPT prompt template copied with country instructions! Paste it into ChatGPT.',
+      type: 'success',
+    })
   }
 
   // Clear & Reset
@@ -252,7 +244,23 @@ export default function ImportClient({ locale }: ImportClientProps) {
               </Typography>
             </Box>
 
-            <Box sx={{ display: 'flex', gap: 1 }}>
+            <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
+              <CustomButton
+                size="small"
+                variant="outlined"
+                onClick={handleCopyPromptTemplate}
+                startIcon={<Copy size={16} />}
+                sx={{
+                  fontSize: '0.8rem',
+                  textTransform: 'none',
+                  borderColor: alpha('#F26419', 0.5),
+                  color: '#F26419',
+                  '&:hover': { borderColor: '#F26419', backgroundColor: alpha('#F26419', 0.08) },
+                }}
+              >
+                {locale === 'fr' ? 'Copier le Prompt ChatGPT' : 'Copy ChatGPT Prompt'}
+              </CustomButton>
+
               <CustomButton
                 size="small"
                 variant="outlined"
@@ -260,7 +268,7 @@ export default function ImportClient({ locale }: ImportClientProps) {
                 startIcon={<Sparkles size={16} />}
                 sx={{ fontSize: '0.8rem', textTransform: 'none' }}
               >
-                {locale === 'fr' ? 'Exemple Démo' : 'Load Sample JSON'}
+                {locale === 'fr' ? 'Charger Exemple' : 'Load Sample JSON'}
               </CustomButton>
 
               <CustomButton
@@ -282,7 +290,7 @@ export default function ImportClient({ locale }: ImportClientProps) {
             rows={14}
             value={jsonText}
             onChange={(e) => setJsonText(e.target.value)}
-            placeholder={`{\n  "ticket": {\n    "ticket_number": "001",\n    "date": "2026-10-20",\n    "model_version": "1.0",\n    "stake": 100,\n    "combined_odds": 2.17\n  },\n  "selections": [ ... ],\n  "alternatives": [ ... ]\n}`}
+            placeholder={`{\n  "ticket": {\n    "ticket_number": "001",\n    "date": "2026-10-20",\n    "model_version": "1.0",\n    "stake": 100,\n    "combined_odds": 2.28\n  },\n  "selections": [\n    {\n      "match_date": "2026-10-20",\n      "country": "England",\n      "league": "League One",\n      "home_team": "Bromley",\n      "away_team": "Leicester City",\n      "market": "Over/Under",\n      "selection": "Under 3.5",\n      "odds": 1.57\n    }\n  ],\n  "alternatives": []\n}`}
             slotProps={{
               input: {
                 sx: {
@@ -437,7 +445,12 @@ export default function ImportClient({ locale }: ImportClientProps) {
                         <td style={{ padding: '12px 14px', fontWeight: 700 }}>
                           {sel.home_team} <span style={{ color: '#9AA3B2' }}>vs</span> {sel.away_team}
                         </td>
-                        <td style={{ padding: '12px 14px', color: '#9AA3B2', fontSize: '0.85rem' }}>{sel.league || '—'}</td>
+                        <td style={{ padding: '12px 14px', color: '#9AA3B2', fontSize: '0.85rem' }}>
+                          {sel.country ? (
+                            <span style={{ color: '#F0F2F5', fontWeight: 600 }}>{sel.country} &bull; </span>
+                          ) : null}
+                          {sel.league || '—'}
+                        </td>
                         <td style={{ padding: '12px 14px' }}>
                           <Chip label={`${sel.market}: ${sel.selection}`} size="small" sx={{ backgroundColor: alpha('#F26419', 0.15), color: '#F26419', fontWeight: 700 }} />
                         </td>
@@ -493,7 +506,12 @@ export default function ImportClient({ locale }: ImportClientProps) {
                       {parsedPayload.alternatives.map((alt, idx) => (
                         <tr key={idx} style={{ borderBottom: '1px solid rgba(240, 242, 245, 0.05)' }}>
                           <td style={{ padding: '12px 14px', fontWeight: 600, color: 'text.secondary' }}>
-                            {alt.home_team} vs {alt.away_team}
+                            <div>{alt.home_team} vs {alt.away_team}</div>
+                            {(alt.country || alt.league) && (
+                              <div style={{ fontSize: '0.75rem', color: '#9AA3B2', marginTop: 2 }}>
+                                {alt.country ? `${alt.country} • ` : ''}{alt.league || ''}
+                              </div>
+                            )}
                           </td>
                           <td style={{ padding: '12px 14px', color: 'text.secondary', fontSize: '0.85rem' }}>
                             {alt.market}: {alt.selection}

@@ -324,6 +324,7 @@ export async function importBettingTicket(payload: TicketImportJSON): Promise<{
   const selectionsPayload = payload.selections.map((sel) => ({
     ticket_id: ticket.id,
     match_date: sel.match_date || payload.ticket.date || null,
+    country: sel.country || null,
     league: sel.league || null,
     home_team: sel.home_team,
     away_team: sel.away_team,
@@ -362,6 +363,7 @@ export async function importBettingTicket(payload: TicketImportJSON): Promise<{
     const alternativesPayload = payload.alternatives.map((alt) => ({
       ticket_id: ticket.id,
       match_date: alt.match_date || payload.ticket.date || null,
+      country: alt.country || null,
       league: alt.league || null,
       home_team: alt.home_team,
       away_team: alt.away_team,
@@ -407,6 +409,8 @@ export async function getBettingTickets(filters?: {
       ),
       betting_selections (
         id,
+        country,
+        league,
         home_team,
         away_team,
         market,
@@ -834,6 +838,7 @@ export async function exportTicketAsJson(ticketUuid: string): Promise<{
     },
     selections: (ticket.betting_selections || []).map((s) => ({
       match_date: s.match_date,
+      country: s.country,
       league: s.league,
       home_team: s.home_team,
       away_team: s.away_team,
@@ -862,6 +867,7 @@ export async function exportTicketAsJson(ticketUuid: string): Promise<{
     })),
     alternatives: (ticket.betting_alternatives || []).map((a) => ({
       match_date: a.match_date,
+      country: a.country,
       league: a.league,
       home_team: a.home_team,
       away_team: a.away_team,

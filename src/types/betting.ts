@@ -63,6 +63,7 @@ export interface BettingSelection {
   uuid: string
   ticket_id: number
   match_date: string | null
+  country: string | null
   league: string | null
   home_team: string
   away_team: string
@@ -97,6 +98,7 @@ export interface BettingAlternative {
   uuid: string
   ticket_id: number
   match_date: string | null
+  country: string | null
   league: string | null
   home_team: string
   away_team: string
@@ -155,6 +157,7 @@ export interface TicketImportJSON {
   }
   selections: Array<{
     match_date?: string
+    country?: string
     league?: string
     home_team: string
     away_team: string
@@ -180,6 +183,7 @@ export interface TicketImportJSON {
   }>
   alternatives?: Array<{
     match_date?: string
+    country?: string
     league?: string
     home_team: string
     away_team: string
@@ -212,6 +216,7 @@ export interface TicketExportJSON {
   }
   selections: Array<{
     match_date: string | null
+    country: string | null
     league: string | null
     home_team: string
     away_team: string
@@ -240,6 +245,7 @@ export interface TicketExportJSON {
   }>
   alternatives: Array<{
     match_date: string | null
+    country: string | null
     league: string | null
     home_team: string
     away_team: string
