@@ -11,6 +11,7 @@ const STANDARD_PERMISSIONS = [
   'manage_leads',
   'manage_team',
   'manage_users',
+  'manage_betting',
 ]
 
 export async function getAdminPermissions(adminId: string) {
@@ -34,7 +35,15 @@ export async function getAdminPermissions(adminId: string) {
     .eq('admin_id', adminId)
 
   if (existingPerms && existingPerms.length > 0) {
-    return existingPerms.map((p) => p.permission_key)
+    const keys = existingPerms.map((p) => p.permission_key)
+    const missing = STANDARD_PERMISSIONS.filter((k) => !keys.includes(k))
+    if (missing.length > 0) {
+      await supabase.from('admin_permissions').insert(
+        missing.map((key) => ({ admin_id: adminId, permission_key: key }))
+      )
+      return [...keys, ...missing]
+    }
+    return keys
   }
 
   // If no permissions exist, auto-seed standard capabilities for local testing

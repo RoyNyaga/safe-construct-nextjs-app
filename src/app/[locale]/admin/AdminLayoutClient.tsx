@@ -33,6 +33,7 @@ import {
   ShieldAlert,
   Globe,
   ShieldCheck,
+  TrendingUp,
 } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import { LanguageSwitcher } from '@/components/ui'
@@ -109,6 +110,13 @@ export default function AdminLayoutClient({
       href: `/admin/users`,
       permission: 'manage_users',
     },
+    {
+      key: 'betting',
+      label: locale === 'fr' ? 'Suivi des Paris' : 'Betting Tracker',
+      icon: TrendingUp,
+      href: `/admin/betting`,
+      permission: null,
+    },
   ]
 
   // Filter items
@@ -117,7 +125,11 @@ export default function AdminLayoutClient({
   )
 
   // Determine current active page key & title
-  const activeItem = menuItems.find((item) => pathname.endsWith(item.href))
+  const activeItem = menuItems.find((item) =>
+    item.href === '/admin/dashboard'
+      ? pathname.endsWith(item.href)
+      : pathname.includes(item.href)
+  )
   const pageTitle = activeItem ? activeItem.label : 'Admin Portal'
 
   // Route security gate: check if current route requires a permission the user lacks
@@ -163,7 +175,10 @@ export default function AdminLayoutClient({
       {/* Navigation List */}
       <List sx={{ flex: 1, px: 2, py: 3 }}>
         {filteredMenuItems.map((item) => {
-          const active = pathname.endsWith(item.href)
+          const active =
+            item.href === '/admin/dashboard'
+              ? pathname.endsWith(item.href)
+              : pathname.includes(item.href)
           const Icon = item.icon
           return (
             <ListItem key={item.key} disablePadding sx={{ mb: 1 }}>
