@@ -13,6 +13,9 @@ import {
   Paper,
   alpha,
   Divider,
+  MenuItem,
+  Select,
+  FormControl,
 } from '@mui/material'
 import {
   FileCode2,
@@ -25,11 +28,12 @@ import {
   Info,
   Copy,
 } from 'lucide-react'
-import { TicketImportJSON } from '@/types/betting'
+import { TicketImportJSON, BettingModel } from '@/types/betting'
 import { importBettingTicket } from '@/app/[locale]/actions/betting'
 import { CustomNotification, CustomTooltip } from '@/components/ui'
 import CustomButton from '@/components/ui/CustomButton'
 import { LoadingButton } from '@/components/ui/PromptButtons'
+import { formatCurrency } from '@/utils/bettingCurrency'
 
 const SAMPLE_CHATGPT_JSON: TicketImportJSON = {
   ticket: {
@@ -95,14 +99,17 @@ const SAMPLE_CHATGPT_JSON: TicketImportJSON = {
 
 interface ImportClientProps {
   locale: string
+  models?: BettingModel[]
+  currency?: string
 }
 
-export default function ImportClient({ locale }: ImportClientProps) {
+export default function ImportClient({ locale, models = [], currency = 'FCFA' }: ImportClientProps) {
   const router = useRouter()
   const [jsonText, setJsonText] = useState('')
   const [parsedPayload, setParsedPayload] = useState<TicketImportJSON | null>(null)
   const [parseError, setParseError] = useState<string | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [selectedModelUuid, setSelectedModelUuid] = useState<string>('')
 
   const [notification, setNotification] = useState<{
     open: boolean
@@ -132,6 +139,17 @@ export default function ImportClient({ locale }: ImportClientProps) {
       }
 
       setParsedPayload(obj as TicketImportJSON)
+
+      // Resolve matching model UUID
+      const match =
+        models.find((m) => m.uuid === obj.ticket?.model_uuid) ||
+        models.find((m) => m.version === obj.ticket?.model_version) ||
+        models.find((m) => m.is_active) ||
+        models[0]
+      if (match) {
+        setSelectedModelUuid(match.uuid)
+      }
+
       setNotification({
         open: true,
         message: locale === 'fr' ? 'JSON validé avec succès ! Consultez l\'aperçu ci-dessous.' : 'JSON successfully validated! Review preview below.',
@@ -152,6 +170,15 @@ export default function ImportClient({ locale }: ImportClientProps) {
     setJsonText(JSON.stringify(SAMPLE_CHATGPT_JSON, null, 2))
     setParseError(null)
     setParsedPayload(SAMPLE_CHATGPT_JSON)
+
+    const match =
+      models.find((m) => m.uuid === SAMPLE_CHATGPT_JSON.ticket.model_uuid) ||
+      models.find((m) => m.version === SAMPLE_CHATGPT_JSON.ticket.model_version) ||
+      models.find((m) => m.is_active) ||
+      models[0]
+    if (match) {
+      setSelectedModelUuid(match.uuid)
+    }
   }
 
   // Copy ChatGPT prompt template with country instruction
@@ -188,7 +215,17 @@ ${JSON.stringify(SAMPLE_CHATGPT_JSON, null, 2)}`
     if (!parsedPayload) return
 
     setIsSubmitting(true)
-    const res = await importBettingTicket(parsedPayload)
+
+    // Ensure target model UUID is explicitly linked
+    const finalPayload: TicketImportJSON = {
+      ...parsedPayload,
+      ticket: {
+        ...parsedPayload.ticket,
+        ...(selectedModelUuid ? { model_uuid: selectedModelUuid } : {}),
+      },
+    }
+
+    const res = await importBettingTicket(finalPayload)
     setIsSubmitting(false)
 
     if (res.error) {
@@ -382,16 +419,42 @@ ${JSON.stringify(SAMPLE_CHATGPT_JSON, null, 2)}`
                     {parsedPayload.ticket.date || 'Today'}
                   </Typography>
                 </Grid>
-                <Grid size={{ xs: 6, sm: 3 }}>
-                  <Typography variant="caption" color="text.secondary">Model Version</Typography>
-                  <Typography variant="h6" sx={{ fontWeight: 700, color: '#F6AE2D' }}>
-                    v{parsedPayload.ticket.model_version || '1.0'}
+                <Grid size={{ xs: 12, sm: 4 }}>
+                  <Typography variant="caption" color="text.secondary">
+                    {locale === 'fr' ? 'Modèle Statistique Associé' : 'Associated Model'}
                   </Typography>
+                  {models.length > 0 ? (
+                    <FormControl fullWidth size="small" sx={{ mt: 0.5 }}>
+                      <Select
+                        value={selectedModelUuid}
+                        onChange={(e) => setSelectedModelUuid(e.target.value)}
+                        sx={{
+                          backgroundColor: alpha('#121824', 0.8),
+                          fontSize: '0.85rem',
+                          fontWeight: 700,
+                          color: '#F6AE2D',
+                          borderRadius: 1.5,
+                        }}
+                      >
+                        {models.map((m) => (
+                          <MenuItem key={m.uuid} value={m.uuid} sx={{ fontSize: '0.85rem' }}>
+                            v{m.version} - {m.name} {m.is_active ? `(${locale === 'fr' ? 'Actif' : 'Active'})` : ''}
+                          </MenuItem>
+                        ))}
+                      </Select>
+                    </FormControl>
+                  ) : (
+                    <Typography variant="h6" sx={{ fontWeight: 700, color: '#F6AE2D' }}>
+                      v{parsedPayload.ticket.model_version || '1.0'}
+                    </Typography>
+                  )}
                 </Grid>
-                <Grid size={{ xs: 6, sm: 3 }}>
-                  <Typography variant="caption" color="text.secondary">Stake & Odds</Typography>
+                <Grid size={{ xs: 6, sm: 2.5 }}>
+                  <Typography variant="caption" color="text.secondary">
+                    {locale === 'fr' ? 'Mise & Cote Globale' : 'Stake & Odds'}
+                  </Typography>
                   <Typography variant="h6" sx={{ fontWeight: 700 }}>
-                    ${parsedPayload.ticket.stake || 0} @ {parsedPayload.ticket.combined_odds ? Number(parsedPayload.ticket.combined_odds).toFixed(2) : '—'}
+                    {formatCurrency(parsedPayload.ticket.stake || 0, currency)} @ {parsedPayload.ticket.combined_odds ? Number(parsedPayload.ticket.combined_odds).toFixed(2) : '—'}
                   </Typography>
                 </Grid>
               </Grid>
