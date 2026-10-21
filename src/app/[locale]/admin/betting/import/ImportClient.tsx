@@ -36,8 +36,8 @@ import { LoadingButton } from '@/components/ui/PromptButtons'
 import { formatCurrency } from '@/utils/bettingCurrency'
 
 function generateSamplePayload(activeModel?: BettingModel | null): TicketImportJSON {
-  const modelVersion = activeModel?.version || '1.0'
-  const modelName = activeModel?.name || 'Poisson goal-rate model'
+  const modelVersion = activeModel?.version || '2.1'
+  const modelName = activeModel?.name || 'roys_betting_engine_over_1_5_goals'
 
   return {
     ticket: {
@@ -45,10 +45,13 @@ function generateSamplePayload(activeModel?: BettingModel | null): TicketImportJ
       date: '2026-10-20',
       model_version: modelVersion,
       ...(activeModel?.uuid ? { model_uuid: activeModel.uuid } : {}),
+      model_name: modelName,
       stake: 100,
       combined_odds: 2.28,
       estimated_ticket_probability: 0.491,
       status: 'pending',
+      actual_result: null,
+      profit_loss: 0,
       notes: `Two-leg statistical ticket based on our ${modelName}. Selected goal markets prioritize estimated probability above bookmaker break-even and positive expected value.`,
     },
     selections: [
@@ -58,6 +61,16 @@ function generateSamplePayload(activeModel?: BettingModel | null): TicketImportJ
         league: 'League One',
         home_team: 'Bromley',
         away_team: 'Leicester City',
+        home_league_position: 8,
+        away_league_position: 2,
+        home_goals_scored: 24,
+        home_goals_conceded: 18,
+        away_goals_scored: 38,
+        away_goals_conceded: 15,
+        home_goals_per_game: 1.6,
+        home_conceded_per_game: 1.2,
+        away_goals_per_game: 2.38,
+        away_conceded_per_game: 0.94,
         market: 'Over/Under',
         selection: 'Under 3.5',
         odds: 1.57,
@@ -65,7 +78,11 @@ function generateSamplePayload(activeModel?: BettingModel | null): TicketImportJ
         breakeven_probability: 0.637,
         edge_percentage_points: 3.8,
         expected_value: 0.06,
+        actual_home_score: null,
+        actual_away_score: null,
+        result: 'pending',
         comment: 'Selected because the statistical goal profile supports four or more goals being relatively unlikely. The estimated probability is above bookmaker break-even, providing a positive but modest value edge.',
+        notes: 'Pre-match team news: both sides starting defensive midfield pivots. Weather conditions dry.',
       },
       {
         match_date: '2026-10-20',
@@ -73,14 +90,28 @@ function generateSamplePayload(activeModel?: BettingModel | null): TicketImportJ
         league: 'Primera B',
         home_team: 'Tigres FC',
         away_team: 'Real Cundinamarca',
+        home_league_position: 12,
+        away_league_position: 6,
+        home_goals_scored: 14,
+        home_goals_conceded: 16,
+        away_goals_scored: 19,
+        away_goals_conceded: 15,
+        home_goals_per_game: 1.08,
+        home_conceded_per_game: 1.23,
+        away_goals_per_game: 1.46,
+        away_conceded_per_game: 1.15,
         market: 'Over/Under',
         selection: 'Under 2.5',
         odds: 1.45,
         estimated_probability: 0.728,
-        breakeven_probability: 0.690,
+        breakeven_probability: 0.69,
         edge_percentage_points: 3.8,
         expected_value: 0.056,
+        actual_home_score: null,
+        actual_away_score: null,
+        result: 'pending',
         comment: 'Selected because both the home/away goal profile and recent league scoring pattern support a low-scoring match. Model probability is above bookmaker break-even.',
+        notes: 'Low scoring rate in head-to-head fixtures across recent seasons.',
       },
     ],
     alternatives: [
@@ -97,7 +128,11 @@ function generateSamplePayload(activeModel?: BettingModel | null): TicketImportJ
         breakeven_probability: 0.495,
         edge_percentage_points: 1.3,
         expected_value: 0.026,
+        actual_home_score: null,
+        actual_away_score: null,
+        result: 'pending',
         comment: 'Positive value but lower confidence than the selected matches.',
+        notes: 'Rejected due to high variance in Gil Vicente away defensive discipline.',
       },
     ],
   }
@@ -190,17 +225,26 @@ export default function ImportClient({ locale, models = [], currency = 'FCFA' }:
     }
   }
 
-  // Copy ChatGPT prompt template with country and active model instruction
+  // Copy ChatGPT prompt template with country, active model, and statistical snapshot instructions
   const handleCopyPromptTemplate = () => {
-    const activeVersion = activeModel?.version || '1.0'
-    const activeName = activeModel?.name || 'Statistical Goal Model'
+    const activeVersion = activeModel?.version || '2.1'
+    const activeName = activeModel?.name || 'roys_betting_engine_over_1_5_goals'
     const template = `Analyze today's football fixtures using our statistical betting model (${activeName} v${activeVersion}) and generate the betting ticket.
 
 CRITICAL INSTRUCTIONS:
 1. Output MUST be ONLY a single valid JSON object adhering to the schema below.
 2. Active Model Version: Specify "model_version": "${activeVersion}"${activeModel?.uuid ? ` (or "model_uuid": "${activeModel.uuid}")` : ''}.
 3. Country of League: Because leagues in different countries often share similar names (e.g. League One, Primera B, Premier League), you MUST specify the "country" field for each match in both "selections" and "alternatives".
-4. Use the exact JSON format below:
+4. Pre-Match Statistical Snapshot: For EVERY selection, you MUST populate all statistical attributes:
+   - "home_league_position" & "away_league_position": Current league table positions (e.g. 8, 2).
+   - "home_goals_scored" & "home_goals_conceded": Total goals scored and conceded by the home team.
+   - "away_goals_scored" & "away_goals_conceded": Total goals scored and conceded by the away team.
+   - "home_goals_per_game" & "home_conceded_per_game": Average goals scored and conceded per match by the home team.
+   - "away_goals_per_game" & "away_conceded_per_game": Average goals scored and conceded per match by the away team.
+   - "comment": Detailed rationale explaining why the mathematical/statistical profile supports this selection.
+   - "notes": Any crucial contextual match info, injury/lineup news, weather factors, or tactical nuances.
+5. If creating a pending ticket, leave "actual_home_score" and "actual_away_score" as null and "result" as "pending". If importing a completed ticket, you may supply the final scores and "result" ("won", "lost", or "void").
+6. Use the exact JSON format below:
 
 ${JSON.stringify(sampleJson, null, 2)}`
 
@@ -511,7 +555,7 @@ ${JSON.stringify(sampleJson, null, 2)}`
                       <th style={{ padding: '10px 14px', color: '#9AA3B2', fontSize: '0.75rem', textTransform: 'uppercase' }}>Est. Prob</th>
                       <th style={{ padding: '10px 14px', color: '#9AA3B2', fontSize: '0.75rem', textTransform: 'uppercase' }}>Edge</th>
                       <th style={{ padding: '10px 14px', color: '#9AA3B2', fontSize: '0.75rem', textTransform: 'uppercase' }}>EV</th>
-                      <th style={{ padding: '10px 14px', color: '#9AA3B2', fontSize: '0.75rem', textTransform: 'uppercase' }}>GF/GA Snapshot</th>
+                      <th style={{ padding: '10px 14px', color: '#9AA3B2', fontSize: '0.75rem', textTransform: 'uppercase' }}>Stats Snapshot</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -539,8 +583,20 @@ ${JSON.stringify(sampleJson, null, 2)}`
                         <td style={{ padding: '12px 14px', fontWeight: 700 }}>
                           {sel.expected_value !== undefined ? (Number(sel.expected_value) >= 0 ? `+${sel.expected_value}` : `${sel.expected_value}`) : '—'}
                         </td>
-                        <td style={{ padding: '12px 14px', fontSize: '0.75rem', color: '#9AA3B2' }}>
-                          H: {sel.home_goals_scored ?? '—'}/{sel.home_goals_conceded ?? '—'} | A: {sel.away_goals_scored ?? '—'}/{sel.away_goals_conceded ?? '—'}
+                        <td style={{ padding: '12px 14px', fontSize: '0.75rem' }}>
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mb: 0.25 }}>
+                            <span style={{ color: '#9AA3B2' }}>Pos:</span>
+                            <span style={{ color: '#F6AE2D', fontWeight: 700 }}>
+                              #{sel.home_league_position ?? '—'}
+                            </span>
+                            <span style={{ color: '#9AA3B2' }}>vs</span>
+                            <span style={{ color: '#F6AE2D', fontWeight: 700 }}>
+                              #{sel.away_league_position ?? '—'}
+                            </span>
+                          </Box>
+                          <Box sx={{ color: '#9AA3B2' }}>
+                            GF/GA: {sel.home_goals_scored ?? '—'}/{sel.home_goals_conceded ?? '—'} vs {sel.away_goals_scored ?? '—'}/{sel.away_goals_conceded ?? '—'}
+                          </Box>
                         </td>
                       </tr>
                     ))}

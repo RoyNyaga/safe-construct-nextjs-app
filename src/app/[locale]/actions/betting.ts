@@ -281,23 +281,36 @@ export async function importBettingTicket(payload: TicketImportJSON): Promise<{
   const { bankroll } = await getActiveBankroll()
   const bankrollId = bankroll ? bankroll.id : null
 
-  const stake = Number(payload.ticket.stake || 0)
+function parseNullableNumber(val: any): number | null {
+  if (val === null || val === undefined || val === '') return null
+  const num = Number(val)
+  return isNaN(num) ? null : num
+}
+
+function parseNullableString(val: any): string | null {
+  if (val === null || val === undefined) return null
+  const s = String(val).trim()
+  return s.length > 0 ? s : null
+}
+
+  const stake = parseNullableNumber(payload.ticket.stake) ?? 0
 
   // 3. Insert Ticket
   const { data: ticket, error: ticketError } = await supabase
     .from('betting_tickets')
     .insert([
       {
-        ticket_number: payload.ticket.ticket_number || null,
+        ticket_number: parseNullableString(payload.ticket.ticket_number),
         ticket_date: payload.ticket.date || new Date().toISOString().split('T')[0],
         model_id: modelId,
         bankroll_id: bankrollId,
         stake: stake,
-        combined_odds: payload.ticket.combined_odds || null,
-        estimated_ticket_probability: payload.ticket.estimated_ticket_probability || null,
+        combined_odds: parseNullableNumber(payload.ticket.combined_odds),
+        estimated_ticket_probability: parseNullableNumber(payload.ticket.estimated_ticket_probability),
         status: payload.ticket.status || 'pending',
-        notes: payload.ticket.notes || null,
-        profit_loss: 0.00,
+        actual_result: parseNullableString(payload.ticket.actual_result),
+        profit_loss: parseNullableNumber(payload.ticket.profit_loss) ?? 0.00,
+        notes: parseNullableString(payload.ticket.notes),
       },
     ])
     .select()
@@ -324,30 +337,32 @@ export async function importBettingTicket(payload: TicketImportJSON): Promise<{
   const selectionsPayload = payload.selections.map((sel) => ({
     ticket_id: ticket.id,
     match_date: sel.match_date || payload.ticket.date || null,
-    country: sel.country || null,
-    league: sel.league || null,
+    country: parseNullableString(sel.country),
+    league: parseNullableString(sel.league),
     home_team: sel.home_team,
     away_team: sel.away_team,
-    home_league_position: sel.home_league_position ?? null,
-    away_league_position: sel.away_league_position ?? null,
-    home_goals_scored: sel.home_goals_scored ?? null,
-    home_goals_conceded: sel.home_goals_conceded ?? null,
-    away_goals_scored: sel.away_goals_scored ?? null,
-    away_goals_conceded: sel.away_goals_conceded ?? null,
-    home_goals_per_game: sel.home_goals_per_game ?? null,
-    home_conceded_per_game: sel.home_conceded_per_game ?? null,
-    away_goals_per_game: sel.away_goals_per_game ?? null,
-    away_conceded_per_game: sel.away_conceded_per_game ?? null,
+    home_league_position: parseNullableNumber(sel.home_league_position),
+    away_league_position: parseNullableNumber(sel.away_league_position),
+    home_goals_scored: parseNullableNumber(sel.home_goals_scored),
+    home_goals_conceded: parseNullableNumber(sel.home_goals_conceded),
+    away_goals_scored: parseNullableNumber(sel.away_goals_scored),
+    away_goals_conceded: parseNullableNumber(sel.away_goals_conceded),
+    home_goals_per_game: parseNullableNumber(sel.home_goals_per_game),
+    home_conceded_per_game: parseNullableNumber(sel.home_conceded_per_game),
+    away_goals_per_game: parseNullableNumber(sel.away_goals_per_game),
+    away_conceded_per_game: parseNullableNumber(sel.away_conceded_per_game),
     market: sel.market,
     selection: sel.selection,
-    odds: sel.odds ?? null,
-    estimated_probability: sel.estimated_probability ?? null,
-    breakeven_probability: sel.breakeven_probability ?? null,
-    edge_percentage_points: sel.edge_percentage_points ?? null,
-    expected_value: sel.expected_value ?? null,
-    comment: sel.comment || null,
-    notes: sel.notes || null,
-    result: 'pending',
+    odds: parseNullableNumber(sel.odds),
+    estimated_probability: parseNullableNumber(sel.estimated_probability),
+    breakeven_probability: parseNullableNumber(sel.breakeven_probability),
+    edge_percentage_points: parseNullableNumber(sel.edge_percentage_points),
+    expected_value: parseNullableNumber(sel.expected_value),
+    actual_home_score: parseNullableNumber(sel.actual_home_score),
+    actual_away_score: parseNullableNumber(sel.actual_away_score),
+    result: (sel.result as SelectionResultStatus) || 'pending',
+    comment: parseNullableString(sel.comment),
+    notes: parseNullableString(sel.notes),
   }))
 
   const { error: selError } = await supabase.from('betting_selections').insert(selectionsPayload)
@@ -363,20 +378,22 @@ export async function importBettingTicket(payload: TicketImportJSON): Promise<{
     const alternativesPayload = payload.alternatives.map((alt) => ({
       ticket_id: ticket.id,
       match_date: alt.match_date || payload.ticket.date || null,
-      country: alt.country || null,
-      league: alt.league || null,
+      country: parseNullableString(alt.country),
+      league: parseNullableString(alt.league),
       home_team: alt.home_team,
       away_team: alt.away_team,
       market: alt.market,
       selection: alt.selection,
-      odds: alt.odds ?? null,
-      estimated_probability: alt.estimated_probability ?? null,
-      breakeven_probability: alt.breakeven_probability ?? null,
-      edge_percentage_points: alt.edge_percentage_points ?? null,
-      expected_value: alt.expected_value ?? null,
-      comment: alt.comment || null,
-      notes: alt.notes || null,
-      result: 'pending',
+      odds: parseNullableNumber(alt.odds),
+      estimated_probability: parseNullableNumber(alt.estimated_probability),
+      breakeven_probability: parseNullableNumber(alt.breakeven_probability),
+      edge_percentage_points: parseNullableNumber(alt.edge_percentage_points),
+      expected_value: parseNullableNumber(alt.expected_value),
+      actual_home_score: parseNullableNumber(alt.actual_home_score),
+      actual_away_score: parseNullableNumber(alt.actual_away_score),
+      result: (alt.result as SelectionResultStatus) || 'pending',
+      comment: parseNullableString(alt.comment),
+      notes: parseNullableString(alt.notes),
     }))
 
     const { error: altError } = await supabase.from('betting_alternatives').insert(alternativesPayload)

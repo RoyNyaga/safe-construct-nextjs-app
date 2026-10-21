@@ -40,6 +40,11 @@ import {
   Pencil,
   Trash2,
   AlertTriangle,
+  Brain,
+  FileText,
+  Sparkles,
+  Target,
+  Info,
 } from 'lucide-react'
 import { BettingTicket, BettingSelection, BettingAlternative, SelectionResultStatus, TicketStatus } from '@/types/betting'
 import {
@@ -85,6 +90,7 @@ export default function TicketDetailClient({
 
   // Drawer for selection statistical snapshot
   const [snapshotSelection, setSnapshotSelection] = useState<BettingSelection | null>(null)
+  const [snapshotAlternative, setSnapshotAlternative] = useState<BettingAlternative | null>(null)
 
   // Score Entry Modal for Selection
   const [editingSelection, setEditingSelection] = useState<BettingSelection | null>(null)
@@ -558,7 +564,18 @@ export default function TicketDetailClient({
                       {/* Match & League */}
                       <td style={{ padding: '14px' }}>
                         <Typography variant="body2" sx={{ fontWeight: 700 }}>
-                          {sel.home_team} vs {sel.away_team}
+                          {sel.home_team}
+                          {sel.home_league_position !== null && sel.home_league_position !== undefined && (
+                            <span style={{ color: '#F6AE2D', fontSize: '0.75rem', fontWeight: 700, marginLeft: 4 }}>
+                              (#{sel.home_league_position})
+                            </span>
+                          )}{' '}
+                          <span style={{ color: '#9AA3B2', fontWeight: 400 }}>vs</span> {sel.away_team}
+                          {sel.away_league_position !== null && sel.away_league_position !== undefined && (
+                            <span style={{ color: '#F6AE2D', fontSize: '0.75rem', fontWeight: 700, marginLeft: 4 }}>
+                              (#{sel.away_league_position})
+                            </span>
+                          )}
                         </Typography>
                         <Typography variant="caption" color="text.secondary">
                           {sel.country ? `${sel.country} • ` : ''}{sel.league || '—'} &bull; {sel.match_date || ticket.ticket_date}
@@ -770,6 +787,16 @@ export default function TicketDetailClient({
                         </td>
                         <td style={{ padding: '14px', textAlign: 'right' }}>
                           <Box sx={{ display: 'inline-flex', alignItems: 'center', gap: 1 }}>
+                            <CustomTooltip title={locale === 'fr' ? "Détails de l'alternative" : "View alternative details"}>
+                              <IconButton
+                                size="small"
+                                onClick={() => setSnapshotAlternative(alt)}
+                                sx={{ color: '#F6AE2D', backgroundColor: alpha('#F6AE2D', 0.1) }}
+                              >
+                                <SlidersHorizontal size={16} />
+                              </IconButton>
+                            </CustomTooltip>
+
                             <CustomButton
                               size="small"
                               variant="outlined"
@@ -802,115 +829,599 @@ export default function TicketDetailClient({
         </Card>
       )}
 
-      {/* ─── STATISTICAL SNAPSHOT DRAWER ─────────────────────────────────── */}
+      {/* ─── STATISTICAL SNAPSHOT & SELECTION DETAIL DRAWER ──────────────── */}
       <CustomDrawer
         open={Boolean(snapshotSelection)}
         onClose={() => setSnapshotSelection(null)}
         title={
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
             <SlidersHorizontal size={20} color="#42A5F5" />
-            <span>{locale === 'fr' ? 'Snapshot Statistique Pré-Match' : 'Pre-Match Statistical Snapshot'}</span>
+            <span>{locale === 'fr' ? 'Détails & Snapshot de la Sélection' : 'Selection Details & Statistical Snapshot'}</span>
           </Box>
         }
-        width={400}
+        width={540}
       >
-        {snapshotSelection && (
-          <Box>
-            <Typography variant="subtitle1" sx={{ fontWeight: 800, mb: 0.5 }}>
-              {snapshotSelection.home_team} vs {snapshotSelection.away_team}
-            </Typography>
-            <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 3 }}>
-              {snapshotSelection.country ? `${snapshotSelection.country} • ` : ''}{snapshotSelection.league || '—'} &bull; Stored on {snapshotSelection.match_date || ticket.ticket_date}
-            </Typography>
+        {snapshotSelection && (() => {
+          const selColor =
+            snapshotSelection.result === 'won'
+              ? '#66BB6A'
+              : snapshotSelection.result === 'lost'
+              ? '#EF5350'
+              : snapshotSelection.result === 'void'
+              ? '#9AA3B2'
+              : '#F6AE2D'
 
+          const homeGD =
+            snapshotSelection.home_goals_scored !== null &&
+            snapshotSelection.home_goals_scored !== undefined &&
+            snapshotSelection.home_goals_conceded !== null &&
+            snapshotSelection.home_goals_conceded !== undefined
+              ? Number(snapshotSelection.home_goals_scored) - Number(snapshotSelection.home_goals_conceded)
+              : null
+
+          const awayGD =
+            snapshotSelection.away_goals_scored !== null &&
+            snapshotSelection.away_goals_scored !== undefined &&
+            snapshotSelection.away_goals_conceded !== null &&
+            snapshotSelection.away_goals_conceded !== undefined
+              ? Number(snapshotSelection.away_goals_scored) - Number(snapshotSelection.away_goals_conceded)
+              : null
+
+          return (
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2.5 }}>
+              {/* Match Header */}
+              <Box>
+                <Typography variant="h6" sx={{ fontWeight: 800, mb: 0.5, color: '#F0F2F5' }}>
+                  {snapshotSelection.home_team}{' '}
+                  {snapshotSelection.home_league_position !== null && snapshotSelection.home_league_position !== undefined && (
+                    <span style={{ color: '#F6AE2D', fontSize: '0.85rem' }}>
+                      (#{snapshotSelection.home_league_position})
+                    </span>
+                  )}{' '}
+                  <span style={{ color: '#9AA3B2', fontWeight: 400 }}>vs</span>{' '}
+                  {snapshotSelection.away_team}{' '}
+                  {snapshotSelection.away_league_position !== null && snapshotSelection.away_league_position !== undefined && (
+                    <span style={{ color: '#F6AE2D', fontSize: '0.85rem' }}>
+                      (#{snapshotSelection.away_league_position})
+                    </span>
+                  )}
+                </Typography>
+                <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>
+                  {snapshotSelection.country ? `${snapshotSelection.country} • ` : ''}
+                  {snapshotSelection.league || '—'} &bull; Match Date: {snapshotSelection.match_date || ticket.ticket_date}
+                </Typography>
+              </Box>
+
+              {/* Market Pick & Result Bar */}
+              <Box
+                sx={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  p: 1.5,
+                  borderRadius: 2,
+                  backgroundColor: alpha('#121824', 0.8),
+                  border: (theme) => `1px solid ${alpha(theme.palette.divider, 1)}`,
+                  flexWrap: 'wrap',
+                  gap: 1,
+                }}
+              >
+                <Chip
+                  label={`${snapshotSelection.market}: ${snapshotSelection.selection}`}
+                  size="small"
+                  sx={{ backgroundColor: alpha('#F26419', 0.2), color: '#F26419', fontWeight: 700 }}
+                />
+
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  {snapshotSelection.actual_home_score !== null &&
+                  snapshotSelection.actual_away_score !== null &&
+                  snapshotSelection.actual_home_score !== undefined &&
+                  snapshotSelection.actual_away_score !== undefined ? (
+                    <Chip
+                      label={`Score: ${snapshotSelection.actual_home_score} - ${snapshotSelection.actual_away_score}`}
+                      size="small"
+                      sx={{ fontWeight: 800, backgroundColor: alpha('#F0F2F5', 0.1) }}
+                    />
+                  ) : null}
+                  <Chip
+                    label={snapshotSelection.result.toUpperCase()}
+                    size="small"
+                    sx={{
+                      fontWeight: 800,
+                      fontSize: '0.7rem',
+                      backgroundColor: alpha(selColor, 0.15),
+                      color: selColor,
+                      border: `1px solid ${alpha(selColor, 0.3)}`,
+                    }}
+                  />
+                </Box>
+              </Box>
+
+              {/* Mathematical Model Analytics */}
+              <Paper
+                elevation={0}
+                sx={{
+                  p: 2,
+                  borderRadius: 2,
+                  backgroundColor: alpha('#121824', 0.6),
+                  border: (theme) => `1px solid ${alpha(theme.palette.divider, 1)}`,
+                }}
+              >
+                <Typography
+                  variant="subtitle2"
+                  sx={{
+                    fontWeight: 700,
+                    mb: 1.5,
+                    color: '#42A5F5',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 1,
+                  }}
+                >
+                  <Target size={16} />
+                  {locale === 'fr' ? 'Métriques Mathématiques & Cote' : 'Model Valuation & Mathematical Edge'}
+                </Typography>
+                <Grid container spacing={1.5}>
+                  <Grid size={{ xs: 6, sm: 4 }}>
+                    <Typography variant="caption" color="text.secondary">Bookmaker Odds</Typography>
+                    <Typography variant="body1" sx={{ fontWeight: 800 }}>
+                      {snapshotSelection.odds ? Number(snapshotSelection.odds).toFixed(2) : '—'}
+                    </Typography>
+                  </Grid>
+                  <Grid size={{ xs: 6, sm: 4 }}>
+                    <Typography variant="caption" color="text.secondary">Model Probability</Typography>
+                    <Typography variant="body1" sx={{ fontWeight: 800, color: '#66BB6A' }}>
+                      {snapshotSelection.estimated_probability
+                        ? `${(Number(snapshotSelection.estimated_probability) * 100).toFixed(1)}%`
+                        : '—'}
+                    </Typography>
+                  </Grid>
+                  <Grid size={{ xs: 6, sm: 4 }}>
+                    <Typography variant="caption" color="text.secondary">Break-even Prob</Typography>
+                    <Typography variant="body1" sx={{ fontWeight: 700, color: '#9AA3B2' }}>
+                      {snapshotSelection.breakeven_probability
+                        ? `${(Number(snapshotSelection.breakeven_probability) * 100).toFixed(1)}%`
+                        : '—'}
+                    </Typography>
+                  </Grid>
+                  <Grid size={{ xs: 6, sm: 6 }}>
+                    <Typography variant="caption" color="text.secondary">Edge Points</Typography>
+                    <Typography
+                      variant="body1"
+                      sx={{
+                        fontWeight: 800,
+                        color: (Number(snapshotSelection.edge_percentage_points) || 0) >= 0 ? '#66BB6A' : '#EF5350',
+                      }}
+                    >
+                      {snapshotSelection.edge_percentage_points !== null && snapshotSelection.edge_percentage_points !== undefined
+                        ? `${Number(snapshotSelection.edge_percentage_points) >= 0 ? '+' : ''}${snapshotSelection.edge_percentage_points}%`
+                        : '—'}
+                    </Typography>
+                  </Grid>
+                  <Grid size={{ xs: 6, sm: 6 }}>
+                    <Typography variant="caption" color="text.secondary">Expected Value (EV)</Typography>
+                    <Typography
+                      variant="body1"
+                      sx={{
+                        fontWeight: 800,
+                        color: (Number(snapshotSelection.expected_value) || 0) >= 0 ? '#66BB6A' : '#EF5350',
+                      }}
+                    >
+                      {snapshotSelection.expected_value !== null && snapshotSelection.expected_value !== undefined
+                        ? `${Number(snapshotSelection.expected_value) >= 0 ? '+' : ''}${snapshotSelection.expected_value}`
+                        : '—'}
+                    </Typography>
+                  </Grid>
+                </Grid>
+              </Paper>
+
+              {/* Pre-Match Statistical Matchup Comparison */}
+              <Paper
+                elevation={0}
+                sx={{
+                  p: 2,
+                  borderRadius: 2,
+                  backgroundColor: alpha('#121824', 0.6),
+                  border: (theme) => `1px solid ${alpha(theme.palette.divider, 1)}`,
+                }}
+              >
+                <Typography
+                  variant="subtitle2"
+                  sx={{
+                    fontWeight: 700,
+                    mb: 1.5,
+                    color: '#F26419',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 1,
+                  }}
+                >
+                  <TrendingUp size={16} />
+                  {locale === 'fr' ? 'Profil & Statistiques Pré-Match' : 'Pre-Match Statistical Matchup'}
+                </Typography>
+                <Box sx={{ overflowX: 'auto' }}>
+                  <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.825rem' }}>
+                    <thead>
+                      <tr style={{ borderBottom: '1px solid rgba(240, 242, 245, 0.1)' }}>
+                        <th style={{ padding: '8px 6px', textAlign: 'left', color: '#9AA3B2', fontWeight: 600 }}>Metric</th>
+                        <th style={{ padding: '8px 6px', textAlign: 'center', color: '#F6AE2D', fontWeight: 700 }}>
+                          {snapshotSelection.home_team} (Home)
+                        </th>
+                        <th style={{ padding: '8px 6px', textAlign: 'center', color: '#42A5F5', fontWeight: 700 }}>
+                          {snapshotSelection.away_team} (Away)
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr style={{ borderBottom: '1px solid rgba(240, 242, 245, 0.05)' }}>
+                        <td style={{ padding: '8px 6px', color: '#9AA3B2' }}>League Position</td>
+                        <td style={{ padding: '8px 6px', textAlign: 'center', fontWeight: 800 }}>
+                          {snapshotSelection.home_league_position !== null && snapshotSelection.home_league_position !== undefined
+                            ? `#${snapshotSelection.home_league_position}`
+                            : '—'}
+                        </td>
+                        <td style={{ padding: '8px 6px', textAlign: 'center', fontWeight: 800 }}>
+                          {snapshotSelection.away_league_position !== null && snapshotSelection.away_league_position !== undefined
+                            ? `#${snapshotSelection.away_league_position}`
+                            : '—'}
+                        </td>
+                      </tr>
+                      <tr style={{ borderBottom: '1px solid rgba(240, 242, 245, 0.05)' }}>
+                        <td style={{ padding: '8px 6px', color: '#9AA3B2' }}>Goals Scored (GF)</td>
+                        <td style={{ padding: '8px 6px', textAlign: 'center', fontWeight: 700, color: '#66BB6A' }}>
+                          {snapshotSelection.home_goals_scored ?? '—'}
+                        </td>
+                        <td style={{ padding: '8px 6px', textAlign: 'center', fontWeight: 700, color: '#66BB6A' }}>
+                          {snapshotSelection.away_goals_scored ?? '—'}
+                        </td>
+                      </tr>
+                      <tr style={{ borderBottom: '1px solid rgba(240, 242, 245, 0.05)' }}>
+                        <td style={{ padding: '8px 6px', color: '#9AA3B2' }}>Goals Conceded (GA)</td>
+                        <td style={{ padding: '8px 6px', textAlign: 'center', fontWeight: 700, color: '#EF5350' }}>
+                          {snapshotSelection.home_goals_conceded ?? '—'}
+                        </td>
+                        <td style={{ padding: '8px 6px', textAlign: 'center', fontWeight: 700, color: '#EF5350' }}>
+                          {snapshotSelection.away_goals_conceded ?? '—'}
+                        </td>
+                      </tr>
+                      <tr style={{ borderBottom: '1px solid rgba(240, 242, 245, 0.05)' }}>
+                        <td style={{ padding: '8px 6px', color: '#9AA3B2' }}>Goal Difference (GD)</td>
+                        <td style={{ padding: '8px 6px', textAlign: 'center', fontWeight: 800 }}>
+                          {homeGD !== null ? `${homeGD > 0 ? '+' : ''}${homeGD}` : '—'}
+                        </td>
+                        <td style={{ padding: '8px 6px', textAlign: 'center', fontWeight: 800 }}>
+                          {awayGD !== null ? `${awayGD > 0 ? '+' : ''}${awayGD}` : '—'}
+                        </td>
+                      </tr>
+                      <tr style={{ borderBottom: '1px solid rgba(240, 242, 245, 0.05)' }}>
+                        <td style={{ padding: '8px 6px', color: '#9AA3B2' }}>Avg Goals Scored / Match</td>
+                        <td style={{ padding: '8px 6px', textAlign: 'center', fontWeight: 700 }}>
+                          {snapshotSelection.home_goals_per_game !== null && snapshotSelection.home_goals_per_game !== undefined
+                            ? Number(snapshotSelection.home_goals_per_game).toFixed(2)
+                            : '—'}
+                        </td>
+                        <td style={{ padding: '8px 6px', textAlign: 'center', fontWeight: 700 }}>
+                          {snapshotSelection.away_goals_per_game !== null && snapshotSelection.away_goals_per_game !== undefined
+                            ? Number(snapshotSelection.away_goals_per_game).toFixed(2)
+                            : '—'}
+                        </td>
+                      </tr>
+                      <tr>
+                        <td style={{ padding: '8px 6px', color: '#9AA3B2' }}>Avg Goals Conceded / Match</td>
+                        <td style={{ padding: '8px 6px', textAlign: 'center', fontWeight: 700 }}>
+                          {snapshotSelection.home_conceded_per_game !== null && snapshotSelection.home_conceded_per_game !== undefined
+                            ? Number(snapshotSelection.home_conceded_per_game).toFixed(2)
+                            : '—'}
+                        </td>
+                        <td style={{ padding: '8px 6px', textAlign: 'center', fontWeight: 700 }}>
+                          {snapshotSelection.away_conceded_per_game !== null && snapshotSelection.away_conceded_per_game !== undefined
+                            ? Number(snapshotSelection.away_conceded_per_game).toFixed(2)
+                            : '—'}
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </Box>
+              </Paper>
+
+              {/* Methodology Reasoning */}
+              {snapshotSelection.comment && (
+                <Box
+                  sx={{
+                    p: 2,
+                    borderRadius: 2,
+                    backgroundColor: alpha('#F26419', 0.08),
+                    border: `1px solid ${alpha('#F26419', 0.2)}`,
+                  }}
+                >
+                  <Typography
+                    variant="caption"
+                    sx={{
+                      fontWeight: 700,
+                      color: 'primary.main',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 0.75,
+                      mb: 0.75,
+                    }}
+                  >
+                    <Brain size={15} />
+                    {locale === 'fr' ? 'Justification Méthodologique du Modèle :' : 'Model Methodology & Selection Reasoning:'}
+                  </Typography>
+                  <Typography variant="body2" sx={{ fontStyle: 'italic', lineHeight: 1.6 }}>
+                    "{snapshotSelection.comment}"
+                  </Typography>
+                </Box>
+              )}
+
+              {/* Contextual / Match Notes */}
+              {snapshotSelection.notes && (
+                <Box
+                  sx={{
+                    p: 2,
+                    borderRadius: 2,
+                    backgroundColor: alpha('#42A5F5', 0.08),
+                    border: `1px solid ${alpha('#42A5F5', 0.2)}`,
+                  }}
+                >
+                  <Typography
+                    variant="caption"
+                    sx={{
+                      fontWeight: 700,
+                      color: '#42A5F5',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 0.75,
+                      mb: 0.75,
+                    }}
+                  >
+                    <FileText size={15} />
+                    {locale === 'fr' ? 'Notes Contextuelles & Équipe :' : 'Contextual Notes & Match Insights:'}
+                  </Typography>
+                  <Typography variant="body2" sx={{ lineHeight: 1.6 }}>
+                    {snapshotSelection.notes}
+                  </Typography>
+                </Box>
+              )}
+
+              {/* System Audit Details */}
+              <Box
+                sx={{
+                  pt: 1.5,
+                  borderTop: '1px solid rgba(240, 242, 245, 0.08)',
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                }}
+              >
+                <Typography variant="caption" color="text.secondary">
+                  UUID: {snapshotSelection.uuid?.substring(0, 8)}...
+                </Typography>
+                <Typography variant="caption" color="text.secondary">
+                  Ticket #{ticket.ticket_number || ticket.id}
+                </Typography>
+              </Box>
+            </Box>
+          )
+        })()}
+      </CustomDrawer>
+
+      {/* ─── CONSIDERED ALTERNATIVE DETAILS DRAWER ────────────────────────── */}
+      <CustomDrawer
+        open={Boolean(snapshotAlternative)}
+        onClose={() => setSnapshotAlternative(null)}
+        title={
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <Scale size={20} color="#F6AE2D" />
+            <span>{locale === 'fr' ? "Détails de l'Alternative Rejetée" : 'Rejected Alternative Details'}</span>
+          </Box>
+        }
+        width={540}
+      >
+        {snapshotAlternative && (
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2.5 }}>
+            <Box>
+              <Typography variant="h6" sx={{ fontWeight: 800, mb: 0.5, color: '#F0F2F5' }}>
+                {snapshotAlternative.home_team}{' '}
+                <span style={{ color: '#9AA3B2', fontWeight: 400 }}>vs</span>{' '}
+                {snapshotAlternative.away_team}
+              </Typography>
+              <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>
+                {snapshotAlternative.country ? `${snapshotAlternative.country} • ` : ''}
+                {snapshotAlternative.league || '—'} &bull; Match Date: {snapshotAlternative.match_date || ticket.ticket_date}
+              </Typography>
+            </Box>
+
+            {/* Market & Score Bar */}
+            <Box
+              sx={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                p: 1.5,
+                borderRadius: 2,
+                backgroundColor: alpha('#121824', 0.8),
+                border: (theme) => `1px solid ${alpha(theme.palette.divider, 1)}`,
+                flexWrap: 'wrap',
+                gap: 1,
+              }}
+            >
+              <Chip
+                label={`${snapshotAlternative.market}: ${snapshotAlternative.selection}`}
+                size="small"
+                sx={{ backgroundColor: alpha('#F6AE2D', 0.2), color: '#F6AE2D', fontWeight: 700 }}
+              />
+
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                {snapshotAlternative.actual_home_score !== null &&
+                snapshotAlternative.actual_away_score !== null &&
+                snapshotAlternative.actual_home_score !== undefined &&
+                snapshotAlternative.actual_away_score !== undefined ? (
+                  <Chip
+                    label={`Score: ${snapshotAlternative.actual_home_score} - ${snapshotAlternative.actual_away_score}`}
+                    size="small"
+                    sx={{ fontWeight: 800, backgroundColor: alpha('#F0F2F5', 0.1) }}
+                  />
+                ) : null}
+                <Chip
+                  label={snapshotAlternative.result.toUpperCase()}
+                  size="small"
+                  sx={{
+                    fontWeight: 800,
+                    fontSize: '0.7rem',
+                    backgroundColor: alpha(
+                      snapshotAlternative.result === 'won'
+                        ? '#66BB6A'
+                        : snapshotAlternative.result === 'lost'
+                        ? '#EF5350'
+                        : '#9AA3B2',
+                      0.15
+                    ),
+                    color:
+                      snapshotAlternative.result === 'won'
+                        ? '#66BB6A'
+                        : snapshotAlternative.result === 'lost'
+                        ? '#EF5350'
+                        : '#9AA3B2',
+                  }}
+                />
+              </Box>
+            </Box>
+
+            {/* Model Metrics */}
             <Paper
               elevation={0}
               sx={{
                 p: 2,
-                mb: 3,
                 borderRadius: 2,
                 backgroundColor: alpha('#121824', 0.6),
                 border: (theme) => `1px solid ${alpha(theme.palette.divider, 1)}`,
               }}
             >
-              <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 1.5, color: '#F26419' }}>
-                League Standings Snapshot
+              <Typography
+                variant="subtitle2"
+                sx={{
+                  fontWeight: 700,
+                  mb: 1.5,
+                  color: '#F6AE2D',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 1,
+                }}
+              >
+                <Target size={16} />
+                {locale === 'fr' ? 'Évaluation Statistique du Modèle' : 'Model Statistical Evaluation'}
               </Typography>
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-                <Typography variant="body2">{snapshotSelection.home_team} Position:</Typography>
-                <Typography variant="body2" sx={{ fontWeight: 700 }}>
-                  #{snapshotSelection.home_league_position ?? '—'}
-                </Typography>
-              </Box>
-              <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                <Typography variant="body2">{snapshotSelection.away_team} Position:</Typography>
-                <Typography variant="body2" sx={{ fontWeight: 700 }}>
-                  #{snapshotSelection.away_league_position ?? '—'}
-                </Typography>
-              </Box>
+              <Grid container spacing={1.5}>
+                <Grid size={{ xs: 6, sm: 4 }}>
+                  <Typography variant="caption" color="text.secondary">Odds</Typography>
+                  <Typography variant="body1" sx={{ fontWeight: 800 }}>
+                    {snapshotAlternative.odds ? Number(snapshotAlternative.odds).toFixed(2) : '—'}
+                  </Typography>
+                </Grid>
+                <Grid size={{ xs: 6, sm: 4 }}>
+                  <Typography variant="caption" color="text.secondary">Est. Probability</Typography>
+                  <Typography variant="body1" sx={{ fontWeight: 800, color: '#66BB6A' }}>
+                    {snapshotAlternative.estimated_probability
+                      ? `${(Number(snapshotAlternative.estimated_probability) * 100).toFixed(1)}%`
+                      : '—'}
+                  </Typography>
+                </Grid>
+                <Grid size={{ xs: 6, sm: 4 }}>
+                  <Typography variant="caption" color="text.secondary">Break-even</Typography>
+                  <Typography variant="body1" sx={{ fontWeight: 700, color: '#9AA3B2' }}>
+                    {snapshotAlternative.breakeven_probability
+                      ? `${(Number(snapshotAlternative.breakeven_probability) * 100).toFixed(1)}%`
+                      : '—'}
+                  </Typography>
+                </Grid>
+                <Grid size={{ xs: 6, sm: 6 }}>
+                  <Typography variant="caption" color="text.secondary">Edge Points</Typography>
+                  <Typography
+                    variant="body1"
+                    sx={{
+                      fontWeight: 800,
+                      color: (Number(snapshotAlternative.edge_percentage_points) || 0) >= 0 ? '#66BB6A' : '#EF5350',
+                    }}
+                  >
+                    {snapshotAlternative.edge_percentage_points !== null && snapshotAlternative.edge_percentage_points !== undefined
+                      ? `${Number(snapshotAlternative.edge_percentage_points) >= 0 ? '+' : ''}${snapshotAlternative.edge_percentage_points}%`
+                      : '—'}
+                  </Typography>
+                </Grid>
+                <Grid size={{ xs: 6, sm: 6 }}>
+                  <Typography variant="caption" color="text.secondary">Expected Value (EV)</Typography>
+                  <Typography
+                    variant="body1"
+                    sx={{
+                      fontWeight: 800,
+                      color: (Number(snapshotAlternative.expected_value) || 0) >= 0 ? '#66BB6A' : '#EF5350',
+                    }}
+                  >
+                    {snapshotAlternative.expected_value !== null && snapshotAlternative.expected_value !== undefined
+                      ? `${Number(snapshotAlternative.expected_value) >= 0 ? '+' : ''}${snapshotAlternative.expected_value}`
+                      : '—'}
+                  </Typography>
+                </Grid>
+              </Grid>
             </Paper>
 
-            <Paper
-              elevation={0}
-              sx={{
-                p: 2,
-                mb: 3,
-                borderRadius: 2,
-                backgroundColor: alpha('#121824', 0.6),
-                border: (theme) => `1px solid ${alpha(theme.palette.divider, 1)}`,
-              }}
-            >
-              <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 1.5, color: '#66BB6A' }}>
-                Goals Scored & Conceded (GF / GA)
-              </Typography>
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-                <Typography variant="body2">{snapshotSelection.home_team} GF / GA:</Typography>
-                <Typography variant="body2" sx={{ fontWeight: 700 }}>
-                  {snapshotSelection.home_goals_scored ?? '—'} / {snapshotSelection.home_goals_conceded ?? '—'}
+            {/* Rejection Reason */}
+            {snapshotAlternative.comment && (
+              <Box
+                sx={{
+                  p: 2,
+                  borderRadius: 2,
+                  backgroundColor: alpha('#F6AE2D', 0.08),
+                  border: `1px solid ${alpha('#F6AE2D', 0.2)}`,
+                }}
+              >
+                <Typography
+                  variant="caption"
+                  sx={{
+                    fontWeight: 700,
+                    color: '#F6AE2D',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 0.75,
+                    mb: 0.75,
+                  }}
+                >
+                  <Brain size={15} />
+                  {locale === 'fr' ? 'Motif de Rejet par le Modèle :' : 'Rejection Reason / Analysis:'}
+                </Typography>
+                <Typography variant="body2" sx={{ fontStyle: 'italic', lineHeight: 1.6 }}>
+                  "{snapshotAlternative.comment}"
                 </Typography>
               </Box>
-              <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                <Typography variant="body2">{snapshotSelection.away_team} GF / GA:</Typography>
-                <Typography variant="body2" sx={{ fontWeight: 700 }}>
-                  {snapshotSelection.away_goals_scored ?? '—'} / {snapshotSelection.away_goals_conceded ?? '—'}
-                </Typography>
-              </Box>
-            </Paper>
+            )}
 
-            <Paper
-              elevation={0}
-              sx={{
-                p: 2,
-                mb: 3,
-                borderRadius: 2,
-                backgroundColor: alpha('#121824', 0.6),
-                border: (theme) => `1px solid ${alpha(theme.palette.divider, 1)}`,
-              }}
-            >
-              <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 1.5, color: '#F6AE2D' }}>
-                Average Goals Per Game
-              </Typography>
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-                <Typography variant="body2">{snapshotSelection.home_team} GF / GA per game:</Typography>
-                <Typography variant="body2" sx={{ fontWeight: 700 }}>
-                  {snapshotSelection.home_goals_per_game ?? '—'} / {snapshotSelection.home_conceded_per_game ?? '—'}
+            {/* Contextual Notes */}
+            {snapshotAlternative.notes && (
+              <Box
+                sx={{
+                  p: 2,
+                  borderRadius: 2,
+                  backgroundColor: alpha('#42A5F5', 0.08),
+                  border: `1px solid ${alpha('#42A5F5', 0.2)}`,
+                }}
+              >
+                <Typography
+                  variant="caption"
+                  sx={{
+                    fontWeight: 700,
+                    color: '#42A5F5',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 0.75,
+                    mb: 0.75,
+                  }}
+                >
+                  <FileText size={15} />
+                  {locale === 'fr' ? 'Notes Additionnelles :' : 'Additional Notes:'}
                 </Typography>
-              </Box>
-              <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                <Typography variant="body2">{snapshotSelection.away_team} GF / GA per game:</Typography>
-                <Typography variant="body2" sx={{ fontWeight: 700 }}>
-                  {snapshotSelection.away_goals_per_game ?? '—'} / {snapshotSelection.away_conceded_per_game ?? '—'}
-                </Typography>
-              </Box>
-            </Paper>
-
-            {snapshotSelection.comment && (
-              <Box sx={{ p: 2, borderRadius: 2, backgroundColor: alpha('#F26419', 0.08), border: `1px solid ${alpha('#F26419', 0.2)}` }}>
-                <Typography variant="caption" sx={{ fontWeight: 700, color: 'primary.main', display: 'block', mb: 0.5 }}>
-                  Methodology Selection Reasoning:
-                </Typography>
-                <Typography variant="body2" sx={{ fontStyle: 'italic' }}>
-                  "{snapshotSelection.comment}"
+                <Typography variant="body2" sx={{ lineHeight: 1.6 }}>
+                  {snapshotAlternative.notes}
                 </Typography>
               </Box>
             )}
