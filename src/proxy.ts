@@ -6,10 +6,9 @@ import { routing } from './i18n/routing'
 const intlMiddleware = createMiddleware(routing)
 
 export async function proxy(request: NextRequest) {
-  // First handle Supabase session refresh
-  // Pass the intl response as the base so cookies flow through
-  const intlResponse = intlMiddleware(request)
-  return await updateSession(request, intlResponse)
+  // Pass intlMiddleware function directly so updateSession can re-create
+  // the localized response with fresh request cookies whenever tokens are refreshed
+  return await updateSession(request, intlMiddleware)
 }
 
 export const config = {
