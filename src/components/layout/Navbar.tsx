@@ -50,32 +50,21 @@ export default function Navbar() {
   useEffect(() => {
     setMounted(true)
 
-    // Load active session
-    supabase.auth.getUser().then(({ data: { user } }) => {
-      setUser(user)
-      if (user) {
-        Promise.resolve(
-          supabase.from('profiles').select('role').eq('id', user.id).single()
-        )
-          .then(({ data }) => {
-            setIsAdmin(data?.role === 'admin')
-          })
-          .catch((err) => console.error('[Navbar] profile fetch error:', err))
-      }
-    }).catch((err) => console.error('[Navbar] getUser error:', err))
-
-    // Listen for auth state changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    // Listen for auth state changes (fires INITIAL_SESSION on mount)
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
       const u = session?.user ?? null
       setUser(u)
       if (u) {
-        Promise.resolve(
-          supabase.from('profiles').select('role').eq('id', u.id).single()
-        )
-          .then(({ data }) => {
-            setIsAdmin(data?.role === 'admin')
-          })
-          .catch((err) => console.error('[Navbar] profile listener error:', err))
+        try {
+          const { data } = await supabase
+            .from('profiles')
+            .select('role')
+            .eq('id', u.id)
+            .single()
+          setIsAdmin(data?.role === 'admin')
+        } catch {
+          setIsAdmin(false)
+        }
       } else {
         setIsAdmin(false)
       }
