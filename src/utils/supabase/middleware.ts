@@ -32,9 +32,30 @@ export async function updateSession(request: NextRequest, response?: NextRespons
   // IMPORTANT: Avoid writing lightweight, fragile session checks.
   // Calling getUser() on every request ensures session validity.
   try {
-    await supabase.auth.getUser()
-  } catch (err) {
-    console.error('Supabase session refresh error in proxy:', err)
+    const { error } = await supabase.auth.getUser()
+    if (error) {
+      const isRefreshTokenError =
+        error.code === 'refresh_token_already_used' ||
+        error.message?.toLowerCase().includes('refresh token') ||
+        error.status === 400
+
+      if (isRefreshTokenError) {
+        // Clear stale auth cookies so the browser doesn't stay in a loop sending an already-used token
+        const allCookies = request.cookies.getAll()
+        allCookies.forEach((c) => {
+          if (c.name.startsWith('sb-') && c.name.includes('-auth-token')) {
+            supabaseResponse.cookies.delete(c.name)
+          }
+        })
+      }
+    }
+  } catch (err: any) {
+    if (
+      err?.code !== 'refresh_token_already_used' &&
+      !err?.message?.toLowerCase().includes('refresh token')
+    ) {
+      console.error('Supabase session refresh error in proxy:', err)
+    }
   }
 
   return supabaseResponse
