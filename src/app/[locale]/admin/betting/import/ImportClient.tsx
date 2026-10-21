@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import {
   Box,
@@ -35,66 +35,72 @@ import CustomButton from '@/components/ui/CustomButton'
 import { LoadingButton } from '@/components/ui/PromptButtons'
 import { formatCurrency } from '@/utils/bettingCurrency'
 
-const SAMPLE_CHATGPT_JSON: TicketImportJSON = {
-  ticket: {
-    ticket_number: '001',
-    date: '2026-10-20',
-    model_version: '1.0',
-    stake: 100,
-    combined_odds: 2.28,
-    estimated_ticket_probability: 0.491,
-    status: 'pending',
-    notes: 'Two-leg statistical ticket based on our Poisson goal-rate model. Selected goal markets prioritize estimated probability above bookmaker break-even and positive expected value.',
-  },
-  selections: [
-    {
-      match_date: '2026-10-20',
-      country: 'England',
-      league: 'League One',
-      home_team: 'Bromley',
-      away_team: 'Leicester City',
-      market: 'Over/Under',
-      selection: 'Under 3.5',
-      odds: 1.57,
-      estimated_probability: 0.675,
-      breakeven_probability: 0.637,
-      edge_percentage_points: 3.8,
-      expected_value: 0.06,
-      comment: 'Selected because the statistical goal profile supports four or more goals being relatively unlikely. The estimated probability is above bookmaker break-even, providing a positive but modest value edge.',
+function generateSamplePayload(activeModel?: BettingModel | null): TicketImportJSON {
+  const modelVersion = activeModel?.version || '1.0'
+  const modelName = activeModel?.name || 'Poisson goal-rate model'
+
+  return {
+    ticket: {
+      ticket_number: '001',
+      date: '2026-10-20',
+      model_version: modelVersion,
+      ...(activeModel?.uuid ? { model_uuid: activeModel.uuid } : {}),
+      stake: 100,
+      combined_odds: 2.28,
+      estimated_ticket_probability: 0.491,
+      status: 'pending',
+      notes: `Two-leg statistical ticket based on our ${modelName}. Selected goal markets prioritize estimated probability above bookmaker break-even and positive expected value.`,
     },
-    {
-      match_date: '2026-10-20',
-      country: 'Colombia',
-      league: 'Primera B',
-      home_team: 'Tigres FC',
-      away_team: 'Real Cundinamarca',
-      market: 'Over/Under',
-      selection: 'Under 2.5',
-      odds: 1.45,
-      estimated_probability: 0.728,
-      breakeven_probability: 0.690,
-      edge_percentage_points: 3.8,
-      expected_value: 0.056,
-      comment: 'Selected because both the home/away goal profile and recent league scoring pattern support a low-scoring match. Model probability is above bookmaker break-even.',
-    },
-  ],
-  alternatives: [
-    {
-      match_date: '2026-10-20',
-      country: 'Portugal',
-      league: 'Primeira Liga',
-      home_team: 'Braga',
-      away_team: 'Gil Vicente',
-      market: 'Over/Under',
-      selection: 'Over 2.5',
-      odds: 2.02,
-      estimated_probability: 0.508,
-      breakeven_probability: 0.495,
-      edge_percentage_points: 1.3,
-      expected_value: 0.026,
-      comment: 'Positive value but lower confidence than the selected matches.',
-    },
-  ],
+    selections: [
+      {
+        match_date: '2026-10-20',
+        country: 'England',
+        league: 'League One',
+        home_team: 'Bromley',
+        away_team: 'Leicester City',
+        market: 'Over/Under',
+        selection: 'Under 3.5',
+        odds: 1.57,
+        estimated_probability: 0.675,
+        breakeven_probability: 0.637,
+        edge_percentage_points: 3.8,
+        expected_value: 0.06,
+        comment: 'Selected because the statistical goal profile supports four or more goals being relatively unlikely. The estimated probability is above bookmaker break-even, providing a positive but modest value edge.',
+      },
+      {
+        match_date: '2026-10-20',
+        country: 'Colombia',
+        league: 'Primera B',
+        home_team: 'Tigres FC',
+        away_team: 'Real Cundinamarca',
+        market: 'Over/Under',
+        selection: 'Under 2.5',
+        odds: 1.45,
+        estimated_probability: 0.728,
+        breakeven_probability: 0.690,
+        edge_percentage_points: 3.8,
+        expected_value: 0.056,
+        comment: 'Selected because both the home/away goal profile and recent league scoring pattern support a low-scoring match. Model probability is above bookmaker break-even.',
+      },
+    ],
+    alternatives: [
+      {
+        match_date: '2026-10-20',
+        country: 'Portugal',
+        league: 'Primeira Liga',
+        home_team: 'Braga',
+        away_team: 'Gil Vicente',
+        market: 'Over/Under',
+        selection: 'Over 2.5',
+        odds: 2.02,
+        estimated_probability: 0.508,
+        breakeven_probability: 0.495,
+        edge_percentage_points: 1.3,
+        expected_value: 0.026,
+        comment: 'Positive value but lower confidence than the selected matches.',
+      },
+    ],
+  }
 }
 
 interface ImportClientProps {
@@ -165,40 +171,46 @@ export default function ImportClient({ locale, models = [], currency = 'FCFA' }:
     }
   }
 
+  const activeModel = useMemo(() => {
+    return models.find((m) => m.is_active) || models[0] || null
+  }, [models])
+
+  const sampleJson = useMemo(() => {
+    return generateSamplePayload(activeModel)
+  }, [activeModel])
+
   // Load Sample JSON
   const handleLoadSample = () => {
-    setJsonText(JSON.stringify(SAMPLE_CHATGPT_JSON, null, 2))
+    setJsonText(JSON.stringify(sampleJson, null, 2))
     setParseError(null)
-    setParsedPayload(SAMPLE_CHATGPT_JSON)
+    setParsedPayload(sampleJson)
 
-    const match =
-      models.find((m) => m.uuid === SAMPLE_CHATGPT_JSON.ticket.model_uuid) ||
-      models.find((m) => m.version === SAMPLE_CHATGPT_JSON.ticket.model_version) ||
-      models.find((m) => m.is_active) ||
-      models[0]
-    if (match) {
-      setSelectedModelUuid(match.uuid)
+    if (activeModel) {
+      setSelectedModelUuid(activeModel.uuid)
     }
   }
 
-  // Copy ChatGPT prompt template with country instruction
+  // Copy ChatGPT prompt template with country and active model instruction
   const handleCopyPromptTemplate = () => {
-    const template = `Analyze today's football fixtures using our statistical betting model and generate the betting ticket.
+    const activeVersion = activeModel?.version || '1.0'
+    const activeName = activeModel?.name || 'Statistical Goal Model'
+    const template = `Analyze today's football fixtures using our statistical betting model (${activeName} v${activeVersion}) and generate the betting ticket.
 
 CRITICAL INSTRUCTIONS:
 1. Output MUST be ONLY a single valid JSON object adhering to the schema below.
-2. Country of League: Because leagues in different countries often share similar names (e.g. League One, Primera B, Premier League), you MUST specify the "country" field for each match in both "selections" and "alternatives".
-3. Use the exact JSON format below:
+2. Active Model Version: Specify "model_version": "${activeVersion}"${activeModel?.uuid ? ` (or "model_uuid": "${activeModel.uuid}")` : ''}.
+3. Country of League: Because leagues in different countries often share similar names (e.g. League One, Primera B, Premier League), you MUST specify the "country" field for each match in both "selections" and "alternatives".
+4. Use the exact JSON format below:
 
-${JSON.stringify(SAMPLE_CHATGPT_JSON, null, 2)}`
+${JSON.stringify(sampleJson, null, 2)}`
 
     navigator.clipboard.writeText(template)
     setNotification({
       open: true,
       message:
         locale === 'fr'
-          ? 'Modèle de prompt ChatGPT copié avec instructions pour le pays !'
-          : 'ChatGPT prompt template copied with country instructions! Paste it into ChatGPT.',
+          ? `Modèle de prompt ChatGPT copié avec le modèle actif (${activeName} v${activeVersion}) !`
+          : `ChatGPT prompt template copied using active model (${activeName} v${activeVersion})!`,
       type: 'success',
     })
   }
@@ -327,7 +339,7 @@ ${JSON.stringify(SAMPLE_CHATGPT_JSON, null, 2)}`
             rows={14}
             value={jsonText}
             onChange={(e) => setJsonText(e.target.value)}
-            placeholder={`{\n  "ticket": {\n    "ticket_number": "001",\n    "date": "2026-10-20",\n    "model_version": "1.0",\n    "stake": 100,\n    "combined_odds": 2.28\n  },\n  "selections": [\n    {\n      "match_date": "2026-10-20",\n      "country": "England",\n      "league": "League One",\n      "home_team": "Bromley",\n      "away_team": "Leicester City",\n      "market": "Over/Under",\n      "selection": "Under 3.5",\n      "odds": 1.57\n    }\n  ],\n  "alternatives": []\n}`}
+            placeholder={`{\n  "ticket": {\n    "ticket_number": "001",\n    "date": "2026-10-20",\n    "model_version": "${activeModel?.version || '1.0'}",\n    "stake": 100,\n    "combined_odds": 2.28\n  },\n  "selections": [\n    {\n      "match_date": "2026-10-20",\n      "country": "England",\n      "league": "League One",\n      "home_team": "Bromley",\n      "away_team": "Leicester City",\n      "market": "Over/Under",\n      "selection": "Under 3.5",\n      "odds": 1.57\n    }\n  ],\n  "alternatives": []\n}`}
             slotProps={{
               input: {
                 sx: {
