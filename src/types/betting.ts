@@ -149,53 +149,62 @@ export interface TicketImportJSON {
     date?: string
     model_version?: string
     model_uuid?: string
+    model_name?: string
     stake?: number
     combined_odds?: number
     estimated_ticket_probability?: number
     status?: TicketStatus
-    notes?: string
+    actual_result?: string | null
+    profit_loss?: number
+    notes?: string | null
   }
   selections: Array<{
-    match_date?: string
-    country?: string
-    league?: string
+    match_date?: string | null
+    country?: string | null
+    league?: string | null
     home_team: string
     away_team: string
-    home_league_position?: number
-    away_league_position?: number
-    home_goals_scored?: number
-    home_goals_conceded?: number
-    away_goals_scored?: number
-    away_goals_conceded?: number
-    home_goals_per_game?: number
-    home_conceded_per_game?: number
-    away_goals_per_game?: number
-    away_conceded_per_game?: number
+    home_league_position?: number | null
+    away_league_position?: number | null
+    home_goals_scored?: number | null
+    home_goals_conceded?: number | null
+    away_goals_scored?: number | null
+    away_goals_conceded?: number | null
+    home_goals_per_game?: number | null
+    home_conceded_per_game?: number | null
+    away_goals_per_game?: number | null
+    away_conceded_per_game?: number | null
     market: string
     selection: string
-    odds?: number
-    estimated_probability?: number
-    breakeven_probability?: number
-    edge_percentage_points?: number
-    expected_value?: number
-    comment?: string
-    notes?: string
+    odds?: number | null
+    estimated_probability?: number | null
+    breakeven_probability?: number | null
+    edge_percentage_points?: number | null
+    expected_value?: number | null
+    actual_home_score?: number | null
+    actual_away_score?: number | null
+    result?: SelectionResultStatus
+    comment?: string | null
+    notes?: string | null
   }>
   alternatives?: Array<{
-    match_date?: string
-    country?: string
-    league?: string
+    match_date?: string | null
+    country?: string | null
+    league?: string | null
     home_team: string
     away_team: string
     market: string
     selection: string
-    odds?: number
-    estimated_probability?: number
-    breakeven_probability?: number
-    edge_percentage_points?: number
-    expected_value?: number
-    comment?: string
-    notes?: string
+    odds?: number | null
+    estimated_probability?: number | null
+    breakeven_probability?: number | null
+    edge_percentage_points?: number | null
+    expected_value?: number | null
+    actual_home_score?: number | null
+    actual_away_score?: number | null
+    result?: SelectionResultStatus
+    comment?: string | null
+    notes?: string | null
   }>
 }
 
