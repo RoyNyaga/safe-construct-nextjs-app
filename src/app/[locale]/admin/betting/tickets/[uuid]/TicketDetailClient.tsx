@@ -1067,6 +1067,15 @@ export default function TicketDetailClient({
                         </td>
                       </tr>
                       <tr style={{ borderBottom: '1px solid rgba(240, 242, 245, 0.05)' }}>
+                        <td style={{ padding: '8px 6px', color: '#9AA3B2' }}>Matches Played (MP)</td>
+                        <td style={{ padding: '8px 6px', textAlign: 'center', fontWeight: 800 }}>
+                          {snapshotSelection.home_matches_played ?? '—'}
+                        </td>
+                        <td style={{ padding: '8px 6px', textAlign: 'center', fontWeight: 800 }}>
+                          {snapshotSelection.away_matches_played ?? '—'}
+                        </td>
+                      </tr>
+                      <tr style={{ borderBottom: '1px solid rgba(240, 242, 245, 0.05)' }}>
                         <td style={{ padding: '8px 6px', color: '#9AA3B2' }}>Goals Scored (GF)</td>
                         <td style={{ padding: '8px 6px', textAlign: 'center', fontWeight: 700, color: '#66BB6A' }}>
                           {snapshotSelection.home_goals_scored ?? '—'}
@@ -1335,6 +1344,15 @@ export default function TicketDetailClient({
                       : '—'}
                   </Typography>
                 </Grid>
+                {(snapshotAlternative.home_matches_played !== undefined && snapshotAlternative.home_matches_played !== null) ||
+                (snapshotAlternative.away_matches_played !== undefined && snapshotAlternative.away_matches_played !== null) ? (
+                  <Grid size={{ xs: 12 }}>
+                    <Typography variant="caption" color="text.secondary">Matches Played (MP)</Typography>
+                    <Typography variant="body2" sx={{ fontWeight: 700 }}>
+                      {snapshotAlternative.home_team}: {snapshotAlternative.home_matches_played ?? '—'} &bull; {snapshotAlternative.away_team}: {snapshotAlternative.away_matches_played ?? '—'}
+                    </Typography>
+                  </Grid>
+                ) : null}
                 <Grid size={{ xs: 6, sm: 6 }}>
                   <Typography variant="caption" color="text.secondary">Edge Points</Typography>
                   <Typography

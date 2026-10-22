@@ -69,6 +69,8 @@ export interface BettingSelection {
   away_team: string
   home_league_position: number | null
   away_league_position: number | null
+  home_matches_played: number | null
+  away_matches_played: number | null
   home_goals_scored: number | null
   home_goals_conceded: number | null
   away_goals_scored: number | null
@@ -102,6 +104,8 @@ export interface BettingAlternative {
   league: string | null
   home_team: string
   away_team: string
+  home_matches_played?: number | null
+  away_matches_played?: number | null
   market: string
   selection: string
   odds: number | null
@@ -166,6 +170,10 @@ export interface TicketImportJSON {
     away_team: string
     home_league_position?: number | null
     away_league_position?: number | null
+    home_matches_played?: number | null
+    away_matches_played?: number | null
+    home_games_played?: number | null
+    away_games_played?: number | null
     home_goals_scored?: number | null
     home_goals_conceded?: number | null
     away_goals_scored?: number | null
@@ -193,6 +201,10 @@ export interface TicketImportJSON {
     league?: string | null
     home_team: string
     away_team: string
+    home_matches_played?: number | null
+    away_matches_played?: number | null
+    home_games_played?: number | null
+    away_games_played?: number | null
     market: string
     selection: string
     odds?: number | null
@@ -231,6 +243,8 @@ export interface TicketExportJSON {
     away_team: string
     home_league_position: number | null
     away_league_position: number | null
+    home_matches_played: number | null
+    away_matches_played: number | null
     home_goals_scored: number | null
     home_goals_conceded: number | null
     away_goals_scored: number | null
@@ -258,6 +272,8 @@ export interface TicketExportJSON {
     league: string | null
     home_team: string
     away_team: string
+    home_matches_played?: number | null
+    away_matches_played?: number | null
     market: string
     selection: string
     odds: number | null

@@ -63,6 +63,8 @@ function generateSamplePayload(activeModel?: BettingModel | null): TicketImportJ
         away_team: 'Leicester City',
         home_league_position: 8,
         away_league_position: 2,
+        home_matches_played: 15,
+        away_matches_played: 16,
         home_goals_scored: 24,
         home_goals_conceded: 18,
         away_goals_scored: 38,
@@ -92,6 +94,8 @@ function generateSamplePayload(activeModel?: BettingModel | null): TicketImportJ
         away_team: 'Real Cundinamarca',
         home_league_position: 12,
         away_league_position: 6,
+        home_matches_played: 13,
+        away_matches_played: 13,
         home_goals_scored: 14,
         home_goals_conceded: 16,
         away_goals_scored: 19,
@@ -121,6 +125,8 @@ function generateSamplePayload(activeModel?: BettingModel | null): TicketImportJ
         league: 'Primeira Liga',
         home_team: 'Braga',
         away_team: 'Gil Vicente',
+        home_matches_played: 7,
+        away_matches_played: 8,
         market: 'Over/Under',
         selection: 'Over 2.5',
         odds: 2.02,
@@ -237,6 +243,7 @@ CRITICAL INSTRUCTIONS:
 3. Country of League: Because leagues in different countries often share similar names (e.g. League One, Primera B, Premier League), you MUST specify the "country" field for each match in both "selections" and "alternatives".
 4. Pre-Match Statistical Snapshot: For EVERY selection, you MUST populate all statistical attributes:
    - "home_league_position" & "away_league_position": Current league table positions (e.g. 8, 2).
+   - "home_matches_played" & "away_matches_played": Total number of league matches played to date by each respective team (e.g. 15, 16 - accounts for games in hand and unequal fixture schedules).
    - "home_goals_scored" & "home_goals_conceded": Total goals scored and conceded by the home team.
    - "away_goals_scored" & "away_goals_conceded": Total goals scored and conceded by the away team.
    - "home_goals_per_game" & "home_conceded_per_game": Average goals scored and conceded per match by the home team.
@@ -584,7 +591,7 @@ ${JSON.stringify(sampleJson, null, 2)}`
                           {sel.expected_value !== undefined ? (Number(sel.expected_value) >= 0 ? `+${sel.expected_value}` : `${sel.expected_value}`) : '—'}
                         </td>
                         <td style={{ padding: '12px 14px', fontSize: '0.75rem' }}>
-                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mb: 0.25 }}>
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mb: 0.25, flexWrap: 'wrap' }}>
                             <span style={{ color: '#9AA3B2' }}>Pos:</span>
                             <span style={{ color: '#F6AE2D', fontWeight: 700 }}>
                               #{sel.home_league_position ?? '—'}
@@ -592,6 +599,14 @@ ${JSON.stringify(sampleJson, null, 2)}`
                             <span style={{ color: '#9AA3B2' }}>vs</span>
                             <span style={{ color: '#F6AE2D', fontWeight: 700 }}>
                               #{sel.away_league_position ?? '—'}
+                            </span>
+                            <span style={{ color: '#9AA3B2', marginLeft: 4 }}>• MP:</span>
+                            <span style={{ color: '#F0F2F5', fontWeight: 700 }}>
+                              {sel.home_matches_played ?? sel.home_games_played ?? '—'}
+                            </span>
+                            <span style={{ color: '#9AA3B2' }}>vs</span>
+                            <span style={{ color: '#F0F2F5', fontWeight: 700 }}>
+                              {sel.away_matches_played ?? sel.away_games_played ?? '—'}
                             </span>
                           </Box>
                           <Box sx={{ color: '#9AA3B2' }}>
