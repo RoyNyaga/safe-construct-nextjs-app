@@ -7,11 +7,18 @@ import {
   BettingTicket,
   BettingSelection,
   BettingAlternative,
+  BettingWarning,
+  BettingWarningReview,
   TicketImportJSON,
   TicketExportJSON,
+  WarningsExportJSON,
+  WarningBatchUpdateJSON,
+  WarningAnalyticsSummary,
   SelectionResultStatus,
   TicketStatus,
   CalibrationBucket,
+  CalibrationScope,
+  ModelCalibrationData,
   SelectedVsAlternativesComparison,
 } from '@/types/betting'
 import { autoSettleSelection, calculateTicketStatus, calculateProfitLoss } from '@/utils/bettingSettlement'
@@ -343,6 +350,8 @@ function parseNullableString(val: any): string | null {
     away_team: sel.away_team,
     home_league_position: parseNullableNumber(sel.home_league_position),
     away_league_position: parseNullableNumber(sel.away_league_position),
+    home_matches_played: parseNullableNumber(sel.home_matches_played ?? sel.home_games_played),
+    away_matches_played: parseNullableNumber(sel.away_matches_played ?? sel.away_games_played),
     home_goals_scored: parseNullableNumber(sel.home_goals_scored),
     home_goals_conceded: parseNullableNumber(sel.home_goals_conceded),
     away_goals_scored: parseNullableNumber(sel.away_goals_scored),
@@ -365,7 +374,11 @@ function parseNullableString(val: any): string | null {
     notes: parseNullableString(sel.notes),
   }))
 
-  const { error: selError } = await supabase.from('betting_selections').insert(selectionsPayload)
+  const { data: insertedSelections, error: selError } = await supabase
+    .from('betting_selections')
+    .insert(selectionsPayload)
+    .select('id, home_team, away_team, market, selection')
+
   if (selError) {
     console.error('Failed to insert selections:', selError)
     // Clean up ticket if selections fail
@@ -374,6 +387,7 @@ function parseNullableString(val: any): string | null {
   }
 
   // 6. Insert Rejected Alternatives (if any)
+  let insertedAlternatives: any[] = []
   if (payload.alternatives && payload.alternatives.length > 0) {
     const alternativesPayload = payload.alternatives.map((alt) => ({
       ticket_id: ticket.id,
@@ -382,6 +396,8 @@ function parseNullableString(val: any): string | null {
       league: parseNullableString(alt.league),
       home_team: alt.home_team,
       away_team: alt.away_team,
+      home_matches_played: parseNullableNumber(alt.home_matches_played ?? alt.home_games_played),
+      away_matches_played: parseNullableNumber(alt.away_matches_played ?? alt.away_games_played),
       market: alt.market,
       selection: alt.selection,
       odds: parseNullableNumber(alt.odds),
@@ -396,9 +412,175 @@ function parseNullableString(val: any): string | null {
       notes: parseNullableString(alt.notes),
     }))
 
-    const { error: altError } = await supabase.from('betting_alternatives').insert(alternativesPayload)
+    const { data: altData, error: altError } = await supabase
+      .from('betting_alternatives')
+      .insert(alternativesPayload)
+      .select('id, home_team, away_team, market, selection')
+
     if (altError) {
       console.warn('Warning: Failed to insert alternatives:', altError)
+    } else {
+      insertedAlternatives = altData || []
+    }
+  }
+
+  // 7. Insert Warnings (Nested under Selections & Alternatives, or legacy top-level)
+  const warningsPayload: any[] = []
+  const warningsErrors: string[] = []
+
+  // 7a. Nested warnings from selections
+  if (insertedSelections && insertedSelections.length > 0) {
+    payload.selections.forEach((sel, idx) => {
+      const selId = insertedSelections[idx]?.id
+      if (selId && sel.warnings && Array.isArray(sel.warnings)) {
+        sel.warnings.forEach((w) => {
+          warningsPayload.push({
+            ticket_id: ticket.id,
+            selection_id: selId,
+            alternative_id: null,
+            target_type: 'selection',
+            warning_type: (w.type || 'OTHER').toUpperCase(),
+            severity: (w.severity || 'MEDIUM').toUpperCase(),
+            market_relevance: (w.market_relevance || 'DIRECT').toUpperCase(),
+            direction: (w.direction || 'CONTRADICTORY').toUpperCase(),
+            description: w.description || 'No description provided',
+            evidence: parseNullableString(w.evidence),
+            verified: w.verified !== undefined ? Boolean(w.verified) : true,
+            numerical_adjustment: Boolean(w.numerical_adjustment),
+            pre_match_status: w.pre_match_status || 'PENDING',
+            post_match_status: w.post_match_status || 'PENDING',
+            review_notes: parseNullableString(w.review_notes),
+          })
+        })
+      }
+    })
+  }
+
+  // 7b. Nested warnings from alternatives
+  if (insertedAlternatives && insertedAlternatives.length > 0 && payload.alternatives) {
+    payload.alternatives.forEach((alt, idx) => {
+      const altId = insertedAlternatives[idx]?.id
+      if (altId && alt.warnings && Array.isArray(alt.warnings)) {
+        alt.warnings.forEach((w) => {
+          warningsPayload.push({
+            ticket_id: ticket.id,
+            selection_id: null,
+            alternative_id: altId,
+            target_type: 'alternative',
+            warning_type: (w.type || 'OTHER').toUpperCase(),
+            severity: (w.severity || 'MEDIUM').toUpperCase(),
+            market_relevance: (w.market_relevance || 'CONTEXTUAL').toUpperCase(),
+            direction: (w.direction || 'CONTRADICTORY').toUpperCase(),
+            description: w.description || 'No description provided',
+            evidence: parseNullableString(w.evidence),
+            verified: w.verified !== undefined ? Boolean(w.verified) : true,
+            numerical_adjustment: Boolean(w.numerical_adjustment),
+            pre_match_status: w.pre_match_status || 'PENDING',
+            post_match_status: w.post_match_status || 'PENDING',
+            review_notes: parseNullableString(w.review_notes),
+          })
+        })
+      }
+    })
+  }
+
+  // 7c. Legacy top-level warnings (for backward compatibility)
+  if (payload.warnings && payload.warnings.length > 0) {
+    const selList = insertedSelections || []
+    const altList = insertedAlternatives || []
+
+    for (let i = 0; i < payload.warnings.length; i++) {
+      const w = payload.warnings[i]
+      const ref = w.selection_reference || ({} as any)
+      const targetType = ref.target_type
+
+      const homeNorm = (ref.home_team || '').trim().toLowerCase()
+      const awayNorm = (ref.away_team || '').trim().toLowerCase()
+
+      let matchedSelectionId: number | null = null
+      let matchedAlternativeId: number | null = null
+      let matchedType: 'selection' | 'alternative' = 'selection'
+
+      if (targetType === 'alternative') {
+        const match = altList.find(
+          (a) =>
+            a.home_team.trim().toLowerCase() === homeNorm &&
+            a.away_team.trim().toLowerCase() === awayNorm
+        )
+        if (match) {
+          matchedAlternativeId = match.id
+          matchedType = 'alternative'
+        }
+      } else if (targetType === 'selection') {
+        const match = selList.find(
+          (s) =>
+            s.home_team.trim().toLowerCase() === homeNorm &&
+            s.away_team.trim().toLowerCase() === awayNorm
+        )
+        if (match) {
+          matchedSelectionId = match.id
+          matchedType = 'selection'
+        }
+      } else {
+        const selMatch = selList.find(
+          (s) =>
+            s.home_team.trim().toLowerCase() === homeNorm &&
+            s.away_team.trim().toLowerCase() === awayNorm
+        )
+        if (selMatch) {
+          matchedSelectionId = selMatch.id
+          matchedType = 'selection'
+        } else {
+          const altMatch = altList.find(
+            (a) =>
+              a.home_team.trim().toLowerCase() === homeNorm &&
+              a.away_team.trim().toLowerCase() === awayNorm
+          )
+          if (altMatch) {
+            matchedAlternativeId = altMatch.id
+            matchedType = 'alternative'
+          }
+        }
+      }
+
+      if (!matchedSelectionId && !matchedAlternativeId) {
+        warningsErrors.push(
+          `Warning #${i + 1} (${w.type}): Could not match fixture "${ref.home_team || 'Unknown'} vs ${ref.away_team || 'Unknown'}" in ticket selections or alternatives.`
+        )
+        continue
+      }
+
+      warningsPayload.push({
+        ticket_id: ticket.id,
+        selection_id: matchedSelectionId,
+        alternative_id: matchedAlternativeId,
+        target_type: matchedType,
+        warning_type: (w.type || 'OTHER').toUpperCase(),
+        severity: (w.severity || 'MEDIUM').toUpperCase(),
+        market_relevance: (w.market_relevance || 'DIRECT').toUpperCase(),
+        direction: (w.direction || 'CONTRADICTORY').toUpperCase(),
+        description: w.description || 'No description provided',
+        evidence: parseNullableString(w.evidence),
+        verified: w.verified !== undefined ? Boolean(w.verified) : true,
+        numerical_adjustment: Boolean(w.numerical_adjustment),
+        pre_match_status: w.pre_match_status || 'PENDING',
+        post_match_status: w.post_match_status || 'PENDING',
+        review_notes: parseNullableString(w.review_notes),
+      })
+    }
+  }
+
+  if (warningsErrors.length > 0 && warningsPayload.length === 0) {
+    await supabase.from('betting_tickets').delete().eq('id', ticket.id)
+    return { error: `Warning validation failed: ${warningsErrors.join(', ')}` }
+  }
+
+  if (warningsPayload.length > 0) {
+    const { error: warnError } = await supabase.from('betting_warnings').insert(warningsPayload)
+    if (warnError) {
+      console.error('Failed to insert warnings:', warnError)
+      await supabase.from('betting_tickets').delete().eq('id', ticket.id)
+      return { error: `Failed to insert warnings: ${warnError.message}` }
     }
   }
 
@@ -496,6 +678,12 @@ export async function getBettingTicketByUuid(uuid: string): Promise<{
       ),
       betting_transactions (
         *
+      ),
+      betting_warnings (
+        *,
+        betting_warning_reviews (
+          *
+        )
       )
     `)
     .eq('uuid', uuid)
@@ -861,6 +1049,8 @@ export async function exportTicketAsJson(ticketUuid: string): Promise<{
       away_team: s.away_team,
       home_league_position: s.home_league_position,
       away_league_position: s.away_league_position,
+      home_matches_played: s.home_matches_played,
+      away_matches_played: s.away_matches_played,
       home_goals_scored: s.home_goals_scored,
       home_goals_conceded: s.home_goals_conceded,
       away_goals_scored: s.away_goals_scored,
@@ -881,6 +1071,20 @@ export async function exportTicketAsJson(ticketUuid: string): Promise<{
       result: s.result,
       comment: s.comment,
       notes: s.notes,
+      warnings: (ticket.betting_warnings || [])
+        .filter((w) => w.selection_id === s.id)
+        .map((w) => ({
+          warning_uuid: w.uuid,
+          type: w.warning_type,
+          severity: w.severity,
+          market_relevance: w.market_relevance,
+          direction: w.direction,
+          description: w.description,
+          evidence: w.evidence,
+          pre_match_status: w.pre_match_status,
+          post_match_status: w.post_match_status,
+          review_notes: w.review_notes,
+        })),
     })),
     alternatives: (ticket.betting_alternatives || []).map((a) => ({
       match_date: a.match_date,
@@ -888,6 +1092,8 @@ export async function exportTicketAsJson(ticketUuid: string): Promise<{
       league: a.league,
       home_team: a.home_team,
       away_team: a.away_team,
+      home_matches_played: a.home_matches_played ?? null,
+      away_matches_played: a.away_matches_played ?? null,
       market: a.market,
       selection: a.selection,
       odds: a.odds,
@@ -900,10 +1106,411 @@ export async function exportTicketAsJson(ticketUuid: string): Promise<{
       result: a.result,
       comment: a.comment,
       notes: a.notes,
+      warnings: (ticket.betting_warnings || [])
+        .filter((w) => w.alternative_id === a.id)
+        .map((w) => ({
+          warning_uuid: w.uuid,
+          type: w.warning_type,
+          severity: w.severity,
+          market_relevance: w.market_relevance,
+          direction: w.direction,
+          description: w.description,
+          evidence: w.evidence,
+          pre_match_status: w.pre_match_status,
+          post_match_status: w.post_match_status,
+          review_notes: w.review_notes,
+        })),
     })),
+    warnings: (ticket.betting_warnings || []).map((w) => {
+      const sel = (ticket.betting_selections || []).find((s) => s.id === w.selection_id)
+      const alt = (ticket.betting_alternatives || []).find((a) => a.id === w.alternative_id)
+      const targetMatch = sel || alt
+
+      return {
+        warning_uuid: w.uuid,
+        target_type: w.target_type,
+        match: {
+          home_team: targetMatch?.home_team || 'Unknown',
+          away_team: targetMatch?.away_team || 'Unknown',
+          country: targetMatch?.country || null,
+          league: targetMatch?.league || null,
+          market: targetMatch?.market || 'N/A',
+          selection: targetMatch?.selection || 'N/A',
+          actual_home_score: targetMatch?.actual_home_score ?? null,
+          actual_away_score: targetMatch?.actual_away_score ?? null,
+          result: targetMatch?.result || 'pending',
+        },
+        type: w.warning_type,
+        severity: w.severity,
+        market_relevance: w.market_relevance,
+        direction: w.direction,
+        description: w.description,
+        evidence: w.evidence,
+        pre_match_status: w.pre_match_status,
+        post_match_status: w.post_match_status,
+        review_notes: w.review_notes,
+      }
+    }),
   }
 
   return { exportData: exportPayload }
+}
+
+// ─── 5B. WARNING EXPORT & BATCH UPDATE ENGINE ────────────────────────────────
+
+export async function exportTicketWarningsAsJson(ticketUuid?: string): Promise<{
+  exportData: WarningsExportJSON | null
+  error?: string
+}> {
+  const supabase = await createClient()
+
+  let query = supabase
+    .from('betting_warnings')
+    .select(`
+      *,
+      betting_tickets (
+        id,
+        uuid,
+        ticket_number,
+        ticket_date,
+        status
+      ),
+      betting_selections (
+        id,
+        home_team,
+        away_team,
+        country,
+        league,
+        market,
+        selection,
+        odds,
+        estimated_probability,
+        actual_home_score,
+        actual_away_score,
+        result
+      ),
+      betting_alternatives (
+        id,
+        home_team,
+        away_team,
+        country,
+        league,
+        market,
+        selection,
+        odds,
+        estimated_probability,
+        actual_home_score,
+        actual_away_score,
+        result
+      )
+    `)
+    .order('created_at', { ascending: false })
+
+  if (ticketUuid) {
+    const { data: t } = await supabase.from('betting_tickets').select('id').eq('uuid', ticketUuid).maybeSingle()
+    if (!t) return { exportData: null, error: 'Ticket not found' }
+    query = query.eq('ticket_id', t.id)
+  }
+
+  const { data: warnings, error } = await query
+  if (error) {
+    console.error('Failed to query warnings for export:', error)
+    return { exportData: null, error: error.message }
+  }
+
+  const items = (warnings || []).map((w: any) => {
+    const match = w.target_type === 'selection' ? w.betting_selections : w.betting_alternatives
+    return {
+      warning_uuid: w.uuid,
+      warning_type: w.warning_type,
+      severity: w.severity,
+      direction: w.direction,
+      market_relevance: w.market_relevance,
+      target_type: w.target_type,
+      ticket_number: w.betting_tickets?.ticket_number || null,
+      ticket_uuid: w.betting_tickets?.uuid || '',
+      match: {
+        home_team: match?.home_team || 'Unknown Home',
+        away_team: match?.away_team || 'Unknown Away',
+        country: match?.country || null,
+        league: match?.league || null,
+        market: match?.market || 'Unknown Market',
+        selection: match?.selection || 'Unknown Selection',
+        odds: match?.odds ? Number(match.odds) : null,
+        estimated_probability: match?.estimated_probability ? Number(match.estimated_probability) : null,
+        actual_home_score: match?.actual_home_score ?? null,
+        actual_away_score: match?.actual_away_score ?? null,
+        result: match?.result || 'pending',
+        is_settled: match?.result && match.result !== 'pending',
+      },
+      description: w.description,
+      pre_match_evidence: w.evidence,
+      pre_match_status: w.pre_match_status,
+      current_post_match_status: w.post_match_status,
+      existing_review_notes: w.review_notes,
+    }
+  })
+
+  const exportPayload: WarningsExportJSON = {
+    export_type: 'warning_post_match_evaluation_request',
+    ticket_uuid: ticketUuid || null,
+    total_warnings: items.length,
+    pending_warnings_count: items.filter((i: any) => i.current_post_match_status === 'PENDING').length,
+    generated_at: new Date().toISOString(),
+    warnings: items,
+  }
+
+  return { exportData: exportPayload }
+}
+
+export async function applyWarningBatchUpdates(payload: WarningBatchUpdateJSON): Promise<{
+  success?: boolean
+  updatedCount?: number
+  error?: string
+}> {
+  if (!payload || !Array.isArray(payload.updates) || payload.updates.length === 0) {
+    return { error: 'Payload must contain a non-empty "updates" array.' }
+  }
+
+  const supabase = await createClient()
+  let updatedCount = 0
+
+  for (const item of payload.updates) {
+    if (!item.warning_id || !item.post_match_status) continue
+
+    // 1. Fetch current warning
+    const { data: currentWarning } = await supabase
+      .from('betting_warnings')
+      .select('id, uuid, post_match_status')
+      .eq('uuid', item.warning_id)
+      .maybeSingle()
+
+    if (!currentWarning) {
+      console.warn(`Warning UUID not found during batch update: ${item.warning_id}`)
+      continue
+    }
+
+    // 2. Update Warning Record
+    const { error: updateError } = await supabase
+      .from('betting_warnings')
+      .update({
+        post_match_status: item.post_match_status,
+        review_notes: item.review_notes || null,
+        updated_at: new Date().toISOString(),
+      })
+      .eq('id', currentWarning.id)
+
+    if (updateError) {
+      console.error(`Failed to update warning ${item.warning_id}:`, updateError)
+      continue
+    }
+
+    // 3. Record History in betting_warning_reviews
+    await supabase.from('betting_warning_reviews').insert({
+      warning_id: currentWarning.id,
+      previous_status: currentWarning.post_match_status,
+      new_status: item.post_match_status,
+      review_notes: item.review_notes || null,
+      evidence_assessment: item.evidence_assessment || null,
+      confidence: item.confidence || null,
+      review_source: 'chatgpt',
+    })
+
+    updatedCount++
+  }
+
+  revalidatePath('/[locale]/admin/betting', 'layout')
+  return { success: true, updatedCount }
+}
+
+export async function getWarningsList(filters?: {
+  status?: string
+  severity?: string
+  direction?: string
+  warningType?: string
+  targetType?: string
+  search?: string
+}): Promise<{ warnings: BettingWarning[]; error?: string }> {
+  const supabase = await createClient()
+
+  let query = supabase
+    .from('betting_warnings')
+    .select(`
+      *,
+      betting_tickets (
+        id,
+        uuid,
+        ticket_number,
+        ticket_date
+      ),
+      betting_selections (
+        id,
+        home_team,
+        away_team,
+        market,
+        selection,
+        result,
+        actual_home_score,
+        actual_away_score
+      ),
+      betting_alternatives (
+        id,
+        home_team,
+        away_team,
+        market,
+        selection,
+        result,
+        actual_home_score,
+        actual_away_score
+      ),
+      betting_warning_reviews (
+        *
+      )
+    `)
+    .order('created_at', { ascending: false })
+
+  if (filters?.status && filters.status !== 'all') {
+    query = query.eq('post_match_status', filters.status.toUpperCase())
+  }
+  if (filters?.severity && filters.severity !== 'all') {
+    query = query.eq('severity', filters.severity.toUpperCase())
+  }
+  if (filters?.direction && filters.direction !== 'all') {
+    query = query.eq('direction', filters.direction.toUpperCase())
+  }
+  if (filters?.warningType && filters.warningType !== 'all') {
+    query = query.eq('warning_type', filters.warningType.toUpperCase())
+  }
+  if (filters?.targetType && filters.targetType !== 'all') {
+    query = query.eq('target_type', filters.targetType)
+  }
+
+  const { data, error } = await query
+  if (error) {
+    console.error('Failed to get warnings list:', error)
+    return { warnings: [], error: error.message }
+  }
+
+  let list = (data || []) as BettingWarning[]
+
+  if (filters?.search && filters.search.trim()) {
+    const s = filters.search.trim().toLowerCase()
+    list = list.filter((w) => {
+      const match = w.target_type === 'selection' ? w.betting_selections : w.betting_alternatives
+      const teamMatch =
+        (match?.home_team && match.home_team.toLowerCase().includes(s)) ||
+        (match?.away_team && match.away_team.toLowerCase().includes(s))
+      const typeMatch = w.warning_type.toLowerCase().includes(s)
+      const descMatch = w.description.toLowerCase().includes(s)
+      const ticketMatch = w.betting_tickets?.ticket_number?.toLowerCase().includes(s)
+      return teamMatch || typeMatch || descMatch || ticketMatch
+    })
+  }
+
+  return { warnings: list }
+}
+
+export async function getWarningAnalytics(): Promise<WarningAnalyticsSummary> {
+  const supabase = await createClient()
+
+  const { data: warnings } = await supabase
+    .from('betting_warnings')
+    .select(`
+      *,
+      betting_selections (
+        id,
+        result
+      ),
+      betting_alternatives (
+        id,
+        result
+      )
+    `)
+
+  const list = warnings || []
+  const totalWarnings = list.length
+  const pendingWarnings = list.filter((w) => w.post_match_status === 'PENDING').length
+  const confirmedWarnings = list.filter((w) => w.post_match_status === 'CONFIRMED').length
+  const notConfirmedWarnings = list.filter((w) => w.post_match_status === 'NOT_CONFIRMED').length
+  const inconclusiveWarnings = list.filter((w) => w.post_match_status === 'INCONCLUSIVE').length
+
+  const evaluatedWarnings = confirmedWarnings + notConfirmedWarnings + inconclusiveWarnings
+  const confirmationRate = evaluatedWarnings > 0 ? Number(((confirmedWarnings / evaluatedWarnings) * 100).toFixed(1)) : 0
+  const evaluationRate = totalWarnings > 0 ? Number(((evaluatedWarnings / totalWarnings) * 100).toFixed(1)) : 0
+
+  const bySeverity = {
+    LOW: list.filter((w) => w.severity === 'LOW').length,
+    MEDIUM: list.filter((w) => w.severity === 'MEDIUM').length,
+    HIGH: list.filter((w) => w.severity === 'HIGH').length,
+    CRITICAL: list.filter((w) => w.severity === 'CRITICAL').length,
+  }
+
+  const byDirection = {
+    CONTRADICTORY: list.filter((w) => w.direction === 'CONTRADICTORY').length,
+    NEUTRAL: list.filter((w) => w.direction === 'NEUTRAL').length,
+    SUPPORTIVE: list.filter((w) => w.direction === 'SUPPORTIVE').length,
+  }
+
+  // Type aggregates
+  const typeMap: Record<string, { count: number; confirmed: number; won: number; settled: number }> = {}
+  list.forEach((w) => {
+    const t = w.warning_type || 'OTHER'
+    if (!typeMap[t]) {
+      typeMap[t] = { count: 0, confirmed: 0, won: 0, settled: 0 }
+    }
+    typeMap[t].count++
+    if (w.post_match_status === 'CONFIRMED') typeMap[t].confirmed++
+
+    const match = w.target_type === 'selection' ? w.betting_selections : w.betting_alternatives
+    if (match && (match.result === 'won' || match.result === 'lost')) {
+      typeMap[t].settled++
+      if (match.result === 'won') typeMap[t].won++
+    }
+  })
+
+  const byType = Object.keys(typeMap).map((k) => ({
+    type: k,
+    count: typeMap[k].count,
+    confirmed: typeMap[k].confirmed,
+    winRateWhenPresent:
+      typeMap[k].settled > 0 ? Number(((typeMap[k].won / typeMap[k].settled) * 100).toFixed(1)) : 0,
+  }))
+
+  // Outcome impact: Contradictory High/Critical vs Overall
+  const highCriticalContradictory = list.filter(
+    (w) =>
+      w.direction === 'CONTRADICTORY' &&
+      (w.severity === 'HIGH' || w.severity === 'CRITICAL')
+  )
+  const highCritSettled = highCriticalContradictory.filter((w) => {
+    const m = w.target_type === 'selection' ? w.betting_selections : w.betting_alternatives
+    return m && (m.result === 'won' || m.result === 'lost')
+  })
+  const highCritWon = highCritSettled.filter((w) => {
+    const m = w.target_type === 'selection' ? w.betting_selections : w.betting_alternatives
+    return m?.result === 'won'
+  }).length
+
+  const withHighCriticalContradictoryWinRate =
+    highCritSettled.length > 0 ? Number(((highCritWon / highCritSettled.length) * 100).toFixed(1)) : 0
+
+  return {
+    totalWarnings,
+    pendingWarnings,
+    confirmedWarnings,
+    notConfirmedWarnings,
+    inconclusiveWarnings,
+    confirmationRate,
+    evaluationRate,
+    bySeverity,
+    byDirection,
+    byType,
+    impactOnOutcome: {
+      withHighCriticalContradictoryWinRate,
+      withoutWarningsWinRate: 0,
+      allBetsWinRate: 0,
+    },
+  }
 }
 
 // ─── 6. ANALYTICS & CALIBRATION QUERIES ───────────────────────────────────────
@@ -976,39 +1583,21 @@ export async function getBettingSummaryStats() {
   }
 }
 
-export async function getCalibrationStats(modelId?: number): Promise<CalibrationBucket[]> {
-  const supabase = await createClient()
+const CALIBRATION_BUCKET_DEFS = [
+  { label: '50–59%', min: 0.50, max: 0.5999 },
+  { label: '60–64%', min: 0.60, max: 0.6499 },
+  { label: '65–69%', min: 0.65, max: 0.6999 },
+  { label: '70–74%', min: 0.70, max: 0.7499 },
+  { label: '75–79%', min: 0.75, max: 0.7999 },
+  { label: '80–89%', min: 0.80, max: 0.8999 },
+  { label: '90–99%', min: 0.90, max: 1.00 },
+]
 
-  let query = supabase
-    .from('betting_selections')
-    .select(`
-      estimated_probability,
-      result,
-      betting_tickets!inner (
-        model_id
-      )
-    `)
-    .in('result', ['won', 'lost'])
-
-  if (modelId) {
-    query = query.eq('betting_tickets.model_id', modelId)
-  }
-
-  const { data: selections } = await query
-  const settled = selections || []
-
-  // Bucket thresholds
-  const bucketsDef = [
-    { label: '50–59%', min: 0.50, max: 0.5999 },
-    { label: '60–64%', min: 0.60, max: 0.6499 },
-    { label: '65–69%', min: 0.65, max: 0.6999 },
-    { label: '70–74%', min: 0.70, max: 0.7499 },
-    { label: '75–79%', min: 0.75, max: 0.7999 },
-    { label: '80%+', min: 0.80, max: 1.00 },
-  ]
-
-  return bucketsDef.map((b) => {
-    const itemsInBucket = settled.filter((s) => {
+function computeCalibrationBuckets(
+  items: Array<{ estimated_probability: number | null; result: string }>
+): CalibrationBucket[] {
+  return CALIBRATION_BUCKET_DEFS.map((b) => {
+    const itemsInBucket = items.filter((s) => {
       const p = Number(s.estimated_probability || 0)
       return p >= b.min && p <= b.max
     })
@@ -1040,6 +1629,61 @@ export async function getCalibrationStats(modelId?: number): Promise<Calibration
       differencePp,
     }
   })
+}
+
+export async function getModelCalibrationData(modelId?: number): Promise<ModelCalibrationData> {
+  const supabase = await createClient()
+
+  let selQuery = supabase
+    .from('betting_selections')
+    .select(`
+      estimated_probability,
+      result,
+      betting_tickets!inner (
+        model_id
+      )
+    `)
+    .in('result', ['won', 'lost'])
+
+  let altQuery = supabase
+    .from('betting_alternatives')
+    .select(`
+      estimated_probability,
+      result,
+      betting_tickets!inner (
+        model_id
+      )
+    `)
+    .in('result', ['won', 'lost'])
+
+  if (modelId) {
+    selQuery = selQuery.eq('betting_tickets.model_id', modelId)
+    altQuery = altQuery.eq('betting_tickets.model_id', modelId)
+  }
+
+  const [{ data: selData }, { data: altData }] = await Promise.all([selQuery, altQuery])
+  const selections = selData || []
+  const alternatives = altData || []
+  const all = [...selections, ...alternatives]
+
+  return {
+    all: computeCalibrationBuckets(all),
+    selections: computeCalibrationBuckets(selections),
+    alternatives: computeCalibrationBuckets(alternatives),
+    counts: {
+      all: all.length,
+      selections: selections.length,
+      alternatives: alternatives.length,
+    },
+  }
+}
+
+export async function getCalibrationStats(
+  modelId?: number,
+  scope: CalibrationScope = 'selections'
+): Promise<CalibrationBucket[]> {
+  const data = await getModelCalibrationData(modelId)
+  return data[scope] || data.selections
 }
 
 export async function getSelectedVsAlternativesComparison(modelId?: number): Promise<SelectedVsAlternativesComparison> {

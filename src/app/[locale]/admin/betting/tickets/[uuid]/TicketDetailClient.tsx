@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import {
@@ -45,12 +45,24 @@ import {
   Sparkles,
   Target,
   Info,
+  ShieldAlert,
 } from 'lucide-react'
-import { BettingTicket, BettingSelection, BettingAlternative, SelectionResultStatus, TicketStatus } from '@/types/betting'
+import {
+  BettingTicket,
+  BettingSelection,
+  BettingAlternative,
+  BettingWarning,
+  WarningsExportJSON,
+  WarningBatchUpdateJSON,
+  SelectionResultStatus,
+  TicketStatus,
+} from '@/types/betting'
 import {
   updateSelectionResult,
   updateAlternativeResult,
   exportTicketAsJson,
+  exportTicketWarningsAsJson,
+  applyWarningBatchUpdates,
   updateBettingTicket,
   deleteBettingTicket,
   deleteBettingSelection,
@@ -217,6 +229,273 @@ export default function TicketDetailClient({
       setTimeout(() => setHasCopied(false), 2500)
     } catch {
       setNotification({ open: true, message: 'Could not copy to clipboard', type: 'error' })
+    }
+  }
+
+  const [hasCopiedTicketPrompt, setHasCopiedTicketPrompt] = useState(false)
+
+  const handleCopyTicketPrompt = async () => {
+    const promptText = `Analyze this completed football betting ticket including selections, alternatives, and pre-match risk warnings against the final scores:
+
+CRITICAL INSTRUCTIONS:
+- Review the betting model's statistical calibration against the actual match results.
+- Evaluate whether the pre-match warnings materialized or if any blind spots were missed.
+- Synthesize actionable learnings for future betting model iterations.
+
+TICKET DATA PAYLOAD:
+${exportJsonString}`
+
+    try {
+      await navigator.clipboard.writeText(promptText)
+      setHasCopiedTicketPrompt(true)
+      setNotification({
+        open: true,
+        message:
+          locale === 'fr'
+            ? 'Prompt d\'analyse post-mortem copié avec le ticket complet !'
+            : 'Post-mortem ChatGPT prompt copied with complete ticket payload!',
+        type: 'success',
+      })
+      setTimeout(() => setHasCopiedTicketPrompt(false), 2500)
+    } catch {
+      setNotification({ open: true, message: 'Could not copy prompt', type: 'error' })
+    }
+  }
+
+  // Warning Export State & Handlers
+  const [isWarningExportOpen, setIsWarningExportOpen] = useState(false)
+  const [warningExportJson, setWarningExportJson] = useState('')
+  const [hasCopiedWarnings, setHasCopiedWarnings] = useState(false)
+  const [hasCopiedWarningPrompt, setHasCopiedWarningPrompt] = useState(false)
+
+  // Warning Review / Evaluation State & Handlers
+  const [isWarningReviewOpen, setIsWarningReviewOpen] = useState(false)
+  const [warningReviewJsonInput, setWarningReviewJsonInput] = useState('')
+  const [parsedWarningReview, setParsedWarningReview] = useState<WarningBatchUpdateJSON | null>(null)
+  const [warningReviewError, setWarningReviewError] = useState<string | null>(null)
+  const [approvedWarningIds, setApprovedWarningIds] = useState<Set<string>>(new Set())
+  const [isApplyingWarningUpdates, setIsApplyingWarningUpdates] = useState(false)
+
+  interface WarningGroupItem {
+    key: string
+    title: string
+    targetType: 'selection' | 'alternative' | 'ticket'
+    country?: string | null
+    league?: string | null
+    market?: string | null
+    selection?: string | null
+    odds?: number | null
+    actual_home_score?: number | null
+    actual_away_score?: number | null
+    result?: string | null
+    warnings: BettingWarning[]
+  }
+
+  // Group warnings by match / fixture
+  const groupedWarnings: WarningGroupItem[] = useMemo(() => {
+    const warnings: BettingWarning[] = ticket.betting_warnings || []
+    if (warnings.length === 0) return []
+
+    const groups: Map<string, WarningGroupItem> = new Map()
+
+    warnings.forEach((w) => {
+      let key = 'ticket'
+      let title = locale === 'fr' ? 'Contexte Global Ticket' : 'Ticket Scope'
+      let targetType: 'selection' | 'alternative' | 'ticket' = 'ticket'
+      let country: string | null = null
+      let league: string | null = null
+      let market: string | null = null
+      let selection: string | null = null
+      let odds: number | null = null
+      let actual_home_score: number | null = null
+      let actual_away_score: number | null = null
+      let result: string | null = null
+
+      if (w.target_type === 'selection' && w.selection_id) {
+        const sel = (ticket.betting_selections || []).find((s) => s.id === w.selection_id)
+        if (sel) {
+          key = `sel-${sel.id}`
+          title = `${sel.home_team} vs ${sel.away_team}`
+          targetType = 'selection'
+          country = sel.country
+          league = sel.league
+          market = sel.market
+          selection = sel.selection
+          odds = sel.odds ? Number(sel.odds) : null
+          actual_home_score = sel.actual_home_score
+          actual_away_score = sel.actual_away_score
+          result = sel.result
+        }
+      } else if (w.target_type === 'alternative' && w.alternative_id) {
+        const alt = (ticket.betting_alternatives || []).find((a) => a.id === w.alternative_id)
+        if (alt) {
+          key = `alt-${alt.id}`
+          title = `${alt.home_team} vs ${alt.away_team}`
+          targetType = 'alternative'
+          country = alt.country
+          league = alt.league
+          market = alt.market
+          selection = alt.selection
+          odds = alt.odds ? Number(alt.odds) : null
+          actual_home_score = alt.actual_home_score
+          actual_away_score = alt.actual_away_score
+          result = alt.result
+        }
+      }
+
+      if (!groups.has(key)) {
+        groups.set(key, {
+          key,
+          title,
+          targetType,
+          country,
+          league,
+          market,
+          selection,
+          odds,
+          actual_home_score,
+          actual_away_score,
+          result,
+          warnings: [],
+        })
+      }
+      groups.get(key)!.warnings.push(w)
+    })
+
+    return Array.from(groups.values())
+  }, [ticket, locale])
+
+  const handleOpenWarningExport = async () => {
+    const res = await exportTicketWarningsAsJson(ticket.uuid)
+    if (res.exportData) {
+      setWarningExportJson(JSON.stringify(res.exportData, null, 2))
+      setIsWarningExportOpen(true)
+      setHasCopiedWarnings(false)
+    } else {
+      setNotification({ open: true, message: res.error || 'Failed to export warnings', type: 'error' })
+    }
+  }
+
+  const handleCopyWarningJson = async () => {
+    try {
+      await navigator.clipboard.writeText(warningExportJson)
+      setHasCopiedWarnings(true)
+      setNotification({
+        open: true,
+        message:
+          locale === 'fr'
+            ? 'JSON des alertes copié dans le presse-papiers ! Collez-le dans ChatGPT.'
+            : 'Warnings JSON copied to clipboard! Paste it into ChatGPT for post-match evaluation.',
+        type: 'success',
+      })
+      setTimeout(() => setHasCopiedWarnings(false), 2500)
+    } catch {
+      setNotification({ open: true, message: 'Could not copy to clipboard', type: 'error' })
+    }
+  }
+
+  const handleCopyWarningPrompt = async () => {
+    const promptText = `You are an expert sports betting methodology and risk analyst.
+Evaluate the following pre-match warnings based on the final match outcomes and scores provided in the JSON payload below.
+
+For each warning, determine:
+1. "post_match_status":
+   - "CONFIRMED": The documented risk materialized and noticeably influenced the market/selection outcome.
+   - "NOT_CONFIRMED": The feared risk did not materialize and the match proceeded favorably unaffected.
+   - "INCONCLUSIVE": Match events are ambiguous, contradictory, or insufficient data to definitively conclude.
+   - "NOT_APPLICABLE": The match was postponed, voided, or the market was unaffected.
+2. "evidence_assessment": "SUPPORTED" | "CONTRADICTED" | "PARTIAL" | "INCONCLUSIVE"
+3. "confidence": "LOW" | "MEDIUM" | "HIGH"
+4. "review_notes": 1-2 sentence concise diagnostic explanation of how the match unfolded relative to this warning.
+
+CRITICAL INSTRUCTIONS:
+- You MUST preserve each warning's exact "warning_id" (UUID from "warning_uuid").
+- Output ONLY a single valid JSON object adhering strictly to this schema:
+{
+  "operation": "warning_post_match_update",
+  "schema_version": "1.0",
+  "updates": [
+    {
+      "warning_id": "<UUID from warning_uuid>",
+      "post_match_status": "CONFIRMED",
+      "evidence_assessment": "SUPPORTED",
+      "confidence": "HIGH",
+      "review_notes": "Diagnostic rationale..."
+    }
+  ]
+}
+
+DATA PAYLOAD:
+${warningExportJson}`
+
+    try {
+      await navigator.clipboard.writeText(promptText)
+      setHasCopiedWarningPrompt(true)
+      setNotification({
+        open: true,
+        message:
+          locale === 'fr'
+            ? 'Prompt complet d\'évaluation copié ! Collez-le directement dans ChatGPT.'
+            : 'Complete ChatGPT Evaluation Prompt copied! Paste it directly into ChatGPT.',
+        type: 'success',
+      })
+      setTimeout(() => setHasCopiedWarningPrompt(false), 2500)
+    } catch {
+      setNotification({ open: true, message: 'Could not copy prompt', type: 'error' })
+    }
+  }
+
+  const handleParseWarningReviewJson = (val: string) => {
+    setWarningReviewJsonInput(val)
+    if (!val.trim()) {
+      setParsedWarningReview(null)
+      setWarningReviewError(null)
+      return
+    }
+    try {
+      const parsed = JSON.parse(val) as WarningBatchUpdateJSON
+      if (!parsed.updates || !Array.isArray(parsed.updates)) {
+        setWarningReviewError(
+          locale === 'fr'
+            ? 'Le JSON doit contenir un tableau "updates".'
+            : 'JSON must contain an "updates" array.'
+        )
+        setParsedWarningReview(null)
+        return
+      }
+      setParsedWarningReview(parsed)
+      setWarningReviewError(null)
+      setApprovedWarningIds(new Set(parsed.updates.map((u) => u.warning_id)))
+    } catch (e: any) {
+      setWarningReviewError(e.message || 'Invalid JSON format')
+      setParsedWarningReview(null)
+    }
+  }
+
+  const handleApplyWarningReviews = async () => {
+    if (!parsedWarningReview) return
+    setIsApplyingWarningUpdates(true)
+    const filteredUpdates = parsedWarningReview.updates.filter((u) => approvedWarningIds.has(u.warning_id))
+    const res = await applyWarningBatchUpdates({
+      ...parsedWarningReview,
+      updates: filteredUpdates,
+    })
+    setIsApplyingWarningUpdates(false)
+    if (res.error) {
+      setNotification({ open: true, message: res.error, type: 'error' })
+    } else {
+      setIsWarningReviewOpen(false)
+      setWarningReviewJsonInput('')
+      setParsedWarningReview(null)
+      setNotification({
+        open: true,
+        message:
+          locale === 'fr'
+            ? `${res.updatedCount || 0} alerte(s) mise(s) à jour avec succès !`
+            : `Successfully updated ${res.updatedCount || 0} warning(s)!`,
+        type: 'success',
+      })
+      window.location.reload()
     }
   }
 
@@ -398,7 +677,35 @@ export default function TicketDetailClient({
               fontWeight: 700,
             }}
           >
-            {locale === 'fr' ? 'Exporter JSON pour ChatGPT' : 'Export JSON to ChatGPT'}
+            {locale === 'fr' ? 'Exporter JSON' : 'Export Ticket JSON'}
+          </CustomButton>
+
+          <CustomButton
+            variant="outlined"
+            onClick={handleOpenWarningExport}
+            startIcon={<AlertTriangle size={16} />}
+            sx={{
+              borderColor: 'rgba(246, 174, 45, 0.4)',
+              color: '#F6AE2D',
+              fontWeight: 700,
+              '&:hover': { borderColor: '#F6AE2D', backgroundColor: alpha('#F6AE2D', 0.1) },
+            }}
+          >
+            {locale === 'fr' ? 'Exporter Alertes' : 'Export Warnings'}
+          </CustomButton>
+
+          <CustomButton
+            variant="outlined"
+            onClick={() => setIsWarningReviewOpen(true)}
+            startIcon={<CheckCircle2 size={16} />}
+            sx={{
+              borderColor: 'rgba(102, 187, 106, 0.4)',
+              color: '#66BB6A',
+              fontWeight: 700,
+              '&:hover': { borderColor: '#66BB6A', backgroundColor: alpha('#66BB6A', 0.1) },
+            }}
+          >
+            {locale === 'fr' ? 'Évaluer Alertes' : 'Review Warnings'}
           </CustomButton>
         </Box>
       </Box>
@@ -580,6 +887,37 @@ export default function TicketDetailClient({
                         <Typography variant="caption" color="text.secondary">
                           {sel.country ? `${sel.country} • ` : ''}{sel.league || '—'} &bull; {sel.match_date || ticket.ticket_date}
                         </Typography>
+                        {/* Warnings Badges if any */}
+                        {(() => {
+                          const warnings = (ticket.betting_warnings || []).filter(
+                            (w) => w.selection_id === sel.id
+                          )
+                          if (warnings.length === 0) return null
+                          return (
+                            <Box sx={{ display: 'flex', gap: 0.5, mt: 0.75, flexWrap: 'wrap' }}>
+                              {warnings.map((w) => {
+                                const isHigh = w.severity === 'CRITICAL' || w.severity === 'HIGH'
+                                return (
+                                  <Chip
+                                    key={w.id}
+                                    icon={<AlertTriangle size={11} />}
+                                    label={`${w.warning_type}: ${w.severity}`}
+                                    size="small"
+                                    sx={{
+                                      height: 18,
+                                      fontSize: '0.625rem',
+                                      fontWeight: 800,
+                                      backgroundColor: isHigh ? alpha('#EF5350', 0.2) : alpha('#F6AE2D', 0.2),
+                                      color: isHigh ? '#EF5350' : '#F6AE2D',
+                                      border: `1px solid ${isHigh ? 'rgba(239, 83, 80, 0.4)' : 'rgba(246, 174, 45, 0.4)'}`,
+                                      '& .MuiChip-icon': { color: 'inherit', ml: 0.5 },
+                                    }}
+                                  />
+                                )
+                              })}
+                            </Box>
+                          )
+                        })()}
                       </td>
 
                       {/* Market & Pick */}
@@ -749,6 +1087,37 @@ export default function TicketDetailClient({
                               {alt.country ? `${alt.country} • ` : ''}{alt.league || ''}
                             </Typography>
                           )}
+                          {/* Warnings Badges if any */}
+                          {(() => {
+                            const warnings = (ticket.betting_warnings || []).filter(
+                              (w) => w.alternative_id === alt.id
+                            )
+                            if (warnings.length === 0) return null
+                            return (
+                              <Box sx={{ display: 'flex', gap: 0.5, mt: 0.75, flexWrap: 'wrap' }}>
+                                {warnings.map((w) => {
+                                  const isHigh = w.severity === 'CRITICAL' || w.severity === 'HIGH'
+                                  return (
+                                    <Chip
+                                      key={w.id}
+                                      icon={<AlertTriangle size={11} />}
+                                      label={`${w.warning_type}: ${w.severity}`}
+                                      size="small"
+                                      sx={{
+                                        height: 18,
+                                        fontSize: '0.625rem',
+                                        fontWeight: 800,
+                                        backgroundColor: isHigh ? alpha('#EF5350', 0.2) : alpha('#F6AE2D', 0.2),
+                                        color: isHigh ? '#EF5350' : '#F6AE2D',
+                                        border: `1px solid ${isHigh ? 'rgba(239, 83, 80, 0.4)' : 'rgba(246, 174, 45, 0.4)'}`,
+                                        '& .MuiChip-icon': { color: 'inherit', ml: 0.5 },
+                                      }}
+                                    />
+                                  )
+                                })}
+                              </Box>
+                            )
+                          })()}
                         </td>
                         <td style={{ padding: '14px', color: 'text.secondary', fontSize: '0.85rem' }}>
                           {alt.market}: {alt.selection}
@@ -828,6 +1197,292 @@ export default function TicketDetailClient({
           </CardContent>
         </Card>
       )}
+
+      {/* ─── TICKET WARNINGS & RISK FLAGS SECTION ─── */}
+      <Card
+        sx={{
+          mb: 4,
+          backgroundColor: alpha('#1E2635', 0.95),
+          border: '1px solid rgba(255, 255, 255, 0.08)',
+        }}
+      >
+        <CardContent sx={{ p: 3 }}>
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 2, mb: 2.5 }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+              <ShieldAlert size={22} color="#F6AE2D" />
+              <Box>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <Typography variant="h6" sx={{ fontWeight: 700 }}>
+                    {locale === 'fr' ? 'Alertes Pré-Match & Facteurs de Risque' : 'Pre-Match Warnings & Risk Flags'}
+                  </Typography>
+                  <Chip
+                    label={(ticket.betting_warnings || []).length}
+                    size="small"
+                    sx={{
+                      fontWeight: 800,
+                      backgroundColor: alpha('#F6AE2D', 0.2),
+                      color: '#F6AE2D',
+                    }}
+                  />
+                </Box>
+                <Typography variant="caption" color="text.secondary">
+                  {locale === 'fr'
+                    ? 'Facteurs qualitatifs documentés avant le coup d\'envoi et évaluation post-match.'
+                    : 'Documented risk patterns prior to kickoff and post-match ChatGPT verification.'}
+                </Typography>
+              </Box>
+            </Box>
+
+            <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
+              <CustomButton
+                size="small"
+                variant="outlined"
+                onClick={handleOpenWarningExport}
+                startIcon={<AlertTriangle size={15} />}
+                sx={{
+                  borderColor: 'rgba(246, 174, 45, 0.3)',
+                  color: '#F6AE2D',
+                  fontSize: '0.8rem',
+                  fontWeight: 700,
+                  '&:hover': { borderColor: '#F6AE2D', backgroundColor: alpha('#F6AE2D', 0.1) },
+                }}
+              >
+                {locale === 'fr' ? 'Exporter Alertes JSON' : 'Export Warnings JSON'}
+              </CustomButton>
+
+              <CustomButton
+                size="small"
+                variant="outlined"
+                onClick={() => setIsWarningReviewOpen(true)}
+                startIcon={<CheckCircle2 size={15} />}
+                sx={{
+                  borderColor: 'rgba(102, 187, 106, 0.3)',
+                  color: '#66BB6A',
+                  fontSize: '0.8rem',
+                  fontWeight: 700,
+                  '&:hover': { borderColor: '#66BB6A', backgroundColor: alpha('#66BB6A', 0.1) },
+                }}
+              >
+                {locale === 'fr' ? 'Évaluer les Alertes' : 'Review Warnings'}
+              </CustomButton>
+            </Box>
+          </Box>
+
+          {(!ticket.betting_warnings || ticket.betting_warnings.length === 0) ? (
+            <Paper
+              elevation={0}
+              sx={{
+                p: 3,
+                textAlign: 'center',
+                backgroundColor: alpha('#121824', 0.5),
+                borderRadius: 2,
+                border: '1px dashed rgba(255, 255, 255, 0.1)',
+              }}
+            >
+              <Typography variant="body2" color="text.secondary">
+                {locale === 'fr'
+                  ? 'Aucune alerte pré-match enregistrée pour ce ticket.'
+                  : 'No pre-match risk warnings or adverse indicators were logged for this ticket.'}
+              </Typography>
+            </Paper>
+          ) : (
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2.5 }}>
+              {groupedWarnings.map((group) => {
+                const isSelection = group.targetType === 'selection'
+                const themeColor = isSelection ? '#66BB6A' : '#CE93D8'
+
+                return (
+                  <Paper
+                    key={group.key}
+                    elevation={0}
+                    sx={{
+                      p: 2,
+                      backgroundColor: alpha('#121824', 0.6),
+                      borderRadius: 2,
+                      border: `1px solid ${alpha(themeColor, 0.25)}`,
+                    }}
+                  >
+                    {/* Fixture Header Bar */}
+                    <Box
+                      sx={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                        flexWrap: 'wrap',
+                        gap: 1.5,
+                        pb: 1.5,
+                        mb: 1.5,
+                        borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
+                      }}
+                    >
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, flexWrap: 'wrap' }}>
+                        <Chip
+                          label={
+                            isSelection
+                              ? locale === 'fr' ? 'SÉLECTION' : 'SELECTION'
+                              : group.targetType === 'alternative'
+                              ? locale === 'fr' ? 'ALTERNATIVE' : 'ALTERNATIVE'
+                              : 'TICKET'
+                          }
+                          size="small"
+                          sx={{
+                            fontWeight: 800,
+                            fontSize: '0.65rem',
+                            backgroundColor: alpha(themeColor, 0.15),
+                            color: themeColor,
+                            border: `1px solid ${alpha(themeColor, 0.3)}`,
+                          }}
+                        />
+                        <Typography variant="subtitle1" sx={{ fontWeight: 800, color: '#FFFFFF' }}>
+                          {group.title}
+                        </Typography>
+                        {(group.country || group.league) && (
+                          <Typography variant="caption" sx={{ color: '#9AA3B2' }}>
+                            {group.country ? `${group.country} • ` : ''}{group.league || ''}
+                          </Typography>
+                        )}
+                      </Box>
+
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                        {group.market && group.selection && (
+                          <Chip
+                            label={`${group.market}: ${group.selection}${group.odds ? ` @ ${group.odds.toFixed(2)}` : ''}`}
+                            size="small"
+                            sx={{ backgroundColor: alpha('#F0F2F5', 0.05), color: '#F0F2F5', fontWeight: 600, fontSize: '0.75rem' }}
+                          />
+                        )}
+                        {group.actual_home_score !== null && group.actual_away_score !== null && (
+                          <Chip
+                            label={`${group.actual_home_score} - ${group.actual_away_score}${group.result ? ` (${group.result.toUpperCase()})` : ''}`}
+                            size="small"
+                            sx={{
+                              fontWeight: 700,
+                              fontSize: '0.7rem',
+                              backgroundColor: group.result === 'won' ? alpha('#66BB6A', 0.2) : alpha('#EF5350', 0.2),
+                              color: group.result === 'won' ? '#66BB6A' : '#EF5350',
+                            }}
+                          />
+                        )}
+                        <Chip
+                          label={`${group.warnings.length} warning${group.warnings.length > 1 ? 's' : ''}`}
+                          size="small"
+                          sx={{
+                            backgroundColor: alpha('#F6AE2D', 0.15),
+                            color: '#F6AE2D',
+                            fontWeight: 700,
+                            fontSize: '0.7rem',
+                          }}
+                        />
+                      </Box>
+                    </Box>
+
+                    {/* Warnings sub-table for this game */}
+                    <Box sx={{ overflowX: 'auto' }}>
+                      <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
+                        <thead>
+                          <tr style={{ borderBottom: '1px solid rgba(240, 242, 245, 0.05)' }}>
+                            <th style={{ padding: '8px 12px', color: '#9AA3B2', fontSize: '0.7rem', textTransform: 'uppercase' }}>Type & Severity</th>
+                            <th style={{ padding: '8px 12px', color: '#9AA3B2', fontSize: '0.7rem', textTransform: 'uppercase' }}>Direction</th>
+                            <th style={{ padding: '8px 12px', color: '#9AA3B2', fontSize: '0.7rem', textTransform: 'uppercase' }}>Description & Pre-Match Evidence</th>
+                            <th style={{ padding: '8px 12px', color: '#9AA3B2', fontSize: '0.7rem', textTransform: 'uppercase' }}>Post-Match Status</th>
+                            <th style={{ padding: '8px 12px', color: '#9AA3B2', fontSize: '0.7rem', textTransform: 'uppercase' }}>Review Notes</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {group.warnings.map((w) => {
+                            const isHigh = w.severity === 'CRITICAL' || w.severity === 'HIGH'
+                            const statusColor =
+                              w.post_match_status === 'CONFIRMED'
+                                ? '#66BB6A'
+                                : w.post_match_status === 'NOT_CONFIRMED'
+                                ? '#EF5350'
+                                : w.post_match_status === 'INCONCLUSIVE'
+                                ? '#F6AE2D'
+                                : '#9AA3B2'
+
+                            return (
+                              <tr key={w.id} style={{ borderBottom: '1px solid rgba(240, 242, 245, 0.03)' }}>
+                                <td style={{ padding: '10px 12px', verticalAlign: 'top' }}>
+                                  <Typography variant="body2" sx={{ fontWeight: 700, fontSize: '0.85rem' }}>
+                                    {w.warning_type}
+                                  </Typography>
+                                  <Chip
+                                    label={w.severity}
+                                    size="small"
+                                    sx={{
+                                      height: 18,
+                                      fontSize: '0.625rem',
+                                      fontWeight: 800,
+                                      mt: 0.5,
+                                      backgroundColor: isHigh ? alpha('#EF5350', 0.2) : alpha('#F6AE2D', 0.2),
+                                      color: isHigh ? '#EF5350' : '#F6AE2D',
+                                    }}
+                                  />
+                                </td>
+                                <td style={{ padding: '10px 12px', verticalAlign: 'top' }}>
+                                  <Chip
+                                    label={w.direction}
+                                    size="small"
+                                    sx={{
+                                      fontWeight: 700,
+                                      fontSize: '0.65rem',
+                                      backgroundColor:
+                                        w.direction === 'CONTRADICTORY'
+                                          ? alpha('#EF5350', 0.15)
+                                          : w.direction === 'SUPPORTIVE'
+                                          ? alpha('#66BB6A', 0.15)
+                                          : alpha('#9AA3B2', 0.15),
+                                      color:
+                                        w.direction === 'CONTRADICTORY'
+                                          ? '#EF5350'
+                                          : w.direction === 'SUPPORTIVE'
+                                          ? '#66BB6A'
+                                          : '#9AA3B2',
+                                    }}
+                                  />
+                                </td>
+                                <td style={{ padding: '10px 12px', maxWidth: 360, verticalAlign: 'top' }}>
+                                  <Typography variant="body2" sx={{ mb: 0.5, color: '#F0F2F5', fontSize: '0.85rem' }}>
+                                    {w.description}
+                                  </Typography>
+                                  {w.evidence && (
+                                    <Typography variant="caption" color="text.secondary" sx={{ display: 'block', fontStyle: 'italic', fontSize: '0.75rem' }}>
+                                      &ldquo;{w.evidence}&rdquo;
+                                    </Typography>
+                                  )}
+                                </td>
+                                <td style={{ padding: '10px 12px', verticalAlign: 'top' }}>
+                                  <Chip
+                                    label={w.post_match_status}
+                                    size="small"
+                                    sx={{
+                                      fontWeight: 800,
+                                      fontSize: '0.7rem',
+                                      backgroundColor: alpha(statusColor, 0.18),
+                                      color: statusColor,
+                                      border: `1px solid ${alpha(statusColor, 0.3)}`,
+                                    }}
+                                  />
+                                </td>
+                                <td style={{ padding: '10px 12px', maxWidth: 280, verticalAlign: 'top' }}>
+                                  <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.8rem' }}>
+                                    {w.review_notes || '—'}
+                                  </Typography>
+                                </td>
+                              </tr>
+                            )
+                          })}
+                        </tbody>
+                      </table>
+                    </Box>
+                  </Paper>
+                )
+              })}
+            </Box>
+          )}
+        </CardContent>
+      </Card>
+
 
       {/* ─── STATISTICAL SNAPSHOT & SELECTION DETAIL DRAWER ──────────────── */}
       <CustomDrawer
@@ -1064,6 +1719,15 @@ export default function TicketDetailClient({
                           {snapshotSelection.away_league_position !== null && snapshotSelection.away_league_position !== undefined
                             ? `#${snapshotSelection.away_league_position}`
                             : '—'}
+                        </td>
+                      </tr>
+                      <tr style={{ borderBottom: '1px solid rgba(240, 242, 245, 0.05)' }}>
+                        <td style={{ padding: '8px 6px', color: '#9AA3B2' }}>Matches Played (MP)</td>
+                        <td style={{ padding: '8px 6px', textAlign: 'center', fontWeight: 800 }}>
+                          {snapshotSelection.home_matches_played ?? '—'}
+                        </td>
+                        <td style={{ padding: '8px 6px', textAlign: 'center', fontWeight: 800 }}>
+                          {snapshotSelection.away_matches_played ?? '—'}
                         </td>
                       </tr>
                       <tr style={{ borderBottom: '1px solid rgba(240, 242, 245, 0.05)' }}>
@@ -1335,6 +1999,15 @@ export default function TicketDetailClient({
                       : '—'}
                   </Typography>
                 </Grid>
+                {(snapshotAlternative.home_matches_played !== undefined && snapshotAlternative.home_matches_played !== null) ||
+                (snapshotAlternative.away_matches_played !== undefined && snapshotAlternative.away_matches_played !== null) ? (
+                  <Grid size={{ xs: 12 }}>
+                    <Typography variant="caption" color="text.secondary">Matches Played (MP)</Typography>
+                    <Typography variant="body2" sx={{ fontWeight: 700 }}>
+                      {snapshotAlternative.home_team}: {snapshotAlternative.home_matches_played ?? '—'} &bull; {snapshotAlternative.away_team}: {snapshotAlternative.away_matches_played ?? '—'}
+                    </Typography>
+                  </Grid>
+                ) : null}
                 <Grid size={{ xs: 6, sm: 6 }}>
                   <Typography variant="caption" color="text.secondary">Edge Points</Typography>
                   <Typography
@@ -1611,27 +2284,38 @@ export default function TicketDetailClient({
           </Box>
         }
         actions={
-          <Box sx={{ display: 'flex', gap: 1.5, width: '100%', justifyContent: 'space-between' }}>
+          <Box sx={{ display: 'flex', gap: 1.5, width: '100%', justifyContent: 'space-between', flexWrap: 'wrap' }}>
             <CustomButton variant="outlined" onClick={() => setIsExportOpen(false)}>
               {locale === 'fr' ? 'Fermer' : 'Close'}
             </CustomButton>
-            <CustomButton
-              variant="contained"
-              onClick={handleCopyJson}
-              startIcon={hasCopied ? <Check size={18} /> : <Copy size={18} />}
-              sx={{
-                background: hasCopied
-                  ? '#66BB6A'
-                  : 'linear-gradient(135deg, #F26419 0%, #F6AE2D 100%)',
-                color: '#FFFFFF',
-                fontWeight: 700,
-                px: 3,
-              }}
-            >
-              {hasCopied
-                ? locale === 'fr' ? 'Copié dans le presse-papiers !' : 'Copied to Clipboard!'
-                : locale === 'fr' ? 'Copier le JSON' : 'Copy JSON to Clipboard'}
-            </CustomButton>
+            <Box sx={{ display: 'flex', gap: 1.5 }}>
+              <CustomButton
+                variant="outlined"
+                onClick={handleCopyJson}
+                startIcon={hasCopied ? <Check size={18} /> : <Copy size={18} />}
+              >
+                {hasCopied
+                  ? locale === 'fr' ? 'Copié !' : 'Copied!'
+                  : locale === 'fr' ? 'Copier JSON' : 'Copy JSON'}
+              </CustomButton>
+              <CustomButton
+                variant="contained"
+                onClick={handleCopyTicketPrompt}
+                startIcon={hasCopiedTicketPrompt ? <Check size={18} /> : <Sparkles size={18} />}
+                sx={{
+                  background: hasCopiedTicketPrompt
+                    ? '#66BB6A'
+                    : 'linear-gradient(135deg, #F26419 0%, #F6AE2D 100%)',
+                  color: '#FFFFFF',
+                  fontWeight: 700,
+                  px: 2.5,
+                }}
+              >
+                {hasCopiedTicketPrompt
+                  ? locale === 'fr' ? 'Prompt Copié !' : 'Prompt Copied!'
+                  : locale === 'fr' ? 'Copier Prompt ChatGPT + JSON' : 'Copy ChatGPT Prompt + JSON'}
+              </CustomButton>
+            </Box>
           </Box>
         }
       >
@@ -1796,6 +2480,187 @@ export default function TicketDetailClient({
               ? 'Toutes les sélections, alternatives et écritures comptables liées à ce ticket seront supprimées et le solde de la bankroll sera rétabli.'
               : 'All selections, alternative matches, and ledger transactions associated with this ticket will be removed and bankroll balance reconciled.'}
           </Typography>
+        </Box>
+      </CustomModal>
+      {/* ─── WARNINGS EXPORT MODAL ────────────────────────────────────────── */}
+      <CustomModal
+        open={isWarningExportOpen}
+        onClose={() => setIsWarningExportOpen(false)}
+        title={
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <AlertTriangle size={20} color="#F6AE2D" />
+            <span>{locale === 'fr' ? 'Export des Alertes pour Évaluation Post-Match' : 'Export Warnings for Post-Match Review'}</span>
+          </Box>
+        }
+        actions={
+          <Box sx={{ display: 'flex', gap: 1.5, width: '100%', justifyContent: 'space-between', flexWrap: 'wrap' }}>
+            <CustomButton variant="outlined" onClick={() => setIsWarningExportOpen(false)}>
+              {locale === 'fr' ? 'Fermer' : 'Close'}
+            </CustomButton>
+            <Box sx={{ display: 'flex', gap: 1.5 }}>
+              <CustomButton
+                variant="outlined"
+                onClick={handleCopyWarningJson}
+                startIcon={hasCopiedWarnings ? <Check size={16} /> : <Copy size={16} />}
+              >
+                {hasCopiedWarnings
+                  ? locale === 'fr' ? 'Copié !' : 'Copied!'
+                  : locale === 'fr' ? 'Copier JSON' : 'Copy JSON'}
+              </CustomButton>
+              <CustomButton
+                variant="contained"
+                onClick={handleCopyWarningPrompt}
+                startIcon={hasCopiedWarningPrompt ? <Check size={16} /> : <Sparkles size={16} />}
+                sx={{
+                  background: hasCopiedWarningPrompt
+                    ? '#66BB6A'
+                    : 'linear-gradient(135deg, #F26419 0%, #F6AE2D 100%)',
+                  color: '#FFFFFF',
+                  fontWeight: 700,
+                  px: 2.5,
+                }}
+              >
+                {hasCopiedWarningPrompt
+                  ? locale === 'fr' ? 'Prompt Copié !' : 'Prompt Copied!'
+                  : locale === 'fr' ? 'Copier Prompt ChatGPT + JSON' : 'Copy ChatGPT Prompt + JSON'}
+              </CustomButton>
+            </Box>
+          </Box>
+        }
+      >
+        <Box sx={{ pt: 1 }}>
+          <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+            {locale === 'fr'
+              ? 'Ce JSON contient les alertes pré-match, les scores réels constatés et les résultats. Collez-le dans ChatGPT pour générer l\'évaluation post-match automatique.'
+              : 'This payload pairs each pre-match risk warning with the final match outcome and scores. Paste it into ChatGPT to produce a structured batch review.'}
+          </Typography>
+
+          <TextField
+            fullWidth
+            multiline
+            rows={14}
+            value={warningExportJson}
+            slotProps={{
+              input: {
+                readOnly: true,
+                sx: {
+                  fontFamily: 'monospace',
+                  fontSize: '0.8rem',
+                  lineHeight: 1.5,
+                  backgroundColor: alpha('#121824', 0.9),
+                },
+              },
+            }}
+          />
+        </Box>
+      </CustomModal>
+
+      {/* ─── WARNINGS BATCH REVIEW & APPROVAL MODAL ────────────────────────── */}
+      <CustomModal
+        open={isWarningReviewOpen}
+        onClose={() => setIsWarningReviewOpen(false)}
+        title={
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <CheckCircle2 size={20} color="#66BB6A" />
+            <span>{locale === 'fr' ? 'Évaluation des Alertes par ChatGPT' : 'ChatGPT Post-Match Warning Review'}</span>
+          </Box>
+        }
+        actions={
+          <Box sx={{ display: 'flex', gap: 1.5, width: '100%', justifyContent: 'flex-end' }}>
+            <CustomButton variant="outlined" onClick={() => setIsWarningReviewOpen(false)}>
+              {locale === 'fr' ? 'Annuler' : 'Cancel'}
+            </CustomButton>
+            <LoadingButton
+              variant="contained"
+              loading={isApplyingWarningUpdates}
+              disabled={!parsedWarningReview || approvedWarningIds.size === 0}
+              onClick={handleApplyWarningReviews}
+              sx={{
+                backgroundColor: '#66BB6A',
+                color: '#FFFFFF',
+                fontWeight: 700,
+                '&:hover': { backgroundColor: '#4CAF50' },
+              }}
+            >
+              {locale === 'fr'
+                ? `Approuver (${approvedWarningIds.size}) & Appliquer`
+                : `Approve (${approvedWarningIds.size}) & Apply`}
+            </LoadingButton>
+          </Box>
+        }
+      >
+        <Box sx={{ pt: 1 }}>
+          <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+            {locale === 'fr'
+              ? 'Collez la réponse JSON produite par ChatGPT pour valider et mettre à jour les statuts des alertes avec prévisualisation.'
+              : 'Paste the batch JSON generated by ChatGPT. Review each proposed status change and approve them below.'}
+          </Typography>
+
+          <TextField
+            fullWidth
+            multiline
+            rows={6}
+            placeholder='{ "operation": "warning_post_match_update", "updates": [ ... ] }'
+            value={warningReviewJsonInput}
+            onChange={(e) => handleParseWarningReviewJson(e.target.value)}
+            error={Boolean(warningReviewError)}
+            helperText={warningReviewError}
+            sx={{ mb: 3 }}
+          />
+
+          {parsedWarningReview && parsedWarningReview.updates && (
+            <Box>
+              <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 1, color: '#66BB6A' }}>
+                {locale === 'fr' ? 'Modifications proposées (Aperçu) :' : 'Proposed Updates Preview:'}
+              </Typography>
+              <Box sx={{ maxHeight: 260, overflowY: 'auto', border: '1px solid rgba(255, 255, 255, 0.08)', borderRadius: 2 }}>
+                <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.8rem' }}>
+                  <thead>
+                    <tr style={{ borderBottom: '1px solid rgba(255, 255, 255, 0.08)', backgroundColor: alpha('#121824', 0.8) }}>
+                      <th style={{ padding: '8px 12px' }}>Approve</th>
+                      <th style={{ padding: '8px 12px' }}>Warning ID</th>
+                      <th style={{ padding: '8px 12px' }}>New Status</th>
+                      <th style={{ padding: '8px 12px' }}>Assessment</th>
+                      <th style={{ padding: '8px 12px' }}>Review Notes</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {parsedWarningReview.updates.map((item, idx) => {
+                      const isChecked = approvedWarningIds.has(item.warning_id)
+                      return (
+                        <tr key={idx} style={{ borderBottom: '1px solid rgba(255, 255, 255, 0.04)' }}>
+                          <td style={{ padding: '8px 12px' }}>
+                            <input
+                              type="checkbox"
+                              checked={isChecked}
+                              onChange={(e) => {
+                                const next = new Set(approvedWarningIds)
+                                if (e.target.checked) next.add(item.warning_id)
+                                else next.delete(item.warning_id)
+                                setApprovedWarningIds(next)
+                              }}
+                            />
+                          </td>
+                          <td style={{ padding: '8px 12px', fontFamily: 'monospace', fontSize: '0.75rem' }}>
+                            {item.warning_id.slice(0, 8)}...
+                          </td>
+                          <td style={{ padding: '8px 12px', fontWeight: 700, color: '#66BB6A' }}>
+                            {item.post_match_status}
+                          </td>
+                          <td style={{ padding: '8px 12px' }}>
+                            {item.evidence_assessment || '—'}
+                          </td>
+                          <td style={{ padding: '8px 12px', color: '#9AA3B2' }}>
+                            {item.review_notes}
+                          </td>
+                        </tr>
+                      )
+                    })}
+                  </tbody>
+                </table>
+              </Box>
+            </Box>
+          )}
         </Box>
       </CustomModal>
     </Box>

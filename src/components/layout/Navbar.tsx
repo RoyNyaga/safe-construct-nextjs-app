@@ -17,7 +17,7 @@ import {
   Divider,
   Button,
 } from '@mui/material'
-import { Menu, X, HardHat, LogIn, LogOut } from 'lucide-react'
+import { Menu, X, LogIn, LogOut, LayoutGrid } from 'lucide-react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { useTranslations, useLocale } from 'next-intl'
@@ -187,27 +187,26 @@ export default function Navbar() {
               <LanguageSwitcher />
               {user ? (
                 <>
-                  {isAdmin && (
-                    <Button
-                      id="nav-dashboard-btn"
-                      component={Link}
-                      href={`/${locale}/select-context`}
-                      variant="outlined"
-                      size="small"
-                      sx={{
-                        borderColor: 'primary.main',
-                        color: 'primary.light',
-                        fontWeight: 600,
-                        px: 2,
-                        '&:hover': {
-                          borderColor: 'primary.light',
-                          backgroundColor: 'rgba(242, 100, 25, 0.08)',
-                        },
-                      }}
-                    >
-                      {locale === 'fr' ? 'Tableau de bord' : 'Dashboard'}
-                    </Button>
-                  )}
+                  <Button
+                    id="nav-select-context-btn"
+                    component={Link}
+                    href={`/${locale}/select-context`}
+                    variant="outlined"
+                    size="small"
+                    startIcon={<LayoutGrid size={14} />}
+                    sx={{
+                      borderColor: 'primary.main',
+                      color: 'primary.light',
+                      fontWeight: 600,
+                      px: 2,
+                      '&:hover': {
+                        borderColor: 'primary.light',
+                        backgroundColor: 'rgba(242, 100, 25, 0.08)',
+                      },
+                    }}
+                  >
+                    {locale === 'fr' ? 'Sélectionner le contexte' : 'Select Context'}
+                  </Button>
                   <Button
                     id="nav-logout-btn"
                     onClick={handleSignOut}
@@ -384,18 +383,17 @@ export default function Navbar() {
             </Button>
             {user ? (
               <>
-                {isAdmin && (
-                  <Button
-                    id="mobile-nav-dashboard"
-                    component={Link}
-                    href={`/${locale}/select-context`}
-                    variant="outlined"
-                    fullWidth
-                    onClick={() => setMobileOpen(false)}
-                  >
-                    {locale === 'fr' ? 'Tableau de bord' : 'Dashboard'}
-                  </Button>
-                )}
+                <Button
+                  id="mobile-nav-select-context"
+                  component={Link}
+                  href={`/${locale}/select-context`}
+                  variant="outlined"
+                  fullWidth
+                  startIcon={<LayoutGrid size={16} />}
+                  onClick={() => setMobileOpen(false)}
+                >
+                  {locale === 'fr' ? 'Sélectionner le contexte' : 'Select Context'}
+                </Button>
                 <Button
                   id="mobile-nav-logout"
                   variant="contained"
