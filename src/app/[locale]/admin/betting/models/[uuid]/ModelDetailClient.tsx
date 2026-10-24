@@ -28,9 +28,19 @@ import {
   Pencil,
   Trash2,
   AlertTriangle,
+  Copy,
+  Check,
+  ChevronDown,
+  ChevronUp,
 } from 'lucide-react'
 import BettingSubNav from '../../BettingSubNav'
-import { BettingBankroll, BettingModel, CalibrationBucket } from '@/types/betting'
+import {
+  BettingBankroll,
+  BettingModel,
+  CalibrationBucket,
+  CalibrationScope,
+  ModelCalibrationData,
+} from '@/types/betting'
 import { updateBettingModel, deleteBettingModel } from '@/app/[locale]/actions/betting'
 import { CustomModal, CustomNotification } from '@/components/ui'
 import CustomButton from '@/components/ui/CustomButton'
@@ -39,13 +49,15 @@ import { LoadingButton } from '@/components/ui/PromptButtons'
 interface ModelDetailClientProps {
   locale: string
   model: BettingModel
-  calibration: CalibrationBucket[]
+  calibrationData?: ModelCalibrationData
+  calibration?: CalibrationBucket[]
   bankroll: BettingBankroll | null
 }
 
 export default function ModelDetailClient({
   locale,
   model: initialModel,
+  calibrationData,
   calibration,
   bankroll,
 }: ModelDetailClientProps) {
@@ -53,6 +65,40 @@ export default function ModelDetailClient({
   const [model, setModel] = useState<BettingModel>(initialModel)
   const currentBalance = Number(bankroll?.current_balance || 0)
   const currency = bankroll?.currency || 'FCFA'
+
+  // Methodology Notes State (Collapse & Copy)
+  const [isContentExpanded, setIsContentExpanded] = useState(false)
+  const [isCopied, setIsCopied] = useState(false)
+
+  // Calibration Matrix Scope Filter State
+  const [activeScope, setActiveScope] = useState<CalibrationScope>('all')
+
+  const handleCopyContent = async () => {
+    if (!model.content) return
+    try {
+      await navigator.clipboard.writeText(model.content)
+      setIsCopied(true)
+      setTimeout(() => setIsCopied(false), 2500)
+      setNotification({
+        open: true,
+        message:
+          locale === 'fr'
+            ? 'Règles méthodologiques copiées dans le presse-papier !'
+            : 'Methodology notes copied to clipboard!',
+        type: 'success',
+      })
+    } catch {
+      setNotification({
+        open: true,
+        message: locale === 'fr' ? 'Échec de la copie.' : 'Failed to copy to clipboard.',
+        type: 'error',
+      })
+    }
+  }
+
+  const activeBuckets = calibrationData
+    ? calibrationData[activeScope]
+    : calibration || []
 
   // Edit Modal State
   const [isEditOpen, setIsEditOpen] = useState(false)
@@ -317,7 +363,7 @@ export default function ModelDetailClient({
         }}
       >
         <CardContent sx={{ p: 3 }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 1.5, mb: 2 }}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
               <Cpu size={20} color="#F26419" />
               <Typography variant="h6" sx={{ fontWeight: 700 }}>
@@ -325,33 +371,99 @@ export default function ModelDetailClient({
               </Typography>
             </Box>
 
-            <CustomButton
-              size="small"
-              variant="outlined"
-              onClick={handleOpenEdit}
-              startIcon={<Pencil size={14} />}
-              sx={{ borderColor: 'rgba(255, 255, 255, 0.15)', fontSize: '0.75rem' }}
-            >
-              {locale === 'fr' ? 'Modifier les règles' : 'Edit Rules'}
-            </CustomButton>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              <CustomButton
+                size="small"
+                variant="outlined"
+                onClick={handleCopyContent}
+                startIcon={isCopied ? <Check size={14} color="#66BB6A" /> : <Copy size={14} />}
+                disabled={!model.content}
+                sx={{
+                  borderColor: isCopied ? 'rgba(102, 187, 106, 0.4)' : 'rgba(255, 255, 255, 0.15)',
+                  color: isCopied ? '#66BB6A' : '#FFFFFF',
+                  fontSize: '0.75rem',
+                  fontWeight: 600,
+                  transition: 'all 0.2s ease',
+                  '&:hover': {
+                    borderColor: '#F26419',
+                    backgroundColor: alpha('#F26419', 0.1),
+                  },
+                }}
+              >
+                {isCopied
+                  ? locale === 'fr' ? 'Copié !' : 'Copied!'
+                  : locale === 'fr' ? 'Copier le texte' : 'Copy Content'}
+              </CustomButton>
+
+              <CustomButton
+                size="small"
+                variant="outlined"
+                onClick={handleOpenEdit}
+                startIcon={<Pencil size={14} />}
+                sx={{ borderColor: 'rgba(255, 255, 255, 0.15)', fontSize: '0.75rem' }}
+              >
+                {locale === 'fr' ? 'Modifier les règles' : 'Edit Rules'}
+              </CustomButton>
+            </Box>
           </Box>
 
-          <Paper
-            elevation={0}
-            sx={{
-              p: 3,
-              borderRadius: 2,
-              backgroundColor: alpha('#121824', 0.8),
-              border: '1px solid rgba(255, 255, 255, 0.08)',
-              fontFamily: 'monospace',
-              fontSize: '0.85rem',
-              lineHeight: 1.6,
-              whiteSpace: 'pre-wrap',
-              color: '#F0F2F5',
-            }}
-          >
-            {model.content || 'No methodology documentation stored for this model.'}
-          </Paper>
+          <Box sx={{ position: 'relative' }}>
+            <Paper
+              elevation={0}
+              sx={{
+                p: 3,
+                borderRadius: 2,
+                backgroundColor: alpha('#121824', 0.8),
+                border: '1px solid rgba(255, 255, 255, 0.08)',
+                fontFamily: 'monospace',
+                fontSize: '0.85rem',
+                lineHeight: 1.6,
+                whiteSpace: 'pre-wrap',
+                color: '#F0F2F5',
+                maxHeight: isContentExpanded ? 'none' : '220px',
+                overflow: 'hidden',
+                transition: 'max-height 0.3s ease',
+              }}
+            >
+              {model.content || 'No methodology documentation stored for this model.'}
+            </Paper>
+
+            {!isContentExpanded && Boolean(model.content && model.content.length > 250) && (
+              <Box
+                sx={{
+                  position: 'absolute',
+                  bottom: 0,
+                  left: 0,
+                  right: 0,
+                  height: 70,
+                  background: 'linear-gradient(to bottom, transparent, rgba(18, 24, 36, 0.95))',
+                  borderRadius: '0 0 8px 8px',
+                  pointerEvents: 'none',
+                }}
+              />
+            )}
+          </Box>
+
+          {Boolean(model.content && model.content.length > 250) && (
+            <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}>
+              <CustomButton
+                size="small"
+                variant="text"
+                onClick={() => setIsContentExpanded((prev) => !prev)}
+                endIcon={isContentExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+                sx={{
+                  color: 'primary.main',
+                  fontWeight: 700,
+                  fontSize: '0.8125rem',
+                  '&:hover': { backgroundColor: alpha('#F26419', 0.08) },
+                }}
+              >
+                {isContentExpanded
+                  ? locale === 'fr' ? 'Réduire le panneau' : 'View Less'
+                  : locale === 'fr' ? 'Voir tout le panneau (View More)' : 'View More (Expand)'}
+              </CustomButton>
+            </Box>
+          )}
         </CardContent>
       </Card>
 
@@ -364,16 +476,77 @@ export default function ModelDetailClient({
         }}
       >
         <CardContent sx={{ p: 3 }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-              <Percent size={20} color="#F6AE2D" />
-              <Typography variant="h6" sx={{ fontWeight: 700 }}>
-                {locale === 'fr' ? 'Matrice de Calibration des Probabilités' : 'Probability Calibration Matrix'}
+          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 2, mb: 2.5 }}>
+            <Box>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
+                <Percent size={20} color="#F6AE2D" />
+                <Typography variant="h6" sx={{ fontWeight: 700 }}>
+                  {locale === 'fr' ? 'Matrice de Calibration des Probabilités' : 'Probability Calibration Matrix'}
+                </Typography>
+              </Box>
+              <Typography variant="caption" color="text.secondary">
+                {locale === 'fr'
+                  ? 'Comparaison entre probabilité prédite et taux réel de gain pour évaluer le biais de sur/sous-confiance.'
+                  : 'Predicted probability vs actual win rate to evaluate over/under-confidence bias.'}
               </Typography>
             </Box>
-            <Typography variant="caption" color="text.secondary">
-              Predicted probability vs actual win rate
-            </Typography>
+
+            {/* Scope Filter Pill Selector */}
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap' }}>
+              {(['all', 'selections', 'alternatives'] as const).map((scopeKey) => {
+                const isSelected = activeScope === scopeKey
+                const count = calibrationData?.counts?.[scopeKey] ?? (scopeKey === 'selections' ? calibration?.reduce((a, b) => a + b.totalBets, 0) : 0)
+                const label =
+                  scopeKey === 'all'
+                    ? locale === 'fr' ? 'Tous' : 'All'
+                    : scopeKey === 'selections'
+                    ? locale === 'fr' ? 'Sélections' : 'Selections'
+                    : locale === 'fr' ? 'Alternatives' : 'Alternatives'
+
+                return (
+                  <Box
+                    key={scopeKey}
+                    component="button"
+                    type="button"
+                    onClick={() => setActiveScope(scopeKey)}
+                    sx={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: 0.75,
+                      px: 1.75,
+                      py: 0.6,
+                      borderRadius: 50,
+                      cursor: 'pointer',
+                      border: isSelected ? '1px solid #F26419' : '1px solid rgba(255, 255, 255, 0.12)',
+                      backgroundColor: isSelected ? alpha('#F26419', 0.18) : alpha('#121824', 0.6),
+                      color: isSelected ? '#FFFFFF' : '#9AA3B2',
+                      fontWeight: isSelected ? 700 : 500,
+                      fontSize: '0.8125rem',
+                      transition: 'all 0.18s ease-in-out',
+                      outline: 'none',
+                      '&:hover': {
+                        borderColor: isSelected ? '#F26419' : 'rgba(255, 255, 255, 0.3)',
+                        color: '#FFFFFF',
+                      },
+                    }}
+                  >
+                    <span>{label}</span>
+                    <Chip
+                      size="small"
+                      label={count}
+                      sx={{
+                        height: 18,
+                        fontSize: '0.65rem',
+                        fontWeight: 700,
+                        backgroundColor: isSelected ? alpha('#F26419', 0.35) : alpha('#FFFFFF', 0.08),
+                        color: isSelected ? '#FFFFFF' : '#9AA3B2',
+                        '& .MuiChip-label': { px: 0.75 },
+                      }}
+                    />
+                  </Box>
+                )
+              })}
+            </Box>
           </Box>
 
           <Box sx={{ overflowX: 'auto' }}>
@@ -389,7 +562,7 @@ export default function ModelDetailClient({
                 </tr>
               </thead>
               <tbody>
-                {calibration.map((bucket, idx) => (
+                {activeBuckets.map((bucket, idx) => (
                   <tr key={idx} style={{ borderBottom: '1px solid rgba(240, 242, 245, 0.05)' }}>
                     <td style={{ padding: '14px 16px', fontWeight: 700 }}>{bucket.rangeLabel}</td>
                     <td style={{ padding: '14px 16px' }}>{bucket.totalBets}</td>

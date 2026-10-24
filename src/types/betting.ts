@@ -143,9 +143,60 @@ export interface BettingTicket {
   betting_selections?: BettingSelection[]
   betting_alternatives?: BettingAlternative[]
   betting_transactions?: BettingTransaction[]
+  betting_warnings?: BettingWarning[]
 }
 
 // ─── CHATGPT JSON CONTRACTS ──────────────────────────────────────────────────
+
+export interface NestedWarningImportJSON {
+  warning_id?: string | null
+  type: string
+  severity?: WarningSeverity
+  market_relevance?: WarningMarketRelevance
+  direction?: WarningDirection
+  description: string
+  evidence?: string | null
+  verified?: boolean
+  numerical_adjustment?: boolean
+  pre_match_status?: string
+  post_match_status?: WarningPostMatchStatus
+  review_notes?: string | null
+}
+
+export interface NestedWarningExportJSON {
+  warning_uuid: string
+  type: string
+  severity: WarningSeverity
+  market_relevance: WarningMarketRelevance
+  direction: WarningDirection
+  description: string
+  evidence: string | null
+  pre_match_status: string
+  post_match_status: WarningPostMatchStatus
+  review_notes: string | null
+}
+
+export interface WarningImportJSON {
+  warning_id?: string | null
+  selection_reference: {
+    home_team: string
+    away_team: string
+    market?: string
+    selection?: string
+    target_type?: 'selection' | 'alternative'
+  }
+  type: string
+  severity?: WarningSeverity
+  market_relevance?: WarningMarketRelevance
+  direction?: WarningDirection
+  description: string
+  evidence?: string | null
+  verified?: boolean
+  numerical_adjustment?: boolean
+  pre_match_status?: string
+  post_match_status?: WarningPostMatchStatus
+  review_notes?: string | null
+}
 
 export interface TicketImportJSON {
   ticket: {
@@ -194,6 +245,7 @@ export interface TicketImportJSON {
     result?: SelectionResultStatus
     comment?: string | null
     notes?: string | null
+    warnings?: NestedWarningImportJSON[]
   }>
   alternatives?: Array<{
     match_date?: string | null
@@ -217,7 +269,9 @@ export interface TicketImportJSON {
     result?: SelectionResultStatus
     comment?: string | null
     notes?: string | null
+    warnings?: NestedWarningImportJSON[]
   }>
+  warnings?: WarningImportJSON[]
 }
 
 export interface TicketExportJSON {
@@ -265,6 +319,7 @@ export interface TicketExportJSON {
     result: SelectionResultStatus
     comment: string | null
     notes: string | null
+    warnings?: NestedWarningExportJSON[]
   }>
   alternatives: Array<{
     match_date: string | null
@@ -286,6 +341,31 @@ export interface TicketExportJSON {
     result: SelectionResultStatus
     comment: string | null
     notes: string | null
+    warnings?: NestedWarningExportJSON[]
+  }>
+  warnings?: Array<{
+    warning_uuid: string
+    target_type: 'selection' | 'alternative'
+    match: {
+      home_team: string
+      away_team: string
+      country: string | null
+      league: string | null
+      market: string
+      selection: string
+      actual_home_score: number | null
+      actual_away_score: number | null
+      result: string
+    }
+    type: string
+    severity: WarningSeverity
+    market_relevance: WarningMarketRelevance
+    direction: WarningDirection
+    description: string
+    evidence: string | null
+    pre_match_status: string
+    post_match_status: WarningPostMatchStatus
+    review_notes: string | null
   }>
 }
 
@@ -300,6 +380,19 @@ export interface CalibrationBucket {
   avgPredictedProb: number
   actualWinRate: number
   differencePp: number
+}
+
+export type CalibrationScope = 'all' | 'selections' | 'alternatives'
+
+export interface ModelCalibrationData {
+  all: CalibrationBucket[]
+  selections: CalibrationBucket[]
+  alternatives: CalibrationBucket[]
+  counts: {
+    all: number
+    selections: number
+    alternatives: number
+  }
 }
 
 export interface ComparisonGroup {
@@ -318,3 +411,146 @@ export interface SelectedVsAlternativesComparison {
   selected: ComparisonGroup
   alternatives: ComparisonGroup
 }
+
+// ─── WARNING MANAGEMENT & EVALUATION TYPES ───────────────────────────────────
+
+export type WarningSeverity = 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL'
+export type WarningMarketRelevance = 'DIRECT' | 'INDIRECT' | 'CONTEXTUAL'
+export type WarningDirection = 'CONTRADICTORY' | 'NEUTRAL' | 'SUPPORTIVE'
+export type WarningPostMatchStatus =
+  | 'PENDING'
+  | 'CONFIRMED'
+  | 'NOT_CONFIRMED'
+  | 'INCONCLUSIVE'
+  | 'NOT_APPLICABLE'
+
+export type WarningEvidenceAssessment =
+  | 'SUPPORTED'
+  | 'CONTRADICTED'
+  | 'PARTIAL'
+  | 'INCONCLUSIVE'
+
+export type WarningConfidence = 'LOW' | 'MEDIUM' | 'HIGH'
+
+export interface BettingWarningReview {
+  id: number
+  uuid: string
+  warning_id: number
+  previous_status: string | null
+  new_status: WarningPostMatchStatus
+  review_notes: string | null
+  evidence_assessment: WarningEvidenceAssessment | null
+  confidence: WarningConfidence | null
+  review_source: string
+  created_at: string
+}
+
+export interface BettingWarning {
+  id: number
+  uuid: string
+  ticket_id: number
+  selection_id: number | null
+  alternative_id: number | null
+  target_type: 'selection' | 'alternative'
+  warning_type: string
+  severity: WarningSeverity
+  market_relevance: WarningMarketRelevance
+  direction: WarningDirection
+  description: string
+  evidence: string | null
+  verified: boolean
+  numerical_adjustment: boolean
+  pre_match_status: string
+  post_match_status: WarningPostMatchStatus
+  review_notes: string | null
+  created_at: string
+  updated_at: string
+  // Relations
+  betting_tickets?: BettingTicket | null
+  betting_selections?: BettingSelection | null
+  betting_alternatives?: BettingAlternative | null
+  betting_warning_reviews?: BettingWarningReview[]
+}
+
+// ─── WARNING CHATGPT EXPORT & BATCH UPDATE CONTRACTS ─────────────────────────
+
+export interface WarningExportItem {
+  warning_uuid: string
+  warning_type: string
+  severity: WarningSeverity
+  direction: WarningDirection
+  market_relevance: WarningMarketRelevance
+  target_type: 'selection' | 'alternative'
+  ticket_number: string | null
+  ticket_uuid: string
+  match: {
+    home_team: string
+    away_team: string
+    country: string | null
+    league: string | null
+    market: string
+    selection: string
+    odds: number | null
+    estimated_probability: number | null
+    actual_home_score: number | null
+    actual_away_score: number | null
+    result: string
+    is_settled: boolean
+  }
+  description: string
+  pre_match_evidence: string | null
+  pre_match_status: string
+  current_post_match_status: WarningPostMatchStatus
+  existing_review_notes: string | null
+}
+
+export interface WarningsExportJSON {
+  export_type: 'warning_post_match_evaluation_request'
+  ticket_uuid?: string | null
+  ticket_number?: string | null
+  total_warnings: number
+  pending_warnings_count: number
+  generated_at: string
+  warnings: WarningExportItem[]
+}
+
+export interface WarningBatchUpdateItem {
+  warning_id: string // UUID
+  post_match_status: WarningPostMatchStatus
+  review_notes: string
+  evidence_assessment?: WarningEvidenceAssessment
+  confidence?: WarningConfidence
+}
+
+export interface WarningBatchUpdateJSON {
+  operation: 'warning_post_match_update'
+  schema_version: string
+  updates: WarningBatchUpdateItem[]
+}
+
+// ─── WARNING ANALYTICS TYPES ─────────────────────────────────────────────────
+
+export interface WarningAnalyticsSummary {
+  totalWarnings: number
+  pendingWarnings: number
+  confirmedWarnings: number
+  notConfirmedWarnings: number
+  inconclusiveWarnings: number
+  confirmationRate: number // % of evaluated warnings that are CONFIRMED
+  evaluationRate: number // % of total warnings with settled status
+  bySeverity: Record<WarningSeverity, number>
+  byDirection: Record<WarningDirection, number>
+  byType: Array<{
+    type: string
+    count: number
+    confirmed: number
+    winRateWhenPresent: number
+  }>
+  impactOnOutcome: {
+    withHighCriticalContradictoryWinRate: number
+    withoutWarningsWinRate: number
+    allBetsWinRate: number
+  }
+}
+
+

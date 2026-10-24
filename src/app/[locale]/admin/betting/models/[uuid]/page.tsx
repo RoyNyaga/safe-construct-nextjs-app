@@ -1,6 +1,6 @@
 import { notFound } from 'next/navigation'
 import { getActiveBankroll } from '@/app/[locale]/actions/bankroll'
-import { getBettingModelByUuid, getCalibrationStats } from '@/app/[locale]/actions/betting'
+import { getBettingModelByUuid, getModelCalibrationData } from '@/app/[locale]/actions/betting'
 import ModelDetailClient from './ModelDetailClient'
 
 export default async function BettingModelDetailPage({
@@ -16,16 +16,16 @@ export default async function BettingModelDetailPage({
     notFound()
   }
 
-  const [{ bankroll }, calibration] = await Promise.all([
+  const [{ bankroll }, calibrationData] = await Promise.all([
     getActiveBankroll(),
-    getCalibrationStats(model.id),
+    getModelCalibrationData(model.id),
   ])
 
   return (
     <ModelDetailClient
       locale={locale}
       model={model}
-      calibration={calibration}
+      calibrationData={calibrationData}
       bankroll={bankroll}
     />
   )

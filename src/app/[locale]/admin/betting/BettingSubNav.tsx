@@ -12,6 +12,7 @@ import {
   BarChart3,
   TrendingUp,
   ArrowUpRight,
+  AlertTriangle,
 } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { CustomTooltip } from '@/components/ui'
@@ -46,6 +47,11 @@ export default function BettingSubNav({
       label: locale === 'fr' ? 'Tickets' : 'Tickets',
       icon: Receipt,
       href: `/${locale}/admin/betting/tickets`,
+    },
+    {
+      label: locale === 'fr' ? 'Alertes & Risques' : 'Warnings & Risks',
+      icon: AlertTriangle,
+      href: `/${locale}/admin/betting/warnings`,
     },
     {
       label: locale === 'fr' ? 'Importer JSON' : 'Import Ticket',
