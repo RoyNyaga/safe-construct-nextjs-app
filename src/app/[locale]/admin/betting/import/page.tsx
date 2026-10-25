@@ -2,7 +2,7 @@ import { Box } from '@mui/material'
 import BettingSubNav from '../BettingSubNav'
 import ImportClient from './ImportClient'
 import { getActiveBankroll } from '@/app/[locale]/actions/bankroll'
-import { getBettingModels } from '@/app/[locale]/actions/betting'
+import { getBettingModels, getModelTicketNumberSuggestion } from '@/app/[locale]/actions/betting'
 
 export default async function BettingImportPage({
   params,
@@ -10,9 +10,10 @@ export default async function BettingImportPage({
   params: Promise<{ locale: string }>
 }) {
   const { locale } = await params
-  const [{ bankroll }, { models }] = await Promise.all([
+  const [{ bankroll }, { models }, ticketSuggestion] = await Promise.all([
     getActiveBankroll(),
     getBettingModels(),
+    getModelTicketNumberSuggestion(),
   ])
 
   const currency = bankroll?.currency || 'FCFA'
@@ -28,6 +29,7 @@ export default async function BettingImportPage({
         locale={locale}
         models={models || []}
         currency={currency}
+        initialTicketSuggestion={ticketSuggestion}
       />
     </Box>
   )

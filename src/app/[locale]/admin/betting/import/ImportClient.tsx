@@ -36,20 +36,22 @@ import {
   FileText,
   Scale,
 } from 'lucide-react'
-import { TicketImportJSON, BettingModel } from '@/types/betting'
-import { importBettingTicket } from '@/app/[locale]/actions/betting'
+import { TicketImportJSON, BettingModel, TicketSuggestionData } from '@/types/betting'
+import { importBettingTicket, getModelTicketNumberSuggestion } from '@/app/[locale]/actions/betting'
 import { CustomNotification, CustomTooltip, CustomDrawer } from '@/components/ui'
 import CustomButton from '@/components/ui/CustomButton'
 import { LoadingButton } from '@/components/ui/PromptButtons'
 import { formatCurrency } from '@/utils/bettingCurrency'
 
-function generateSamplePayload(activeModel?: BettingModel | null): TicketImportJSON {
+function generateSamplePayload(activeModel?: BettingModel | null, initialSuggestion?: TicketSuggestionData | null): TicketImportJSON {
   const modelVersion = activeModel?.version || '2.1'
   const modelName = activeModel?.name || 'roys_betting_engine_over_1_5_goals'
+  const versionStr = modelVersion.toLowerCase().startsWith('v') ? modelVersion : `v${modelVersion}`
+  const ticketNum = initialSuggestion?.nextSelectionTicketNumber || `S-21-${versionStr}`
 
   return {
     ticket: {
-      ticket_number: '001',
+      ticket_number: ticketNum,
       date: '2026-10-20',
       model_version: modelVersion,
       ...(activeModel?.uuid ? { model_uuid: activeModel.uuid } : {}),
@@ -176,15 +178,26 @@ interface ImportClientProps {
   locale: string
   models?: BettingModel[]
   currency?: string
+  initialTicketSuggestion?: TicketSuggestionData
 }
 
-export default function ImportClient({ locale, models = [], currency = 'FCFA' }: ImportClientProps) {
+export default function ImportClient({
+  locale,
+  models = [],
+  currency = 'FCFA',
+  initialTicketSuggestion,
+}: ImportClientProps) {
   const router = useRouter()
   const [jsonText, setJsonText] = useState('')
   const [parsedPayload, setParsedPayload] = useState<TicketImportJSON | null>(null)
   const [parseError, setParseError] = useState<string | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [selectedModelUuid, setSelectedModelUuid] = useState<string>('')
+  const [ticketSuggestion, setTicketSuggestion] = useState<TicketSuggestionData | null>(
+    initialTicketSuggestion || null
+  )
+  const [ticketType, setTicketType] = useState<'selection' | 'alternative'>('selection')
+  const [isGeneratingTicketNum, setIsGeneratingTicketNum] = useState(false)
   const [snapshotSelection, setSnapshotSelection] = useState<TicketImportJSON['selections'][number] | null>(null)
   const [snapshotAlternative, setSnapshotAlternative] = useState<NonNullable<TicketImportJSON['alternatives']>[number] | null>(null)
 
@@ -328,8 +341,6 @@ export default function ImportClient({ locale, models = [], currency = 'FCFA' }:
         }
       }
 
-      setParsedPayload(obj as TicketImportJSON)
-
       // Resolve matching model UUID
       const match =
         models.find((m) => m.uuid === obj.ticket?.model_uuid) ||
@@ -339,6 +350,26 @@ export default function ImportClient({ locale, models = [], currency = 'FCFA' }:
       if (match) {
         setSelectedModelUuid(match.uuid)
       }
+
+      // Check ticket type and auto-generate ticket_number if missing or generic '001'
+      const isAlt =
+        (!obj.selections || obj.selections.length === 0) &&
+        Boolean(obj.alternatives && obj.alternatives.length > 0)
+      const detectedType: 'selection' | 'alternative' = isAlt ? 'alternative' : 'selection'
+      setTicketType(detectedType)
+
+      const currentNum = obj.ticket?.ticket_number?.trim() || ''
+      if (!currentNum || currentNum === '001' || currentNum.toLowerCase() === 'auto-assigned') {
+        const fallbackVersion = match?.version || '2.1'
+        const vStr = fallbackVersion.toLowerCase().startsWith('v') ? fallbackVersion : `v${fallbackVersion}`
+        const autoNum =
+          detectedType === 'alternative'
+            ? ticketSuggestion?.nextAlternativeTicketNumber || `A-1-${vStr}`
+            : ticketSuggestion?.nextSelectionTicketNumber || `S-1-${vStr}`
+        obj.ticket.ticket_number = autoNum
+      }
+
+      setParsedPayload(obj as TicketImportJSON)
 
       setNotification({
         open: true,
@@ -360,8 +391,71 @@ export default function ImportClient({ locale, models = [], currency = 'FCFA' }:
   }, [models])
 
   const sampleJson = useMemo(() => {
-    return generateSamplePayload(activeModel)
-  }, [activeModel])
+    return generateSamplePayload(activeModel, ticketSuggestion)
+  }, [activeModel, ticketSuggestion])
+
+  // Auto-generate ticket number for selection or alternative
+  const handleAutoGenerateTicketNumber = async (
+    targetType: 'selection' | 'alternative',
+    modelUuidToUse?: string
+  ) => {
+    setIsGeneratingTicketNum(true)
+    const targetModelUuid = modelUuidToUse || selectedModelUuid || activeModel?.uuid
+    const res = await getModelTicketNumberSuggestion({
+      modelUuid: targetModelUuid,
+      type: targetType,
+    })
+    setIsGeneratingTicketNum(false)
+    if (res && res.ticketNumber) {
+      setTicketSuggestion(res)
+      setTicketType(targetType)
+      if (parsedPayload) {
+        setParsedPayload({
+          ...parsedPayload,
+          ticket: {
+            ...parsedPayload.ticket,
+            ticket_number: res.ticketNumber,
+          },
+        })
+      }
+    }
+  }
+
+  // Update ticket number directly in preview
+  const handleUpdateTicketNumber = (val: string) => {
+    if (!parsedPayload) return
+    setParsedPayload({
+      ...parsedPayload,
+      ticket: {
+        ...parsedPayload.ticket,
+        ticket_number: val,
+      },
+    })
+  }
+
+  // Handle model change and refresh ticket number suggestion
+  const handleModelChange = async (newModelUuid: string) => {
+    setSelectedModelUuid(newModelUuid)
+    const res = await getModelTicketNumberSuggestion({
+      modelUuid: newModelUuid,
+      type: ticketType,
+    })
+    if (res && res.ticketNumber) {
+      setTicketSuggestion(res)
+      if (parsedPayload) {
+        const currentNum = parsedPayload.ticket.ticket_number || ''
+        if (!currentNum || currentNum.startsWith('S-') || currentNum.startsWith('A-') || currentNum === '001') {
+          setParsedPayload({
+            ...parsedPayload,
+            ticket: {
+              ...parsedPayload.ticket,
+              ticket_number: res.ticketNumber,
+            },
+          })
+        }
+      }
+    }
+  }
 
   // Load Sample JSON
   const handleLoadSample = () => {
@@ -744,19 +838,135 @@ ${JSON.stringify(sampleJson, null, 2)}`
           >
             <CardContent sx={{ p: 3 }}>
               <Grid container spacing={2.5} sx={{ alignItems: 'flex-start' }}>
-                <Grid size={{ xs: 6, sm: 2 }}>
-                  <Typography variant="caption" color="text.secondary">Ticket #</Typography>
-                  <Typography variant="h6" sx={{ fontWeight: 700, color: 'primary.main' }}>
-                    {parsedPayload.ticket.ticket_number ? `#${parsedPayload.ticket.ticket_number}` : 'Auto-assigned'}
+                <Grid size={{ xs: 12, sm: 3.2 }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 0.5 }}>
+                    <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 700 }}>
+                      Ticket #
+                    </Typography>
+                    {/* S / A Switcher Chips */}
+                    <Box sx={{ display: 'flex', gap: 0.5 }}>
+                      <CustomTooltip
+                        title={
+                          locale === 'fr'
+                            ? `Format Sélection (S). Prochain: #${ticketSuggestion?.nextSelectionTicketNumber || 'S-21-v2.1'}`
+                            : `Selection Format (S). Next: #${ticketSuggestion?.nextSelectionTicketNumber || 'S-21-v2.1'}`
+                        }
+                      >
+                        <Chip
+                          label="S"
+                          size="small"
+                          clickable
+                          onClick={() => handleAutoGenerateTicketNumber('selection')}
+                          sx={{
+                            height: 20,
+                            minWidth: 24,
+                            px: 0.5,
+                            fontSize: '0.7rem',
+                            fontWeight: 800,
+                            cursor: 'pointer',
+                            backgroundColor: ticketType === 'selection' ? '#42A5F5' : alpha('#42A5F5', 0.15),
+                            color: ticketType === 'selection' ? '#0D1117' : '#42A5F5',
+                            border: `1px solid ${alpha('#42A5F5', 0.5)}`,
+                          }}
+                        />
+                      </CustomTooltip>
+                      <CustomTooltip
+                        title={
+                          locale === 'fr'
+                            ? `Format Alternative (A). Prochain: #${ticketSuggestion?.nextAlternativeTicketNumber || 'A-8-v2.1'}`
+                            : `Alternative Format (A). Next: #${ticketSuggestion?.nextAlternativeTicketNumber || 'A-8-v2.1'}`
+                        }
+                      >
+                        <Chip
+                          label="A"
+                          size="small"
+                          clickable
+                          onClick={() => handleAutoGenerateTicketNumber('alternative')}
+                          sx={{
+                            height: 20,
+                            minWidth: 24,
+                            px: 0.5,
+                            fontSize: '0.7rem',
+                            fontWeight: 800,
+                            cursor: 'pointer',
+                            backgroundColor: ticketType === 'alternative' ? '#CE93D8' : alpha('#CE93D8', 0.15),
+                            color: ticketType === 'alternative' ? '#0D1117' : '#CE93D8',
+                            border: `1px solid ${alpha('#CE93D8', 0.5)}`,
+                          }}
+                        />
+                      </CustomTooltip>
+                    </Box>
+                  </Box>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <TextField
+                      size="small"
+                      value={parsedPayload.ticket.ticket_number ?? ''}
+                      onChange={(e) => handleUpdateTicketNumber(e.target.value)}
+                      placeholder={ticketSuggestion?.nextSelectionTicketNumber || 'S-21-v2.1'}
+                      slotProps={{
+                        input: {
+                          startAdornment: (
+                            <InputAdornment position="start">
+                              <span style={{ color: '#42A5F5', fontWeight: 800, fontSize: '0.85rem' }}>#</span>
+                            </InputAdornment>
+                          ),
+                          sx: {
+                            fontWeight: 800,
+                            fontSize: '0.9rem',
+                            color: '#42A5F5',
+                            backgroundColor: alpha('#121824', 0.8),
+                            borderRadius: 1.5,
+                            height: 38,
+                          },
+                        },
+                      }}
+                      sx={{ flex: 1 }}
+                    />
+                    <CustomTooltip
+                      title={
+                        locale === 'fr'
+                          ? `Générer automatiquement selon le format (Type-Compte+1-Version). Actuel: ${ticketSuggestion?.selectionCount ?? 0} sélections, ${ticketSuggestion?.alternativeCount ?? 0} alternatives.`
+                          : `Auto-generate based on (Type-Count+1-Version). Current: ${ticketSuggestion?.selectionCount ?? 0} selections, ${ticketSuggestion?.alternativeCount ?? 0} alternatives.`
+                      }
+                    >
+                      <span>
+                        <CustomButton
+                          size="small"
+                          variant="outlined"
+                          disabled={isGeneratingTicketNum}
+                          onClick={() => handleAutoGenerateTicketNumber(ticketType)}
+                          sx={{
+                            minWidth: 38,
+                            width: 38,
+                            height: 38,
+                            p: 0,
+                            borderRadius: 1.5,
+                            borderColor: alpha('#42A5F5', 0.5),
+                            color: '#42A5F5',
+                            '&:hover': {
+                              borderColor: '#42A5F5',
+                              backgroundColor: alpha('#42A5F5', 0.15),
+                            },
+                          }}
+                        >
+                          <Sparkles size={16} />
+                        </CustomButton>
+                      </span>
+                    </CustomTooltip>
+                  </Box>
+                  <Typography variant="caption" sx={{ display: 'block', mt: 0.5, color: '#9AA3B2', fontSize: '0.7rem' }}>
+                    {ticketType === 'selection'
+                      ? `S: ${ticketSuggestion?.selectionCount ?? 0} sélections existantes + 1 = #${ticketSuggestion?.nextSelectionTicketNumber || 'S-21-v2.1'}`
+                      : `A: ${ticketSuggestion?.alternativeCount ?? 0} alternatives existantes + 1 = #${ticketSuggestion?.nextAlternativeTicketNumber || 'A-8-v2.1'}`}
                   </Typography>
                 </Grid>
-                <Grid size={{ xs: 6, sm: 2 }}>
+                <Grid size={{ xs: 6, sm: 1.8 }}>
                   <Typography variant="caption" color="text.secondary">Date</Typography>
                   <Typography variant="h6" sx={{ fontWeight: 700 }}>
                     {parsedPayload.ticket.date || 'Today'}
                   </Typography>
                 </Grid>
-                <Grid size={{ xs: 12, sm: 3.5 }}>
+                <Grid size={{ xs: 6, sm: 3.0 }}>
                   <Typography variant="caption" color="text.secondary">
                     {locale === 'fr' ? 'Modèle Statistique Associé' : 'Associated Model'}
                   </Typography>
@@ -764,7 +974,7 @@ ${JSON.stringify(sampleJson, null, 2)}`
                     <FormControl fullWidth size="small" sx={{ mt: 0.5 }}>
                       <Select
                         value={selectedModelUuid}
-                        onChange={(e) => setSelectedModelUuid(e.target.value)}
+                        onChange={(e) => handleModelChange(e.target.value)}
                         sx={{
                           backgroundColor: alpha('#121824', 0.8),
                           fontSize: '0.85rem',
@@ -786,7 +996,7 @@ ${JSON.stringify(sampleJson, null, 2)}`
                     </Typography>
                   )}
                 </Grid>
-                <Grid size={{ xs: 12, sm: 4.5 }}>
+                <Grid size={{ xs: 12, sm: 4.0 }}>
                   <Box
                     sx={{
                       p: 1.5,

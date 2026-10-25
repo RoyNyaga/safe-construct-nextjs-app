@@ -198,6 +198,21 @@ export interface WarningImportJSON {
   review_notes?: string | null
 }
 
+export interface TicketSuggestionData {
+  ticketNumber: string
+  prefix: 'S' | 'A'
+  countPlusOne: number
+  totalCount: number
+  modelVersion: string
+  modelId: number | null
+  modelUuid: string | null
+  selectionCount: number
+  alternativeCount: number
+  nextSelectionTicketNumber: string
+  nextAlternativeTicketNumber: string
+  error?: string
+}
+
 export interface TicketImportJSON {
   ticket: {
     ticket_number?: string
