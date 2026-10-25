@@ -20,6 +20,7 @@ import {
   CalibrationScope,
   ModelCalibrationData,
   SelectedVsAlternativesComparison,
+  TicketSuggestionData,
 } from '@/types/betting'
 import { autoSettleSelection, calculateTicketStatus, calculateProfitLoss } from '@/utils/bettingSettlement'
 import { executeTransaction, getActiveBankroll, deleteBankrollTransaction } from './bankroll'
@@ -302,12 +303,25 @@ function parseNullableString(val: any): string | null {
 
   const stake = parseNullableNumber(payload.ticket.stake) ?? 0
 
+  // Resolve ticket number if missing or empty
+  let resolvedTicketNumber = parseNullableString(payload.ticket.ticket_number)
+  if (!resolvedTicketNumber) {
+    const isAlt =
+      (!payload.selections || payload.selections.length === 0) &&
+      Boolean(payload.alternatives && payload.alternatives.length > 0)
+    const suggestion = await getModelTicketNumberSuggestion({
+      modelId: modelId,
+      type: isAlt ? 'alternative' : 'selection',
+    })
+    resolvedTicketNumber = suggestion.ticketNumber
+  }
+
   // 3. Insert Ticket
   const { data: ticket, error: ticketError } = await supabase
     .from('betting_tickets')
     .insert([
       {
-        ticket_number: parseNullableString(payload.ticket.ticket_number),
+        ticket_number: resolvedTicketNumber,
         ticket_date: payload.ticket.date || new Date().toISOString().split('T')[0],
         model_id: modelId,
         bankroll_id: bankrollId,
@@ -1763,3 +1777,132 @@ export async function getSelectedVsAlternativesComparison(modelId?: number): Pro
     alternatives: calculateGroup(altData || []),
   }
 }
+
+// ─── 11. TICKET NUMBER GENERATION ──────────────────────────────────────────
+
+export async function getModelTicketNumberSuggestion(params?: {
+  modelUuid?: string
+  modelId?: number
+  type?: 'selection' | 'alternative'
+}): Promise<TicketSuggestionData> {
+  const supabase = await createClient()
+
+  // 1. Resolve target model (specified by uuid, id, or active model fallback)
+  let model: { id: number; uuid: string; version: string; is_active: boolean } | null = null
+
+  if (params?.modelUuid) {
+    const { data } = await supabase
+      .from('betting_models')
+      .select('id, uuid, version, is_active')
+      .eq('uuid', params.modelUuid)
+      .maybeSingle()
+    if (data) model = data
+  }
+
+  if (!model && params?.modelId) {
+    const { data } = await supabase
+      .from('betting_models')
+      .select('id, uuid, version, is_active')
+      .eq('id', params.modelId)
+      .maybeSingle()
+    if (data) model = data
+  }
+
+  if (!model) {
+    const { data } = await supabase
+      .from('betting_models')
+      .select('id, uuid, version, is_active')
+      .eq('is_active', true)
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle()
+    if (data) model = data
+  }
+
+  if (!model) {
+    const { data } = await supabase
+      .from('betting_models')
+      .select('id, uuid, version, is_active')
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle()
+    if (data) model = data
+  }
+
+  const rawVersion = model?.version || '1.0'
+  const modelVersion = rawVersion.toLowerCase().startsWith('v') ? rawVersion : `v${rawVersion}`
+  const targetType = params?.type || 'selection'
+
+  if (!model) {
+    return {
+      ticketNumber: targetType === 'alternative' ? `A-1-${modelVersion}` : `S-1-${modelVersion}`,
+      prefix: targetType === 'alternative' ? 'A' : 'S',
+      countPlusOne: 1,
+      totalCount: 0,
+      modelVersion,
+      modelId: null,
+      modelUuid: null,
+      selectionCount: 0,
+      alternativeCount: 0,
+      nextSelectionTicketNumber: `S-1-${modelVersion}`,
+      nextAlternativeTicketNumber: `A-1-${modelVersion}`,
+    }
+  }
+
+  // 2. Fetch ticket IDs belonging to this model
+  const { data: tickets, error: ticketError } = await supabase
+    .from('betting_tickets')
+    .select('id')
+    .eq('model_id', model.id)
+
+  if (ticketError) {
+    console.error('Failed to fetch tickets for model count:', ticketError)
+  }
+
+  const ticketIds = (tickets || []).map((t) => t.id)
+  let selectionCount = 0
+  let alternativeCount = 0
+
+  if (ticketIds.length > 0) {
+    const [{ count: selCount, error: selErr }, { count: altCount, error: altErr }] = await Promise.all([
+      supabase
+        .from('betting_selections')
+        .select('*', { count: 'exact', head: true })
+        .in('ticket_id', ticketIds),
+      supabase
+        .from('betting_alternatives')
+        .select('*', { count: 'exact', head: true })
+        .in('ticket_id', ticketIds),
+    ])
+
+    if (selErr) console.error('Failed to count selections for model:', selErr)
+    if (altErr) console.error('Failed to count alternatives for model:', altErr)
+
+    selectionCount = selCount || 0
+    alternativeCount = altCount || 0
+  }
+
+  const nextSelectionTicketNumber = `S-${selectionCount + 1}-${modelVersion}`
+  const nextAlternativeTicketNumber = `A-${alternativeCount + 1}-${modelVersion}`
+
+  const isAlt = targetType === 'alternative'
+  const ticketNumber = isAlt ? nextAlternativeTicketNumber : nextSelectionTicketNumber
+  const prefix: 'S' | 'A' = isAlt ? 'A' : 'S'
+  const totalCount = isAlt ? alternativeCount : selectionCount
+  const countPlusOne = totalCount + 1
+
+  return {
+    ticketNumber,
+    prefix,
+    countPlusOne,
+    totalCount,
+    modelVersion,
+    modelId: model.id,
+    modelUuid: model.uuid,
+    selectionCount,
+    alternativeCount,
+    nextSelectionTicketNumber,
+    nextAlternativeTicketNumber,
+  }
+}
+
