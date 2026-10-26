@@ -3,6 +3,8 @@ export type TicketStatus = 'pending' | 'won' | 'lost' | 'void'
 export type SelectionResultStatus = 'pending' | 'won' | 'lost' | 'void'
 export type TransactionType = 'deposit' | 'withdrawal' | 'bet_stake' | 'bet_win' | 'bet_refund' | 'adjustment'
 export type TriggerType = 'manual' | 'automatic'
+export type AlignmentRemark = 'very_high' | 'high' | 'medium' | 'low' | 'very_low'
+export type EdgeRemark = 'very_high' | 'high' | 'medium' | 'low' | 'very_low'
 
 export interface BettingModel {
   id: number
@@ -86,6 +88,14 @@ export interface BettingSelection {
   breakeven_probability: number | null
   edge_percentage_points: number | null
   expected_value: number | null
+  current_league_home_avg?: number | null
+  current_league_away_avg?: number | null
+  historical_league_home_avg?: number | null
+  historical_league_away_avg?: number | null
+  historical_estimated_probability?: number | null
+  alignment_delta_pp?: number | null
+  alignment_remark?: AlignmentRemark | null
+  edge_remark?: EdgeRemark | null
   actual_home_score: number | null
   actual_away_score: number | null
   result: SelectionResultStatus
@@ -104,8 +114,18 @@ export interface BettingAlternative {
   league: string | null
   home_team: string
   away_team: string
+  home_league_position?: number | null
+  away_league_position?: number | null
   home_matches_played?: number | null
   away_matches_played?: number | null
+  home_goals_scored?: number | null
+  home_goals_conceded?: number | null
+  away_goals_scored?: number | null
+  away_goals_conceded?: number | null
+  home_goals_per_game?: number | null
+  home_conceded_per_game?: number | null
+  away_goals_per_game?: number | null
+  away_conceded_per_game?: number | null
   market: string
   selection: string
   odds: number | null
@@ -113,6 +133,14 @@ export interface BettingAlternative {
   breakeven_probability: number | null
   edge_percentage_points: number | null
   expected_value: number | null
+  current_league_home_avg?: number | null
+  current_league_away_avg?: number | null
+  historical_league_home_avg?: number | null
+  historical_league_away_avg?: number | null
+  historical_estimated_probability?: number | null
+  alignment_delta_pp?: number | null
+  alignment_remark?: AlignmentRemark | null
+  edge_remark?: EdgeRemark | null
   actual_home_score: number | null
   actual_away_score: number | null
   result: SelectionResultStatus
@@ -255,6 +283,14 @@ export interface TicketImportJSON {
     breakeven_probability?: number | null
     edge_percentage_points?: number | null
     expected_value?: number | null
+    current_league_home_avg?: number | null
+    current_league_away_avg?: number | null
+    historical_league_home_avg?: number | null
+    historical_league_away_avg?: number | null
+    historical_estimated_probability?: number | null
+    alignment_delta_pp?: number | null
+    alignment_remark?: AlignmentRemark | null
+    edge_remark?: EdgeRemark | null
     actual_home_score?: number | null
     actual_away_score?: number | null
     result?: SelectionResultStatus
@@ -268,10 +304,20 @@ export interface TicketImportJSON {
     league?: string | null
     home_team: string
     away_team: string
+    home_league_position?: number | null
+    away_league_position?: number | null
     home_matches_played?: number | null
     away_matches_played?: number | null
     home_games_played?: number | null
     away_games_played?: number | null
+    home_goals_scored?: number | null
+    home_goals_conceded?: number | null
+    away_goals_scored?: number | null
+    away_goals_conceded?: number | null
+    home_goals_per_game?: number | null
+    home_conceded_per_game?: number | null
+    away_goals_per_game?: number | null
+    away_conceded_per_game?: number | null
     market: string
     selection: string
     odds?: number | null
@@ -279,6 +325,14 @@ export interface TicketImportJSON {
     breakeven_probability?: number | null
     edge_percentage_points?: number | null
     expected_value?: number | null
+    current_league_home_avg?: number | null
+    current_league_away_avg?: number | null
+    historical_league_home_avg?: number | null
+    historical_league_away_avg?: number | null
+    historical_estimated_probability?: number | null
+    alignment_delta_pp?: number | null
+    alignment_remark?: AlignmentRemark | null
+    edge_remark?: EdgeRemark | null
     actual_home_score?: number | null
     actual_away_score?: number | null
     result?: SelectionResultStatus
@@ -329,6 +383,14 @@ export interface TicketExportJSON {
     breakeven_probability: number | null
     edge_percentage_points: number | null
     expected_value: number | null
+    current_league_home_avg?: number | null
+    current_league_away_avg?: number | null
+    historical_league_home_avg?: number | null
+    historical_league_away_avg?: number | null
+    historical_estimated_probability?: number | null
+    alignment_delta_pp?: number | null
+    alignment_remark?: AlignmentRemark | null
+    edge_remark?: EdgeRemark | null
     actual_home_score: number | null
     actual_away_score: number | null
     result: SelectionResultStatus
@@ -342,8 +404,18 @@ export interface TicketExportJSON {
     league: string | null
     home_team: string
     away_team: string
+    home_league_position?: number | null
+    away_league_position?: number | null
     home_matches_played?: number | null
     away_matches_played?: number | null
+    home_goals_scored?: number | null
+    home_goals_conceded?: number | null
+    away_goals_scored?: number | null
+    away_goals_conceded?: number | null
+    home_goals_per_game?: number | null
+    home_conceded_per_game?: number | null
+    away_goals_per_game?: number | null
+    away_conceded_per_game?: number | null
     market: string
     selection: string
     odds: number | null
@@ -351,6 +423,14 @@ export interface TicketExportJSON {
     breakeven_probability: number | null
     edge_percentage_points: number | null
     expected_value: number | null
+    current_league_home_avg?: number | null
+    current_league_away_avg?: number | null
+    historical_league_home_avg?: number | null
+    historical_league_away_avg?: number | null
+    historical_estimated_probability?: number | null
+    alignment_delta_pp?: number | null
+    alignment_remark?: AlignmentRemark | null
+    edge_remark?: EdgeRemark | null
     actual_home_score: number | null
     actual_away_score: number | null
     result: SelectionResultStatus
@@ -507,6 +587,7 @@ export interface WarningExportItem {
     selection: string
     odds: number | null
     estimated_probability: number | null
+    historical_estimated_probability?: number | null
     actual_home_score: number | null
     actual_away_score: number | null
     result: string

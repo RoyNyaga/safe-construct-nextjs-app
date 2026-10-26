@@ -1,0 +1,91 @@
+{
+  "_version": "1.0",
+  "_description": "Locked historical competition scoring baselines for Roy Betting Engine v2.1 benchmark calculations",
+  "_reference_date": "2026-10-26",
+  "competitions": {
+    "england_league_two": {
+      "name": "England League Two",
+      "historical_home_avg": 1.45,
+      "historical_away_avg": 1.15,
+      "season_basis": "2024/25 - 2025/26 multi-year aggregate"
+    },
+    "england_premier_league": {
+      "name": "England Premier League",
+      "historical_home_avg": 1.55,
+      "historical_away_avg": 1.25,
+      "season_basis": "2024/25 - 2025/26 multi-year aggregate"
+    },
+    "spain_la_liga": {
+      "name": "Spain La Liga",
+      "historical_home_avg": 1.45,
+      "historical_away_avg": 1.10,
+      "season_basis": "2024/25 - 2025/26 multi-year aggregate"
+    },
+    "spain_segunda_division": {
+      "name": "Spain Segunda División",
+      "historical_home_avg": 1.35,
+      "historical_away_avg": 1.00,
+      "season_basis": "2024/25 - 2025/26 multi-year aggregate"
+    },
+    "france_ligue_1": {
+      "name": "France Ligue 1",
+      "historical_home_avg": 1.50,
+      "historical_away_avg": 1.20,
+      "season_basis": "2024/25 - 2025/26 multi-year aggregate"
+    },
+    "france_ligue_2": {
+      "name": "France Ligue 2",
+      "historical_home_avg": 1.35,
+      "historical_away_avg": 1.05,
+      "season_basis": "2024/25 - 2025/26 multi-year aggregate"
+    },
+    "portugal_primeira_liga": {
+      "name": "Portugal Primeira Liga",
+      "historical_home_avg": 1.45,
+      "historical_away_avg": 1.15,
+      "season_basis": "2024/25 - 2025/26 multi-year aggregate"
+    },
+    "portugal_liga_portugal_2": {
+      "name": "Portugal Liga Portugal 2",
+      "historical_home_avg": 1.35,
+      "historical_away_avg": 1.10,
+      "season_basis": "2024/25 - 2025/26 multi-year aggregate"
+    },
+    "brazil_serie_a": {
+      "name": "Brazil Serie A",
+      "historical_home_avg": 1.40,
+      "historical_away_avg": 1.00,
+      "season_basis": "2024 - 2025 multi-year aggregate"
+    },
+    "argentina_liga_profesional": {
+      "name": "Argentina Liga Profesional",
+      "historical_home_avg": 1.30,
+      "historical_away_avg": 1.05,
+      "season_basis": "2024 - 2025 multi-year aggregate"
+    },
+    "armenia_premier_league": {
+      "name": "Armenia Premier League",
+      "historical_home_avg": 1.45,
+      "historical_away_avg": 1.15,
+      "season_basis": "2024/25 - 2025/26 multi-year aggregate"
+    },
+    "bolivia_primera_division": {
+      "name": "Bolivia Primera División",
+      "historical_home_avg": 1.70,
+      "historical_away_avg": 1.05,
+      "season_basis": "2024 - 2025 multi-year aggregate"
+    },
+    "bulgaria_first_league": {
+      "name": "Bulgaria First League",
+      "historical_home_avg": 1.35,
+      "historical_away_avg": 1.05,
+      "season_basis": "2024/25 - 2025/26 multi-year aggregate"
+    },
+    "default_fallback": {
+      "name": "Default Competition Fallback",
+      "historical_home_avg": 1.45,
+      "historical_away_avg": 1.15,
+      "season_basis": "Standard European lower/mid tier baseline"
+    }
+  }
+}

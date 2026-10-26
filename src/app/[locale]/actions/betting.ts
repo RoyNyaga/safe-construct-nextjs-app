@@ -21,6 +21,8 @@ import {
   ModelCalibrationData,
   SelectedVsAlternativesComparison,
   TicketSuggestionData,
+  AlignmentRemark,
+  EdgeRemark,
 } from '@/types/betting'
 import { autoSettleSelection, calculateTicketStatus, calculateProfitLoss } from '@/utils/bettingSettlement'
 import { executeTransaction, getActiveBankroll, deleteBankrollTransaction } from './bankroll'
@@ -301,6 +303,58 @@ function parseNullableString(val: any): string | null {
   return s.length > 0 ? s : null
 }
 
+function computeAlignmentMetrics(
+  estimatedProb: number | null | undefined,
+  historicalProb: number | null | undefined,
+  providedDelta?: number | null,
+  providedRemark?: AlignmentRemark | null
+): { alignment_delta_pp: number | null; alignment_remark: AlignmentRemark | null } {
+  if (providedDelta !== undefined && providedDelta !== null && providedRemark) {
+    return { alignment_delta_pp: providedDelta, alignment_remark: providedRemark }
+  }
+
+  if (estimatedProb === null || estimatedProb === undefined || historicalProb === null || historicalProb === undefined) {
+    return {
+      alignment_delta_pp: providedDelta ?? null,
+      alignment_remark: providedRemark ?? null,
+    }
+  }
+
+  const delta = Number((Math.abs(Number(estimatedProb) - Number(historicalProb)) * 100).toFixed(2))
+  let remark: AlignmentRemark = 'very_high'
+  if (delta <= 1.5) {
+    remark = 'very_high'
+  } else if (delta <= 3.0) {
+    remark = 'high'
+  } else if (delta <= 5.0) {
+    remark = 'medium'
+  } else if (delta <= 7.0) {
+    remark = 'low'
+  } else {
+    remark = 'very_low'
+  }
+
+  return {
+    alignment_delta_pp: providedDelta ?? delta,
+    alignment_remark: providedRemark ?? remark,
+  }
+}
+
+function computeEdgeRemark(
+  edgePp: number | null | undefined,
+  providedRemark?: EdgeRemark | null
+): EdgeRemark | null {
+  if (providedRemark) return providedRemark
+  if (edgePp === null || edgePp === undefined) return null
+
+  const edge = Number(edgePp)
+  if (edge > 15.0) return 'very_high'
+  if (edge > 5.0) return 'high'
+  if (edge >= 0.0) return 'medium'
+  if (edge >= -10.0) return 'low'
+  return 'very_low'
+}
+
   const stake = parseNullableNumber(payload.ticket.stake) ?? 0
 
   // Resolve ticket number if missing or empty
@@ -355,38 +409,59 @@ function parseNullableString(val: any): string | null {
   }
 
   // 5. Insert Selected Selections
-  const selectionsPayload = payload.selections.map((sel) => ({
-    ticket_id: ticket.id,
-    match_date: sel.match_date || payload.ticket.date || null,
-    country: parseNullableString(sel.country),
-    league: parseNullableString(sel.league),
-    home_team: sel.home_team,
-    away_team: sel.away_team,
-    home_league_position: parseNullableNumber(sel.home_league_position),
-    away_league_position: parseNullableNumber(sel.away_league_position),
-    home_matches_played: parseNullableNumber(sel.home_matches_played ?? sel.home_games_played),
-    away_matches_played: parseNullableNumber(sel.away_matches_played ?? sel.away_games_played),
-    home_goals_scored: parseNullableNumber(sel.home_goals_scored),
-    home_goals_conceded: parseNullableNumber(sel.home_goals_conceded),
-    away_goals_scored: parseNullableNumber(sel.away_goals_scored),
-    away_goals_conceded: parseNullableNumber(sel.away_goals_conceded),
-    home_goals_per_game: parseNullableNumber(sel.home_goals_per_game),
-    home_conceded_per_game: parseNullableNumber(sel.home_conceded_per_game),
-    away_goals_per_game: parseNullableNumber(sel.away_goals_per_game),
-    away_conceded_per_game: parseNullableNumber(sel.away_conceded_per_game),
-    market: sel.market,
-    selection: sel.selection,
-    odds: parseNullableNumber(sel.odds),
-    estimated_probability: parseNullableNumber(sel.estimated_probability),
-    breakeven_probability: parseNullableNumber(sel.breakeven_probability),
-    edge_percentage_points: parseNullableNumber(sel.edge_percentage_points),
-    expected_value: parseNullableNumber(sel.expected_value),
-    actual_home_score: parseNullableNumber(sel.actual_home_score),
-    actual_away_score: parseNullableNumber(sel.actual_away_score),
-    result: (sel.result as SelectionResultStatus) || 'pending',
-    comment: parseNullableString(sel.comment),
-    notes: parseNullableString(sel.notes),
-  }))
+  const selectionsPayload = payload.selections.map((sel) => {
+    const align = computeAlignmentMetrics(
+      parseNullableNumber(sel.estimated_probability),
+      parseNullableNumber(sel.historical_estimated_probability),
+      parseNullableNumber(sel.alignment_delta_pp),
+      sel.alignment_remark as AlignmentRemark | null
+    )
+    const edgeRem = computeEdgeRemark(
+      parseNullableNumber(sel.edge_percentage_points),
+      sel.edge_remark as EdgeRemark | null
+    )
+
+    return {
+      ticket_id: ticket.id,
+      match_date: sel.match_date || payload.ticket.date || null,
+      country: parseNullableString(sel.country),
+      league: parseNullableString(sel.league),
+      home_team: sel.home_team,
+      away_team: sel.away_team,
+      home_league_position: parseNullableNumber(sel.home_league_position),
+      away_league_position: parseNullableNumber(sel.away_league_position),
+      home_matches_played: parseNullableNumber(sel.home_matches_played ?? sel.home_games_played),
+      away_matches_played: parseNullableNumber(sel.away_matches_played ?? sel.away_games_played),
+      home_goals_scored: parseNullableNumber(sel.home_goals_scored),
+      home_goals_conceded: parseNullableNumber(sel.home_goals_conceded),
+      away_goals_scored: parseNullableNumber(sel.away_goals_scored),
+      away_goals_conceded: parseNullableNumber(sel.away_goals_conceded),
+      home_goals_per_game: parseNullableNumber(sel.home_goals_per_game),
+      home_conceded_per_game: parseNullableNumber(sel.home_conceded_per_game),
+      away_goals_per_game: parseNullableNumber(sel.away_goals_per_game),
+      away_conceded_per_game: parseNullableNumber(sel.away_conceded_per_game),
+      market: sel.market,
+      selection: sel.selection,
+      odds: parseNullableNumber(sel.odds),
+      estimated_probability: parseNullableNumber(sel.estimated_probability),
+      breakeven_probability: parseNullableNumber(sel.breakeven_probability),
+      edge_percentage_points: parseNullableNumber(sel.edge_percentage_points),
+      expected_value: parseNullableNumber(sel.expected_value),
+      current_league_home_avg: parseNullableNumber(sel.current_league_home_avg),
+      current_league_away_avg: parseNullableNumber(sel.current_league_away_avg),
+      historical_league_home_avg: parseNullableNumber(sel.historical_league_home_avg),
+      historical_league_away_avg: parseNullableNumber(sel.historical_league_away_avg),
+      historical_estimated_probability: parseNullableNumber(sel.historical_estimated_probability),
+      alignment_delta_pp: align.alignment_delta_pp,
+      alignment_remark: align.alignment_remark,
+      edge_remark: edgeRem,
+      actual_home_score: parseNullableNumber(sel.actual_home_score),
+      actual_away_score: parseNullableNumber(sel.actual_away_score),
+      result: (sel.result as SelectionResultStatus) || 'pending',
+      comment: parseNullableString(sel.comment),
+      notes: parseNullableString(sel.notes),
+    }
+  })
 
   const { data: insertedSelections, error: selError } = await supabase
     .from('betting_selections')
@@ -403,28 +478,59 @@ function parseNullableString(val: any): string | null {
   // 6. Insert Rejected Alternatives (if any)
   let insertedAlternatives: any[] = []
   if (payload.alternatives && payload.alternatives.length > 0) {
-    const alternativesPayload = payload.alternatives.map((alt) => ({
-      ticket_id: ticket.id,
-      match_date: alt.match_date || payload.ticket.date || null,
-      country: parseNullableString(alt.country),
-      league: parseNullableString(alt.league),
-      home_team: alt.home_team,
-      away_team: alt.away_team,
-      home_matches_played: parseNullableNumber(alt.home_matches_played ?? alt.home_games_played),
-      away_matches_played: parseNullableNumber(alt.away_matches_played ?? alt.away_games_played),
-      market: alt.market,
-      selection: alt.selection,
-      odds: parseNullableNumber(alt.odds),
-      estimated_probability: parseNullableNumber(alt.estimated_probability),
-      breakeven_probability: parseNullableNumber(alt.breakeven_probability),
-      edge_percentage_points: parseNullableNumber(alt.edge_percentage_points),
-      expected_value: parseNullableNumber(alt.expected_value),
-      actual_home_score: parseNullableNumber(alt.actual_home_score),
-      actual_away_score: parseNullableNumber(alt.actual_away_score),
-      result: (alt.result as SelectionResultStatus) || 'pending',
-      comment: parseNullableString(alt.comment),
-      notes: parseNullableString(alt.notes),
-    }))
+    const alternativesPayload = payload.alternatives.map((alt) => {
+      const align = computeAlignmentMetrics(
+        parseNullableNumber(alt.estimated_probability),
+        parseNullableNumber(alt.historical_estimated_probability),
+        parseNullableNumber(alt.alignment_delta_pp),
+        alt.alignment_remark as AlignmentRemark | null
+      )
+      const edgeRem = computeEdgeRemark(
+        parseNullableNumber(alt.edge_percentage_points),
+        alt.edge_remark as EdgeRemark | null
+      )
+
+      return {
+        ticket_id: ticket.id,
+        match_date: alt.match_date || payload.ticket.date || null,
+        country: parseNullableString(alt.country),
+        league: parseNullableString(alt.league),
+        home_team: alt.home_team,
+        away_team: alt.away_team,
+        home_league_position: parseNullableNumber(alt.home_league_position),
+        away_league_position: parseNullableNumber(alt.away_league_position),
+        home_matches_played: parseNullableNumber(alt.home_matches_played ?? alt.home_games_played),
+        away_matches_played: parseNullableNumber(alt.away_matches_played ?? alt.away_games_played),
+        home_goals_scored: parseNullableNumber(alt.home_goals_scored),
+        home_goals_conceded: parseNullableNumber(alt.home_goals_conceded),
+        away_goals_scored: parseNullableNumber(alt.away_goals_scored),
+        away_goals_conceded: parseNullableNumber(alt.away_goals_conceded),
+        home_goals_per_game: parseNullableNumber(alt.home_goals_per_game),
+        home_conceded_per_game: parseNullableNumber(alt.home_conceded_per_game),
+        away_goals_per_game: parseNullableNumber(alt.away_goals_per_game),
+        away_conceded_per_game: parseNullableNumber(alt.away_conceded_per_game),
+        market: alt.market,
+        selection: alt.selection,
+        odds: parseNullableNumber(alt.odds),
+        estimated_probability: parseNullableNumber(alt.estimated_probability),
+        breakeven_probability: parseNullableNumber(alt.breakeven_probability),
+        edge_percentage_points: parseNullableNumber(alt.edge_percentage_points),
+        expected_value: parseNullableNumber(alt.expected_value),
+        current_league_home_avg: parseNullableNumber(alt.current_league_home_avg),
+        current_league_away_avg: parseNullableNumber(alt.current_league_away_avg),
+        historical_league_home_avg: parseNullableNumber(alt.historical_league_home_avg),
+        historical_league_away_avg: parseNullableNumber(alt.historical_league_away_avg),
+        historical_estimated_probability: parseNullableNumber(alt.historical_estimated_probability),
+        alignment_delta_pp: align.alignment_delta_pp,
+        alignment_remark: align.alignment_remark,
+        edge_remark: edgeRem,
+        actual_home_score: parseNullableNumber(alt.actual_home_score),
+        actual_away_score: parseNullableNumber(alt.actual_away_score),
+        result: (alt.result as SelectionResultStatus) || 'pending',
+        comment: parseNullableString(alt.comment),
+        notes: parseNullableString(alt.notes),
+      }
+    })
 
     const { data: altData, error: altError } = await supabase
       .from('betting_alternatives')
@@ -982,6 +1088,9 @@ export async function updateBettingSelectionDetails(
     odds?: number | null
     estimated_probability?: number | null
     edge_percentage_points?: number | null
+    alignment_delta_pp?: number | null
+    alignment_remark?: AlignmentRemark | null
+    edge_remark?: EdgeRemark | null
     comment?: string
     notes?: string
   }
@@ -998,6 +1107,9 @@ export async function updateBettingSelectionDetails(
       ...(data.odds !== undefined && { odds: data.odds }),
       ...(data.estimated_probability !== undefined && { estimated_probability: data.estimated_probability }),
       ...(data.edge_percentage_points !== undefined && { edge_percentage_points: data.edge_percentage_points }),
+      ...(data.alignment_delta_pp !== undefined && { alignment_delta_pp: data.alignment_delta_pp }),
+      ...(data.alignment_remark !== undefined && { alignment_remark: data.alignment_remark }),
+      ...(data.edge_remark !== undefined && { edge_remark: data.edge_remark }),
       ...(data.comment !== undefined && { comment: data.comment }),
       ...(data.notes !== undefined && { notes: data.notes }),
       updated_at: new Date().toISOString(),
@@ -1080,6 +1192,14 @@ export async function exportTicketAsJson(ticketUuid: string): Promise<{
       breakeven_probability: s.breakeven_probability,
       edge_percentage_points: s.edge_percentage_points,
       expected_value: s.expected_value,
+      current_league_home_avg: s.current_league_home_avg ?? null,
+      current_league_away_avg: s.current_league_away_avg ?? null,
+      historical_league_home_avg: s.historical_league_home_avg ?? null,
+      historical_league_away_avg: s.historical_league_away_avg ?? null,
+      historical_estimated_probability: s.historical_estimated_probability ?? null,
+      alignment_delta_pp: s.alignment_delta_pp ?? null,
+      alignment_remark: s.alignment_remark ?? null,
+      edge_remark: s.edge_remark ?? null,
       actual_home_score: s.actual_home_score,
       actual_away_score: s.actual_away_score,
       result: s.result,
@@ -1106,8 +1226,18 @@ export async function exportTicketAsJson(ticketUuid: string): Promise<{
       league: a.league,
       home_team: a.home_team,
       away_team: a.away_team,
+      home_league_position: a.home_league_position ?? null,
+      away_league_position: a.away_league_position ?? null,
       home_matches_played: a.home_matches_played ?? null,
       away_matches_played: a.away_matches_played ?? null,
+      home_goals_scored: a.home_goals_scored ?? null,
+      home_goals_conceded: a.home_goals_conceded ?? null,
+      away_goals_scored: a.away_goals_scored ?? null,
+      away_goals_conceded: a.away_goals_conceded ?? null,
+      home_goals_per_game: a.home_goals_per_game ?? null,
+      home_conceded_per_game: a.home_conceded_per_game ?? null,
+      away_goals_per_game: a.away_goals_per_game ?? null,
+      away_conceded_per_game: a.away_conceded_per_game ?? null,
       market: a.market,
       selection: a.selection,
       odds: a.odds,
@@ -1115,6 +1245,14 @@ export async function exportTicketAsJson(ticketUuid: string): Promise<{
       breakeven_probability: a.breakeven_probability,
       edge_percentage_points: a.edge_percentage_points,
       expected_value: a.expected_value,
+      current_league_home_avg: a.current_league_home_avg ?? null,
+      current_league_away_avg: a.current_league_away_avg ?? null,
+      historical_league_home_avg: a.historical_league_home_avg ?? null,
+      historical_league_away_avg: a.historical_league_away_avg ?? null,
+      historical_estimated_probability: a.historical_estimated_probability ?? null,
+      alignment_delta_pp: a.alignment_delta_pp ?? null,
+      alignment_remark: a.alignment_remark ?? null,
+      edge_remark: a.edge_remark ?? null,
       actual_home_score: a.actual_home_score,
       actual_away_score: a.actual_away_score,
       result: a.result,
@@ -1199,6 +1337,7 @@ export async function exportTicketWarningsAsJson(ticketUuid?: string): Promise<{
         selection,
         odds,
         estimated_probability,
+        historical_estimated_probability,
         actual_home_score,
         actual_away_score,
         result
@@ -1213,6 +1352,7 @@ export async function exportTicketWarningsAsJson(ticketUuid?: string): Promise<{
         selection,
         odds,
         estimated_probability,
+        historical_estimated_probability,
         actual_home_score,
         actual_away_score,
         result
@@ -1252,6 +1392,7 @@ export async function exportTicketWarningsAsJson(ticketUuid?: string): Promise<{
         selection: match?.selection || 'Unknown Selection',
         odds: match?.odds ? Number(match.odds) : null,
         estimated_probability: match?.estimated_probability ? Number(match.estimated_probability) : null,
+        historical_estimated_probability: match?.historical_estimated_probability ? Number(match.historical_estimated_probability) : null,
         actual_home_score: match?.actual_home_score ?? null,
         actual_away_score: match?.actual_away_score ?? null,
         result: match?.result || 'pending',
