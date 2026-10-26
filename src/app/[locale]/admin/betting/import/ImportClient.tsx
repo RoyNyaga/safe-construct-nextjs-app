@@ -90,6 +90,14 @@ function generateSamplePayload(activeModel?: BettingModel | null, initialSuggest
         breakeven_probability: 0.637,
         edge_percentage_points: 3.8,
         expected_value: 0.06,
+        current_league_home_avg: 1.55,
+        current_league_away_avg: 1.25,
+        historical_league_home_avg: 1.50,
+        historical_league_away_avg: 1.20,
+        historical_estimated_probability: 0.680,
+        alignment_delta_pp: 0.50,
+        alignment_remark: 'very_high',
+        edge_remark: 'medium',
         actual_home_score: null,
         actual_away_score: null,
         result: 'pending',
@@ -131,6 +139,14 @@ function generateSamplePayload(activeModel?: BettingModel | null, initialSuggest
         breakeven_probability: 0.69,
         edge_percentage_points: 3.8,
         expected_value: 0.056,
+        current_league_home_avg: 1.30,
+        current_league_away_avg: 1.05,
+        historical_league_home_avg: 1.35,
+        historical_league_away_avg: 1.05,
+        historical_estimated_probability: 0.722,
+        alignment_delta_pp: 0.60,
+        alignment_remark: 'very_high',
+        edge_remark: 'medium',
         actual_home_score: null,
         actual_away_score: null,
         result: 'pending',
@@ -145,8 +161,18 @@ function generateSamplePayload(activeModel?: BettingModel | null, initialSuggest
         league: 'Primeira Liga',
         home_team: 'Braga',
         away_team: 'Gil Vicente',
+        home_league_position: 4,
+        away_league_position: 12,
         home_matches_played: 7,
         away_matches_played: 8,
+        home_goals_scored: 15,
+        home_goals_conceded: 8,
+        away_goals_scored: 9,
+        away_goals_conceded: 16,
+        home_goals_per_game: 2.14,
+        home_conceded_per_game: 1.14,
+        away_goals_per_game: 1.13,
+        away_conceded_per_game: 2.0,
         market: 'Over/Under',
         selection: 'Over 2.5',
         odds: 2.02,
@@ -154,6 +180,14 @@ function generateSamplePayload(activeModel?: BettingModel | null, initialSuggest
         breakeven_probability: 0.495,
         edge_percentage_points: 1.3,
         expected_value: 0.026,
+        current_league_home_avg: 1.62,
+        current_league_away_avg: 1.28,
+        historical_league_home_avg: 1.55,
+        historical_league_away_avg: 1.22,
+        historical_estimated_probability: 0.514,
+        alignment_delta_pp: 0.60,
+        alignment_remark: 'very_high',
+        edge_remark: 'medium',
         actual_home_score: null,
         actual_away_score: null,
         result: 'pending',
@@ -1140,8 +1174,15 @@ ${JSON.stringify(sampleJson, null, 2)}`
                           <Chip label={`${sel.market}: ${sel.selection}`} size="small" sx={{ backgroundColor: alpha('#F26419', 0.15), color: '#F26419', fontWeight: 700 }} />
                         </td>
                         <td style={{ padding: '12px 14px', fontWeight: 700 }}>{sel.odds ? Number(sel.odds).toFixed(2) : '—'}</td>
-                        <td style={{ padding: '12px 14px', color: '#66BB6A', fontWeight: 700 }}>
-                          {sel.estimated_probability ? `${(Number(sel.estimated_probability) * 100).toFixed(1)}%` : '—'}
+                        <td style={{ padding: '12px 14px' }}>
+                          <Typography variant="body2" sx={{ color: '#66BB6A', fontWeight: 700 }}>
+                            {sel.estimated_probability ? `${(Number(sel.estimated_probability) * 100).toFixed(1)}%` : '—'}
+                          </Typography>
+                          {sel.historical_estimated_probability !== null && sel.historical_estimated_probability !== undefined && (
+                            <Typography variant="caption" sx={{ color: '#9AA3B2', fontSize: '0.7rem', display: 'block' }}>
+                              Hist: {(Number(sel.historical_estimated_probability) * 100).toFixed(1)}%
+                            </Typography>
+                          )}
                         </td>
                         <td style={{ padding: '12px 14px', color: (sel.edge_percentage_points || 0) >= 0 ? '#66BB6A' : '#EF5350', fontWeight: 700 }}>
                           {sel.edge_percentage_points !== undefined ? `+${sel.edge_percentage_points}%` : '—'}
@@ -1309,8 +1350,15 @@ ${JSON.stringify(sampleJson, null, 2)}`
                             {alt.market}: {alt.selection}
                           </td>
                           <td style={{ padding: '12px 14px', fontSize: '0.85rem' }}>{alt.odds ? Number(alt.odds).toFixed(2) : '—'}</td>
-                          <td style={{ padding: '12px 14px', fontSize: '0.85rem' }}>
-                            {alt.estimated_probability ? `${(Number(alt.estimated_probability) * 100).toFixed(1)}%` : '—'}
+                          <td style={{ padding: '12px 14px' }}>
+                            <Typography variant="body2" sx={{ fontSize: '0.85rem', fontWeight: 700, color: '#66BB6A' }}>
+                              {alt.estimated_probability ? `${(Number(alt.estimated_probability) * 100).toFixed(1)}%` : '—'}
+                            </Typography>
+                            {alt.historical_estimated_probability !== null && alt.historical_estimated_probability !== undefined && (
+                              <Typography variant="caption" sx={{ color: '#9AA3B2', fontSize: '0.7rem', display: 'block' }}>
+                                Hist: {(Number(alt.historical_estimated_probability) * 100).toFixed(1)}%
+                              </Typography>
+                            )}
                           </td>
                           <td style={{ padding: '12px 14px', fontSize: '0.8rem', color: '#9AA3B2', fontStyle: 'italic' }}>
                             {alt.comment || '—'}
@@ -1690,6 +1738,133 @@ ${JSON.stringify(sampleJson, null, 2)}`
                 </Grid>
               </Paper>
 
+              {/* Dual-Baseline Benchmark Card */}
+              {((snapshotSelection.historical_estimated_probability !== null && snapshotSelection.historical_estimated_probability !== undefined) ||
+              (snapshotSelection.current_league_home_avg !== null && snapshotSelection.current_league_home_avg !== undefined) ||
+              (snapshotSelection.historical_league_home_avg !== null && snapshotSelection.historical_league_home_avg !== undefined)) && (
+                <Paper
+                  elevation={0}
+                  sx={{
+                    p: 2,
+                    borderRadius: 2,
+                    backgroundColor: alpha('#121824', 0.6),
+                    border: (theme) => `1px solid ${alpha(theme.palette.divider, 1)}`,
+                  }}
+                >
+                  <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1.5, flexWrap: 'wrap', gap: 1 }}>
+                    <Typography
+                      variant="subtitle2"
+                      sx={{
+                        fontWeight: 700,
+                        color: '#42A5F5',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 1,
+                      }}
+                    >
+                      <Scale size={16} />
+                      {locale === 'fr' ? 'Double Référence & Validation Historique' : 'Dual-Baseline Benchmark'}
+                    </Typography>
+                    {snapshotSelection.estimated_probability &&
+                    snapshotSelection.historical_estimated_probability !== null &&
+                    snapshotSelection.historical_estimated_probability !== undefined && (() => {
+                      const diffPct = snapshotSelection.alignment_delta_pp !== null && snapshotSelection.alignment_delta_pp !== undefined
+                        ? Number(snapshotSelection.alignment_delta_pp)
+                        : Math.abs(Number(snapshotSelection.estimated_probability) - Number(snapshotSelection.historical_estimated_probability)) * 100
+                      const rem = snapshotSelection.alignment_remark || (diffPct <= 1.5 ? 'very_high' : diffPct <= 3.0 ? 'high' : diffPct <= 5.0 ? 'medium' : diffPct <= 7.0 ? 'low' : 'very_low')
+                      const colorMap: Record<string, string> = {
+                        very_high: '#00E676',
+                        high: '#66BB6A',
+                        medium: '#FFA726',
+                        low: '#FF7043',
+                        very_low: '#EF5350',
+                      }
+                      const labelMap: Record<string, string> = {
+                        very_high: `Very High Alignment (Δ ${diffPct.toFixed(1)} pp)`,
+                        high: `High Alignment (Δ ${diffPct.toFixed(1)} pp)`,
+                        medium: `Medium Alignment (Δ ${diffPct.toFixed(1)} pp)`,
+                        low: `Low Alignment (Δ ${diffPct.toFixed(1)} pp)`,
+                        very_low: `Very Low Alignment (Δ ${diffPct.toFixed(1)} pp)`,
+                      }
+                      const color = colorMap[rem] || '#42A5F5'
+                      const label = labelMap[rem] || `Alignment (Δ ${diffPct.toFixed(1)} pp)`
+                      return (
+                        <Chip
+                          label={label}
+                          size="small"
+                          sx={{
+                            fontWeight: 700,
+                            fontSize: '0.675rem',
+                            height: 22,
+                            backgroundColor: alpha(color, 0.15),
+                            color,
+                            border: `1px solid ${alpha(color, 0.3)}`,
+                          }}
+                        />
+                      )
+                    })()}
+                  </Box>
+
+                  <Grid container spacing={1.5}>
+                    <Grid size={{ xs: 6, sm: 6 }}>
+                      <Box
+                        sx={{
+                          p: 1.25,
+                          borderRadius: 1.5,
+                          backgroundColor: alpha('#1E2638', 0.5),
+                          border: `1px solid ${alpha('#42A5F5', 0.2)}`,
+                        }}
+                      >
+                        <Typography variant="caption" sx={{ color: '#42A5F5', fontWeight: 700, display: 'block', mb: 0.5 }}>
+                          Current Season (Primary)
+                        </Typography>
+                        <Typography variant="h6" sx={{ fontWeight: 800, color: '#66BB6A', lineHeight: 1.2 }}>
+                          {snapshotSelection.estimated_probability
+                            ? `${(Number(snapshotSelection.estimated_probability) * 100).toFixed(1)}%`
+                            : '—'}
+                        </Typography>
+                        <Typography variant="caption" sx={{ color: '#9AA3B2', fontSize: '0.72rem', display: 'block', mt: 0.5 }}>
+                          League Baselines:{' '}
+                          {snapshotSelection.current_league_home_avg
+                            ? `H: ${Number(snapshotSelection.current_league_home_avg).toFixed(2)} / A: ${Number(snapshotSelection.current_league_away_avg ?? 0).toFixed(2)}`
+                            : 'Live Aggregates'}
+                        </Typography>
+                      </Box>
+                    </Grid>
+
+                    <Grid size={{ xs: 6, sm: 6 }}>
+                      <Box
+                        sx={{
+                          p: 1.25,
+                          borderRadius: 1.5,
+                          backgroundColor: alpha('#1E2638', 0.5),
+                          border: `1px solid ${alpha('#9AA3B2', 0.2)}`,
+                        }}
+                      >
+                        <Typography variant="caption" sx={{ color: '#9AA3B2', fontWeight: 700, display: 'block', mb: 0.5 }}>
+                          Historical Baseline (Benchmark)
+                        </Typography>
+                        <Typography variant="h6" sx={{ fontWeight: 800, color: '#F6AE2D', lineHeight: 1.2 }}>
+                          {snapshotSelection.historical_estimated_probability !== null && snapshotSelection.historical_estimated_probability !== undefined
+                            ? `${(Number(snapshotSelection.historical_estimated_probability) * 100).toFixed(1)}%`
+                            : '—'}
+                        </Typography>
+                        <Typography variant="caption" sx={{ color: '#9AA3B2', fontSize: '0.72rem', display: 'block', mt: 0.5 }}>
+                          Historical Baselines:{' '}
+                          {snapshotSelection.historical_league_home_avg
+                            ? `H: ${Number(snapshotSelection.historical_league_home_avg).toFixed(2)} / A: ${Number(snapshotSelection.historical_league_away_avg ?? 0).toFixed(2)}`
+                            : 'Locked Catalog'}
+                        </Typography>
+                      </Box>
+                    </Grid>
+                  </Grid>
+
+                  <Typography variant="caption" sx={{ color: '#9AA3B2', fontSize: '0.7rem', display: 'block', mt: 1, fontStyle: 'italic' }}>
+                    * Current season provides dynamic market edge; historical catalog acts as structural stability benchmark.
+                  </Typography>
+                </Paper>
+              )}
+
               {/* Pre-Match Statistical Matchup Comparison */}
               <Paper
                 elevation={0}
@@ -2009,165 +2184,442 @@ ${JSON.stringify(sampleJson, null, 2)}`
         }
         width={540}
       >
-        {snapshotAlternative && (
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2.5 }}>
-            <Box>
-              <Typography variant="h6" sx={{ fontWeight: 800, mb: 0.5, color: '#F0F2F5' }}>
-                {snapshotAlternative.home_team}{' '}
-                <span style={{ color: '#9AA3B2', fontWeight: 400 }}>vs</span>{' '}
-                {snapshotAlternative.away_team}
-              </Typography>
-              <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>
-                {snapshotAlternative.country ? `${snapshotAlternative.country} • ` : ''}
-                {snapshotAlternative.league || '—'} &bull; Match Date: {snapshotAlternative.match_date || parsedPayload?.ticket.date || 'Today'}
-              </Typography>
-            </Box>
+        {snapshotAlternative && (() => {
+          const altHomeGD =
+            snapshotAlternative.home_goals_scored !== null &&
+            snapshotAlternative.home_goals_scored !== undefined &&
+            snapshotAlternative.home_goals_conceded !== null &&
+            snapshotAlternative.home_goals_conceded !== undefined
+              ? Number(snapshotAlternative.home_goals_scored) - Number(snapshotAlternative.home_goals_conceded)
+              : null
 
-            <Box
-              sx={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                p: 1.5,
-                borderRadius: 2,
-                backgroundColor: alpha('#121824', 0.8),
-                border: (theme) => `1px solid ${alpha(theme.palette.divider, 1)}`,
-                flexWrap: 'wrap',
-                gap: 1,
-              }}
-            >
-              <Chip
-                label={`${snapshotAlternative.market}: ${snapshotAlternative.selection}`}
-                size="small"
-                sx={{ backgroundColor: alpha('#F6AE2D', 0.2), color: '#F6AE2D', fontWeight: 700 }}
-              />
+          const altAwayGD =
+            snapshotAlternative.away_goals_scored !== null &&
+            snapshotAlternative.away_goals_scored !== undefined &&
+            snapshotAlternative.away_goals_conceded !== null &&
+            snapshotAlternative.away_goals_conceded !== undefined
+              ? Number(snapshotAlternative.away_goals_scored) - Number(snapshotAlternative.away_goals_conceded)
+              : null
 
-              <Chip
-                label={`Odds: ${snapshotAlternative.odds ? Number(snapshotAlternative.odds).toFixed(2) : '—'}`}
-                size="small"
-                sx={{ fontWeight: 800, backgroundColor: alpha('#F6AE2D', 0.15), color: '#F6AE2D' }}
-              />
-            </Box>
+          return (
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2.5 }}>
+              <Box>
+                <Typography variant="h6" sx={{ fontWeight: 800, mb: 0.5, color: '#F0F2F5' }}>
+                  {snapshotAlternative.home_team}{' '}
+                  {snapshotAlternative.home_league_position !== null && snapshotAlternative.home_league_position !== undefined && (
+                    <span style={{ fontSize: '0.8rem', color: '#9AA3B2', fontWeight: 600 }}>
+                      (#{snapshotAlternative.home_league_position})
+                    </span>
+                  )}{' '}
+                  <span style={{ color: '#9AA3B2', fontWeight: 400 }}>vs</span>{' '}
+                  {snapshotAlternative.away_team}{' '}
+                  {snapshotAlternative.away_league_position !== null && snapshotAlternative.away_league_position !== undefined && (
+                    <span style={{ fontSize: '0.8rem', color: '#9AA3B2', fontWeight: 600 }}>
+                      (#{snapshotAlternative.away_league_position})
+                    </span>
+                  )}
+                </Typography>
+                <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>
+                  {snapshotAlternative.country ? `${snapshotAlternative.country} • ` : ''}
+                  {snapshotAlternative.league || '—'} &bull; Match Date: {snapshotAlternative.match_date || parsedPayload?.ticket.date || 'Today'}
+                </Typography>
+              </Box>
 
-            <Paper
-              elevation={0}
-              sx={{
-                p: 2,
-                borderRadius: 2,
-                backgroundColor: alpha('#121824', 0.6),
-                border: (theme) => `1px solid ${alpha(theme.palette.divider, 1)}`,
-              }}
-            >
-              <Typography
-                variant="subtitle2"
+              <Box
                 sx={{
-                  fontWeight: 700,
-                  mb: 1.5,
-                  color: '#F6AE2D',
                   display: 'flex',
                   alignItems: 'center',
+                  justifyContent: 'space-between',
+                  p: 1.5,
+                  borderRadius: 2,
+                  backgroundColor: alpha('#121824', 0.8),
+                  border: (theme) => `1px solid ${alpha(theme.palette.divider, 1)}`,
+                  flexWrap: 'wrap',
                   gap: 1,
                 }}
               >
-                <Target size={16} />
-                {locale === 'fr' ? 'Évaluation & Probabilité' : 'Model Probability & Valuation'}
-              </Typography>
-              <Grid container spacing={1.5}>
-                <Grid size={{ xs: 6, sm: 6 }}>
-                  <Typography variant="caption" color="text.secondary">Model Probability</Typography>
-                  <Typography variant="body1" sx={{ fontWeight: 800, color: '#66BB6A' }}>
-                    {snapshotAlternative.estimated_probability
-                      ? `${(Number(snapshotAlternative.estimated_probability) * 100).toFixed(1)}%`
-                      : '—'}
-                  </Typography>
-                </Grid>
-                <Grid size={{ xs: 6, sm: 6 }}>
-                  <Typography variant="caption" color="text.secondary">Bookmaker Odds</Typography>
-                  <Typography variant="body1" sx={{ fontWeight: 800 }}>
-                    {snapshotAlternative.odds ? Number(snapshotAlternative.odds).toFixed(2) : '—'}
-                  </Typography>
-                </Grid>
-                {snapshotAlternative.edge_percentage_points !== undefined && snapshotAlternative.edge_percentage_points !== null && (
-                  <Grid size={{ xs: 6, sm: 6 }}>
-                    <Typography variant="caption" color="text.secondary">Edge</Typography>
-                    <Typography variant="body1" sx={{ fontWeight: 800, color: (snapshotAlternative.edge_percentage_points || 0) >= 0 ? '#66BB6A' : '#EF5350' }}>
-                      {snapshotAlternative.edge_percentage_points > 0 ? '+' : ''}{snapshotAlternative.edge_percentage_points}%
-                    </Typography>
-                  </Grid>
-                )}
-                {snapshotAlternative.expected_value !== undefined && snapshotAlternative.expected_value !== null && (
-                  <Grid size={{ xs: 6, sm: 6 }}>
-                    <Typography variant="caption" color="text.secondary">Expected Value (EV)</Typography>
-                    <Typography variant="body1" sx={{ fontWeight: 800, color: (Number(snapshotAlternative.expected_value) || 0) >= 0 ? '#66BB6A' : '#EF5350' }}>
-                      {Number(snapshotAlternative.expected_value) > 0 ? '+' : ''}{snapshotAlternative.expected_value}
-                    </Typography>
-                  </Grid>
-                )}
-              </Grid>
-            </Paper>
+                <Chip
+                  label={`${snapshotAlternative.market}: ${snapshotAlternative.selection}`}
+                  size="small"
+                  sx={{ backgroundColor: alpha('#F6AE2D', 0.2), color: '#F6AE2D', fontWeight: 700 }}
+                />
 
-            {snapshotAlternative.comment && (
-              <Box
-                sx={{
-                  p: 2,
-                  borderRadius: 2,
-                  backgroundColor: alpha('#EF5350', 0.08),
-                  border: `1px solid ${alpha('#EF5350', 0.2)}`,
-                }}
-              >
-                <Typography variant="caption" sx={{ fontWeight: 700, color: '#EF5350', display: 'flex', alignItems: 'center', gap: 0.75, mb: 0.75 }}>
-                  <Brain size={15} />
-                  {locale === 'fr' ? 'Motif de Rejet :' : 'Rejection Reason / Analysis:'}
-                </Typography>
-                <Typography variant="body2" sx={{ fontStyle: 'italic', lineHeight: 1.6 }}>
-                  "{snapshotAlternative.comment}"
-                </Typography>
+                <Chip
+                  label={`Odds: ${snapshotAlternative.odds ? Number(snapshotAlternative.odds).toFixed(2) : '—'}`}
+                  size="small"
+                  sx={{ fontWeight: 800, backgroundColor: alpha('#F6AE2D', 0.15), color: '#F6AE2D' }}
+                />
               </Box>
-            )}
 
-            {snapshotAlternative.warnings && snapshotAlternative.warnings.length > 0 && (
-              <Box
+              <Paper
+                elevation={0}
                 sx={{
                   p: 2,
                   borderRadius: 2,
-                  backgroundColor: alpha('#F6AE2D', 0.08),
-                  border: `1px solid ${alpha('#F6AE2D', 0.3)}`,
+                  backgroundColor: alpha('#121824', 0.6),
+                  border: (theme) => `1px solid ${alpha(theme.palette.divider, 1)}`,
                 }}
               >
-                <Typography variant="caption" sx={{ fontWeight: 700, color: '#F6AE2D', display: 'flex', alignItems: 'center', gap: 0.75, mb: 1 }}>
-                  <AlertTriangle size={15} />
-                  {locale === 'fr' ? `Alertes Détectées (${snapshotAlternative.warnings.length})` : `Detected Warnings (${snapshotAlternative.warnings.length})`}
+                <Typography
+                  variant="subtitle2"
+                  sx={{
+                    fontWeight: 700,
+                    mb: 1.5,
+                    color: '#F6AE2D',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 1,
+                  }}
+                >
+                  <Target size={16} />
+                  {locale === 'fr' ? 'Évaluation & Probabilité' : 'Model Probability & Valuation'}
                 </Typography>
-                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                  {snapshotAlternative.warnings.map((w: any, wIdx: number) => (
-                    <Box
-                      key={wIdx}
+                <Grid container spacing={1.5}>
+                  <Grid size={{ xs: 6, sm: 6 }}>
+                    <Typography variant="caption" color="text.secondary">Model Probability</Typography>
+                    <Typography variant="body1" sx={{ fontWeight: 800, color: '#66BB6A' }}>
+                      {snapshotAlternative.estimated_probability
+                        ? `${(Number(snapshotAlternative.estimated_probability) * 100).toFixed(1)}%`
+                        : '—'}
+                    </Typography>
+                  </Grid>
+                  <Grid size={{ xs: 6, sm: 6 }}>
+                    <Typography variant="caption" color="text.secondary">Bookmaker Odds</Typography>
+                    <Typography variant="body1" sx={{ fontWeight: 800 }}>
+                      {snapshotAlternative.odds ? Number(snapshotAlternative.odds).toFixed(2) : '—'}
+                    </Typography>
+                  </Grid>
+                  {snapshotAlternative.edge_percentage_points !== undefined && snapshotAlternative.edge_percentage_points !== null && (
+                    <Grid size={{ xs: 6, sm: 6 }}>
+                      <Typography variant="caption" color="text.secondary">Edge</Typography>
+                      <Typography variant="body1" sx={{ fontWeight: 800, color: (snapshotAlternative.edge_percentage_points || 0) >= 0 ? '#66BB6A' : '#EF5350' }}>
+                        {snapshotAlternative.edge_percentage_points > 0 ? '+' : ''}{snapshotAlternative.edge_percentage_points}%
+                      </Typography>
+                    </Grid>
+                  )}
+                  {snapshotAlternative.expected_value !== undefined && snapshotAlternative.expected_value !== null && (
+                    <Grid size={{ xs: 6, sm: 6 }}>
+                      <Typography variant="caption" color="text.secondary">Expected Value (EV)</Typography>
+                      <Typography variant="body1" sx={{ fontWeight: 800, color: (Number(snapshotAlternative.expected_value) || 0) >= 0 ? '#66BB6A' : '#EF5350' }}>
+                        {Number(snapshotAlternative.expected_value) > 0 ? '+' : ''}{snapshotAlternative.expected_value}
+                      </Typography>
+                    </Grid>
+                  )}
+                </Grid>
+              </Paper>
+
+              {/* Dual-Baseline Benchmark Card */}
+              {((snapshotAlternative.historical_estimated_probability !== null && snapshotAlternative.historical_estimated_probability !== undefined) ||
+              (snapshotAlternative.current_league_home_avg !== null && snapshotAlternative.current_league_home_avg !== undefined) ||
+              (snapshotAlternative.historical_league_home_avg !== null && snapshotAlternative.historical_league_home_avg !== undefined)) && (
+                <Paper
+                  elevation={0}
+                  sx={{
+                    p: 2,
+                    borderRadius: 2,
+                    backgroundColor: alpha('#121824', 0.6),
+                    border: (theme) => `1px solid ${alpha(theme.palette.divider, 1)}`,
+                  }}
+                >
+                  <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1.5, flexWrap: 'wrap', gap: 1 }}>
+                    <Typography
+                      variant="subtitle2"
                       sx={{
-                        p: 1.5,
-                        borderRadius: 1.5,
-                        backgroundColor: alpha('#121824', 0.7),
-                        border: `1px solid ${alpha('#F6AE2D', 0.3)}`,
+                        fontWeight: 700,
+                        color: '#42A5F5',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 1,
                       }}
                     >
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
-                        <Chip label={w.type} size="small" sx={{ height: 20, fontSize: '0.7rem', fontWeight: 700, backgroundColor: alpha('#9C27B0', 0.2), color: '#CE93D8' }} />
-                        <Chip label={w.severity || 'MED'} size="small" sx={{ height: 20, fontSize: '0.65rem', fontWeight: 800, backgroundColor: alpha('#F6AE2D', 0.2), color: '#F6AE2D' }} />
-                      </Box>
-                      <Typography variant="body2" sx={{ fontWeight: 600, color: '#F0F2F5', mb: 0.5 }}>
-                        {w.description}
-                      </Typography>
-                      {w.evidence && (
-                        <Typography variant="caption" sx={{ color: '#9AA3B2', fontStyle: 'italic', display: 'block' }}>
-                          &ldquo;{w.evidence}&rdquo;
+                      <Scale size={16} />
+                      {locale === 'fr' ? 'Double Référence & Validation Historique' : 'Dual-Baseline Benchmark'}
+                    </Typography>
+                    {snapshotAlternative.estimated_probability &&
+                    snapshotAlternative.historical_estimated_probability !== null &&
+                    snapshotAlternative.historical_estimated_probability !== undefined && (() => {
+                      const diffPct = snapshotAlternative.alignment_delta_pp !== null && snapshotAlternative.alignment_delta_pp !== undefined
+                        ? Number(snapshotAlternative.alignment_delta_pp)
+                        : Math.abs(Number(snapshotAlternative.estimated_probability) - Number(snapshotAlternative.historical_estimated_probability)) * 100
+                      const rem = snapshotAlternative.alignment_remark || (diffPct <= 1.5 ? 'very_high' : diffPct <= 3.0 ? 'high' : diffPct <= 5.0 ? 'medium' : diffPct <= 7.0 ? 'low' : 'very_low')
+                      const colorMap: Record<string, string> = {
+                        very_high: '#00E676',
+                        high: '#66BB6A',
+                        medium: '#FFA726',
+                        low: '#FF7043',
+                        very_low: '#EF5350',
+                      }
+                      const labelMap: Record<string, string> = {
+                        very_high: `Very High Alignment (Δ ${diffPct.toFixed(1)} pp)`,
+                        high: `High Alignment (Δ ${diffPct.toFixed(1)} pp)`,
+                        medium: `Medium Alignment (Δ ${diffPct.toFixed(1)} pp)`,
+                        low: `Low Alignment (Δ ${diffPct.toFixed(1)} pp)`,
+                        very_low: `Very Low Alignment (Δ ${diffPct.toFixed(1)} pp)`,
+                      }
+                      const color = colorMap[rem] || '#42A5F5'
+                      const label = labelMap[rem] || `Alignment (Δ ${diffPct.toFixed(1)} pp)`
+                      return (
+                        <Chip
+                          label={label}
+                          size="small"
+                          sx={{
+                            fontWeight: 700,
+                            fontSize: '0.675rem',
+                            height: 22,
+                            backgroundColor: alpha(color, 0.15),
+                            color,
+                            border: `1px solid ${alpha(color, 0.3)}`,
+                          }}
+                        />
+                      )
+                    })()}
+                  </Box>
+
+                  <Grid container spacing={1.5}>
+                    <Grid size={{ xs: 6, sm: 6 }}>
+                      <Box
+                        sx={{
+                          p: 1.25,
+                          borderRadius: 1.5,
+                          backgroundColor: alpha('#1E2638', 0.5),
+                          border: `1px solid ${alpha('#42A5F5', 0.2)}`,
+                        }}
+                      >
+                        <Typography variant="caption" sx={{ color: '#42A5F5', fontWeight: 700, display: 'block', mb: 0.5 }}>
+                          Current Season (Primary)
                         </Typography>
-                      )}
-                    </Box>
-                  ))}
+                        <Typography variant="h6" sx={{ fontWeight: 800, color: '#66BB6A', lineHeight: 1.2 }}>
+                          {snapshotAlternative.estimated_probability
+                            ? `${(Number(snapshotAlternative.estimated_probability) * 100).toFixed(1)}%`
+                            : '—'}
+                        </Typography>
+                        <Typography variant="caption" sx={{ color: '#9AA3B2', fontSize: '0.72rem', display: 'block', mt: 0.5 }}>
+                          League Baselines:{' '}
+                          {snapshotAlternative.current_league_home_avg
+                            ? `H: ${Number(snapshotAlternative.current_league_home_avg).toFixed(2)} / A: ${Number(snapshotAlternative.current_league_away_avg ?? 0).toFixed(2)}`
+                            : 'Live Aggregates'}
+                        </Typography>
+                      </Box>
+                    </Grid>
+
+                    <Grid size={{ xs: 6, sm: 6 }}>
+                      <Box
+                        sx={{
+                          p: 1.25,
+                          borderRadius: 1.5,
+                          backgroundColor: alpha('#1E2638', 0.5),
+                          border: `1px solid ${alpha('#9AA3B2', 0.2)}`,
+                        }}
+                      >
+                        <Typography variant="caption" sx={{ color: '#9AA3B2', fontWeight: 700, display: 'block', mb: 0.5 }}>
+                          Historical Baseline (Benchmark)
+                        </Typography>
+                        <Typography variant="h6" sx={{ fontWeight: 800, color: '#F6AE2D', lineHeight: 1.2 }}>
+                          {snapshotAlternative.historical_estimated_probability !== null && snapshotAlternative.historical_estimated_probability !== undefined
+                            ? `${(Number(snapshotAlternative.historical_estimated_probability) * 100).toFixed(1)}%`
+                            : '—'}
+                        </Typography>
+                        <Typography variant="caption" sx={{ color: '#9AA3B2', fontSize: '0.72rem', display: 'block', mt: 0.5 }}>
+                          Historical Baselines:{' '}
+                          {snapshotAlternative.historical_league_home_avg
+                            ? `H: ${Number(snapshotAlternative.historical_league_home_avg).toFixed(2)} / A: ${Number(snapshotAlternative.historical_league_away_avg ?? 0).toFixed(2)}`
+                            : 'Locked Catalog'}
+                        </Typography>
+                      </Box>
+                    </Grid>
+                  </Grid>
+
+                  <Typography variant="caption" sx={{ color: '#9AA3B2', fontSize: '0.7rem', display: 'block', mt: 1, fontStyle: 'italic' }}>
+                    * Current season provides dynamic market edge; historical catalog acts as structural stability benchmark.
+                  </Typography>
+                </Paper>
+              )}
+
+              {/* Pre-Match Statistical Matchup Comparison */}
+              {((snapshotAlternative.home_goals_scored !== null && snapshotAlternative.home_goals_scored !== undefined) ||
+              (snapshotAlternative.home_goals_per_game !== null && snapshotAlternative.home_goals_per_game !== undefined) ||
+              (snapshotAlternative.home_league_position !== null && snapshotAlternative.home_league_position !== undefined)) && (
+                <Paper
+                  elevation={0}
+                  sx={{
+                    p: 2,
+                    borderRadius: 2,
+                    backgroundColor: alpha('#121824', 0.6),
+                    border: (theme) => `1px solid ${alpha(theme.palette.divider, 1)}`,
+                  }}
+                >
+                  <Typography
+                    variant="subtitle2"
+                    sx={{
+                      fontWeight: 700,
+                      mb: 1.5,
+                      color: '#F6AE2D',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 1,
+                    }}
+                  >
+                    <TrendingUp size={16} />
+                    {locale === 'fr' ? 'Profil & Statistiques Pré-Match' : 'Pre-Match Statistical Matchup'}
+                  </Typography>
+                  <Box sx={{ overflowX: 'auto' }}>
+                    <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.825rem' }}>
+                      <thead>
+                        <tr style={{ borderBottom: '1px solid rgba(240, 242, 245, 0.1)' }}>
+                          <th style={{ padding: '8px 6px', textAlign: 'left', color: '#9AA3B2', fontWeight: 600 }}>Metric</th>
+                          <th style={{ padding: '8px 6px', textAlign: 'center', color: '#F6AE2D', fontWeight: 700 }}>
+                            {snapshotAlternative.home_team} (Home)
+                          </th>
+                          <th style={{ padding: '8px 6px', textAlign: 'center', color: '#42A5F5', fontWeight: 700 }}>
+                            {snapshotAlternative.away_team} (Away)
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr style={{ borderBottom: '1px solid rgba(240, 242, 245, 0.05)' }}>
+                          <td style={{ padding: '8px 6px', color: '#9AA3B2' }}>League Position</td>
+                          <td style={{ padding: '8px 6px', textAlign: 'center', fontWeight: 800 }}>
+                            {snapshotAlternative.home_league_position !== null && snapshotAlternative.home_league_position !== undefined
+                              ? `#${snapshotAlternative.home_league_position}`
+                              : '—'}
+                          </td>
+                          <td style={{ padding: '8px 6px', textAlign: 'center', fontWeight: 800 }}>
+                            {snapshotAlternative.away_league_position !== null && snapshotAlternative.away_league_position !== undefined
+                              ? `#${snapshotAlternative.away_league_position}`
+                              : '—'}
+                          </td>
+                        </tr>
+                        <tr style={{ borderBottom: '1px solid rgba(240, 242, 245, 0.05)' }}>
+                          <td style={{ padding: '8px 6px', color: '#9AA3B2' }}>Matches Played (MP)</td>
+                          <td style={{ padding: '8px 6px', textAlign: 'center', fontWeight: 700 }}>
+                            {snapshotAlternative.home_matches_played ?? '—'}
+                          </td>
+                          <td style={{ padding: '8px 6px', textAlign: 'center', fontWeight: 700 }}>
+                            {snapshotAlternative.away_matches_played ?? '—'}
+                          </td>
+                        </tr>
+                        <tr style={{ borderBottom: '1px solid rgba(240, 242, 245, 0.05)' }}>
+                          <td style={{ padding: '8px 6px', color: '#9AA3B2' }}>Goals Scored (GF)</td>
+                          <td style={{ padding: '8px 6px', textAlign: 'center', fontWeight: 700, color: '#66BB6A' }}>
+                            {snapshotAlternative.home_goals_scored ?? '—'}
+                          </td>
+                          <td style={{ padding: '8px 6px', textAlign: 'center', fontWeight: 700, color: '#66BB6A' }}>
+                            {snapshotAlternative.away_goals_scored ?? '—'}
+                          </td>
+                        </tr>
+                        <tr style={{ borderBottom: '1px solid rgba(240, 242, 245, 0.05)' }}>
+                          <td style={{ padding: '8px 6px', color: '#9AA3B2' }}>Goals Conceded (GA)</td>
+                          <td style={{ padding: '8px 6px', textAlign: 'center', fontWeight: 700, color: '#EF5350' }}>
+                            {snapshotAlternative.home_goals_conceded ?? '—'}
+                          </td>
+                          <td style={{ padding: '8px 6px', textAlign: 'center', fontWeight: 700, color: '#EF5350' }}>
+                            {snapshotAlternative.away_goals_conceded ?? '—'}
+                          </td>
+                        </tr>
+                        <tr style={{ borderBottom: '1px solid rgba(240, 242, 245, 0.05)' }}>
+                          <td style={{ padding: '8px 6px', color: '#9AA3B2' }}>Goal Difference (GD)</td>
+                          <td style={{ padding: '8px 6px', textAlign: 'center', fontWeight: 800 }}>
+                            {altHomeGD !== null ? `${altHomeGD > 0 ? '+' : ''}${altHomeGD}` : '—'}
+                          </td>
+                          <td style={{ padding: '8px 6px', textAlign: 'center', fontWeight: 800 }}>
+                            {altAwayGD !== null ? `${altAwayGD > 0 ? '+' : ''}${altAwayGD}` : '—'}
+                          </td>
+                        </tr>
+                        <tr style={{ borderBottom: '1px solid rgba(240, 242, 245, 0.05)' }}>
+                          <td style={{ padding: '8px 6px', color: '#9AA3B2' }}>Avg Goals Scored / Match</td>
+                          <td style={{ padding: '8px 6px', textAlign: 'center', fontWeight: 700 }}>
+                            {snapshotAlternative.home_goals_per_game !== null && snapshotAlternative.home_goals_per_game !== undefined
+                              ? Number(snapshotAlternative.home_goals_per_game).toFixed(2)
+                              : '—'}
+                          </td>
+                          <td style={{ padding: '8px 6px', textAlign: 'center', fontWeight: 700 }}>
+                            {snapshotAlternative.away_goals_per_game !== null && snapshotAlternative.away_goals_per_game !== undefined
+                              ? Number(snapshotAlternative.away_goals_per_game).toFixed(2)
+                              : '—'}
+                          </td>
+                        </tr>
+                        <tr>
+                          <td style={{ padding: '8px 6px', color: '#9AA3B2' }}>Avg Goals Conceded / Match</td>
+                          <td style={{ padding: '8px 6px', textAlign: 'center', fontWeight: 700 }}>
+                            {snapshotAlternative.home_conceded_per_game !== null && snapshotAlternative.home_conceded_per_game !== undefined
+                              ? Number(snapshotAlternative.home_conceded_per_game).toFixed(2)
+                              : '—'}
+                          </td>
+                          <td style={{ padding: '8px 6px', textAlign: 'center', fontWeight: 700 }}>
+                            {snapshotAlternative.away_conceded_per_game !== null && snapshotAlternative.away_conceded_per_game !== undefined
+                              ? Number(snapshotAlternative.away_conceded_per_game).toFixed(2)
+                              : '—'}
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </Box>
+                </Paper>
+              )}
+
+              {snapshotAlternative.comment && (
+                <Box
+                  sx={{
+                    p: 2,
+                    borderRadius: 2,
+                    backgroundColor: alpha('#EF5350', 0.08),
+                    border: `1px solid ${alpha('#EF5350', 0.2)}`,
+                  }}
+                >
+                  <Typography variant="caption" sx={{ fontWeight: 700, color: '#EF5350', display: 'flex', alignItems: 'center', gap: 0.75, mb: 0.75 }}>
+                    <Brain size={15} />
+                    {locale === 'fr' ? 'Motif de Rejet :' : 'Rejection Reason / Analysis:'}
+                  </Typography>
+                  <Typography variant="body2" sx={{ fontStyle: 'italic', lineHeight: 1.6 }}>
+                    "{snapshotAlternative.comment}"
+                  </Typography>
                 </Box>
-              </Box>
-            )}
-          </Box>
-        )}
+              )}
+
+              {snapshotAlternative.warnings && snapshotAlternative.warnings.length > 0 && (
+                <Box
+                  sx={{
+                    p: 2,
+                    borderRadius: 2,
+                    backgroundColor: alpha('#F6AE2D', 0.08),
+                    border: `1px solid ${alpha('#F6AE2D', 0.3)}`,
+                  }}
+                >
+                  <Typography variant="caption" sx={{ fontWeight: 700, color: '#F6AE2D', display: 'flex', alignItems: 'center', gap: 0.75, mb: 1 }}>
+                    <AlertTriangle size={15} />
+                    {locale === 'fr' ? `Alertes Détectées (${snapshotAlternative.warnings.length})` : `Detected Warnings (${snapshotAlternative.warnings.length})`}
+                  </Typography>
+                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                    {snapshotAlternative.warnings.map((w: any, wIdx: number) => (
+                      <Box
+                        key={wIdx}
+                        sx={{
+                          p: 1.5,
+                          borderRadius: 1.5,
+                          backgroundColor: alpha('#121824', 0.7),
+                          border: `1px solid ${alpha('#F6AE2D', 0.3)}`,
+                        }}
+                      >
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
+                          <Chip label={w.type} size="small" sx={{ height: 20, fontSize: '0.7rem', fontWeight: 700, backgroundColor: alpha('#9C27B0', 0.2), color: '#CE93D8' }} />
+                          <Chip label={w.severity || 'MED'} size="small" sx={{ height: 20, fontSize: '0.65rem', fontWeight: 800, backgroundColor: alpha('#F6AE2D', 0.2), color: '#F6AE2D' }} />
+                        </Box>
+                        <Typography variant="body2" sx={{ fontWeight: 600, color: '#F0F2F5', mb: 0.5 }}>
+                          {w.description}
+                        </Typography>
+                        {w.evidence && (
+                          <Typography variant="caption" sx={{ color: '#9AA3B2', fontStyle: 'italic', display: 'block' }}>
+                            &ldquo;{w.evidence}&rdquo;
+                          </Typography>
+                        )}
+                      </Box>
+                    ))}
+                  </Box>
+                </Box>
+              )}
+            </Box>
+          )
+        })()}
       </CustomDrawer>
     </Box>
   )

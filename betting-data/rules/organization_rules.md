@@ -8,7 +8,10 @@ All betting analytics, model specifications, prompt guidelines, and generated ti
 betting-data/
 ├── rules/
 │   ├── model_2.1.md                   # Core Roy Betting Engine Over 1.5 specification
-│   └── organization_rules.md          # File & directory organization rules (this document)
+│   ├── organization_rules.md          # File & directory organization rules (this document)
+│   └── prompting_guide.md             # Standardized prompting guide for all 5 workflow levels
+├── scripts/
+│   └── calculate_model.py             # Deterministic Model 2.1 Poisson & EV calculator
 ├── january/
 ├── february/
 ├── march/
@@ -81,11 +84,23 @@ When instructing an AI agent or analyst to generate a betting ticket:
 1. **Model Source**: Read instructions from `betting-data/rules/model_<version>.md`.
 2. **JSON Compliance**: The output must adhere strictly to the JSON schema defined in `src/types/betting.ts` (`TicketImportJSON`).
 3. **Storage Destination**: Save the output to `betting-data/<month>/ticket_<YYYY-MM-DD>_<INDEX>.json`.
-4. **Mandatory Probabilities & Value**:
+4. **Mandatory Probabilities, Value & Consensus Metrics**:
    - Every selection and alternative must include:
-     - `estimated_probability` (0.000 to 1.000)
+     - `estimated_probability` (0.000 to 1.000, derived from current-season baselines)
+     - `historical_estimated_probability` (0.000 to 1.000, derived from historical baselines)
+     - `alignment_delta_pp` ($|P_{\text{primary}} - P_{\text{historical}}| \times 100$)
+     - `alignment_remark` (`very_high`, `high`, `medium`, `low`, `very_low`)
      - `odds` (decimal)
      - `breakeven_probability` ($1 / \text{odds}$)
      - `edge_percentage_points` ($(\text{prob} - \text{break\_even}) \times 100$)
+     - `edge_remark` (`very_high`, `high`, `medium`, `low`, `very_low`)
      - `expected_value` ($(\text{prob} \times \text{odds}) - 1$)
-5. **Decoupling Principle**: Qualitative warnings (e.g., `H2H_LOW_GOALS`, `SMALL_SAMPLE`, `LOW_AWAY_SCORING`) operate as an evidence layer and verdict filter (`SELECT` / `CAUTION` / `NO BET`). They must never apply arbitrary percentage point penalties to the mathematical Poisson probability.
+5. **Full Schema Parity for Alternatives**:
+   - Alternatives (`betting_alternatives`) are considered-and-rejected betting options that must match primary selections attribute-for-attribute.
+   - Every alternative must populate all 10 venue statistical attributes (`home_league_position`, `away_league_position`, `home_matches_played`, `away_matches_played`, `home_goals_scored`, `home_goals_conceded`, `away_goals_scored`, `away_goals_conceded`, `home_goals_per_game`, `home_conceded_per_game`, `away_goals_per_game`, `away_conceded_per_game`) alongside all 8 dual-baseline and value-edge attributes (`current_league_home_avg`, `current_league_away_avg`, `historical_league_home_avg`, `historical_league_away_avg`, `historical_estimated_probability`, `alignment_delta_pp`, `alignment_remark`, `edge_remark`).
+6. **Dual-Baseline Recording**:
+   - Both selections and alternatives must record the league scoring baselines used:
+     - `current_league_home_avg`, `current_league_away_avg` (live table)
+     - `historical_league_home_avg`, `historical_league_away_avg` (from `betting-data/rules/league_baselines.json`)
+7. **Decoupling Principle**: Qualitative warnings (e.g., `H2H_LOW_GOALS`, `SMALL_SAMPLE`, `LOW_AWAY_SCORING`) operate as an evidence layer and verdict filter (`SELECT` / `CAUTION` / `NO BET`). They must never apply arbitrary percentage point penalties to the mathematical Poisson probability.
+
