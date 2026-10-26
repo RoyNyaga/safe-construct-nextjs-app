@@ -1,7 +1,7 @@
 # ROY BETTING ENGINE — MATCH EVALUATION REPORT
 **Model Version**: 2.1 (Over 1.5 Goals Focused — Dual-Baseline Protocol)
 **Evaluation Date**: 2026-10-26
-**Total Fixtures Evaluated**: 17 matches
+**Total Fixtures Evaluated**: 26 matches
 **Source Odds Provider**: Betmomo
 **Methodology Enforcement**: Strict Venue-Specific Home/Away Protocol (Section 5.0), Dual-Baseline Protocol (Section 5.1A), & Hard-Stop Rule
 
@@ -819,6 +819,471 @@
 
 ---
 
+## 18. Nea Salamina vs Pafos FC
+- **Fixture**: Cyprus — 1. Division | Date: 2026-10-26
+- **Data Quality**: **Verified (Dual-Baseline Venue-Specific Analysis)**
+
+### Pre-Match Statistical Matchup Comparison
+| Metric | Nea Salamina (Home Venue) | Pafos FC (Away Venue) |
+| :--- | :---: | :---: |
+| **League Standing** | 13th | 1st |
+| **Venue Matches Played** | 3 | 4 |
+| **Overall Matches Played** | 7 | 7 |
+| **Venue Goals Scored (GF)** | 2 (0.67 / game) | 10 (2.50 / game) |
+| **Venue Goals Conceded (GA)** | 7 (2.33 / game) | 2 (0.50 / game) |
+| **Venue Goal Difference (GD)** | -5 | +8 |
+| **Overall Record (GF / GA)** | 5 GF / 17 GA | 19 GF / 4 GA |
+
+### Goal Profiles & Strength Indices (Dual-Baseline)
+- **Primary Live Baselines (Cyprus 1. Division 2026/27)**: Home scoring avg 1.40, Away scoring avg 1.18
+  - **Home Attacking Strength**: 0.67 ÷ 1.40 = 0.48
+  - **Away Defensive Weakness**: 0.50 ÷ 1.40 = 0.36
+  - **Away Attacking Strength**: 2.50 ÷ 1.18 = 2.12
+  - **Home Defensive Weakness**: 2.33 ÷ 1.18 = 1.98
+- **Historical Benchmark Baselines (Locked Catalog)**: Home scoring avg 1.45, Away scoring avg 1.15
+
+### Expected Goals (λ) & Poisson Formulation
+- **Primary Live Model**:
+  - λ_home: 0.2393 | λ_away: 4.9364 | **λ_total: 5.1757**
+  - **Poisson P(Over 1.5)**: **96.5%** (Extremely strong)
+  - Poisson P(Under 1.5): 3.5%
+- **Companion Historical Benchmark**:
+  - Hist λ_home: 0.2299 | Hist λ_away: 5.0725 | **Hist λ_total: 5.2963**
+  - **Historical P(Over 1.5)**: **96.9%**
+- **Dual-Baseline Alignment**: `[VERY HIGH ALIGNMENT]` (0.34 pp delta)
+  - *Interpretation*: Near-perfect consensus between live season and historical multi-year benchmark (Delta ≤ 1.5 pp). Maximum statistical stability.
+
+### Market Pricing & Value Analysis
+- **Offered Odds**: 1.21
+- **Bookmaker Break-Even Probability**: 82.6%
+- **Value Edge**: +13.9 percentage points (`[HIGH EDGE]`)
+- **Expected Value (EV)**: +0.168 per unit staked
+
+### Warnings & Negative Checks
+- **`SMALL_SAMPLE`** [MEDIUM] (CONTRADICTORY / INDIRECT): Limited sample size of only 3 matches.
+  - *Evidence*: Sample size below the 5-match threshold for statistical stability (3 vs 4).
+- **`LOW_HOME_SCORING`** [MEDIUM] (CONTRADICTORY / DIRECT): Nea Salamina home scoring rate is low (0.67 GF/game).
+  - *Evidence*: Nea Salamina averages under 1.0 goal scored per match across the observed fixtures.
+- **`TEAM_NEWS_UNVERIFIED`** [LOW] (NEUTRAL / CONTEXTUAL): Pre-match team news and confirmed starting lineups remain unverified.
+  - *Evidence*: Lineups have not been locked in; rotation or late injury risk unconfirmed.
+
+### Final Decision Verdict: **CAUTION**
+> CAUTION. Model estimates an 96.5% Over 1.5 probability versus bookmaker break-even of 82.6% at 1.21 odds (+13.9 edge, +0.168 EV). Multiple medium warnings (SMALL_SAMPLE, LOW_HOME_SCORING) warrant measured caution.
+
+---
+
+## 19. AEK Larnaca vs Omonia Nicosia
+- **Fixture**: Cyprus — 1. Division | Date: 2026-10-26
+- **Data Quality**: **Verified (Dual-Baseline Venue-Specific Analysis)**
+
+### Pre-Match Statistical Matchup Comparison
+| Metric | AEK Larnaca (Home Venue) | Omonia Nicosia (Away Venue) |
+| :--- | :---: | :---: |
+| **League Standing** | 3rd | 6th |
+| **Venue Matches Played** | 3 | 3 |
+| **Overall Matches Played** | 7 | 7 |
+| **Venue Goals Scored (GF)** | 5 (1.67 / game) | 4 (1.33 / game) |
+| **Venue Goals Conceded (GA)** | 3 (1.00 / game) | 4 (1.33 / game) |
+| **Venue Goal Difference (GD)** | +2 | +0 |
+| **Overall Record (GF / GA)** | 12 GF / 8 GA | 13 GF / 8 GA |
+
+### Goal Profiles & Strength Indices (Dual-Baseline)
+- **Primary Live Baselines (Cyprus 1. Division 2026/27)**: Home scoring avg 1.40, Away scoring avg 1.18
+  - **Home Attacking Strength**: 1.67 ÷ 1.40 = 1.19
+  - **Away Defensive Weakness**: 1.33 ÷ 1.40 = 0.95
+  - **Away Attacking Strength**: 1.33 ÷ 1.18 = 1.13
+  - **Home Defensive Weakness**: 1.00 ÷ 1.18 = 0.85
+- **Historical Benchmark Baselines (Locked Catalog)**: Home scoring avg 1.45, Away scoring avg 1.15
+
+### Expected Goals (λ) & Poisson Formulation
+- **Primary Live Model**:
+  - λ_home: 1.5865 | λ_away: 1.1271 | **λ_total: 2.7136**
+  - **Poisson P(Over 1.5)**: **75.4%** (Good)
+  - Poisson P(Under 1.5): 24.6%
+- **Companion Historical Benchmark**:
+  - Hist λ_home: 1.5326 | Hist λ_away: 1.1594 | **Hist λ_total: 2.6883**
+  - **Historical P(Over 1.5)**: **74.9%**
+- **Dual-Baseline Alignment**: `[VERY HIGH ALIGNMENT]` (0.46 pp delta)
+  - *Interpretation*: Near-perfect consensus between live season and historical multi-year benchmark (Delta ≤ 1.5 pp). Maximum statistical stability.
+
+### Market Pricing & Value Analysis
+- **Offered Odds**: 1.23
+- **Bookmaker Break-Even Probability**: 81.3%
+- **Value Edge**: -5.9 percentage points (`[LOW EDGE]`)
+- **Expected Value (EV)**: -0.073 per unit staked
+
+### Warnings & Negative Checks
+- **`SMALL_SAMPLE`** [MEDIUM] (CONTRADICTORY / INDIRECT): Limited sample size of only 3 matches.
+  - *Evidence*: Sample size below the 5-match threshold for statistical stability (3 vs 3).
+- **`TEAM_NEWS_UNVERIFIED`** [LOW] (NEUTRAL / CONTEXTUAL): Pre-match team news and confirmed starting lineups remain unverified.
+  - *Evidence*: Lineups have not been locked in; rotation or late injury risk unconfirmed.
+
+### Final Decision Verdict: **CAUTION**
+> CAUTION. Model estimates an 75.4% Over 1.5 probability versus bookmaker break-even of 81.3% at 1.23 odds (-5.9 edge, -0.073 EV). High probability (75.4%), but pricing offers no positive edge (-5.9pp). Disclosed under Principle 9.
+
+---
+
+## 20. FC Copenhagen vs Odense BK
+- **Fixture**: Denmark — Superliga | Date: 2026-10-26
+- **Data Quality**: **Verified (Dual-Baseline Venue-Specific Analysis)**
+
+### Pre-Match Statistical Matchup Comparison
+| Metric | FC Copenhagen (Home Venue) | Odense BK (Away Venue) |
+| :--- | :---: | :---: |
+| **League Standing** | 2nd | 7th |
+| **Venue Matches Played** | 5 | 5 |
+| **Overall Matches Played** | 11 | 11 |
+| **Venue Goals Scored (GF)** | 12 (2.40 / game) | 4 (0.80 / game) |
+| **Venue Goals Conceded (GA)** | 4 (0.80 / game) | 9 (1.80 / game) |
+| **Venue Goal Difference (GD)** | +8 | -5 |
+| **Overall Record (GF / GA)** | 25 GF / 11 GA | 10 GF / 15 GA |
+
+### Goal Profiles & Strength Indices (Dual-Baseline)
+- **Primary Live Baselines (Denmark Superliga 2026/27)**: Home scoring avg 1.58, Away scoring avg 1.25
+  - **Home Attacking Strength**: 2.40 ÷ 1.58 = 1.52
+  - **Away Defensive Weakness**: 1.80 ÷ 1.58 = 1.14
+  - **Away Attacking Strength**: 0.80 ÷ 1.25 = 0.64
+  - **Home Defensive Weakness**: 0.80 ÷ 1.25 = 0.64
+- **Historical Benchmark Baselines (Locked Catalog)**: Home scoring avg 1.52, Away scoring avg 1.28
+
+### Expected Goals (λ) & Poisson Formulation
+- **Primary Live Model**:
+  - λ_home: 2.7342 | λ_away: 0.5120 | **λ_total: 3.2462**
+  - **Poisson P(Over 1.5)**: **83.5%** (Strong)
+  - Poisson P(Under 1.5): 16.5%
+- **Companion Historical Benchmark**:
+  - Hist λ_home: 2.8421 | Hist λ_away: 0.5000 | **Hist λ_total: 3.3421**
+  - **Historical P(Over 1.5)**: **84.7%**
+- **Dual-Baseline Alignment**: `[VERY HIGH ALIGNMENT]` (1.18 pp delta)
+  - *Interpretation*: Near-perfect consensus between live season and historical multi-year benchmark (Delta ≤ 1.5 pp). Maximum statistical stability.
+
+### Market Pricing & Value Analysis
+- **Offered Odds**: 1.17
+- **Bookmaker Break-Even Probability**: 85.5%
+- **Value Edge**: -2.0 percentage points (`[LOW EDGE]`)
+- **Expected Value (EV)**: -0.023 per unit staked
+
+### Warnings & Negative Checks
+- **`LOW_AWAY_SCORING`** [MEDIUM] (CONTRADICTORY / DIRECT): Odense BK averages only 0.80 goals per game, increasing shutout risk.
+  - *Evidence*: Odense BK away scoring average is 0.80 GF/game, placing heavy reliance on FC Copenhagen to produce goals.
+- **`TEAM_NEWS_UNVERIFIED`** [LOW] (NEUTRAL / CONTEXTUAL): Pre-match team news and confirmed starting lineups remain unverified.
+  - *Evidence*: Lineups have not been locked in; rotation or late injury risk unconfirmed.
+
+### Final Decision Verdict: **CAUTION**
+> CAUTION. Model estimates an 83.5% Over 1.5 probability versus bookmaker break-even of 85.5% at 1.17 odds (-2.0 edge, -0.023 EV). High probability (83.5%), but pricing offers no positive edge (-2.0pp). Disclosed under Principle 9.
+
+---
+
+## 21. Mosta FC vs Hibernians FC
+- **Fixture**: Malta — Premier League | Date: 2026-10-26
+- **Data Quality**: **Verified (Dual-Baseline Venue-Specific Analysis)**
+
+### Pre-Match Statistical Matchup Comparison
+| Metric | Mosta FC (Home Venue) | Hibernians FC (Away Venue) |
+| :--- | :---: | :---: |
+| **League Standing** | 7th | 4th |
+| **Venue Matches Played** | 4 | 4 |
+| **Overall Matches Played** | 8 | 8 |
+| **Venue Goals Scored (GF)** | 4 (1.00 / game) | 6 (1.50 / game) |
+| **Venue Goals Conceded (GA)** | 5 (1.25 / game) | 4 (1.00 / game) |
+| **Venue Goal Difference (GD)** | -1 | +2 |
+| **Overall Record (GF / GA)** | 8 GF / 11 GA | 12 GF / 7 GA |
+
+### Goal Profiles & Strength Indices (Dual-Baseline)
+- **Primary Live Baselines (Malta Premier League 2026/27)**: Home scoring avg 1.35, Away scoring avg 1.15
+  - **Home Attacking Strength**: 1.00 ÷ 1.35 = 0.74
+  - **Away Defensive Weakness**: 1.00 ÷ 1.35 = 0.74
+  - **Away Attacking Strength**: 1.50 ÷ 1.15 = 1.30
+  - **Home Defensive Weakness**: 1.25 ÷ 1.15 = 1.09
+- **Historical Benchmark Baselines (Locked Catalog)**: Home scoring avg 1.40, Away scoring avg 1.10
+
+### Expected Goals (λ) & Poisson Formulation
+- **Primary Live Model**:
+  - λ_home: 0.7407 | λ_away: 1.6304 | **λ_total: 2.3712**
+  - **Poisson P(Over 1.5)**: **68.5%** (Weak for the Over 1.5-focused strategy)
+  - Poisson P(Under 1.5): 31.5%
+- **Companion Historical Benchmark**:
+  - Hist λ_home: 0.7143 | Hist λ_away: 1.7045 | **Hist λ_total: 2.4188**
+  - **Historical P(Over 1.5)**: **69.6%**
+- **Dual-Baseline Alignment**: `[VERY HIGH ALIGNMENT]` (1.04 pp delta)
+  - *Interpretation*: Near-perfect consensus between live season and historical multi-year benchmark (Delta ≤ 1.5 pp). Maximum statistical stability.
+
+### Market Pricing & Value Analysis
+- **Offered Odds**: 1.25
+- **Bookmaker Break-Even Probability**: 80.0%
+- **Value Edge**: -11.5 percentage points (`[VERY LOW EDGE]`)
+- **Expected Value (EV)**: -0.143 per unit staked
+
+### Warnings & Negative Checks
+- **`SMALL_SAMPLE`** [MEDIUM] (CONTRADICTORY / INDIRECT): Limited sample size of only 4 matches.
+  - *Evidence*: Sample size below the 5-match threshold for statistical stability (4 vs 4).
+- **`TEAM_NEWS_UNVERIFIED`** [LOW] (NEUTRAL / CONTEXTUAL): Pre-match team news and confirmed starting lineups remain unverified.
+  - *Evidence*: Lineups have not been locked in; rotation or late injury risk unconfirmed.
+
+### Final Decision Verdict: **NO BET**
+> NO BET. Model estimates an 68.5% Over 1.5 probability versus bookmaker break-even of 80.0% at 1.25 odds (-11.5 edge, -0.143 EV). Estimated Over 1.5 probability (68.5%) is well below the 70% threshold for the Over 1.5 strategy.
+
+---
+
+## 22. Warta Poznan vs LKS Lodz
+- **Fixture**: Poland — I Liga | Date: 2026-10-26
+- **Data Quality**: **Verified (Dual-Baseline Venue-Specific Analysis)**
+
+### Pre-Match Statistical Matchup Comparison
+| Metric | Warta Poznan (Home Venue) | LKS Lodz (Away Venue) |
+| :--- | :---: | :---: |
+| **League Standing** | 7th | 8th |
+| **Venue Matches Played** | 5 | 5 |
+| **Overall Matches Played** | 11 | 11 |
+| **Venue Goals Scored (GF)** | 10 (2.00 / game) | 6 (1.20 / game) |
+| **Venue Goals Conceded (GA)** | 6 (1.20 / game) | 5 (1.00 / game) |
+| **Venue Goal Difference (GD)** | +4 | +1 |
+| **Overall Record (GF / GA)** | 19 GF / 15 GA | 14 GF / 11 GA |
+
+### Goal Profiles & Strength Indices (Dual-Baseline)
+- **Primary Live Baselines (Poland I Liga 2026/27)**: Home scoring avg 1.48, Away scoring avg 1.18
+  - **Home Attacking Strength**: 2.00 ÷ 1.48 = 1.35
+  - **Away Defensive Weakness**: 1.00 ÷ 1.48 = 0.68
+  - **Away Attacking Strength**: 1.20 ÷ 1.18 = 1.02
+  - **Home Defensive Weakness**: 1.20 ÷ 1.18 = 1.02
+- **Historical Benchmark Baselines (Locked Catalog)**: Home scoring avg 1.45, Away scoring avg 1.15
+
+### Expected Goals (λ) & Poisson Formulation
+- **Primary Live Model**:
+  - λ_home: 1.3514 | λ_away: 1.2203 | **λ_total: 2.5717**
+  - **Poisson P(Over 1.5)**: **72.7%** (Moderate)
+  - Poisson P(Under 1.5): 27.3%
+- **Companion Historical Benchmark**:
+  - Hist λ_home: 1.3793 | Hist λ_away: 1.2522 | **Hist λ_total: 2.6315**
+  - **Historical P(Over 1.5)**: **73.9%**
+- **Dual-Baseline Alignment**: `[VERY HIGH ALIGNMENT]` (1.15 pp delta)
+  - *Interpretation*: Near-perfect consensus between live season and historical multi-year benchmark (Delta ≤ 1.5 pp). Maximum statistical stability.
+
+### Market Pricing & Value Analysis
+- **Offered Odds**: 1.25
+- **Bookmaker Break-Even Probability**: 80.0%
+- **Value Edge**: -7.3 percentage points (`[LOW EDGE]`)
+- **Expected Value (EV)**: -0.091 per unit staked
+
+### Warnings & Negative Checks
+- **`TEAM_NEWS_UNVERIFIED`** [LOW] (NEUTRAL / CONTEXTUAL): Pre-match team news and confirmed starting lineups remain unverified.
+  - *Evidence*: Lineups have not been locked in; rotation or late injury risk unconfirmed.
+
+### Final Decision Verdict: **CAUTION**
+> CAUTION. Model estimates an 72.7% Over 1.5 probability versus bookmaker break-even of 80.0% at 1.25 odds (-7.3 edge, -0.091 EV). High probability (72.7%), but pricing offers no positive edge (-7.3pp). Disclosed under Principle 9.
+
+---
+
+## 23. ACS Sepsi OSK vs Universitatea Craiova
+- **Fixture**: Romania — SuperLiga | Date: 2026-10-26
+- **Data Quality**: **Verified (Dual-Baseline Venue-Specific Analysis)**
+
+### Pre-Match Statistical Matchup Comparison
+| Metric | ACS Sepsi OSK (Home Venue) | Universitatea Craiova (Away Venue) |
+| :--- | :---: | :---: |
+| **League Standing** | 12th | 3rd |
+| **Venue Matches Played** | 6 | 6 |
+| **Overall Matches Played** | 12 | 12 |
+| **Venue Goals Scored (GF)** | 7 (1.17 / game) | 11 (1.83 / game) |
+| **Venue Goals Conceded (GA)** | 8 (1.33 / game) | 4 (0.67 / game) |
+| **Venue Goal Difference (GD)** | -1 | +7 |
+| **Overall Record (GF / GA)** | 13 GF / 18 GA | 25 GF / 7 GA |
+
+### Goal Profiles & Strength Indices (Dual-Baseline)
+- **Primary Live Baselines (Romania SuperLiga 2026/27)**: Home scoring avg 1.38, Away scoring avg 1.10
+  - **Home Attacking Strength**: 1.17 ÷ 1.38 = 0.85
+  - **Away Defensive Weakness**: 0.67 ÷ 1.38 = 0.48
+  - **Away Attacking Strength**: 1.83 ÷ 1.10 = 1.67
+  - **Home Defensive Weakness**: 1.33 ÷ 1.10 = 1.21
+- **Historical Benchmark Baselines (Locked Catalog)**: Home scoring avg 1.40, Away scoring avg 1.12
+
+### Expected Goals (λ) & Poisson Formulation
+- **Primary Live Model**:
+  - λ_home: 0.5680 | λ_away: 2.2126 | **λ_total: 2.7807**
+  - **Poisson P(Over 1.5)**: **76.6%** (Good)
+  - Poisson P(Under 1.5): 23.4%
+- **Companion Historical Benchmark**:
+  - Hist λ_home: 0.5556 | Hist λ_away: 2.1825 | **Hist λ_total: 2.7331**
+  - **Historical P(Over 1.5)**: **75.7%**
+- **Dual-Baseline Alignment**: `[VERY HIGH ALIGNMENT]` (0.83 pp delta)
+  - *Interpretation*: Near-perfect consensus between live season and historical multi-year benchmark (Delta ≤ 1.5 pp). Maximum statistical stability.
+
+### Market Pricing & Value Analysis
+- **Offered Odds**: 1.27
+- **Bookmaker Break-Even Probability**: 78.7%
+- **Value Edge**: -2.2 percentage points (`[LOW EDGE]`)
+- **Expected Value (EV)**: -0.028 per unit staked
+
+### Warnings & Negative Checks
+- **`TEAM_NEWS_UNVERIFIED`** [LOW] (NEUTRAL / CONTEXTUAL): Pre-match team news and confirmed starting lineups remain unverified.
+  - *Evidence*: Lineups have not been locked in; rotation or late injury risk unconfirmed.
+
+### Final Decision Verdict: **CAUTION**
+> CAUTION. Model estimates an 76.6% Over 1.5 probability versus bookmaker break-even of 78.7% at 1.27 odds (-2.2 edge, -0.028 EV). High probability (76.6%), but pricing offers no positive edge (-2.2pp). Disclosed under Principle 9.
+
+---
+
+## 24. Al Bukayriyah vs Hajer FC
+- **Fixture**: Saudi Arabia — Division 1 | Date: 2026-10-26
+- **Data Quality**: **Verified (Dual-Baseline Venue-Specific Analysis)**
+
+### Pre-Match Statistical Matchup Comparison
+| Metric | Al Bukayriyah (Home Venue) | Hajer FC (Away Venue) |
+| :--- | :---: | :---: |
+| **League Standing** | 17th | 16th |
+| **Venue Matches Played** | 4 | 3 |
+| **Overall Matches Played** | 8 | 7 |
+| **Venue Goals Scored (GF)** | 2 (0.50 / game) | 2 (0.67 / game) |
+| **Venue Goals Conceded (GA)** | 6 (1.50 / game) | 6 (2.00 / game) |
+| **Venue Goal Difference (GD)** | -4 | -4 |
+| **Overall Record (GF / GA)** | 5 GF / 14 GA | 6 GF / 11 GA |
+
+### Goal Profiles & Strength Indices (Dual-Baseline)
+- **Primary Live Baselines (Saudi Arabia Division 1 2026/27)**: Home scoring avg 1.30, Away scoring avg 1.05
+  - **Home Attacking Strength**: 0.50 ÷ 1.30 = 0.38
+  - **Away Defensive Weakness**: 2.00 ÷ 1.30 = 1.54
+  - **Away Attacking Strength**: 0.67 ÷ 1.05 = 0.63
+  - **Home Defensive Weakness**: 1.50 ÷ 1.05 = 1.43
+- **Historical Benchmark Baselines (Locked Catalog)**: Home scoring avg 1.35, Away scoring avg 1.10
+
+### Expected Goals (λ) & Poisson Formulation
+- **Primary Live Model**:
+  - λ_home: 0.7692 | λ_away: 0.9571 | **λ_total: 1.7264**
+  - **Poisson P(Over 1.5)**: **51.5%** (Weak for the Over 1.5-focused strategy)
+  - Poisson P(Under 1.5): 48.5%
+- **Companion Historical Benchmark**:
+  - Hist λ_home: 0.7407 | Hist λ_away: 0.9091 | **Hist λ_total: 1.6544**
+  - **Historical P(Over 1.5)**: **49.2%**
+- **Dual-Baseline Alignment**: `[HIGH ALIGNMENT]` (2.24 pp delta)
+  - *Interpretation*: Strong agreement between live season and historical benchmark (Delta ≤ 3.0 pp). High mathematical confidence.
+
+### Market Pricing & Value Analysis
+- **Offered Odds**: 1.33
+- **Bookmaker Break-Even Probability**: 75.2%
+- **Value Edge**: -23.7 percentage points (`[VERY LOW EDGE]`)
+- **Expected Value (EV)**: -0.315 per unit staked
+
+### Warnings & Negative Checks
+- **`SMALL_SAMPLE`** [MEDIUM] (CONTRADICTORY / INDIRECT): Limited sample size of only 3 matches.
+  - *Evidence*: Sample size below the 5-match threshold for statistical stability (4 vs 3).
+- **`LOW_AWAY_SCORING`** [MEDIUM] (CONTRADICTORY / DIRECT): Hajer FC averages only 0.67 goals per game, increasing shutout risk.
+  - *Evidence*: Hajer FC away scoring average is 0.67 GF/game, placing heavy reliance on Al Bukayriyah to produce goals.
+- **`LOW_HOME_SCORING`** [HIGH] (CONTRADICTORY / DIRECT): Al Bukayriyah home scoring rate is low (0.50 GF/game).
+  - *Evidence*: Al Bukayriyah averages under 1.0 goal scored per match across the observed fixtures.
+- **`TEAM_NEWS_UNVERIFIED`** [LOW] (NEUTRAL / CONTEXTUAL): Pre-match team news and confirmed starting lineups remain unverified.
+  - *Evidence*: Lineups have not been locked in; rotation or late injury risk unconfirmed.
+
+### Final Decision Verdict: **NO BET**
+> NO BET. Model estimates an 51.5% Over 1.5 probability versus bookmaker break-even of 75.2% at 1.33 odds (-23.7 edge, -0.315 EV). Estimated Over 1.5 probability (51.5%) is well below the 70% threshold for the Over 1.5 strategy.
+
+---
+
+## 25. Al Anwar vs Al Akhdoud
+- **Fixture**: Saudi Arabia — Division 1 | Date: 2026-10-26
+- **Data Quality**: **Verified (Dual-Baseline Venue-Specific Analysis)**
+
+### Pre-Match Statistical Matchup Comparison
+| Metric | Al Anwar (Home Venue) | Al Akhdoud (Away Venue) |
+| :--- | :---: | :---: |
+| **League Standing** | 8th | 14th |
+| **Venue Matches Played** | 4 | 4 |
+| **Overall Matches Played** | 8 | 8 |
+| **Venue Goals Scored (GF)** | 4 (1.00 / game) | 4 (1.00 / game) |
+| **Venue Goals Conceded (GA)** | 2 (0.50 / game) | 9 (2.25 / game) |
+| **Venue Goal Difference (GD)** | +2 | -5 |
+| **Overall Record (GF / GA)** | 7 GF / 5 GA | 10 GF / 16 GA |
+
+### Goal Profiles & Strength Indices (Dual-Baseline)
+- **Primary Live Baselines (Saudi Arabia Division 1 2026/27)**: Home scoring avg 1.30, Away scoring avg 1.05
+  - **Home Attacking Strength**: 1.00 ÷ 1.30 = 0.77
+  - **Away Defensive Weakness**: 2.25 ÷ 1.30 = 1.73
+  - **Away Attacking Strength**: 1.00 ÷ 1.05 = 0.95
+  - **Home Defensive Weakness**: 0.50 ÷ 1.05 = 0.48
+- **Historical Benchmark Baselines (Locked Catalog)**: Home scoring avg 1.35, Away scoring avg 1.10
+
+### Expected Goals (λ) & Poisson Formulation
+- **Primary Live Model**:
+  - λ_home: 1.7308 | λ_away: 0.4762 | **λ_total: 2.2070**
+  - **Poisson P(Over 1.5)**: **64.7%** (Weak for the Over 1.5-focused strategy)
+  - Poisson P(Under 1.5): 35.3%
+- **Companion Historical Benchmark**:
+  - Hist λ_home: 1.6667 | Hist λ_away: 0.4545 | **Hist λ_total: 2.1212**
+  - **Historical P(Over 1.5)**: **62.6%**
+- **Dual-Baseline Alignment**: `[HIGH ALIGNMENT]` (2.13 pp delta)
+  - *Interpretation*: Strong agreement between live season and historical benchmark (Delta ≤ 3.0 pp). High mathematical confidence.
+
+### Market Pricing & Value Analysis
+- **Offered Odds**: 1.28
+- **Bookmaker Break-Even Probability**: 78.1%
+- **Value Edge**: -13.4 percentage points (`[VERY LOW EDGE]`)
+- **Expected Value (EV)**: -0.172 per unit staked
+
+### Warnings & Negative Checks
+- **`SMALL_SAMPLE`** [MEDIUM] (CONTRADICTORY / INDIRECT): Limited sample size of only 4 matches.
+  - *Evidence*: Sample size below the 5-match threshold for statistical stability (4 vs 4).
+- **`TEAM_NEWS_UNVERIFIED`** [LOW] (NEUTRAL / CONTEXTUAL): Pre-match team news and confirmed starting lineups remain unverified.
+  - *Evidence*: Lineups have not been locked in; rotation or late injury risk unconfirmed.
+
+### Final Decision Verdict: **NO BET**
+> NO BET. Model estimates an 64.7% Over 1.5 probability versus bookmaker break-even of 78.1% at 1.28 odds (-13.4 edge, -0.172 EV). Estimated Over 1.5 probability (64.7%) is well below the 70% threshold for the Over 1.5 strategy.
+
+---
+
+## 26. Al Ula FC vs Al Orobah FC
+- **Fixture**: Saudi Arabia — Division 1 | Date: 2026-10-26
+- **Data Quality**: **Verified (Dual-Baseline Venue-Specific Analysis)**
+
+### Pre-Match Statistical Matchup Comparison
+| Metric | Al Ula FC (Home Venue) | Al Orobah FC (Away Venue) |
+| :--- | :---: | :---: |
+| **League Standing** | 1st | 12th |
+| **Venue Matches Played** | 3 | 3 |
+| **Overall Matches Played** | 7 | 7 |
+| **Venue Goals Scored (GF)** | 9 (3.00 / game) | 2 (0.67 / game) |
+| **Venue Goals Conceded (GA)** | 1 (0.33 / game) | 2 (0.67 / game) |
+| **Venue Goal Difference (GD)** | +8 | +0 |
+| **Overall Record (GF / GA)** | 16 GF / 3 GA | 5 GF / 5 GA |
+
+### Goal Profiles & Strength Indices (Dual-Baseline)
+- **Primary Live Baselines (Saudi Arabia Division 1 2026/27)**: Home scoring avg 1.30, Away scoring avg 1.05
+  - **Home Attacking Strength**: 3.00 ÷ 1.30 = 2.31
+  - **Away Defensive Weakness**: 0.67 ÷ 1.30 = 0.51
+  - **Away Attacking Strength**: 0.67 ÷ 1.05 = 0.63
+  - **Home Defensive Weakness**: 0.33 ÷ 1.05 = 0.32
+- **Historical Benchmark Baselines (Locked Catalog)**: Home scoring avg 1.35, Away scoring avg 1.10
+
+### Expected Goals (λ) & Poisson Formulation
+- **Primary Live Model**:
+  - λ_home: 1.5462 | λ_away: 0.2106 | **λ_total: 1.7567**
+  - **Poisson P(Over 1.5)**: **52.4%** (Weak for the Over 1.5-focused strategy)
+  - Poisson P(Under 1.5): 47.6%
+- **Companion Historical Benchmark**:
+  - Hist λ_home: 1.4815 | Hist λ_away: 0.2020 | **Hist λ_total: 1.6899**
+  - **Historical P(Over 1.5)**: **50.4%**
+- **Dual-Baseline Alignment**: `[HIGH ALIGNMENT]` (2.06 pp delta)
+  - *Interpretation*: Strong agreement between live season and historical benchmark (Delta ≤ 3.0 pp). High mathematical confidence.
+
+### Market Pricing & Value Analysis
+- **Offered Odds**: 1.22
+- **Bookmaker Break-Even Probability**: 82.0%
+- **Value Edge**: -29.5 percentage points (`[VERY LOW EDGE]`)
+- **Expected Value (EV)**: -0.360 per unit staked
+
+### Warnings & Negative Checks
+- **`SMALL_SAMPLE`** [MEDIUM] (CONTRADICTORY / INDIRECT): Limited sample size of only 3 matches.
+  - *Evidence*: Sample size below the 5-match threshold for statistical stability (3 vs 3).
+- **`LOW_AWAY_SCORING`** [MEDIUM] (CONTRADICTORY / DIRECT): Al Orobah FC averages only 0.67 goals per game, increasing shutout risk.
+  - *Evidence*: Al Orobah FC away scoring average is 0.67 GF/game, placing heavy reliance on Al Ula FC to produce goals.
+- **`STRONG_DEFENSIVE_MATCHUP`** [HIGH] (CONTRADICTORY / DIRECT): Both teams maintain exceptionally tight defensive records.
+  - *Evidence*: Al Ula FC concedes 0.33 GA/game and Al Orobah FC concedes 0.67 GA/game, elevating 0-0 and 1-0 probability.
+- **`TEAM_NEWS_UNVERIFIED`** [LOW] (NEUTRAL / CONTEXTUAL): Pre-match team news and confirmed starting lineups remain unverified.
+  - *Evidence*: Lineups have not been locked in; rotation or late injury risk unconfirmed.
+
+### Final Decision Verdict: **NO BET**
+> NO BET. Model estimates an 52.4% Over 1.5 probability versus bookmaker break-even of 82.0% at 1.22 odds (-29.5 edge, -0.360 EV). Estimated Over 1.5 probability (52.4%) is well below the 70% threshold for the Over 1.5 strategy.
+
+---
+
 ## Summary Decision Table (Dual-Baseline Overview)
 
 | Match | Market & Odds | Roy's Prob (Cur) | Hist. Prob | Alignment (Delta & Remark) | Edge (pp) & Remark | EV | Verdict | Warnings Summary |
@@ -840,3 +1305,12 @@
 | **CA Nacional Potosí vs Guabirá** | Over 1.5 @ 1.12 | **91.1%** | 91.4% | 0.3 pp (`very_high`) | +1.8 (`medium`) | +0.020 | **SELECT** | `TEAM_NEWS_UNVERIFIED` |
 | **Lokomotiv Plovdiv vs PFK Slavia Sofia** | Over 1.5 @ 1.50 | **41.3%** | 40.7% | 0.6 pp (`very_high`) | -25.3 (`very_low`) | -0.380 | **NO BET** | `TEAM_NEWS_UNVERIFIED` |
 | **CSKA Sofia vs PFC Ludogorets Razgrad** | Over 1.5 @ 1.27 | **83.0%** | 83.0% | 0.1 pp (`very_high`) | +4.3 (`medium`) | +0.054 | **CAUTION** | `SMALL_SAMPLE`, `STRONG_DEFENSIVE_MATCHUP`, `TEAM_NEWS_UNVERIFIED` |
+| **Nea Salamina vs Pafos FC** | Over 1.5 @ 1.21 | **96.5%** | 96.9% | 0.3 pp (`very_high`) | +13.9 (`high`) | +0.168 | **CAUTION** | `SMALL_SAMPLE`, `LOW_HOME_SCORING`, `TEAM_NEWS_UNVERIFIED` |
+| **AEK Larnaca vs Omonia Nicosia** | Over 1.5 @ 1.23 | **75.4%** | 74.9% | 0.5 pp (`very_high`) | -5.9 (`low`) | -0.073 | **CAUTION** | `SMALL_SAMPLE`, `TEAM_NEWS_UNVERIFIED` |
+| **FC Copenhagen vs Odense BK** | Over 1.5 @ 1.17 | **83.5%** | 84.7% | 1.2 pp (`very_high`) | -2.0 (`low`) | -0.023 | **CAUTION** | `LOW_AWAY_SCORING`, `TEAM_NEWS_UNVERIFIED` |
+| **Mosta FC vs Hibernians FC** | Over 1.5 @ 1.25 | **68.5%** | 69.6% | 1.0 pp (`very_high`) | -11.5 (`very_low`) | -0.143 | **NO BET** | `SMALL_SAMPLE`, `TEAM_NEWS_UNVERIFIED` |
+| **Warta Poznan vs LKS Lodz** | Over 1.5 @ 1.25 | **72.7%** | 73.9% | 1.1 pp (`very_high`) | -7.3 (`low`) | -0.091 | **CAUTION** | `TEAM_NEWS_UNVERIFIED` |
+| **ACS Sepsi OSK vs Universitatea Craiova** | Over 1.5 @ 1.27 | **76.6%** | 75.7% | 0.8 pp (`very_high`) | -2.2 (`low`) | -0.028 | **CAUTION** | `TEAM_NEWS_UNVERIFIED` |
+| **Al Bukayriyah vs Hajer FC** | Over 1.5 @ 1.33 | **51.5%** | 49.2% | 2.2 pp (`high`) | -23.7 (`very_low`) | -0.315 | **NO BET** | `SMALL_SAMPLE`, `LOW_AWAY_SCORING`, `LOW_HOME_SCORING`, `TEAM_NEWS_UNVERIFIED` |
+| **Al Anwar vs Al Akhdoud** | Over 1.5 @ 1.28 | **64.7%** | 62.6% | 2.1 pp (`high`) | -13.4 (`very_low`) | -0.172 | **NO BET** | `SMALL_SAMPLE`, `TEAM_NEWS_UNVERIFIED` |
+| **Al Ula FC vs Al Orobah FC** | Over 1.5 @ 1.22 | **52.4%** | 50.4% | 2.1 pp (`high`) | -29.5 (`very_low`) | -0.360 | **NO BET** | `SMALL_SAMPLE`, `LOW_AWAY_SCORING`, `STRONG_DEFENSIVE_MATCHUP`, `TEAM_NEWS_UNVERIFIED` |
