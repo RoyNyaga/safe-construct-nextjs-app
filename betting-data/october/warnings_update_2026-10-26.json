@@ -1,0 +1,48 @@
+{
+  "operation": "warning_post_match_update",
+  "schema_version": "1.0",
+  "updates": [
+    {
+      "warning_id": "aee13496-9d91-487f-8e26-43ae0c966c11",
+      "post_match_status": "NOT_CONFIRMED",
+      "evidence_assessment": "CONTRADICTED",
+      "confidence": "HIGH",
+      "review_notes": "Small-sample volatility did not materialize; Sevilla scored twice to secure a 2-0 victory, comfortably landing the Over 1.5 selection."
+    },
+    {
+      "warning_id": "25a4c9ac-9f72-437f-82ec-82e6d00598f5",
+      "post_match_status": "NOT_CONFIRMED",
+      "evidence_assessment": "CONTRADICTED",
+      "confidence": "MEDIUM",
+      "review_notes": "Starting lineups featured standard primary attackers with no disruptive absences, allowing regular goal expectations to unfold."
+    },
+    {
+      "warning_id": "31c2d4d0-26bf-47a0-9279-4e8c65150b46",
+      "post_match_status": "NOT_CONFIRMED",
+      "evidence_assessment": "CONTRADICTED",
+      "confidence": "MEDIUM",
+      "review_notes": "Nacional Potosí deployed their standard first-choice squad at altitude, controlling the match for a 2-0 victory with no lineup interference."
+    },
+    {
+      "warning_id": "7d69daf2-225a-478c-aac1-8c7f4cf7c93f",
+      "post_match_status": "CONFIRMED",
+      "evidence_assessment": "SUPPORTED",
+      "confidence": "HIGH",
+      "review_notes": "Early-season sample volatility proved decisive; Pafos's unrepresentative early away scoring run failed to hold against a compact defense, resulting in a 0-0 stalemate."
+    },
+    {
+      "warning_id": "8535b0de-9e91-4a84-987d-020e207cb7f6",
+      "post_match_status": "CONFIRMED",
+      "evidence_assessment": "SUPPORTED",
+      "confidence": "HIGH",
+      "review_notes": "Nea Salamina's severe home attacking deficiency materialized fully with 0 goals scored, leaving no margin for error and contributing directly to the 0-0 failure."
+    },
+    {
+      "warning_id": "9d9570ed-26e1-4008-896b-05d3cf34707c",
+      "post_match_status": "INCONCLUSIVE",
+      "evidence_assessment": "PARTIAL",
+      "confidence": "MEDIUM",
+      "review_notes": "Tactical low-block containment by Nea Salamina was the primary factor in the 0-0 draw rather than unexpected lineup omissions."
+    }
+  ]
+}
