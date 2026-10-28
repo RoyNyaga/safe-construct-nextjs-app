@@ -1,0 +1,160 @@
+{
+  "operation": "warning_post_match_update",
+  "schema_version": "1.0",
+  "updates": [
+    {
+      "warning_id": "e975cec8-224a-421e-91d6-3d50e2939275",
+      "post_match_status": "INCONCLUSIVE",
+      "evidence_assessment": "PARTIAL",
+      "confidence": "MEDIUM",
+      "review_notes": "Starting lineups were standard, but Rivadavia deployed an ultra-compact low block that limited Argentinos Juniors to a single goal in a 1-0 result."
+    },
+    {
+      "warning_id": "9a95f271-8aca-406e-90ec-2d6d695ac572",
+      "post_match_status": "INCONCLUSIVE",
+      "evidence_assessment": "PARTIAL",
+      "confidence": "MEDIUM",
+      "review_notes": "Regular squad members started; Caracas scored early and retreated into a disciplined defensive shell, restricting the game to 0-1."
+    },
+    {
+      "warning_id": "04a6e557-e7f6-4ecc-88d6-a1eee2f27e8d",
+      "post_match_status": "NOT_CONFIRMED",
+      "evidence_assessment": "CONTRADICTED",
+      "confidence": "HIGH",
+      "review_notes": "Sample volatility did not suppress attacking output; Roma dominated offensive transitions to deliver a 4-2 goalfest (6 total goals)."
+    },
+    {
+      "warning_id": "bb06e306-b068-477b-a715-4f5b509d32a2",
+      "post_match_status": "NOT_CONFIRMED",
+      "evidence_assessment": "CONTRADICTED",
+      "confidence": "MEDIUM",
+      "review_notes": "Primary starting forwards were fully available and drove early offensive output."
+    },
+    {
+      "warning_id": "4375e8e0-1016-4fd2-87a7-8d68f5a8af07",
+      "post_match_status": "NOT_CONFIRMED",
+      "evidence_assessment": "CONTRADICTED",
+      "confidence": "HIGH",
+      "review_notes": "Small sample variance did not restrict scoring; Al Tai maintained their home average by scoring two unanswered goals."
+    },
+    {
+      "warning_id": "34558ce3-ed37-44ca-9413-2901a5dc4405",
+      "post_match_status": "CONFIRMED",
+      "evidence_assessment": "SUPPORTED",
+      "confidence": "HIGH",
+      "review_notes": "Jeddah Club's road offensive drought materialized as they were shut out 0-2; Al Tai single-handedly landed the Over 1.5 line."
+    },
+    {
+      "warning_id": "ddb5aff5-906d-4432-9d15-bbd70e53e030",
+      "post_match_status": "NOT_CONFIRMED",
+      "evidence_assessment": "CONTRADICTED",
+      "confidence": "MEDIUM",
+      "review_notes": "Standard starting lineups featured with no disruptive late scratches or tactical shifts."
+    },
+    {
+      "warning_id": "f53e37f6-adf3-4a30-8329-acd52988cf3d",
+      "post_match_status": "NOT_CONFIRMED",
+      "evidence_assessment": "CONTRADICTED",
+      "confidence": "HIGH",
+      "review_notes": "Small sample size presented no risk to goal scoring; an extraordinary 8-goal encounter materialized (2-6)."
+    },
+    {
+      "warning_id": "39474738-294d-415b-844d-d42d8721068b",
+      "post_match_status": "NOT_CONFIRMED",
+      "evidence_assessment": "CONTRADICTED",
+      "confidence": "HIGH",
+      "review_notes": "Both managers deployed standard attacking personnel, leading to rapid end-to-end chances."
+    },
+    {
+      "warning_id": "b3b7954d-1b68-47ea-926a-4e335d543d16",
+      "post_match_status": "NOT_CONFIRMED",
+      "evidence_assessment": "CONTRADICTED",
+      "confidence": "HIGH",
+      "review_notes": "Sample limitations did not prevent the fixture from reaching the 2-goal minimum required for Over 1.5."
+    },
+    {
+      "warning_id": "1aea6815-f595-48e7-9720-68d782744d00",
+      "post_match_status": "CONFIRMED",
+      "evidence_assessment": "SUPPORTED",
+      "confidence": "HIGH",
+      "review_notes": "Defensive strength on both sides suppressed open play; the game finished in a tight 1-1 draw, landing the Over 1.5 on the minimum required margin."
+    },
+    {
+      "warning_id": "9fa99332-728d-4239-a729-388967587eb8",
+      "post_match_status": "NOT_CONFIRMED",
+      "evidence_assessment": "CONTRADICTED",
+      "confidence": "MEDIUM",
+      "review_notes": "Standard starting compositions were deployed with defensive units intact."
+    },
+    {
+      "warning_id": "49e4d3ce-f8a9-42f2-89aa-3bf6a45be316",
+      "post_match_status": "NOT_CONFIRMED",
+      "evidence_assessment": "PARTIAL",
+      "confidence": "MEDIUM",
+      "review_notes": "Small sample instability obscured Al Adalah's home scoring vulnerability, resulting in a 0-1 shutout defeat."
+    },
+    {
+      "warning_id": "7336ef29-64fa-4e8a-b54d-4250e2ef3731",
+      "post_match_status": "NOT_CONFIRMED",
+      "evidence_assessment": "CONTRADICTED",
+      "confidence": "HIGH",
+      "review_notes": "Al Jeel defied their scoring drought by finding the net; however, Al Adalah unexpectedly failed to score, resulting in a 0-1 loss for Over 1.5."
+    },
+    {
+      "warning_id": "02ab6d55-a959-4197-a738-edcabc107447",
+      "post_match_status": "INCONCLUSIVE",
+      "evidence_assessment": "PARTIAL",
+      "confidence": "MEDIUM",
+      "review_notes": "Tactical caution dominated the game, with Al Jeel protecting an early lead to secure a low-event 0-1 win."
+    },
+    {
+      "warning_id": "201b3bbb-f285-4fa3-9568-9de1613c433d",
+      "post_match_status": "NOT_CONFIRMED",
+      "evidence_assessment": "CONTRADICTED",
+      "confidence": "HIGH",
+      "review_notes": "Small venue sample did not suppress attacking opportunities; Borneo FC secured a 1-2 road win with 3 total goals."
+    },
+    {
+      "warning_id": "f0e37bec-73f8-4afe-b1e6-7a6b3e069d89",
+      "post_match_status": "NOT_CONFIRMED",
+      "evidence_assessment": "CONTRADICTED",
+      "confidence": "MEDIUM",
+      "review_notes": "Regular starting elevens took the field, facilitating open match transitions."
+    },
+    {
+      "warning_id": "8ce003c2-2822-4f23-8c85-3fa69bd4ccdf",
+      "post_match_status": "NOT_CONFIRMED",
+      "evidence_assessment": "CONTRADICTED",
+      "confidence": "HIGH",
+      "review_notes": "Extreme early-season sample volatility did not impede goals; both clubs converted their opportunities in a 1-1 draw."
+    },
+    {
+      "warning_id": "6ef7ab60-fb93-479a-b83b-62990220ddca",
+      "post_match_status": "NOT_CONFIRMED",
+      "evidence_assessment": "CONTRADICTED",
+      "confidence": "MEDIUM",
+      "review_notes": "Both clubs fielded standard squads with no administrative or squad irregularities."
+    },
+    {
+      "warning_id": "93928b19-8172-4d72-bfb5-6fffa1dddbf2",
+      "post_match_status": "NOT_CONFIRMED",
+      "evidence_assessment": "CONTRADICTED",
+      "confidence": "MEDIUM",
+      "review_notes": "Starting elevens featured first-choice personnel; an intense 1-1 battle produced 2 goals to satisfy Over 1.5."
+    },
+    {
+      "warning_id": "8865c047-36af-45c7-8f2c-e29ef79f4118",
+      "post_match_status": "NOT_CONFIRMED",
+      "evidence_assessment": "CONTRADICTED",
+      "confidence": "HIGH",
+      "review_notes": "Sample limitations did not hinder goals; Al-Wehda won 2-1 in an open 3-goal match."
+    },
+    {
+      "warning_id": "cf53b663-a015-453e-b9fe-8ce6ee0249d9",
+      "post_match_status": "NOT_CONFIRMED",
+      "evidence_assessment": "CONTRADICTED",
+      "confidence": "MEDIUM",
+      "review_notes": "Regular starting lineups featured; key creators were active and converted opportunities."
+    }
+  ]
+}

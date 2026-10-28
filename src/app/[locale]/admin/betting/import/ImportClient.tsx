@@ -235,6 +235,12 @@ export default function ImportClient({
   const [snapshotSelection, setSnapshotSelection] = useState<TicketImportJSON['selections'][number] | null>(null)
   const [snapshotAlternative, setSnapshotAlternative] = useState<NonNullable<TicketImportJSON['alternatives']>[number] | null>(null)
 
+  // Controlled Preview Overrides (guarantees that any edit made in preview is strictly used on submission)
+  const [previewStake, setPreviewStake] = useState<number | ''>('')
+  const [previewTicketNumber, setPreviewTicketNumber] = useState<string>('')
+  const [previewDate, setPreviewDate] = useState<string>('')
+  const [previewNotes, setPreviewNotes] = useState<string>('')
+
   // Group warnings per match for the import preview
   const groupedDetectedWarnings = useMemo(() => {
     if (!parsedPayload) return []
@@ -403,6 +409,13 @@ export default function ImportClient({
         obj.ticket.ticket_number = autoNum
       }
 
+      // Initialize preview controlled states with parsed values
+      const initialStake = obj.ticket?.stake !== undefined && obj.ticket?.stake !== null ? Number(obj.ticket.stake) : 0
+      setPreviewStake(initialStake)
+      setPreviewTicketNumber(obj.ticket?.ticket_number || '')
+      setPreviewDate(obj.ticket?.date || new Date().toISOString().split('T')[0])
+      setPreviewNotes(obj.ticket?.notes || '')
+
       setParsedPayload(obj as TicketImportJSON)
 
       setNotification({
@@ -443,51 +456,117 @@ export default function ImportClient({
     if (res && res.ticketNumber) {
       setTicketSuggestion(res)
       setTicketType(targetType)
-      if (parsedPayload) {
-        setParsedPayload({
-          ...parsedPayload,
+      setPreviewTicketNumber(res.ticketNumber)
+      setParsedPayload((prev) => {
+        if (!prev) return null
+        const updated: TicketImportJSON = {
+          ...prev,
           ticket: {
-            ...parsedPayload.ticket,
+            ...prev.ticket,
             ticket_number: res.ticketNumber,
           },
-        })
-      }
+        }
+        setJsonText(JSON.stringify(updated, null, 2))
+        return updated
+      })
     }
   }
 
   // Update ticket number directly in preview
   const handleUpdateTicketNumber = (val: string) => {
-    if (!parsedPayload) return
-    setParsedPayload({
-      ...parsedPayload,
-      ticket: {
-        ...parsedPayload.ticket,
-        ticket_number: val,
-      },
+    setPreviewTicketNumber(val)
+    setParsedPayload((prev) => {
+      if (!prev) return null
+      const updated: TicketImportJSON = {
+        ...prev,
+        ticket: {
+          ...prev.ticket,
+          ticket_number: val,
+        },
+      }
+      setJsonText(JSON.stringify(updated, null, 2))
+      return updated
+    })
+  }
+
+  // Update ticket date directly in preview
+  const handleUpdateDate = (val: string) => {
+    setPreviewDate(val)
+    setParsedPayload((prev) => {
+      if (!prev) return null
+      const updated: TicketImportJSON = {
+        ...prev,
+        ticket: {
+          ...prev.ticket,
+          date: val,
+        },
+      }
+      setJsonText(JSON.stringify(updated, null, 2))
+      return updated
+    })
+  }
+
+  // Update ticket notes directly in preview
+  const handleUpdateNotes = (val: string) => {
+    setPreviewNotes(val)
+    setParsedPayload((prev) => {
+      if (!prev) return null
+      const updated: TicketImportJSON = {
+        ...prev,
+        ticket: {
+          ...prev.ticket,
+          notes: val,
+        },
+      }
+      setJsonText(JSON.stringify(updated, null, 2))
+      return updated
     })
   }
 
   // Handle model change and refresh ticket number suggestion
   const handleModelChange = async (newModelUuid: string) => {
     setSelectedModelUuid(newModelUuid)
+    const selectedModel = models.find((m) => m.uuid === newModelUuid)
     const res = await getModelTicketNumberSuggestion({
       modelUuid: newModelUuid,
       type: ticketType,
     })
     if (res && res.ticketNumber) {
       setTicketSuggestion(res)
-      if (parsedPayload) {
-        const currentNum = parsedPayload.ticket.ticket_number || ''
-        if (!currentNum || currentNum.startsWith('S-') || currentNum.startsWith('A-') || currentNum === '001') {
-          setParsedPayload({
-            ...parsedPayload,
-            ticket: {
-              ...parsedPayload.ticket,
-              ticket_number: res.ticketNumber,
-            },
-          })
+      setParsedPayload((prev) => {
+        if (!prev) return null
+        const currentNum = prev.ticket.ticket_number || ''
+        const shouldUpdateNum = !currentNum || currentNum.startsWith('S-') || currentNum.startsWith('A-') || currentNum === '001'
+        const newNum = shouldUpdateNum ? res.ticketNumber : currentNum
+        if (shouldUpdateNum) {
+          setPreviewTicketNumber(newNum)
         }
-      }
+        const updated: TicketImportJSON = {
+          ...prev,
+          ticket: {
+            ...prev.ticket,
+            model_uuid: newModelUuid,
+            ...(selectedModel ? { model_version: selectedModel.version, model_name: selectedModel.name } : {}),
+            ticket_number: newNum,
+          },
+        }
+        setJsonText(JSON.stringify(updated, null, 2))
+        return updated
+      })
+    } else {
+      setParsedPayload((prev) => {
+        if (!prev) return null
+        const updated: TicketImportJSON = {
+          ...prev,
+          ticket: {
+            ...prev.ticket,
+            model_uuid: newModelUuid,
+            ...(selectedModel ? { model_version: selectedModel.version, model_name: selectedModel.name } : {}),
+          },
+        }
+        setJsonText(JSON.stringify(updated, null, 2))
+        return updated
+      })
     }
   }
 
@@ -496,6 +575,10 @@ export default function ImportClient({
     setJsonText(JSON.stringify(sampleJson, null, 2))
     setParseError(null)
     setParsedPayload(sampleJson)
+    setPreviewStake(sampleJson.ticket.stake ?? 100)
+    setPreviewTicketNumber(sampleJson.ticket.ticket_number ?? '')
+    setPreviewDate(sampleJson.ticket.date ?? '2026-10-20')
+    setPreviewNotes(sampleJson.ticket.notes ?? '')
 
     if (activeModel) {
       setSelectedModelUuid(activeModel.uuid)
@@ -580,99 +663,129 @@ ${JSON.stringify(sampleJson, null, 2)}`
     setJsonText('')
     setParsedPayload(null)
     setParseError(null)
+    setPreviewStake('')
+    setPreviewTicketNumber('')
+    setPreviewDate('')
+    setPreviewNotes('')
   }
 
   // Delete a selection from preview & recalculate dependent metrics
   const handleDeleteSelection = (indexToDelete: number) => {
-    if (!parsedPayload) return
+    setParsedPayload((prev) => {
+      if (!prev) return null
 
-    if (parsedPayload.selections.length <= 1) {
+      if (prev.selections.length <= 1) {
+        setNotification({
+          open: true,
+          message:
+            locale === 'fr'
+              ? 'Un ticket doit contenir au moins une sélection.'
+              : 'A ticket must contain at least one selection.',
+          type: 'error',
+        })
+        return prev
+      }
+
+      const targetSel = prev.selections[indexToDelete]
+      const remainingSelections = prev.selections.filter((_, i) => i !== indexToDelete)
+
+      // Recalculate combined_odds: product of remaining selections' odds
+      const newCombinedOdds =
+        remainingSelections.length > 0
+          ? Number(remainingSelections.reduce((acc, s) => acc * (Number(s.odds) || 1), 1).toFixed(2))
+          : 0
+
+      // Recalculate estimated_ticket_probability: product of remaining selections' estimated_probability
+      const newEstimatedProb =
+        remainingSelections.length > 0
+          ? Number(
+              remainingSelections.reduce(
+                (acc, s) => acc * (Number(s.estimated_probability) || 1),
+                1
+              ).toFixed(3)
+            )
+          : 0
+
+      // Clean any legacy top-level warnings associated with this selection
+      const remainingLegacyWarnings = prev.warnings?.filter((w) => {
+        if (!w.selection_reference) return true
+        return !(
+          w.selection_reference.home_team === targetSel.home_team &&
+          w.selection_reference.away_team === targetSel.away_team
+        )
+      })
+
+      const effectiveStake =
+        previewStake !== '' && !isNaN(Number(previewStake))
+          ? Number(previewStake)
+          : prev.ticket.stake
+
+      const effectiveTicketNumber =
+        previewTicketNumber.trim() !== ''
+          ? previewTicketNumber.trim()
+          : prev.ticket.ticket_number
+
+      const effectiveDate = previewDate || prev.ticket.date
+      const effectiveNotes = previewNotes !== undefined ? previewNotes : prev.ticket.notes
+
+      const updatedPayload: TicketImportJSON = {
+        ...prev,
+        ticket: {
+          ...prev.ticket,
+          stake: effectiveStake,
+          ticket_number: effectiveTicketNumber,
+          date: effectiveDate,
+          notes: effectiveNotes,
+          combined_odds: newCombinedOdds,
+          estimated_ticket_probability: newEstimatedProb,
+        },
+        selections: remainingSelections,
+        ...(remainingLegacyWarnings ? { warnings: remainingLegacyWarnings } : {}),
+      }
+
+      setJsonText(JSON.stringify(updatedPayload, null, 2))
+
+      // Close drawer if it was showing this selection
+      if (
+        snapshotSelection &&
+        snapshotSelection.home_team === targetSel.home_team &&
+        snapshotSelection.away_team === targetSel.away_team
+      ) {
+        setSnapshotSelection(null)
+      }
+
       setNotification({
         open: true,
         message:
           locale === 'fr'
-            ? 'Un ticket doit contenir au moins une sélection.'
-            : 'A ticket must contain at least one selection.',
-        type: 'error',
+            ? `Sélection "${targetSel.home_team} vs ${targetSel.away_team}" retirée. Cote (${newCombinedOdds}) et probabilité (${(newEstimatedProb * 100).toFixed(1)}%) recalculées.`
+            : `Selection "${targetSel.home_team} vs ${targetSel.away_team}" removed. Combined odds (${newCombinedOdds}) and probability (${(newEstimatedProb * 100).toFixed(1)}%) recalculated.`,
+        type: 'info',
       })
-      return
-    }
 
-    const targetSel = parsedPayload.selections[indexToDelete]
-    const remainingSelections = parsedPayload.selections.filter((_, i) => i !== indexToDelete)
-
-    // Recalculate combined_odds: product of remaining selections' odds
-    const newCombinedOdds =
-      remainingSelections.length > 0
-        ? Number(remainingSelections.reduce((acc, s) => acc * (Number(s.odds) || 1), 1).toFixed(2))
-        : 0
-
-    // Recalculate estimated_ticket_probability: product of remaining selections' estimated_probability
-    const newEstimatedProb =
-      remainingSelections.length > 0
-        ? Number(
-            remainingSelections.reduce(
-              (acc, s) => acc * (Number(s.estimated_probability) || 1),
-              1
-            ).toFixed(3)
-          )
-        : 0
-
-    // Clean any legacy top-level warnings associated with this selection
-    const remainingLegacyWarnings = parsedPayload.warnings?.filter((w) => {
-      if (!w.selection_reference) return true
-      return !(
-        w.selection_reference.home_team === targetSel.home_team &&
-        w.selection_reference.away_team === targetSel.away_team
-      )
-    })
-
-    const updatedPayload: TicketImportJSON = {
-      ...parsedPayload,
-      ticket: {
-        ...parsedPayload.ticket,
-        combined_odds: newCombinedOdds,
-        estimated_ticket_probability: newEstimatedProb,
-      },
-      selections: remainingSelections,
-      ...(remainingLegacyWarnings ? { warnings: remainingLegacyWarnings } : {}),
-    }
-
-    setParsedPayload(updatedPayload)
-    setJsonText(JSON.stringify(updatedPayload, null, 2))
-
-    // Close drawer if it was showing this selection
-    if (
-      snapshotSelection &&
-      snapshotSelection.home_team === targetSel.home_team &&
-      snapshotSelection.away_team === targetSel.away_team
-    ) {
-      setSnapshotSelection(null)
-    }
-
-    setNotification({
-      open: true,
-      message:
-        locale === 'fr'
-          ? `Sélection "${targetSel.home_team} vs ${targetSel.away_team}" retirée. Cote (${newCombinedOdds}) et probabilité (${(newEstimatedProb * 100).toFixed(1)}%) recalculées.`
-          : `Selection "${targetSel.home_team} vs ${targetSel.away_team}" removed. Combined odds (${newCombinedOdds}) and probability (${(newEstimatedProb * 100).toFixed(1)}%) recalculated.`,
-      type: 'info',
+      return updatedPayload
     })
   }
 
   // Update stake in preview
-  const handleUpdateStake = (newStake: number) => {
-    if (!parsedPayload) return
-    const safeStake = isNaN(newStake) || newStake < 0 ? 0 : newStake
-    const updatedPayload: TicketImportJSON = {
-      ...parsedPayload,
-      ticket: {
-        ...parsedPayload.ticket,
-        stake: safeStake,
-      },
+  const handleUpdateStake = (val: string | number) => {
+    const parsedVal = val === '' ? '' : (isNaN(Number(val)) ? '' : Number(val))
+    setPreviewStake(parsedVal)
+    const num = Number(val)
+    if (!isNaN(num) && num >= 0) {
+      setParsedPayload((prev) => {
+        if (!prev) return null
+        const updatedPayload: TicketImportJSON = {
+          ...prev,
+          ticket: {
+            ...prev.ticket,
+            stake: num,
+          },
+        }
+        setJsonText(JSON.stringify(updatedPayload, null, 2))
+        return updatedPayload
+      })
     }
-    setParsedPayload(updatedPayload)
-    setJsonText(JSON.stringify(updatedPayload, null, 2))
   }
 
   // Submit and create ticket
@@ -681,11 +794,28 @@ ${JSON.stringify(sampleJson, null, 2)}`
 
     setIsSubmitting(true)
 
-    // Ensure target model UUID is explicitly linked
+    const effectiveStake =
+      previewStake !== '' && !isNaN(Number(previewStake))
+        ? Number(previewStake)
+        : parsedPayload.ticket.stake
+
+    const effectiveTicketNumber =
+      previewTicketNumber.trim() !== ''
+        ? previewTicketNumber.trim()
+        : parsedPayload.ticket.ticket_number
+
+    const effectiveDate = previewDate || parsedPayload.ticket.date
+    const effectiveNotes = previewNotes !== undefined ? previewNotes : parsedPayload.ticket.notes
+
+    // Ensure target model UUID and preview edited values are explicitly linked
     const finalPayload: TicketImportJSON = {
       ...parsedPayload,
       ticket: {
         ...parsedPayload.ticket,
+        stake: effectiveStake,
+        ticket_number: effectiveTicketNumber,
+        date: effectiveDate,
+        notes: effectiveNotes,
         ...(selectedModelUuid ? { model_uuid: selectedModelUuid } : {}),
       },
     }
@@ -855,11 +985,29 @@ ${JSON.stringify(sampleJson, null, 2)}`
       {/* ─── LIVE PREVIEW SECTION ──────────────────────────────────────────── */}
       {parsedPayload && (
         <Box sx={{ mb: 4 }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
-            <CheckCircle2 size={20} color="#66BB6A" />
-            <Typography variant="h5" sx={{ fontWeight: 800 }}>
-              {locale === 'fr' ? 'Aperçu du Ticket' : 'Ticket Preview'}
-            </Typography>
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2, flexWrap: 'wrap', gap: 1 }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              <CheckCircle2 size={20} color="#66BB6A" />
+              <Typography variant="h5" sx={{ fontWeight: 800 }}>
+                {locale === 'fr' ? 'Aperçu du Ticket' : 'Ticket Preview'}
+              </Typography>
+            </Box>
+            <LoadingButton
+              variant="contained"
+              loading={isSubmitting}
+              onClick={handleSubmit}
+              startIcon={<Send size={18} />}
+              sx={{
+                backgroundColor: '#66BB6A',
+                color: '#FFFFFF',
+                fontWeight: 700,
+                px: 3,
+                boxShadow: '0 4px 14px rgba(102, 187, 106, 0.35)',
+                '&:hover': { backgroundColor: '#43A047' },
+              }}
+            >
+              {locale === 'fr' ? 'Créer le Ticket Définitivement' : 'Create & Save Ticket'}
+            </LoadingButton>
           </Box>
 
           {/* Ticket Header Metadata */}
@@ -934,7 +1082,7 @@ ${JSON.stringify(sampleJson, null, 2)}`
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                     <TextField
                       size="small"
-                      value={parsedPayload.ticket.ticket_number ?? ''}
+                      value={previewTicketNumber}
                       onChange={(e) => handleUpdateTicketNumber(e.target.value)}
                       placeholder={ticketSuggestion?.nextSelectionTicketNumber || 'S-21-v2.1'}
                       slotProps={{
@@ -994,14 +1142,32 @@ ${JSON.stringify(sampleJson, null, 2)}`
                       : `A: ${ticketSuggestion?.alternativeCount ?? 0} alternatives existantes + 1 = #${ticketSuggestion?.nextAlternativeTicketNumber || 'A-8-v2.1'}`}
                   </Typography>
                 </Grid>
-                <Grid size={{ xs: 6, sm: 1.8 }}>
-                  <Typography variant="caption" color="text.secondary">Date</Typography>
-                  <Typography variant="h6" sx={{ fontWeight: 700 }}>
-                    {parsedPayload.ticket.date || 'Today'}
+                <Grid size={{ xs: 6, sm: 2.0 }}>
+                  <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 700 }}>
+                    {locale === 'fr' ? 'Date (Éditable)' : 'Date (Editable)'}
                   </Typography>
+                  <TextField
+                    type="date"
+                    size="small"
+                    value={previewDate}
+                    onChange={(e) => handleUpdateDate(e.target.value)}
+                    slotProps={{
+                      input: {
+                        sx: {
+                          fontWeight: 700,
+                          fontSize: '0.85rem',
+                          backgroundColor: alpha('#121824', 0.8),
+                          borderRadius: 1.5,
+                          height: 38,
+                          mt: 0.5,
+                        },
+                      },
+                    }}
+                    fullWidth
+                  />
                 </Grid>
-                <Grid size={{ xs: 6, sm: 3.0 }}>
-                  <Typography variant="caption" color="text.secondary">
+                <Grid size={{ xs: 6, sm: 2.8 }}>
+                  <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 700 }}>
                     {locale === 'fr' ? 'Modèle Statistique Associé' : 'Associated Model'}
                   </Typography>
                   {models.length > 0 ? (
@@ -1015,6 +1181,7 @@ ${JSON.stringify(sampleJson, null, 2)}`
                           fontWeight: 700,
                           color: '#F6AE2D',
                           borderRadius: 1.5,
+                          height: 38,
                         }}
                       >
                         {models.map((m) => (
@@ -1046,7 +1213,7 @@ ${JSON.stringify(sampleJson, null, 2)}`
                       <Typography variant="caption" color="text.secondary">
                         {locale === 'fr' ? 'Gain Potentiel' : 'Est. Return'}:{' '}
                         <span style={{ color: '#F6AE2D', fontWeight: 800 }}>
-                          {formatCurrency((parsedPayload.ticket.stake || 0) * (parsedPayload.ticket.combined_odds || 0), currency)}
+                          {formatCurrency((Number(previewStake) || 0) * (parsedPayload.ticket.combined_odds || 0), currency)}
                         </span>
                       </Typography>
                     </Box>
@@ -1054,8 +1221,8 @@ ${JSON.stringify(sampleJson, null, 2)}`
                       <TextField
                         type="number"
                         size="small"
-                        value={parsedPayload.ticket.stake ?? ''}
-                        onChange={(e) => handleUpdateStake(Number(e.target.value))}
+                        value={previewStake}
+                        onChange={(e) => handleUpdateStake(e.target.value)}
                         slotProps={{
                           input: {
                             startAdornment: (
@@ -1096,14 +1263,34 @@ ${JSON.stringify(sampleJson, null, 2)}`
                 </Grid>
               </Grid>
 
-              {parsedPayload.ticket.notes && (
-                <Box sx={{ mt: 2, pt: 2, borderTop: (theme) => `1px solid ${alpha(theme.palette.divider, 1)}` }}>
-                  <Typography variant="caption" color="text.secondary">Notes:</Typography>
-                  <Typography variant="body2" sx={{ fontStyle: 'italic', mt: 0.25 }}>
-                    "{parsedPayload.ticket.notes}"
+              {/* Editable Notes Section */}
+              <Box sx={{ mt: 2, pt: 2, borderTop: (theme) => `1px solid ${alpha(theme.palette.divider, 1)}` }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 0.5 }}>
+                  <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 700 }}>
+                    {locale === 'fr' ? 'Notes du Ticket (Éditable)' : 'Ticket Notes (Editable)'}:
                   </Typography>
                 </Box>
-              )}
+                <TextField
+                  fullWidth
+                  multiline
+                  minRows={1}
+                  maxRows={3}
+                  size="small"
+                  value={previewNotes}
+                  onChange={(e) => handleUpdateNotes(e.target.value)}
+                  placeholder={locale === 'fr' ? 'Notes analytiques sur ce ticket...' : 'Analytical notes for this ticket...'}
+                  slotProps={{
+                    input: {
+                      sx: {
+                        fontSize: '0.85rem',
+                        fontStyle: 'italic',
+                        backgroundColor: alpha('#121824', 0.6),
+                        borderRadius: 1.5,
+                      },
+                    },
+                  }}
+                />
+              </Box>
             </CardContent>
           </Card>
 
