@@ -1,0 +1,48 @@
+{
+  "operation": "warning_post_match_update",
+  "schema_version": "1.0",
+  "updates": [
+    {
+      "warning_id": "9892d9b6-d2c3-44e1-bcea-c9c0aca1c15f",
+      "post_match_status": "NOT_CONFIRMED",
+      "evidence_assessment": "CONTRADICTED",
+      "confidence": "HIGH",
+      "review_notes": "Radomlje found the net in a 1-1 draw, and total match goals reached 2, safely clearing the Over 1.5 threshold."
+    },
+    {
+      "warning_id": "4c4c30f0-258b-424f-8cd8-223d2d0d9b2c",
+      "post_match_status": "NOT_CONFIRMED",
+      "evidence_assessment": "CONTRADICTED",
+      "confidence": "MEDIUM",
+      "review_notes": "Lineups featured normal starting compositions with no disruptive late absences or tactical interference."
+    },
+    {
+      "warning_id": "59ca1551-9920-4973-8342-450fe52803b5",
+      "post_match_status": "NOT_CONFIRMED",
+      "evidence_assessment": "CONTRADICTED",
+      "confidence": "HIGH",
+      "review_notes": "Sample volatility did not materialize as an issue; Como's potent road attack delivered 3 goals and Torino scored 1 in an open 1-3 match."
+    },
+    {
+      "warning_id": "dde3a88f-2910-40ac-9d9c-58bd22a77c5c",
+      "post_match_status": "NOT_CONFIRMED",
+      "evidence_assessment": "CONTRADICTED",
+      "confidence": "HIGH",
+      "review_notes": "Key attacking starters (Che Adams for Torino; Nico Paz and Ramón for Como) played and drove a 4-goal contest."
+    },
+    {
+      "warning_id": "40e7286a-d2cc-4e18-b52e-3f87d66a2288",
+      "post_match_status": "CONFIRMED",
+      "evidence_assessment": "SUPPORTED",
+      "confidence": "HIGH",
+      "review_notes": "Septemvri Sofia's low away scoring risk materialized fully with 0 goals scored; however, Cherno More produced two goals to land the Over 1.5 selection."
+    },
+    {
+      "warning_id": "cb75e9e4-c9e7-4557-aed5-84992dc2fa4c",
+      "post_match_status": "NOT_CONFIRMED",
+      "evidence_assessment": "CONTRADICTED",
+      "confidence": "MEDIUM",
+      "review_notes": "Starting lineups aligned with tactical norms and Cherno More established control early with two first-half goals."
+    }
+  ]
+}
