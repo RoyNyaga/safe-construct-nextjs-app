@@ -309,17 +309,6 @@ export interface TicketImportJSON {
     away_overall_goals_conceded?: number | null
     away_overall_goals_per_game?: number | null
     away_overall_conceded_per_game?: number | null
-  // Season-overall statistics (All venues combined)
-  home_overall_matches_played?: number | null
-  home_overall_goals_scored?: number | null
-  home_overall_goals_conceded?: number | null
-  home_overall_goals_per_game?: number | null
-  home_overall_conceded_per_game?: number | null
-  away_overall_matches_played?: number | null
-  away_overall_goals_scored?: number | null
-  away_overall_goals_conceded?: number | null
-  away_overall_goals_per_game?: number | null
-  away_overall_conceded_per_game?: number | null
     market: string
     selection: string
     odds?: number | null
@@ -373,17 +362,6 @@ export interface TicketImportJSON {
     away_overall_goals_conceded?: number | null
     away_overall_goals_per_game?: number | null
     away_overall_conceded_per_game?: number | null
-  // Season-overall statistics (All venues combined)
-  home_overall_matches_played?: number | null
-  home_overall_goals_scored?: number | null
-  home_overall_goals_conceded?: number | null
-  home_overall_goals_per_game?: number | null
-  home_overall_conceded_per_game?: number | null
-  away_overall_matches_played?: number | null
-  away_overall_goals_scored?: number | null
-  away_overall_goals_conceded?: number | null
-  away_overall_goals_per_game?: number | null
-  away_overall_conceded_per_game?: number | null
     market: string
     selection: string
     odds?: number | null
@@ -453,17 +431,6 @@ export interface TicketExportJSON {
     away_overall_goals_conceded?: number | null
     away_overall_goals_per_game?: number | null
     away_overall_conceded_per_game?: number | null
-  // Season-overall statistics (All venues combined)
-  home_overall_matches_played?: number | null
-  home_overall_goals_scored?: number | null
-  home_overall_goals_conceded?: number | null
-  home_overall_goals_per_game?: number | null
-  home_overall_conceded_per_game?: number | null
-  away_overall_matches_played?: number | null
-  away_overall_goals_scored?: number | null
-  away_overall_goals_conceded?: number | null
-  away_overall_goals_per_game?: number | null
-  away_overall_conceded_per_game?: number | null
     market: string
     selection: string
     odds: number | null
@@ -515,17 +482,6 @@ export interface TicketExportJSON {
     away_overall_goals_conceded?: number | null
     away_overall_goals_per_game?: number | null
     away_overall_conceded_per_game?: number | null
-  // Season-overall statistics (All venues combined)
-  home_overall_matches_played?: number | null
-  home_overall_goals_scored?: number | null
-  home_overall_goals_conceded?: number | null
-  home_overall_goals_per_game?: number | null
-  home_overall_conceded_per_game?: number | null
-  away_overall_matches_played?: number | null
-  away_overall_goals_scored?: number | null
-  away_overall_goals_conceded?: number | null
-  away_overall_goals_per_game?: number | null
-  away_overall_conceded_per_game?: number | null
     market: string
     selection: string
     odds: number | null
