@@ -48,5 +48,11 @@ Montenegra first league
 Morocco botola 1
 - Mas maghreb fes vs RS Berkane, over 1.5: 1.52
 
+Peru liga 1
+- Sporting cristal vs Alianza lima, over 1.5: 1.27
+
+Tunisia ligue 1
+- CS Sfazien vs Esperance Tunis, over 1.5: 1.23
+
 
 
