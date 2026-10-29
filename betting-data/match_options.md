@@ -1,42 +1,52 @@
+Italy serie A
+-  Frosinone calcio vs lecce, over 1.5: 1.12
+- Florentina vs Atalanta, over 1.5: 1.16
 
-england league 2
-- walsall vs salford city, over 1.5: 1.2
+Brazil Serie A
+- Atletic MG vs Cruzeiro EC, over 1.5: 1.24
 
-Spaini laliga
-- Sevilla vs OSasuna, over 1.5: 1.38
-span segunda division
-- FC Andorra vs Burgos CF, over 1.5: 1.3
+Botswana premier league 
+- Township Rollers FC vs Tonota FC, over 1.5: 1.5
 
-France league 1
-- Paris saint germain vs Olympique lyonnaiis, over 1.5: 1.11
+Bulgaria second league
+- FC Yantra 2019 Gabrovo vs FK Hebar Panzardzhik, over 1.5: 1.26
 
-France league 2
-- Montpellier vs Red Star fc:  over 1.5: 1.25
-- US Boulonge vs Stade reims: over 1.5: 1.33
+Columbia primera B
+- Envigado FC vs Independiente Yumbo, over 1.5: 1.45
+- Boca Juniors de call vs club union Magdalena, over 1.5: 1.4
+- Tigress FC vs Real Cartagena, over 1.5: 1.36
 
-liga portugal
-- Santa Clara vs Sl Benfica, over 1.5: 1.27
+Egyp Premier leage
+- Modern sport FC vs AI Ahli cairo, over 1.5: 1.33
+- Pyramids FC vs Wadi degla fc, over 15: 1.24
 
-Liga portugal 2
-- SCU Torreense vs Amarante FC over 1.5: 1.32 
+Finland veikkausliiga
+- Inter Turku vs HJK Helsinki, over 1.5: 1.23
+- Kups kuopio vs IF gnistan over 1.5: 1.23
 
-Brazil serie A
-- Coritiba vs Gremio FB Porto Alegrense, over 1.5: 1.28
+Guatemala liga Ncional
+- FC Deportivo Mixco vs Xalaju MC, over 1.5: 1.25
 
-Argentina liliga profesional
-- CA Union de Santa Fe vs Estudiiantes la plata over 1.5: 1.38
+Iran Pro league
+- Fajr Sepasi Shiraz fc vs Tractor, over 1.5: 1.45
 
-Armenia premier league
-- FC Ararat-Armennia vs FC Noah, over 1.5: 1.28
+Iraq stars league
+- AI mosul SC vs AI Jolan SC, over 1.5: 1.43
+- AI Naft Baghdad vs AI Kahraba, over 1.5: 1.47
+- AI quwa ai jawiya vs ai minaa sc, over 1.5: 1.39
 
-Bahraiin 1st diiviision
-- Busaiteen Bouri vs cultural SC, over 1.5: 1.24
-- Um Alhassam vs AI Budaiiya, over 1.5: 1.29
-- AI Shabab Manama vs Isa Town, over 1.5: 1.35
+Jordan Pro league
+- AI Salt vs AI jazeera Amman, over 1.5: 1.32
 
-Bolivia LFPB
-- CA Nacionall potosi vs Guabrira montero, over 1.5: 1.12
+Kenya premier league
+- Mathare United fc vs Tusker fc, over 1.5: 1.2
+- Kenya police vs Ulinzi stars fc, over 1.5: 1.52
 
-Bulgaria first lleague
-- Lokomotiiv Plodiv vs PFK sllavia sofiia, over 1.5: 1.5
-- CSK Sofia vs PFC Ludogorets Razgrad, over 1.5: 1.27
+Montenegra first league
+- FK Sutjeska Niksic vs FK Jezero plav, over 1.5: 1.33
+
+Morocco botola 1
+- Mas maghreb fes vs RS Berkane, over 1.5: 1.52
+
+
+

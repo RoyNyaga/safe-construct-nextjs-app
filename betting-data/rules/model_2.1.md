@@ -135,8 +135,24 @@ To prevent deceptive sample distortion (e.g., teams that score heavily at home b
 >   *"Could not calculate probabilities for [Match Name] due to missing venue-specific home/away statistics."*
 
 > [!IMPORTANT]
-> **ALTERNATIVE PARITY RULE**:
-> All betting alternatives (`betting_alternatives`) are considered-and-rejected betting options that require the exact same depth of statistical tracking as primary selections. Omitting venue statistics from alternatives is strictly prohibited. Both selections and alternatives must record full venue performance metrics (`home_league_position`, `away_league_position`, `home_matches_played`, `away_matches_played`, `home_goals_scored`, `home_goals_conceded`, `away_goals_scored`, `away_goals_conceded`, `home_goals_per_game`, `home_conceded_per_game`, `away_goals_per_game`, `away_conceded_per_game`).
+> **ALTERNATIVE PARITY RULE & VENUE VS. OVERALL STATS SEPARATION**:
+> All betting alternatives (`betting_alternatives`) are considered-and-rejected betting options that require the exact same depth of statistical tracking as primary selections. Omitting venue or overall statistics from alternatives is strictly prohibited.
+> Both selections and alternatives must record two clearly separated statistical baselines:
+> 1. **Venue Performance Metrics (Direct Poisson Engine Inputs)**:
+>    - `home_league_position`, `away_league_position`
+>    - `home_matches_played`, `away_matches_played` (Strictly venue matches: home @ home, away @ away)
+>    - `home_goals_scored`, `home_goals_conceded` (Strictly venue goals)
+>    - `away_goals_scored`, `away_goals_conceded` (Strictly venue goals)
+>    - `home_goals_per_game`, `home_conceded_per_game` (`home_goals_scored ÷ home_matches_played`)
+>    - `away_goals_per_game`, `away_conceded_per_game` (`away_goals_scored ÷ away_matches_played`)
+>    *Mathematical Invariant: Venue goals ÷ matches played must equal the per-game rate (±0.05 rounding).*
+> 2. **Season Overall Metrics (All Venues Combined — Contextual Form Record)**:
+>    - `home_overall_matches_played`, `away_overall_matches_played` (Total games across all venues)
+>    - `home_overall_goals_scored`, `home_overall_goals_conceded` (Total season goals)
+>    - `away_overall_goals_scored`, `away_overall_goals_conceded` (Total season goals)
+>    - `home_overall_goals_per_game`, `home_overall_conceded_per_game` (Season-wide rate)
+>    - `away_overall_goals_per_game`, `away_overall_conceded_per_game` (Season-wide rate)
+>    *Note: Poisson calculations strictly use venue-specific per-game rates; season-overall metrics provide macro context and do not distort venue expected goals.*
 
 
 ### 5.1 Establish league scoring baselines

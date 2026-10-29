@@ -89,7 +89,17 @@
           "post_match_status": "PENDING",
           "review_notes": null
         }
-      ]
+      ],
+      "home_overall_matches_played": 14,
+      "home_overall_goals_scored": 31,
+      "home_overall_goals_conceded": 23,
+      "home_overall_goals_per_game": 2.21,
+      "home_overall_conceded_per_game": 1.64,
+      "away_overall_matches_played": 14,
+      "away_overall_goals_scored": 11,
+      "away_overall_goals_conceded": 18,
+      "away_overall_goals_per_game": 0.79,
+      "away_overall_conceded_per_game": 1.29
     },
     {
       "match_date": "2026-10-24",
@@ -120,7 +130,7 @@
       "current_league_home_avg": 1.48,
       "current_league_away_avg": 1.12,
       "historical_league_home_avg": 1.45,
-      "historical_league_away_avg": 1.10,
+      "historical_league_away_avg": 1.1,
       "historical_estimated_probability": 0.842,
       "alignment_delta_pp": 0.5,
       "alignment_remark": "very_high",
@@ -154,7 +164,17 @@
           "post_match_status": "PENDING",
           "review_notes": null
         }
-      ]
+      ],
+      "home_overall_matches_played": 18,
+      "home_overall_goals_scored": 23,
+      "home_overall_goals_conceded": 45,
+      "home_overall_goals_per_game": 1.28,
+      "home_overall_conceded_per_game": 2.5,
+      "away_overall_matches_played": 18,
+      "away_overall_goals_scored": 20,
+      "away_overall_goals_conceded": 22,
+      "away_overall_goals_per_game": 1.11,
+      "away_overall_conceded_per_game": 1.22
     },
     {
       "match_date": "2026-10-24",
@@ -184,7 +204,7 @@
       "expected_value": 0.048,
       "current_league_home_avg": 1.42,
       "current_league_away_avg": 1.14,
-      "historical_league_home_avg": 1.40,
+      "historical_league_home_avg": 1.4,
       "historical_league_away_avg": 1.15,
       "historical_estimated_probability": 0.828,
       "alignment_delta_pp": 0.4,
@@ -231,7 +251,17 @@
           "post_match_status": "PENDING",
           "review_notes": null
         }
-      ]
+      ],
+      "home_overall_matches_played": 14,
+      "home_overall_goals_scored": 25,
+      "home_overall_goals_conceded": 7,
+      "home_overall_goals_per_game": 1.79,
+      "home_overall_conceded_per_game": 0.5,
+      "away_overall_matches_played": 14,
+      "away_overall_goals_scored": 7,
+      "away_overall_goals_conceded": 23,
+      "away_overall_goals_per_game": 0.5,
+      "away_overall_conceded_per_game": 1.64
     },
     {
       "match_date": "2026-10-24",
@@ -260,10 +290,10 @@
       "edge_remark": "medium",
       "expected_value": 0.002,
       "current_league_home_avg": 1.72,
-      "current_league_away_avg": 1.40,
+      "current_league_away_avg": 1.4,
       "historical_league_home_avg": 1.65,
       "historical_league_away_avg": 1.35,
-      "historical_estimated_probability": 0.890,
+      "historical_estimated_probability": 0.89,
       "alignment_delta_pp": 0.5,
       "alignment_remark": "very_high",
       "actual_home_score": 1,
@@ -296,7 +326,17 @@
           "post_match_status": "PENDING",
           "review_notes": null
         }
-      ]
+      ],
+      "home_overall_matches_played": 12,
+      "home_overall_goals_scored": 29,
+      "home_overall_goals_conceded": 22,
+      "home_overall_goals_per_game": 2.42,
+      "home_overall_conceded_per_game": 1.83,
+      "away_overall_matches_played": 12,
+      "away_overall_goals_scored": 9,
+      "away_overall_goals_conceded": 31,
+      "away_overall_goals_per_game": 0.75,
+      "away_overall_conceded_per_game": 2.58
     },
     {
       "match_date": "2026-10-24",
@@ -361,7 +401,17 @@
           "post_match_status": "PENDING",
           "review_notes": null
         }
-      ]
+      ],
+      "home_overall_matches_played": 14,
+      "home_overall_goals_scored": 13,
+      "home_overall_goals_conceded": 20,
+      "home_overall_goals_per_game": 0.93,
+      "home_overall_conceded_per_game": 1.43,
+      "away_overall_matches_played": 14,
+      "away_overall_goals_scored": 34,
+      "away_overall_goals_conceded": 13,
+      "away_overall_goals_per_game": 2.43,
+      "away_overall_conceded_per_game": 0.93
     }
   ],
   "alternatives": [
@@ -382,7 +432,7 @@
       "home_goals_per_game": 2.14,
       "home_conceded_per_game": 0.71,
       "away_goals_per_game": 0.86,
-      "away_conceded_per_game": 1.00,
+      "away_conceded_per_game": 1,
       "market": "Over/Under",
       "selection": "Over 1.5",
       "odds": 1.29,
@@ -428,7 +478,17 @@
           "post_match_status": "PENDING",
           "review_notes": null
         }
-      ]
+      ],
+      "home_overall_matches_played": 14,
+      "home_overall_goals_scored": 27,
+      "home_overall_goals_conceded": 9,
+      "home_overall_goals_per_game": 1.93,
+      "home_overall_conceded_per_game": 0.64,
+      "away_overall_matches_played": 14,
+      "away_overall_goals_scored": 11,
+      "away_overall_goals_conceded": 13,
+      "away_overall_goals_per_game": 0.79,
+      "away_overall_conceded_per_game": 0.93
     },
     {
       "match_date": "2026-10-24",
@@ -459,7 +519,7 @@
       "current_league_home_avg": 1.48,
       "current_league_away_avg": 1.12,
       "historical_league_home_avg": 1.45,
-      "historical_league_away_avg": 1.10,
+      "historical_league_away_avg": 1.1,
       "historical_estimated_probability": 0.755,
       "alignment_delta_pp": 0.8,
       "alignment_remark": "very_high",
@@ -493,7 +553,17 @@
           "post_match_status": "PENDING",
           "review_notes": null
         }
-      ]
+      ],
+      "home_overall_matches_played": 16,
+      "home_overall_goals_scored": 16,
+      "home_overall_goals_conceded": 18,
+      "home_overall_goals_per_game": 1,
+      "home_overall_conceded_per_game": 1.13,
+      "away_overall_matches_played": 18,
+      "away_overall_goals_scored": 13,
+      "away_overall_goals_conceded": 22,
+      "away_overall_goals_per_game": 0.72,
+      "away_overall_conceded_per_game": 1.22
     },
     {
       "match_date": "2026-10-24",
@@ -524,7 +594,7 @@
       "current_league_home_avg": 1.48,
       "current_league_away_avg": 1.12,
       "historical_league_home_avg": 1.45,
-      "historical_league_away_avg": 1.10,
+      "historical_league_away_avg": 1.1,
       "historical_estimated_probability": 0.558,
       "alignment_delta_pp": 0.6,
       "alignment_remark": "very_high",
@@ -570,7 +640,17 @@
           "post_match_status": "PENDING",
           "review_notes": null
         }
-      ]
+      ],
+      "home_overall_matches_played": 18,
+      "home_overall_goals_scored": 11,
+      "home_overall_goals_conceded": 25,
+      "home_overall_goals_per_game": 0.61,
+      "home_overall_conceded_per_game": 1.39,
+      "away_overall_matches_played": 18,
+      "away_overall_goals_scored": 27,
+      "away_overall_goals_conceded": 22,
+      "away_overall_goals_per_game": 1.5,
+      "away_overall_conceded_per_game": 1.22
     }
   ],
   "warnings": [
