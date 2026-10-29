@@ -25,6 +25,7 @@ import {
   EdgeRemark,
 } from '@/types/betting'
 import { autoSettleSelection, calculateTicketStatus, calculateProfitLoss } from '@/utils/bettingSettlement'
+import { checkVenueStatsMismatch } from '@/utils/bettingValidation'
 import { executeTransaction, getActiveBankroll, deleteBankrollTransaction } from './bankroll'
 
 // ─── 1. MODEL OPERATIONS ─────────────────────────────────────────────────────
@@ -440,6 +441,16 @@ function computeEdgeRemark(
       home_conceded_per_game: parseNullableNumber(sel.home_conceded_per_game),
       away_goals_per_game: parseNullableNumber(sel.away_goals_per_game),
       away_conceded_per_game: parseNullableNumber(sel.away_conceded_per_game),
+      home_overall_matches_played: parseNullableNumber(sel.home_overall_matches_played),
+      home_overall_goals_scored: parseNullableNumber(sel.home_overall_goals_scored),
+      home_overall_goals_conceded: parseNullableNumber(sel.home_overall_goals_conceded),
+      home_overall_goals_per_game: parseNullableNumber(sel.home_overall_goals_per_game),
+      home_overall_conceded_per_game: parseNullableNumber(sel.home_overall_conceded_per_game),
+      away_overall_matches_played: parseNullableNumber(sel.away_overall_matches_played),
+      away_overall_goals_scored: parseNullableNumber(sel.away_overall_goals_scored),
+      away_overall_goals_conceded: parseNullableNumber(sel.away_overall_goals_conceded),
+      away_overall_goals_per_game: parseNullableNumber(sel.away_overall_goals_per_game),
+      away_overall_conceded_per_game: parseNullableNumber(sel.away_overall_conceded_per_game),
       market: sel.market,
       selection: sel.selection,
       odds: parseNullableNumber(sel.odds),
@@ -509,6 +520,16 @@ function computeEdgeRemark(
         home_conceded_per_game: parseNullableNumber(alt.home_conceded_per_game),
         away_goals_per_game: parseNullableNumber(alt.away_goals_per_game),
         away_conceded_per_game: parseNullableNumber(alt.away_conceded_per_game),
+        home_overall_matches_played: parseNullableNumber(alt.home_overall_matches_played),
+        home_overall_goals_scored: parseNullableNumber(alt.home_overall_goals_scored),
+        home_overall_goals_conceded: parseNullableNumber(alt.home_overall_goals_conceded),
+        home_overall_goals_per_game: parseNullableNumber(alt.home_overall_goals_per_game),
+        home_overall_conceded_per_game: parseNullableNumber(alt.home_overall_conceded_per_game),
+        away_overall_matches_played: parseNullableNumber(alt.away_overall_matches_played),
+        away_overall_goals_scored: parseNullableNumber(alt.away_overall_goals_scored),
+        away_overall_goals_conceded: parseNullableNumber(alt.away_overall_goals_conceded),
+        away_overall_goals_per_game: parseNullableNumber(alt.away_overall_goals_per_game),
+        away_overall_conceded_per_game: parseNullableNumber(alt.away_overall_conceded_per_game),
         market: alt.market,
         selection: alt.selection,
         odds: parseNullableNumber(alt.odds),
@@ -573,6 +594,35 @@ function computeEdgeRemark(
           })
         })
       }
+
+      // Soft validation: detect venue stats mismatch
+      if (selId) {
+        const mismatch = checkVenueStatsMismatch(sel)
+        if (mismatch) {
+          const alreadyExists = (sel.warnings || []).some(
+            (w) => String(w.type).toUpperCase() === 'VENUE_STATS_MISMATCH'
+          )
+          if (!alreadyExists) {
+            warningsPayload.push({
+              ticket_id: ticket.id,
+              selection_id: selId,
+              alternative_id: null,
+              target_type: 'selection',
+              warning_type: 'VENUE_STATS_MISMATCH',
+              severity: 'MEDIUM',
+              market_relevance: 'DIRECT',
+              direction: 'CONTRADICTORY',
+              description: mismatch.description,
+              evidence: mismatch.evidence,
+              verified: true,
+              numerical_adjustment: false,
+              pre_match_status: 'CONFIRMED',
+              post_match_status: 'PENDING',
+              review_notes: 'Soft validation triggered during ticket import.',
+            })
+          }
+        }
+      }
     })
   }
 
@@ -600,6 +650,35 @@ function computeEdgeRemark(
             review_notes: parseNullableString(w.review_notes),
           })
         })
+      }
+
+      // Soft validation: detect venue stats mismatch
+      if (altId) {
+        const mismatch = checkVenueStatsMismatch(alt)
+        if (mismatch) {
+          const alreadyExists = (alt.warnings || []).some(
+            (w) => String(w.type).toUpperCase() === 'VENUE_STATS_MISMATCH'
+          )
+          if (!alreadyExists) {
+            warningsPayload.push({
+              ticket_id: ticket.id,
+              selection_id: null,
+              alternative_id: altId,
+              target_type: 'alternative',
+              warning_type: 'VENUE_STATS_MISMATCH',
+              severity: 'MEDIUM',
+              market_relevance: 'CONTEXTUAL',
+              direction: 'CONTRADICTORY',
+              description: mismatch.description,
+              evidence: mismatch.evidence,
+              verified: true,
+              numerical_adjustment: false,
+              pre_match_status: 'CONFIRMED',
+              post_match_status: 'PENDING',
+              review_notes: 'Soft validation triggered during ticket import.',
+            })
+          }
+        }
       }
     })
   }
@@ -1185,6 +1264,16 @@ export async function exportTicketAsJson(ticketUuid: string): Promise<{
       home_conceded_per_game: s.home_conceded_per_game,
       away_goals_per_game: s.away_goals_per_game,
       away_conceded_per_game: s.away_conceded_per_game,
+      home_overall_matches_played: s.home_overall_matches_played ?? null,
+      home_overall_goals_scored: s.home_overall_goals_scored ?? null,
+      home_overall_goals_conceded: s.home_overall_goals_conceded ?? null,
+      home_overall_goals_per_game: s.home_overall_goals_per_game ?? null,
+      home_overall_conceded_per_game: s.home_overall_conceded_per_game ?? null,
+      away_overall_matches_played: s.away_overall_matches_played ?? null,
+      away_overall_goals_scored: s.away_overall_goals_scored ?? null,
+      away_overall_goals_conceded: s.away_overall_goals_conceded ?? null,
+      away_overall_goals_per_game: s.away_overall_goals_per_game ?? null,
+      away_overall_conceded_per_game: s.away_overall_conceded_per_game ?? null,
       market: s.market,
       selection: s.selection,
       odds: s.odds,
@@ -1238,6 +1327,16 @@ export async function exportTicketAsJson(ticketUuid: string): Promise<{
       home_conceded_per_game: a.home_conceded_per_game ?? null,
       away_goals_per_game: a.away_goals_per_game ?? null,
       away_conceded_per_game: a.away_conceded_per_game ?? null,
+      home_overall_matches_played: a.home_overall_matches_played ?? null,
+      home_overall_goals_scored: a.home_overall_goals_scored ?? null,
+      home_overall_goals_conceded: a.home_overall_goals_conceded ?? null,
+      home_overall_goals_per_game: a.home_overall_goals_per_game ?? null,
+      home_overall_conceded_per_game: a.home_overall_conceded_per_game ?? null,
+      away_overall_matches_played: a.away_overall_matches_played ?? null,
+      away_overall_goals_scored: a.away_overall_goals_scored ?? null,
+      away_overall_goals_conceded: a.away_overall_goals_conceded ?? null,
+      away_overall_goals_per_game: a.away_overall_goals_per_game ?? null,
+      away_overall_conceded_per_game: a.away_overall_conceded_per_game ?? null,
       market: a.market,
       selection: a.selection,
       odds: a.odds,

@@ -95,9 +95,12 @@ When instructing an AI agent or analyst to generate a betting ticket:
      - `edge_percentage_points` ($(\text{prob} - \text{break\_even}) \times 100$)
      - `edge_remark` (`very_high`, `high`, `medium`, `low`, `very_low`)
      - `expected_value` ($(\text{prob} \times \text{odds}) - 1$)
-5. **Full Schema Parity for Alternatives**:
+5. **Full Schema Parity for Alternatives & Venue vs Overall Separation**:
    - Alternatives (`betting_alternatives`) are considered-and-rejected betting options that must match primary selections attribute-for-attribute.
-   - Every alternative must populate all 10 venue statistical attributes (`home_league_position`, `away_league_position`, `home_matches_played`, `away_matches_played`, `home_goals_scored`, `home_goals_conceded`, `away_goals_scored`, `away_goals_conceded`, `home_goals_per_game`, `home_conceded_per_game`, `away_goals_per_game`, `away_conceded_per_game`) alongside all 8 dual-baseline and value-edge attributes (`current_league_home_avg`, `current_league_away_avg`, `historical_league_home_avg`, `historical_league_away_avg`, `historical_estimated_probability`, `alignment_delta_pp`, `alignment_remark`, `edge_remark`).
+   - Every alternative must populate:
+     a. All 12 venue statistical attributes (`home_league_position`, `away_league_position`, `home_matches_played`, `away_matches_played`, `home_goals_scored`, `home_goals_conceded`, `away_goals_scored`, `away_goals_conceded`, `home_goals_per_game`, `home_conceded_per_game`, `away_goals_per_game`, `away_conceded_per_game`)
+     b. All 10 season-overall attributes (`home_overall_matches_played`, `away_overall_matches_played`, `home_overall_goals_scored`, `away_overall_goals_scored`, `home_overall_goals_conceded`, `away_overall_goals_conceded`, `home_overall_goals_per_game`, `away_overall_goals_per_game`, `home_overall_conceded_per_game`, `away_overall_conceded_per_game`)
+     c. All 8 dual-baseline and value-edge attributes (`current_league_home_avg`, `current_league_away_avg`, `historical_league_home_avg`, `historical_league_away_avg`, `historical_estimated_probability`, `alignment_delta_pp`, `alignment_remark`, `edge_remark`).
 6. **Dual-Baseline Recording**:
    - Both selections and alternatives must record the league scoring baselines used:
      - `current_league_home_avg`, `current_league_away_avg` (live table)

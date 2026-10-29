@@ -83,7 +83,7 @@ Please generate the import ticket JSON according to our organization rules. Save
 1. Reads all stats and calculated probabilities directly from `evaluation_YYYY-MM-DD.md` (**Zero redundant web searches**).
 2. Computes the combined ticket odds and aggregate probability $\prod P_i$.
 3. Formats the ticket number using the automated convention (e.g. `S-22-v2.1`).
-4. Generates both selections and alternatives with **100% schema parity** (all 10 venue performance attributes) and records the **5 dual-baseline attributes** (`current_league_home_avg`, `current_league_away_avg`, `historical_league_home_avg`, `historical_league_away_avg`, `historical_estimated_probability`).
+4. Generates both selections and alternatives with **100% schema parity** (12 venue performance attributes + 10 season-overall attributes) and records the **5 dual-baseline attributes** (`current_league_home_avg`, `current_league_away_avg`, `historical_league_home_avg`, `historical_league_away_avg`, `historical_estimated_probability`).
 5. Writes the payload directly to `betting-data/<month>/ticket_YYYY-MM-DD_001.json`.
 6. Outputs the JSON in chat so you can paste it directly into your app at:
    `/admin/betting/import` -> **Validate** -> **Import Ticket**.
