@@ -4,4 +4,4 @@ Matches in the bellow leagues do not have enough information online
 - Colombia Primera B
 - Iraq Stars League
 - Kenya Premier
-- Kenya Police vs Ulinzi Stars FC
+
