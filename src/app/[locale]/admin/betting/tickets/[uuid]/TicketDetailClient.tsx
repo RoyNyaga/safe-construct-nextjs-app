@@ -888,6 +888,24 @@ ${warningExportJson}`
                         <Typography variant="caption" color="text.secondary">
                           {sel.country ? `${sel.country} • ` : ''}{sel.league || '—'} &bull; {sel.match_date || ticket.ticket_date}
                         </Typography>
+                        {((sel.prob_over_1_5 != null) || (sel.prob_over_2_5 != null) || (sel.prob_btts_yes != null) || (sel.prob_under_3_5 != null)) && (
+                          <Box sx={{ display: 'flex', gap: 0.5, mt: 0.5, flexWrap: 'wrap' }}>
+                            {sel.prob_over_1_5 != null && (
+                              <Chip label={`O1.5: ${(Number(sel.prob_over_1_5) * 100).toFixed(0)}%`} size="small" sx={{ height: 16, fontSize: '0.62rem', backgroundColor: alpha('#42A5F5', 0.12), color: '#42A5F5', border: `1px solid ${alpha('#42A5F5', 0.3)}` }} />
+                            )}
+                            {sel.prob_over_2_5 != null && (
+                              <Chip label={`O2.5: ${(Number(sel.prob_over_2_5) * 100).toFixed(0)}%`} size="small" sx={{ height: 16, fontSize: '0.62rem', backgroundColor: alpha('#AB47BC', 0.12), color: '#AB47BC', border: `1px solid ${alpha('#AB47BC', 0.3)}` }} />
+                            )}
+                            {sel.prob_btts_yes != null && (
+                              <Chip label={`BTTS: ${(Number(sel.prob_btts_yes) * 100).toFixed(0)}%`} size="small" sx={{ height: 16, fontSize: '0.62rem', backgroundColor: alpha('#F26419', 0.12), color: '#F26419', border: `1px solid ${alpha('#F26419', 0.3)}` }} />
+                            )}
+                            {sel.prob_under_3_5 != null && (
+                              <Chip label={`U3.5: ${(Number(sel.prob_under_3_5) * 100).toFixed(0)}%`} size="small" sx={{ height: 16, fontSize: '0.62rem', backgroundColor: alpha('#26A69A', 0.12), color: '#26A69A', border: `1px solid ${alpha('#26A69A', 0.3)}` }} />
+                            )}
+                          </Box>
+                        )}
+                        <Typography variant="caption" sx={{ display: 'none' }}>
+                        </Typography>
                         {/* Warnings Badges if any */}
                         {(() => {
                           const warnings = (ticket.betting_warnings || []).filter(
@@ -1093,6 +1111,26 @@ ${warningExportJson}`
                           {(alt.country || alt.league) && (
                             <Typography variant="caption" color="text.secondary" sx={{ display: 'block', fontSize: '0.75rem' }}>
                               {alt.country ? `${alt.country} • ` : ''}{alt.league || ''}
+                            </Typography>
+                          )}
+                          {((alt.prob_over_1_5 != null) || (alt.prob_over_2_5 != null) || (alt.prob_btts_yes != null) || (alt.prob_under_3_5 != null)) && (
+                            <Box sx={{ display: 'flex', gap: 0.5, mt: 0.5, flexWrap: 'wrap' }}>
+                              {alt.prob_over_1_5 != null && (
+                                <Chip label={`O1.5: ${(Number(alt.prob_over_1_5) * 100).toFixed(0)}%`} size="small" sx={{ height: 16, fontSize: '0.62rem', backgroundColor: alpha('#42A5F5', 0.12), color: '#42A5F5', border: `1px solid ${alpha('#42A5F5', 0.3)}` }} />
+                              )}
+                              {alt.prob_over_2_5 != null && (
+                                <Chip label={`O2.5: ${(Number(alt.prob_over_2_5) * 100).toFixed(0)}%`} size="small" sx={{ height: 16, fontSize: '0.62rem', backgroundColor: alpha('#AB47BC', 0.12), color: '#AB47BC', border: `1px solid ${alpha('#AB47BC', 0.3)}` }} />
+                              )}
+                              {alt.prob_btts_yes != null && (
+                                <Chip label={`BTTS: ${(Number(alt.prob_btts_yes) * 100).toFixed(0)}%`} size="small" sx={{ height: 16, fontSize: '0.62rem', backgroundColor: alpha('#F26419', 0.12), color: '#F26419', border: `1px solid ${alpha('#F26419', 0.3)}` }} />
+                              )}
+                              {alt.prob_under_3_5 != null && (
+                                <Chip label={`U3.5: ${(Number(alt.prob_under_3_5) * 100).toFixed(0)}%`} size="small" sx={{ height: 16, fontSize: '0.62rem', backgroundColor: alpha('#26A69A', 0.12), color: '#26A69A', border: `1px solid ${alpha('#26A69A', 0.3)}` }} />
+                              )}
+                            </Box>
+                          )}
+                          {false && (
+                            <Typography variant="caption" sx={{ display: 'none' }}>
                             </Typography>
                           )}
                           {/* Warnings Badges if any */}
