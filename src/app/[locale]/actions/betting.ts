@@ -463,6 +463,11 @@ function computeEdgeRemark(
       historical_league_home_avg: parseNullableNumber(sel.historical_league_home_avg),
       historical_league_away_avg: parseNullableNumber(sel.historical_league_away_avg),
       historical_estimated_probability: parseNullableNumber(sel.historical_estimated_probability),
+      prob_over_1_5: parseNullableNumber(sel.prob_over_1_5),
+      prob_over_2_5: parseNullableNumber(sel.prob_over_2_5),
+      prob_btts_yes: parseNullableNumber(sel.prob_btts_yes),
+      prob_under_3_5: parseNullableNumber(sel.prob_under_3_5),
+      market_evaluations: sel.market_evaluations || null,
       alignment_delta_pp: align.alignment_delta_pp,
       alignment_remark: align.alignment_remark,
       edge_remark: edgeRem,
@@ -542,6 +547,11 @@ function computeEdgeRemark(
         historical_league_home_avg: parseNullableNumber(alt.historical_league_home_avg),
         historical_league_away_avg: parseNullableNumber(alt.historical_league_away_avg),
         historical_estimated_probability: parseNullableNumber(alt.historical_estimated_probability),
+        prob_over_1_5: parseNullableNumber(alt.prob_over_1_5),
+        prob_over_2_5: parseNullableNumber(alt.prob_over_2_5),
+        prob_btts_yes: parseNullableNumber(alt.prob_btts_yes),
+        prob_under_3_5: parseNullableNumber(alt.prob_under_3_5),
+        market_evaluations: alt.market_evaluations || null,
         alignment_delta_pp: align.alignment_delta_pp,
         alignment_remark: align.alignment_remark,
         edge_remark: edgeRem,
@@ -1170,6 +1180,11 @@ export async function updateBettingSelectionDetails(
     alignment_delta_pp?: number | null
     alignment_remark?: AlignmentRemark | null
     edge_remark?: EdgeRemark | null
+    prob_over_1_5?: number | null
+    prob_over_2_5?: number | null
+    prob_btts_yes?: number | null
+    prob_under_3_5?: number | null
+    market_evaluations?: Record<string, any> | null
     comment?: string
     notes?: string
   }
@@ -1189,6 +1204,11 @@ export async function updateBettingSelectionDetails(
       ...(data.alignment_delta_pp !== undefined && { alignment_delta_pp: data.alignment_delta_pp }),
       ...(data.alignment_remark !== undefined && { alignment_remark: data.alignment_remark }),
       ...(data.edge_remark !== undefined && { edge_remark: data.edge_remark }),
+      ...(data.prob_over_1_5 !== undefined && { prob_over_1_5: data.prob_over_1_5 }),
+      ...(data.prob_over_2_5 !== undefined && { prob_over_2_5: data.prob_over_2_5 }),
+      ...(data.prob_btts_yes !== undefined && { prob_btts_yes: data.prob_btts_yes }),
+      ...(data.prob_under_3_5 !== undefined && { prob_under_3_5: data.prob_under_3_5 }),
+      ...(data.market_evaluations !== undefined && { market_evaluations: data.market_evaluations }),
       ...(data.comment !== undefined && { comment: data.comment }),
       ...(data.notes !== undefined && { notes: data.notes }),
       updated_at: new Date().toISOString(),
@@ -1286,6 +1306,11 @@ export async function exportTicketAsJson(ticketUuid: string): Promise<{
       historical_league_home_avg: s.historical_league_home_avg ?? null,
       historical_league_away_avg: s.historical_league_away_avg ?? null,
       historical_estimated_probability: s.historical_estimated_probability ?? null,
+      prob_over_1_5: s.prob_over_1_5 ?? null,
+      prob_over_2_5: s.prob_over_2_5 ?? null,
+      prob_btts_yes: s.prob_btts_yes ?? null,
+      prob_under_3_5: s.prob_under_3_5 ?? null,
+      market_evaluations: s.market_evaluations ?? null,
       alignment_delta_pp: s.alignment_delta_pp ?? null,
       alignment_remark: s.alignment_remark ?? null,
       edge_remark: s.edge_remark ?? null,
@@ -1349,6 +1374,11 @@ export async function exportTicketAsJson(ticketUuid: string): Promise<{
       historical_league_home_avg: a.historical_league_home_avg ?? null,
       historical_league_away_avg: a.historical_league_away_avg ?? null,
       historical_estimated_probability: a.historical_estimated_probability ?? null,
+      prob_over_1_5: a.prob_over_1_5 ?? null,
+      prob_over_2_5: a.prob_over_2_5 ?? null,
+      prob_btts_yes: a.prob_btts_yes ?? null,
+      prob_under_3_5: a.prob_under_3_5 ?? null,
+      market_evaluations: a.market_evaluations ?? null,
       alignment_delta_pp: a.alignment_delta_pp ?? null,
       alignment_remark: a.alignment_remark ?? null,
       edge_remark: a.edge_remark ?? null,

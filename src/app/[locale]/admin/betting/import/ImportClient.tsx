@@ -46,10 +46,10 @@ import { checkVenueStatsMismatch } from '@/utils/bettingValidation'
 import { PreMatchStatsTables } from '@/components/betting/PreMatchStatsTables'
 
 function generateSamplePayload(activeModel?: BettingModel | null, initialSuggestion?: TicketSuggestionData | null): TicketImportJSON {
-  const modelVersion = activeModel?.version || '2.1'
-  const modelName = activeModel?.name || 'roys_betting_engine_over_1_5_goals'
+  const modelVersion = activeModel?.version || '3.0'
+  const modelName = activeModel?.name || 'roys_betting_engine_BTS_O2-5'
   const versionStr = modelVersion.toLowerCase().startsWith('v') ? modelVersion : `v${modelVersion}`
-  const ticketNum = initialSuggestion?.nextSelectionTicketNumber || `S-21-${versionStr}`
+  const ticketNum = initialSuggestion?.nextSelectionTicketNumber || `S-1-${versionStr}`
 
   return {
     ticket: {
@@ -100,6 +100,10 @@ function generateSamplePayload(activeModel?: BettingModel | null, initialSuggest
         alignment_delta_pp: 0.50,
         alignment_remark: 'very_high',
         edge_remark: 'medium',
+        prob_over_1_5: 0.852,
+        prob_over_2_5: 0.612,
+        prob_btts_yes: 0.671,
+        prob_under_3_5: 0.675,
         actual_home_score: null,
         actual_away_score: null,
         result: 'pending',
@@ -149,6 +153,10 @@ function generateSamplePayload(activeModel?: BettingModel | null, initialSuggest
         alignment_delta_pp: 0.60,
         alignment_remark: 'very_high',
         edge_remark: 'medium',
+        prob_over_1_5: 0.852,
+        prob_over_2_5: 0.612,
+        prob_btts_yes: 0.671,
+        prob_under_3_5: 0.675,
         actual_home_score: null,
         actual_away_score: null,
         result: 'pending',
@@ -190,6 +198,10 @@ function generateSamplePayload(activeModel?: BettingModel | null, initialSuggest
         alignment_delta_pp: 0.60,
         alignment_remark: 'very_high',
         edge_remark: 'medium',
+        prob_over_1_5: 0.852,
+        prob_over_2_5: 0.612,
+        prob_btts_yes: 0.671,
+        prob_under_3_5: 0.675,
         actual_home_score: null,
         actual_away_score: null,
         result: 'pending',
@@ -1334,6 +1346,22 @@ ${JSON.stringify(sampleJson, null, 2)}`
                       <tr key={idx} style={{ borderBottom: '1px solid rgba(240, 242, 245, 0.05)' }}>
                         <td style={{ padding: '12px 14px', fontWeight: 700 }}>
                           <div>{sel.home_team} <span style={{ color: '#9AA3B2' }}>vs</span> {sel.away_team}</div>
+                          {((sel.prob_over_1_5 != null) || (sel.prob_over_2_5 != null) || (sel.prob_btts_yes != null) || (sel.prob_under_3_5 != null)) && (
+                            <Box sx={{ mt: 0.5, display: 'flex', gap: 0.5, flexWrap: 'wrap' }}>
+                              {sel.prob_over_1_5 != null && (
+                                <Chip label={`O1.5: ${(Number(sel.prob_over_1_5) * 100).toFixed(0)}%`} size="small" sx={{ height: 16, fontSize: '0.62rem', backgroundColor: alpha('#42A5F5', 0.12), color: '#42A5F5' }} />
+                              )}
+                              {sel.prob_over_2_5 != null && (
+                                <Chip label={`O2.5: ${(Number(sel.prob_over_2_5) * 100).toFixed(0)}%`} size="small" sx={{ height: 16, fontSize: '0.62rem', backgroundColor: alpha('#AB47BC', 0.12), color: '#AB47BC' }} />
+                              )}
+                              {sel.prob_btts_yes != null && (
+                                <Chip label={`BTTS: ${(Number(sel.prob_btts_yes) * 100).toFixed(0)}%`} size="small" sx={{ height: 16, fontSize: '0.62rem', backgroundColor: alpha('#F26419', 0.12), color: '#F26419' }} />
+                              )}
+                              {sel.prob_under_3_5 != null && (
+                                <Chip label={`U3.5: ${(Number(sel.prob_under_3_5) * 100).toFixed(0)}%`} size="small" sx={{ height: 16, fontSize: '0.62rem', backgroundColor: alpha('#26A69A', 0.12), color: '#26A69A' }} />
+                              )}
+                            </Box>
+                          )}
                           {sel.warnings && sel.warnings.length > 0 && (
                             <Box sx={{ mt: 0.5, display: 'flex', gap: 0.5, flexWrap: 'wrap' }}>
                               {sel.warnings.map((w, wIdx) => (
@@ -1511,6 +1539,22 @@ ${JSON.stringify(sampleJson, null, 2)}`
                         <tr key={idx} style={{ borderBottom: '1px solid rgba(240, 242, 245, 0.05)' }}>
                           <td style={{ padding: '12px 14px', fontWeight: 600, color: 'text.secondary' }}>
                             <div>{alt.home_team} vs {alt.away_team}</div>
+                            {((alt.prob_over_1_5 != null) || (alt.prob_over_2_5 != null) || (alt.prob_btts_yes != null) || (alt.prob_under_3_5 != null)) && (
+                              <Box sx={{ mt: 0.5, display: 'flex', gap: 0.5, flexWrap: 'wrap' }}>
+                                {alt.prob_over_1_5 != null && (
+                                  <Chip label={`O1.5: ${(Number(alt.prob_over_1_5) * 100).toFixed(0)}%`} size="small" sx={{ height: 16, fontSize: '0.62rem', backgroundColor: alpha('#42A5F5', 0.12), color: '#42A5F5' }} />
+                                )}
+                                {alt.prob_over_2_5 != null && (
+                                  <Chip label={`O2.5: ${(Number(alt.prob_over_2_5) * 100).toFixed(0)}%`} size="small" sx={{ height: 16, fontSize: '0.62rem', backgroundColor: alpha('#AB47BC', 0.12), color: '#AB47BC' }} />
+                                )}
+                                {alt.prob_btts_yes != null && (
+                                  <Chip label={`BTTS: ${(Number(alt.prob_btts_yes) * 100).toFixed(0)}%`} size="small" sx={{ height: 16, fontSize: '0.62rem', backgroundColor: alpha('#F26419', 0.12), color: '#F26419' }} />
+                                )}
+                                {alt.prob_under_3_5 != null && (
+                                  <Chip label={`U3.5: ${(Number(alt.prob_under_3_5) * 100).toFixed(0)}%`} size="small" sx={{ height: 16, fontSize: '0.62rem', backgroundColor: alpha('#26A69A', 0.12), color: '#26A69A' }} />
+                                )}
+                              </Box>
+                            )}
                             {(alt.country || alt.league) && (
                               <div style={{ fontSize: '0.75rem', color: '#9AA3B2', marginTop: 2 }}>
                                 {alt.country ? `${alt.country} • ` : ''}{alt.league || ''}

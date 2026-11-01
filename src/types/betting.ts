@@ -6,6 +6,20 @@ export type TriggerType = 'manual' | 'automatic'
 export type AlignmentRemark = 'very_high' | 'high' | 'medium' | 'low' | 'very_low'
 export type EdgeRemark = 'very_high' | 'high' | 'medium' | 'low' | 'very_low'
 
+export interface MarketEvaluationItem {
+  market: string
+  selection: string
+  probability: number
+  odds?: number | null
+  breakeven_probability?: number | null
+  edge_percentage_points?: number | null
+  expected_value?: number | null
+  historical_probability?: number | null
+  alignment_delta_pp?: number | null
+  alignment_remark?: AlignmentRemark | null
+  edge_remark?: EdgeRemark | null
+}
+
 export interface BettingModel {
   id: number
   uuid: string
@@ -107,6 +121,11 @@ export interface BettingSelection {
   alignment_delta_pp?: number | null
   alignment_remark?: AlignmentRemark | null
   edge_remark?: EdgeRemark | null
+  prob_over_1_5?: number | null
+  prob_over_2_5?: number | null
+  prob_btts_yes?: number | null
+  prob_under_3_5?: number | null
+  market_evaluations?: Record<string, MarketEvaluationItem> | null
   actual_home_score: number | null
   actual_away_score: number | null
   result: SelectionResultStatus
@@ -163,6 +182,11 @@ export interface BettingAlternative {
   alignment_delta_pp?: number | null
   alignment_remark?: AlignmentRemark | null
   edge_remark?: EdgeRemark | null
+  prob_over_1_5?: number | null
+  prob_over_2_5?: number | null
+  prob_btts_yes?: number | null
+  prob_under_3_5?: number | null
+  market_evaluations?: Record<string, MarketEvaluationItem> | null
   actual_home_score: number | null
   actual_away_score: number | null
   result: SelectionResultStatus
@@ -324,6 +348,11 @@ export interface TicketImportJSON {
     alignment_delta_pp?: number | null
     alignment_remark?: AlignmentRemark | null
     edge_remark?: EdgeRemark | null
+    prob_over_1_5?: number | null
+    prob_over_2_5?: number | null
+    prob_btts_yes?: number | null
+    prob_under_3_5?: number | null
+    market_evaluations?: Record<string, MarketEvaluationItem> | null
     actual_home_score?: number | null
     actual_away_score?: number | null
     result?: SelectionResultStatus
@@ -377,6 +406,11 @@ export interface TicketImportJSON {
     alignment_delta_pp?: number | null
     alignment_remark?: AlignmentRemark | null
     edge_remark?: EdgeRemark | null
+    prob_over_1_5?: number | null
+    prob_over_2_5?: number | null
+    prob_btts_yes?: number | null
+    prob_under_3_5?: number | null
+    market_evaluations?: Record<string, MarketEvaluationItem> | null
     actual_home_score?: number | null
     actual_away_score?: number | null
     result?: SelectionResultStatus
@@ -446,6 +480,11 @@ export interface TicketExportJSON {
     alignment_delta_pp?: number | null
     alignment_remark?: AlignmentRemark | null
     edge_remark?: EdgeRemark | null
+    prob_over_1_5?: number | null
+    prob_over_2_5?: number | null
+    prob_btts_yes?: number | null
+    prob_under_3_5?: number | null
+    market_evaluations?: Record<string, MarketEvaluationItem> | null
     actual_home_score: number | null
     actual_away_score: number | null
     result: SelectionResultStatus
@@ -497,6 +536,11 @@ export interface TicketExportJSON {
     alignment_delta_pp?: number | null
     alignment_remark?: AlignmentRemark | null
     edge_remark?: EdgeRemark | null
+    prob_over_1_5?: number | null
+    prob_over_2_5?: number | null
+    prob_btts_yes?: number | null
+    prob_under_3_5?: number | null
+    market_evaluations?: Record<string, MarketEvaluationItem> | null
     actual_home_score: number | null
     actual_away_score: number | null
     result: SelectionResultStatus

@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
 """
-Roy Betting Engine — Over 1.5 Focus (Model Version 2.1)
-Deterministic Statistical Engine & Poisson Value Calculator
+Roy Betting Engine — Multi-Market Goal Engine (Model Version 3.0)
+Focus: Both Teams to Score (Yes/No), Over 2.5, Under 3.5, and Over 1.5 Anchor
+Deterministic Statistical Engine & Multi-Market Poisson Value Calculator
 
 Complies strictly with:
-- betting-data/rules/model_2.1.md
+- betting-data/rules/model_3.0.md
 - betting-data/rules/organization_rules.md
 - src/types/betting.ts (TicketImportJSON & Warnings)
 """
@@ -16,9 +17,9 @@ import os
 import argparse
 from typing import Dict, List, Any, Optional, Tuple
 
-MODEL_NAME = "roys_betting_engine_over_1_5_goals"
-MODEL_VERSION = "2.1"
-DEFAULT_MODEL_UUID = "fe3bdd50-fac0-45fe-8783-836f20868bdc"
+MODEL_NAME = "roys_betting_engine_BTS_O2-5"
+MODEL_VERSION = "3.0"
+DEFAULT_MODEL_UUID = ""
 
 # Default league scoring baselines if unspecified
 DEFAULT_LEAGUE_HOME_GF = 1.50
@@ -51,7 +52,7 @@ def lookup_historical_baseline(league_name: Optional[str]) -> Tuple[float, float
 
 def get_confidence_label(prob: float) -> str:
     """
-    Model 2.1 Section 14: Probability Confidence Labels
+    Model 3.0 Section 14: Probability Confidence Labels
     """
     if prob >= 0.90:
         return "Extremely strong"
@@ -63,13 +64,15 @@ def get_confidence_label(prob: float) -> str:
         return "Good"
     elif prob >= 0.70:
         return "Moderate"
+    elif prob >= 0.55:
+        return "Fair (Viable for high-odds BTTS / Over 2.5)"
     else:
-        return "Weak for the Over 1.5-focused strategy"
+        return "Weak"
 
 
 def classify_alignment(delta_pp: float) -> str:
     """
-    Model 2.1 Section 5.1A: 5-Tier Model Alignment Classification
+    Model 3.0 Section 5.1A: 5-Tier Model Alignment Classification
     Delta is the absolute difference in percentage points between
     Primary live model and Historical benchmark: |P_primary - P_hist| * 100
     - very_high: Delta <= 1.5 pp
@@ -92,7 +95,7 @@ def classify_alignment(delta_pp: float) -> str:
 
 def classify_edge(edge_pp: float) -> str:
     """
-    Model 2.1 Section 15: 5-Tier Value Edge Classification
+    Model 3.0 Section 7: 5-Tier Value Edge Classification
     Edge is the difference between estimated probability and break-even:
     (P_est - P_breakeven) * 100
     - very_high: Edge > 15.0 pp
@@ -115,7 +118,7 @@ def classify_edge(edge_pp: float) -> str:
 
 def calculate_poisson_probabilities(lambda_home: float, lambda_away: float) -> Dict[str, float]:
     """
-    Model 2.1 Section 6: Poisson Probability Calculation
+    Model 3.0 Section 6: Poisson Probability Calculation
     P(0 goals) = e^(-lambda_total)
     P(1 goal)  = lambda_total * e^(-lambda_total)
     P(Over 1.5) = 1 - e^(-lambda_total) * (1 + lambda_total)
@@ -183,7 +186,7 @@ def calculate_poisson_probabilities(lambda_home: float, lambda_away: float) -> D
 
 def calculate_market_value(prob: float, odds: float) -> Dict[str, float]:
     """
-    Model 2.1 Section 15: Bookmaker Odds and Market Value
+    Model 3.0 Section 7: Bookmaker Odds and Market Value
     - Break-even probability = 1 / Decimal odds
     - Probability edge (pp) = (Model probability - Break-even probability) * 100
     - Expected value per unit staked = (Model probability * Decimal odds) - 1
@@ -217,7 +220,7 @@ def calculate_expected_goals(
     league_away_avg: float = DEFAULT_LEAGUE_AWAY_GF,
 ) -> Tuple[float, float, float, Dict[str, float]]:
     """
-    Model 2.1 Section 5: Expected Goals Calculation Method
+    Model 3.0 Section 5: Expected Goals Calculation Method
     - Home attacking strength = Home GF / League home avg
     - Away defensive weakness = Away GA / League home avg
     - lambda_home_base = League home avg * Home atk str * Away def weak
@@ -266,11 +269,13 @@ def detect_standard_warnings(
     h2h_notes: Optional[str] = None,
     team_news_verified: bool = False,
     extra_warnings: Optional[List[Dict[str, Any]]] = None,
+    lambda_home: float = 0.0,
+    lambda_away: float = 0.0,
 ) -> List[Dict[str, Any]]:
     """
-    Model 2.1 Section 16 & 16A: Automated Standardized Warnings Detection
+    Model 3.0 Section 8: Automated Standardized Warnings Detection
     Adheres strictly to the Decoupling Principle:
-    Warnings operate as an evidence layer and verdict filter,
+    Warnings operate as an evidence layer and risk filter,
     and DO NOT modify the numerical Poisson probability.
     """
     warnings: List[Dict[str, Any]] = []
@@ -354,6 +359,40 @@ def detect_standard_warnings(
             "review_notes": None,
         })
 
+    # 4b. One-Sided Scoring Risk (BTTS Threat)
+    if (lambda_home >= 2.0 and lambda_away <= 0.75) or (lambda_away >= 2.0 and lambda_home <= 0.75):
+        warnings.append({
+            "type": "ONE_SIDED_SCORING_RISK",
+            "severity": "HIGH",
+            "market_relevance": "DIRECT",
+            "direction": "CONTRADICTORY",
+            "description": "Severe attacking asymmetry: dominant side heavily favored while opponent exhibits low scoring potential.",
+            "evidence": f"Expected goals disparity (lambda_home: {lambda_home:.2f}, lambda_away: {lambda_away:.2f}) indicates elevated shutout/one-sided match probability.",
+            "verified": True,
+            "numerical_adjustment": False,
+            "pre_match_status": "PENDING",
+            "post_match_status": "PENDING",
+            "review_notes": None,
+        })
+
+    # 4c. Clean Sheet Dominance
+    if home_ga_per_game <= 0.50 or away_ga_per_game <= 0.50:
+        tight_team = home_team if home_ga_per_game <= 0.50 else away_team
+        tight_rate = home_ga_per_game if home_ga_per_game <= 0.50 else away_ga_per_game
+        warnings.append({
+            "type": "CLEAN_SHEET_DOMINANCE",
+            "severity": "HIGH" if tight_rate <= 0.40 else "MEDIUM",
+            "market_relevance": "DIRECT",
+            "direction": "CONTRADICTORY",
+            "description": f"{tight_team} exhibits elite defensive resistance with very low concession rate.",
+            "evidence": f"{tight_team} concedes only {tight_rate:.2f} GA/game at venue, suppressing opponent goal expectation and BTTS probability.",
+            "verified": True,
+            "numerical_adjustment": False,
+            "pre_match_status": "PENDING",
+            "post_match_status": "PENDING",
+            "review_notes": None,
+        })
+
     # 5. H2H Check if notes provide evidence
     if h2h_notes and any(term in h2h_notes.lower() for term in ["low-scoring", "0-0", "1-0", "tight", "tactical"]):
         warnings.append({
@@ -412,9 +451,10 @@ def determine_verdict(
     ev: float,
     warnings: List[Dict[str, Any]],
     min_matches: int,
+    selection_type: str = "Over 1.5",
 ) -> Tuple[str, str]:
     """
-    Model 2.1 Section 17: Final Decision Rule
+    Model 3.0 Section 10: Final Decision Rule
     SELECT / CAUTION / NO BET
     """
     critical_warnings = [w for w in warnings if w.get("severity") == "CRITICAL"]
@@ -428,8 +468,16 @@ def determine_verdict(
     if critical_warnings or min_matches <= 2:
         return "NO BET", "Extreme small-sample distortion or critical unresolved risk renders the statistical signal uncalibrated."
 
-    if prob < 0.70:
-        return "NO BET", f"Estimated Over 1.5 probability ({prob*100:.1f}%) is well below the 70% threshold for the Over 1.5 strategy."
+    min_prob = 0.50
+    if selection_type in ["Over 1.5", "Over 1.5 Goals"]:
+        min_prob = 0.70
+    elif selection_type in ["Under 3.5", "Under 3.5 Goals"]:
+        min_prob = 0.65
+    elif selection_type in ["Over 2.5", "Over 2.5 Goals", "BTTS Yes", "Both Teams to Score", "Yes"]:
+        min_prob = 0.52
+
+    if prob < min_prob:
+        return "NO BET", f"Estimated {selection_type} probability ({prob*100:.1f}%) is below the {min_prob*100:.0f}% threshold for this market."
 
     if ev < -0.10 or edge_pp < -10.0:
         return "NO BET", f"Significant negative expected value ({ev:+.3f}) and pricing mismatch ({edge_pp:+.1f}pp edge) violate Principle 8."
@@ -445,7 +493,8 @@ def determine_verdict(
         return "CAUTION", f"High probability ({prob*100:.1f}%), but pricing offers no positive edge ({edge_pp:+.1f}pp). Disclosed under Principle 9."
 
     # Strong selections -> SELECT
-    if prob >= 0.80 and edge_pp >= 0:
+    select_prob_threshold = 0.78 if selection_type in ["Over 1.5", "Over 1.5 Goals"] else (0.68 if selection_type in ["Under 3.5", "Under 3.5 Goals"] else 0.56)
+    if prob >= select_prob_threshold and edge_pp >= 0:
         return "SELECT", f"Strong probability ({prob*100:.1f}%) supported by positive edge (+{edge_pp:.1f}pp, EV {ev:+.3f}) and acceptable risk profile."
 
     return "CAUTION", f"Viable probability ({prob*100:.1f}%), but edge is modest (+{edge_pp:.1f}pp) and requires risk awareness."
@@ -453,7 +502,7 @@ def determine_verdict(
 
 def evaluate_match(fixture: Dict[str, Any]) -> Dict[str, Any]:
     """
-    Main evaluation pipeline for a single fixture according to Model 2.1.
+    Main evaluation pipeline for a single fixture according to Model 3.0.
     """
     home_team = fixture["home_team"]
     away_team = fixture["away_team"]
@@ -481,7 +530,7 @@ def evaluate_match(fixture: Dict[str, Any]) -> Dict[str, Any]:
     overall_away_gf_per_game = round(away_gf / away_matches, 2) if away_matches > 0 else 1.2
     overall_away_ga_per_game = round(away_ga / away_matches, 2) if away_matches > 0 else 1.5
 
-    # Venue-Specific Stats (Strict Requirement under Model 2.1 Section 5.0)
+    # Venue-Specific Stats (Strict Requirement under Model 3.0 Section 5.0)
     has_venue_stats = (
         "home_venue_matches" in fixture and
         "home_venue_goals_scored" in fixture and
@@ -532,8 +581,8 @@ def evaluate_match(fixture: Dict[str, Any]) -> Dict[str, Any]:
             "actual_away_score": None,
             "result": "pending",
             "verdict": "INSUFFICIENT DATA",
-            "comment": f"INSUFFICIENT DATA. Calculation halted for {home_team} vs {away_team}: Missing venue-specific statistics ({', '.join(missing_fields)}). Under Model 2.1 Section 5.0 Hard-Stop Rule, full-season aggregates cannot be substituted for lambda.",
-            "notes": f"Missing venue-specific home/away stats. Calculation halted per Model 2.1 Section 5.0.",
+            "comment": f"INSUFFICIENT DATA. Calculation halted for {home_team} vs {away_team}: Missing venue-specific statistics ({', '.join(missing_fields)}). Under Model 3.0 Section 5.0 Hard-Stop Rule, full-season aggregates cannot be substituted for lambda.",
+            "notes": f"Missing venue-specific home/away stats. Calculation halted per Model 3.0 Section 5.0.",
             "ratios": {},
             "data_quality": "INSUFFICIENT DATA",
             "warnings": [
@@ -602,29 +651,41 @@ def evaluate_match(fixture: Dict[str, Any]) -> Dict[str, Any]:
     )
     hist_poisson = calculate_poisson_probabilities(hist_lambda_home, hist_lambda_away)
     hist_target_prob = hist_poisson["p_over_1_5"]
-    if selection_type == "Over 2.5":
+    if selection_type in ["Over 2.5", "Over 2.5 Goals"]:
         hist_target_prob = hist_poisson["p_over_2_5"]
-    elif selection_type == "Under 2.5":
+    elif selection_type in ["Under 2.5", "Under 2.5 Goals"]:
         hist_target_prob = hist_poisson["p_under_2_5"]
-    elif selection_type == "Under 3.5":
+    elif selection_type in ["Under 3.5", "Under 3.5 Goals"]:
         hist_target_prob = hist_poisson["p_under_3_5"]
+    elif selection_type in ["BTTS Yes", "Both Teams to Score", "Yes"]:
+        hist_target_prob = hist_poisson["p_btts_yes"]
+    elif selection_type in ["BTTS No", "No"]:
+        hist_target_prob = hist_poisson["p_btts_no"]
+    elif selection_type in ["Over 1.5", "Over 1.5 Goals"]:
+        hist_target_prob = hist_poisson["p_over_1_5"]
 
     # 2. Poisson Probabilities (Section 6)
     poisson = calculate_poisson_probabilities(lambda_home, lambda_away)
 
     # 3. Market Selection Target Probability
     target_prob = poisson["p_over_1_5"]
-    if selection_type == "Over 2.5":
+    if selection_type in ["Over 2.5", "Over 2.5 Goals"]:
         target_prob = poisson["p_over_2_5"]
-    elif selection_type == "Under 2.5":
+    elif selection_type in ["Under 2.5", "Under 2.5 Goals"]:
         target_prob = poisson["p_under_2_5"]
-    elif selection_type == "Under 3.5":
+    elif selection_type in ["Under 3.5", "Under 3.5 Goals"]:
         target_prob = poisson["p_under_3_5"]
+    elif selection_type in ["BTTS Yes", "Both Teams to Score", "Yes"]:
+        target_prob = poisson["p_btts_yes"]
+    elif selection_type in ["BTTS No", "No"]:
+        target_prob = poisson["p_btts_no"]
+    elif selection_type in ["Over 1.5", "Over 1.5 Goals"]:
+        target_prob = poisson["p_over_1_5"]
 
     # 4. Market Value (Section 15)
     market_val = calculate_market_value(target_prob, odds)
 
-    # 5. Warnings Detection (Section 16)
+    # 5. Warnings Detection (Section 8)
     h2h_notes = fixture.get("h2h_notes")
     team_news_verified = fixture.get("team_news_verified", False)
     extra_warnings = fixture.get("extra_warnings", [])
@@ -641,15 +702,18 @@ def evaluate_match(fixture: Dict[str, Any]) -> Dict[str, Any]:
         h2h_notes=h2h_notes,
         team_news_verified=team_news_verified,
         extra_warnings=extra_warnings,
+        lambda_home=lambda_home,
+        lambda_away=lambda_away,
     )
 
-    # 6. Final Verdict (Section 17)
+    # 6. Final Verdict (Section 10)
     verdict, verdict_reason = determine_verdict(
         prob=target_prob,
         edge_pp=market_val["edge_percentage_points"],
         ev=market_val["expected_value"],
         warnings=warnings,
         min_matches=calc_min_matches,
+        selection_type=selection_type,
     )
 
     # Human-readable commentary & notes
@@ -667,10 +731,43 @@ def evaluate_match(fixture: Dict[str, Any]) -> Dict[str, Any]:
 
     notes = "; ".join(notes_parts) if notes_parts else "Statistically stable sample with consistent goal output across leagues."
 
-    # 7. Alignment & Edge Categorization (Model 2.1 Section 5.1A & 15)
+    # 6b. Dual Contribution Index (DCI) - Game Openness
+    max_lambda = max(lambda_home, lambda_away)
+    min_lambda = min(lambda_home, lambda_away)
+    dci = round(min_lambda / max_lambda, 3) if max_lambda > 0 else 0.0
+
+    # 7. Alignment & Edge Categorization (Model 3.0 Section 5.1A & 7)
     align_delta_pp = round(abs(target_prob - hist_target_prob) * 100.0, 2)
     align_rem = classify_alignment(align_delta_pp)
     edge_rem = classify_edge(market_val["edge_percentage_points"])
+
+    def build_eval_item(m_name, s_name, p_val, hist_p_val, m_odds=None):
+        delta = round(abs(p_val - hist_p_val) * 100.0, 2)
+        item = {
+            "market": m_name,
+            "selection": s_name,
+            "probability": round(p_val, 4),
+            "historical_probability": round(hist_p_val, 4),
+            "alignment_delta_pp": delta,
+            "alignment_remark": classify_alignment(delta),
+        }
+        if m_odds and m_odds > 1.0:
+            val = calculate_market_value(p_val, m_odds)
+            item.update({
+                "odds": val["odds"],
+                "breakeven_probability": val["breakeven_probability"],
+                "edge_percentage_points": val["edge_percentage_points"],
+                "expected_value": val["expected_value"],
+                "edge_remark": classify_edge(val["edge_percentage_points"]),
+            })
+        return item
+
+    market_evaluations = {
+        "over_1_5": build_eval_item("Over/Under", "Over 1.5", poisson["p_over_1_5"], hist_poisson["p_over_1_5"], fixture.get("odds_over_1_5", odds if selection_type in ["Over 1.5", "Over 1.5 Goals"] else None)),
+        "over_2_5": build_eval_item("Over/Under", "Over 2.5", poisson["p_over_2_5"], hist_poisson["p_over_2_5"], fixture.get("odds_over_2_5", odds if selection_type in ["Over 2.5", "Over 2.5 Goals"] else None)),
+        "btts_yes": build_eval_item("Both Teams to Score", "Yes", poisson["p_btts_yes"], hist_poisson["p_btts_yes"], fixture.get("odds_btts_yes", odds if selection_type in ["BTTS Yes", "Both Teams to Score", "Yes"] else None)),
+        "under_3_5": build_eval_item("Over/Under", "Under 3.5", poisson["p_under_3_5"], hist_poisson["p_under_3_5"], fixture.get("odds_under_3_5", odds if selection_type in ["Under 3.5", "Under 3.5 Goals"] else None)),
+    }
 
     return {
         "match_date": match_date,
@@ -710,6 +807,12 @@ def evaluate_match(fixture: Dict[str, Any]) -> Dict[str, Any]:
         "breakeven_probability": market_val["breakeven_probability"],
         "edge_percentage_points": market_val["edge_percentage_points"],
         "expected_value": market_val["expected_value"],
+        "prob_over_1_5": poisson["p_over_1_5"],
+        "prob_over_2_5": poisson["p_over_2_5"],
+        "prob_btts_yes": poisson["p_btts_yes"],
+        "prob_under_3_5": poisson["p_under_3_5"],
+        "dual_contribution_index": dci,
+        "market_evaluations": market_evaluations,
         "actual_home_score": None,
         "actual_away_score": None,
         "result": "pending",
@@ -718,6 +821,66 @@ def evaluate_match(fixture: Dict[str, Any]) -> Dict[str, Any]:
         "notes": notes,
         "ratios": ratios,
         "warnings": warnings,
+    }
+
+
+# Format selections / alternatives for app import or candidate catalog
+def clean_selection(item: Dict[str, Any]) -> Dict[str, Any]:
+    return {
+        "match_date": item.get("match_date"),
+        "country": item.get("country"),
+        "league": item.get("league"),
+        "home_team": item.get("home_team"),
+        "away_team": item.get("away_team"),
+        "home_league_position": item.get("home_league_position"),
+        "away_league_position": item.get("away_league_position"),
+        "home_matches_played": item.get("home_matches_played"),
+        "away_matches_played": item.get("away_matches_played"),
+        "home_goals_scored": item.get("home_goals_scored"),
+        "home_goals_conceded": item.get("home_goals_conceded"),
+        "away_goals_scored": item.get("away_goals_scored"),
+        "away_goals_conceded": item.get("away_goals_conceded"),
+        "home_goals_per_game": item.get("home_goals_per_game"),
+        "home_conceded_per_game": item.get("home_conceded_per_game"),
+        "away_goals_per_game": item.get("away_goals_per_game"),
+        "away_conceded_per_game": item.get("away_conceded_per_game"),
+        "market": item.get("market", "Over/Under"),
+        "selection": item.get("selection", "Over 1.5"),
+        "odds": item.get("odds"),
+        "estimated_probability": item.get("estimated_probability"),
+        "breakeven_probability": item.get("breakeven_probability"),
+        "edge_percentage_points": item.get("edge_percentage_points"),
+        "expected_value": item.get("expected_value"),
+        "current_league_home_avg": item.get("current_league_home_avg"),
+        "current_league_away_avg": item.get("current_league_away_avg"),
+        "historical_league_home_avg": item.get("historical_league_home_avg"),
+        "historical_league_away_avg": item.get("historical_league_away_avg"),
+        "historical_estimated_probability": item.get("historical_estimated_probability"),
+        "alignment_delta_pp": item.get("alignment_delta_pp"),
+        "alignment_remark": item.get("alignment_remark"),
+        "edge_remark": item.get("edge_remark"),
+        "prob_over_1_5": item.get("prob_over_1_5"),
+        "prob_over_2_5": item.get("prob_over_2_5"),
+        "prob_btts_yes": item.get("prob_btts_yes"),
+        "prob_under_3_5": item.get("prob_under_3_5"),
+        "dual_contribution_index": item.get("dual_contribution_index"),
+        "market_evaluations": item.get("market_evaluations"),
+        "actual_home_score": None,
+        "actual_away_score": None,
+        "result": "pending",
+        "comment": item.get("comment"),
+        "notes": item.get("notes"),
+        "warnings": [
+            {
+                "type": w["type"],
+                "severity": w.get("severity", "MEDIUM"),
+                "market_relevance": w.get("market_relevance", "DIRECT"),
+                "direction": w.get("direction", "CONTRADICTORY"),
+                "description": w.get("description", ""),
+                "evidence": w.get("evidence", ""),
+            }
+            for w in item.get("warnings", [])
+        ],
     }
 
 
@@ -747,63 +910,10 @@ def generate_ticket_payload(
 
     if not ticket_notes:
         ticket_notes = (
-            f"{len(selections)}-leg ticket evaluated with Roy's Betting Engine Over 1.5 Focus v2.1. "
+            f"{len(selections)}-leg ticket evaluated with Roy's Betting Engine BTS & Over 2.5 Focus v3.0. "
             f"Combined odds: {combined_odds}; aggregate estimated probability: {agg_prob} vs "
             f"break-even probability: {round(1.0/combined_odds, 3) if combined_odds > 0 else 0}."
         )
-
-    # Format selections for app import
-    def clean_selection(item: Dict[str, Any]) -> Dict[str, Any]:
-        return {
-            "match_date": item.get("match_date"),
-            "country": item.get("country"),
-            "league": item.get("league"),
-            "home_team": item.get("home_team"),
-            "away_team": item.get("away_team"),
-            "home_league_position": item.get("home_league_position"),
-            "away_league_position": item.get("away_league_position"),
-            "home_matches_played": item.get("home_matches_played"),
-            "away_matches_played": item.get("away_matches_played"),
-            "home_goals_scored": item.get("home_goals_scored"),
-            "home_goals_conceded": item.get("home_goals_conceded"),
-            "away_goals_scored": item.get("away_goals_scored"),
-            "away_goals_conceded": item.get("away_goals_conceded"),
-            "home_goals_per_game": item.get("home_goals_per_game"),
-            "home_conceded_per_game": item.get("home_conceded_per_game"),
-            "away_goals_per_game": item.get("away_goals_per_game"),
-            "away_conceded_per_game": item.get("away_conceded_per_game"),
-            "market": item.get("market", "Over/Under"),
-            "selection": item.get("selection", "Over 1.5"),
-            "odds": item.get("odds"),
-            "estimated_probability": item.get("estimated_probability"),
-            "breakeven_probability": item.get("breakeven_probability"),
-            "edge_percentage_points": item.get("edge_percentage_points"),
-            "expected_value": item.get("expected_value"),
-            "current_league_home_avg": item.get("current_league_home_avg"),
-            "current_league_away_avg": item.get("current_league_away_avg"),
-            "historical_league_home_avg": item.get("historical_league_home_avg"),
-            "historical_league_away_avg": item.get("historical_league_away_avg"),
-            "historical_estimated_probability": item.get("historical_estimated_probability"),
-            "alignment_delta_pp": item.get("alignment_delta_pp"),
-            "alignment_remark": item.get("alignment_remark"),
-            "edge_remark": item.get("edge_remark"),
-            "actual_home_score": None,
-            "actual_away_score": None,
-            "result": "pending",
-            "comment": item.get("comment"),
-            "notes": item.get("notes"),
-            "warnings": [
-                {
-                    "type": w["type"],
-                    "severity": w.get("severity", "MEDIUM"),
-                    "market_relevance": w.get("market_relevance", "DIRECT"),
-                    "direction": w.get("direction", "CONTRADICTORY"),
-                    "description": w.get("description", ""),
-                    "evidence": w.get("evidence", ""),
-                }
-                for w in item.get("warnings", [])
-            ],
-        }
 
     return {
         "ticket": {
@@ -825,13 +935,31 @@ def generate_ticket_payload(
     }
 
 
+def generate_candidates_payload(
+    candidates: List[Dict[str, Any]],
+    date: str = "2026-11-02",
+) -> Dict[str, Any]:
+    """
+    Builds the candidates_<date>.json structure cataloging all good/promising
+    fixtures evaluated for that day for user review, comparison, and model training.
+    """
+    return {
+        "catalog_type": "daily_evaluated_candidates",
+        "date": date,
+        "model_version": MODEL_VERSION,
+        "model_name": MODEL_NAME,
+        "total_matches": len(candidates),
+        "candidates": [clean_selection(c) for c in candidates],
+    }
+
+
 def format_markdown_summary_table(evaluated_fixtures: List[Dict[str, Any]]) -> str:
     """
     Renders the clean markdown summary comparison table with companion Historical Prob,
-    Alignment Delta & Remark, and Value Edge & Remark columns.
+    Alignment Delta & Remark, and Multi-Market Matrix columns.
     """
     lines = [
-        "| Match | Market & Odds | Roy's Prob | Hist. Prob | Alignment (Delta & Remark) | Edge (pp) & Remark | EV | Verdict | Warnings Summary |",
+        "| Match | Market & Odds | Selected Prob | Hist. Prob | Alignment (Delta & Remark) | Edge & EV | Multi-Market Matrix (O1.5 / O2.5 / BTTS / U3.5) | Verdict | Warnings Summary |",
         "| :--- | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :--- |",
     ]
 
@@ -858,8 +986,16 @@ def format_markdown_summary_table(evaluated_fixtures: List[Dict[str, Any]]) -> s
         warn_list = [w['type'] for w in f.get('warnings', [])]
         warn_str = ", ".join(f"`{w}`" for w in warn_list) if warn_list else "_None_"
 
+        edge_ev_str = f"{edge_str} / {ev_str}" if edge_str != "*N/A*" else "*N/A*"
+        dci_val = f.get('dual_contribution_index')
+        dci_str = f" | DCI: {dci_val:.2f}" if dci_val is not None else ""
+        m_matrix = (
+            f"O1.5: {f.get('prob_over_1_5', 0)*100:.0f}% | O2.5: {f.get('prob_over_2_5', 0)*100:.0f}% | BTTS: {f.get('prob_btts_yes', 0)*100:.0f}% | U3.5: {f.get('prob_under_3_5', 0)*100:.0f}%{dci_str}"
+            if f.get('prob_over_1_5') is not None
+            else "—"
+        )
         lines.append(
-            f"| {match_str} | {market_str} | {prob_str} | {hist_str} | {align_str} | {edge_str} | {ev_str} | {verdict_str} | {warn_str} |"
+            f"| {match_str} | {market_str} | {prob_str} | {hist_str} | {align_str} | {edge_ev_str} | {m_matrix} | {verdict_str} | {warn_str} |"
         )
 
     return "\n".join(lines)
@@ -869,11 +1005,11 @@ def format_markdown_summary_table(evaluated_fixtures: List[Dict[str, Any]]) -> s
 
 def run_self_tests():
     """
-    Validates mathematical compliance against Model 2.1 specifications:
+    Validates mathematical compliance against Model 3.0 specifications:
     - Section 5.0: Hard-Stop Rule halts calculation if venue splits are missing
     - Section 6: lambda=2.37 gives raw Over 1.5 prob ~= 68.5%
-    - Section 15: break-even, edge, EV calculations
-    - Clean Poisson sum formulation
+    - Section 7: break-even, edge, EV calculations
+    - Clean Multi-Market Poisson, BTTS, and Dual Contribution Index (DCI) formulation
     """
     # Test 1: Poisson formula with lambda = 2.37
     p = calculate_poisson_probabilities(1.20, 1.17)
@@ -960,16 +1096,29 @@ def run_self_tests():
     assert classify_edge(-5.0) == "low"
     assert classify_edge(-15.0) == "very_low"
 
-    print("✅ All Model 2.1 mathematical self-tests and Hard-Stop validations passed successfully!")
+    # Test 7: Multi-market companion probabilities & DCI
+    assert "prob_over_1_5" in walsall_res
+    assert "prob_over_2_5" in walsall_res
+    assert "prob_btts_yes" in walsall_res
+    assert "prob_under_3_5" in walsall_res
+    assert "dual_contribution_index" in walsall_res
+    assert walsall_res["dual_contribution_index"] > 0
+    assert "market_evaluations" in walsall_res
+    assert "over_2_5" in walsall_res["market_evaluations"]
+    assert "btts_yes" in walsall_res["market_evaluations"]
+
+    print("✅ All Model 3.0 multi-market mathematical self-tests and Hard-Stop validations passed successfully!")
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Roy Betting Engine Model 2.1 Calculation Script")
+    parser = argparse.ArgumentParser(description="Roy Betting Engine Model 3.0 Calculation Script")
     parser.add_argument("--test", action="store_true", help="Run internal mathematical unit tests")
     parser.add_argument("--input", type=str, help="Path to JSON file containing list of fixtures to evaluate")
     parser.add_argument("--output-json", type=str, help="Path to output evaluated TicketImportJSON")
-    parser.add_argument("--ticket-number", type=str, default="S-22-v2.1", help="Ticket number attribute")
+    parser.add_argument("--candidates-json", type=str, help="Path to output evaluated candidates JSON catalog")
+    parser.add_argument("--ticket-number", type=str, default="S-1-v3.0", help="Ticket number attribute")
     parser.add_argument("--stake", type=float, default=100.0, help="Stake in currency")
+    parser.add_argument("--date", type=str, default="2026-11-02", help="Date for ticket or candidate catalog")
 
     args = parser.parse_args()
 
@@ -989,10 +1138,20 @@ if __name__ == "__main__":
                 ticket_number=args.ticket_number,
                 selections=evaluated,
                 stake=args.stake,
+                ticket_date=args.date,
             )
             with open(args.output_json, "w", encoding="utf-8") as out_f:
                 json.dump(ticket_payload, out_f, indent=2)
             print(f"\nSaved TicketImportJSON to {args.output_json}")
+
+        if args.candidates_json:
+            cand_payload = generate_candidates_payload(
+                candidates=evaluated,
+                date=args.date,
+            )
+            with open(args.candidates_json, "w", encoding="utf-8") as out_c:
+                json.dump(cand_payload, out_c, indent=2)
+            print(f"Saved Candidate Catalog to {args.candidates_json}")
     else:
         # Run self-test if called without arguments
         run_self_tests()

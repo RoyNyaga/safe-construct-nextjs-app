@@ -1,6 +1,6 @@
 # ROY'S BETTING ENGINE — ANTIGRAVITY WORKFLOW & PROMPTING GUIDE
 
-This guide provides the exact prompts and workflow to follow at every level of the betting lifecycle. With this setup, Antigravity replaces ChatGPT, handles batch processing, runs deterministic calculations via `betting-data/scripts/calculate_model.py`, and automatically adheres to [`model_2.1.md`](file:///Users/macitosh/Documents/Programming/nextjs/safe-consruct-nextjs-app/betting-data/rules/model_2.1.md) and [`organization_rules.md`](file:///Users/macitosh/Documents/Programming/nextjs/safe-consruct-nextjs-app/betting-data/rules/organization_rules.md).
+This guide provides the exact prompts and workflow to follow at every level of the betting lifecycle. With this setup, Antigravity handles batch processing, runs deterministic calculations via `betting-data/scripts/calculate_model.py`, and automatically adheres to [`model_3.0.md`](file:///d:/Programming/nextjs/safe-construct-nextjs-app/betting-data/rules/model_3.0.md) and [`organization_rules.md`](file:///d:/Programming/nextjs/safe-construct-nextjs-app/betting-data/rules/organization_rules.md).
 
 ---
 
@@ -8,85 +8,96 @@ This guide provides the exact prompts and workflow to follow at every level of t
 
 | Level | Goal | Copy-Paste Prompt Template |
 | :--- | :--- | :--- |
-| **Level 1** | **Batch Evaluate Matches** | `Evaluate today's matches according to Model 2.1: [Paste matches and Betmomo odds]. Save results and summary table to betting-data/<month>/evaluation_<date>.md.` |
-| **Level 2** | **Generate Import Ticket** | `From evaluation_<date>.md, set selections: [Match A, Match B], alternatives: [Match C]. Stake: [e.g. 2000]. Generate ticket_<date>_001.json for app import.` |
+| **One-Step Flow** | **Evaluate & Auto-Generate Ticket + Candidates** | `Evaluate today's matches for [DATE] according to our selection process: [Paste matches and Betmomo odds]. Stake: [e.g. 2000]. Generate evaluation_<date>.md, candidates_<date>.json, and ticket_<date>_001.json.` |
+| **Level 1** | **Batch Multi-Market Evaluation Only** | `Evaluate today's matches according to Model 3.0: [Paste matches and market odds]. Save results and summary table to betting-data/<month>/evaluation_<date>.md.` |
+| **Level 2** | **Manual Ticket Customization / Swap** | `From evaluation_<date>.md or candidates_<date>.json, swap [Selection X] with [Candidate Y] in ticket_<date>_001.json.` |
 | **Level 3** | **Check Scores** | `Check live/final scores for ticket [ticket_number or date].` |
-| **Level 4** | **Ticket Review** | `Review our settled ticket [ticket_number or date]: [Paste exported ticket JSON]. Let's analyze model accuracy vs actuals.` |
+| **Level 4** | **Ticket Review** | `Review our settled ticket [ticket_number or date]: [Paste exported ticket JSON]. Let's analyze model calibration vs actuals across BTTS, Over 2.5, and Over 1.5.` |
 | **Level 5** | **Batch Warnings Update** | `Evaluate these post-match warnings and generate the WarningBatchUpdateJSON: [Paste warnings export payload].` |
 
 ---
 
 ## LEVEL 1: Batch Match Pre-Screening & Evaluation
 
-Instead of feeding games one by one into ChatGPT, gather all your shortlisted games and their Over 1.5 odds from Betmomo, and send them all at once.
+Gather shortlisted fixtures and their candidate market odds (BTTS Yes, Over 2.5, Over 1.5, Under 3.5), and submit them together.
 
 ### Option A: Direct Prompt (Recommended for 3–10 matches)
 ```text
-Evaluate today's matches (2026-10-25) according to Model 2.1:
+Evaluate today's matches (2026-11-02) according to Model 3.0:
 
-Barcelona vs Real Madrid | Over 1.5 @ 1.22
-Chelsea vs Tottenham | Over 1.5 @ 1.17
-Lazio vs Parma | Over 1.5 @ 1.26
-Augsburg vs Union Berlin | Over 1.5 @ 1.12
-Arsenal vs Everton | Over 1.5 @ 1.29
+Eintracht Frankfurt vs Hamburger SV | BTTS Yes @ 1.68 | Over 2.5 @ 1.72 | Over 1.5 @ 1.19
+Olympique Lyonnais vs Angers SCO | Over 2.5 @ 1.64 | BTTS Yes @ 1.75 | Over 1.5 @ 1.21
+Athletic Bilbao vs Real Sociedad | Under 3.5 @ 1.33 | BTTS Yes @ 2.05 | Over 1.5 @ 1.40
 
-Please search for pre-match statistics, run calculate_model.py, and save the full evaluation and summary table to betting-data/october/evaluation_2026-10-25.md.
+Please search for pre-match statistics, run calculate_model.py, and save the full evaluation and summary table to betting-data/november/evaluation_2026-11-02.md.
 ```
 
 ### Option B: File-Based (Recommended for 10+ matches)
-1. Create or paste your list into `betting-data/<month>/matches_input_YYYY-MM-DD.txt`:
-   ```text
-   Barcelona vs Real Madrid | Over 1.5 @ 1.22
-   Chelsea vs Tottenham | Over 1.5 @ 1.17
-   Lazio vs Parma | Over 1.5 @ 1.26
-   ...
-   ```
+1. Create or paste your list into `betting-data/<month>/matches_input_YYYY-MM-DD.txt`.
 2. Prompt Antigravity:
    ```text
-   Please evaluate all matches in betting-data/october/matches_input_2026-10-25.txt according to Model 2.1 and generate betting-data/october/evaluation_2026-10-25.md.
+   Please evaluate all matches in betting-data/november/matches_input_2026-11-02.txt according to Model 3.0 and generate betting-data/november/evaluation_2026-11-02.md.
    ```
 
 ### What Antigravity Does:
 1. **Mandatory Two-Stage Research**:
-   - Gathers both the overall league table AND the separate venue-specific splits (**Home record for the host**, **Away record for the visitor**).
+   - Gathers both the overall league table AND separate venue-specific splits (**Home record for the host**, **Away record for the visitor**).
 2. **HARD STOP RULE**:
    - If venue-specific splits (`home_matches_at_home`, `home_gf_at_home`, `home_ga_at_home`, `away_matches_away`, `away_gf_away`, `away_ga_away`) are missing, Antigravity **MUST NOT proceed with calculating probabilities**.
-   - It will mark the fixture as **INSUFFICIENT DATA** and explicitly alert you in chat that probabilities could not be calculated due to missing venue data.
-3. Runs `betting-data/scripts/calculate_model.py` with verified venue splits to calculate exact Poisson Over 1.5 probabilities, break-even odds, edge, and EV.
-4. Automatically detects standard warnings (`SMALL_SAMPLE`, `LOW_AWAY_SCORING`, `H2H_LOW_GOALS`, etc.) under the **Decoupling Principle** (warnings filter verdicts, but never arbitrarily subtract percentage points from Poisson).
+   - It marks the fixture as **INSUFFICIENT DATA** and explicitly alerts you in chat.
+3. Runs `betting-data/scripts/calculate_model.py` with verified venue splits to calculate bivariate Poisson expected goals ($\lambda_{home}, \lambda_{away}$) across all 4 markets:
+   - $P(\text{Over } 1.5)$
+   - $P(\text{Over } 2.5)$
+   - $P(\text{BTTS Yes})$
+   - $P(\text{Under } 3.5)$
+4. Automatically detects standard multi-market warnings (`ONE_SIDED_SCORING_RISK`, `CLEAN_SHEET_DOMINANCE`, `STRONG_DEFENSIVE_MATCHUP`, `SMALL_SAMPLE`, etc.).
 5. Saves everything to `betting-data/<month>/evaluation_YYYY-MM-DD.md` and displays the **Summary Decision Table**:
 
-| Match | Market & Odds | Roy's Prob | Hist. Prob | Break-Even | Edge (pp) | EV | Verdict | Warnings Summary |
-| :--- | :--- | :---: | :---: | :---: | :---: | :---: | :--- | :--- |
-| **Chelsea vs Tottenham** | Over 1.5 @ 1.17 | 87.9% | 86.5% | 85.5% | +2.4 | +0.029 | **SELECT** | `TEAM_NEWS_UNVERIFIED` |
-| **Lazio vs Parma** | Over 1.5 @ 1.26 | 76.0% | 75.4% | 79.4% | -3.3 | -0.042 | **CAUTION** | `LOW_AWAY_SCORING`, `TEAM_NEWS_UNVERIFIED` |
-| **Arsenal vs Everton** | Over 1.5 @ 1.29 | 59.0% | 61.2% | 77.5% | -18.5 | -0.239 | **NO BET** | `STRONG_DEFENSIVE_MATCHUP` |
+| Match | Pick & Odds | Roy's Prob | Break-Even | Edge (pp) | EV | Multi-Market Matrix | Verdict | Warnings Summary |
+| :--- | :--- | :---: | :---: | :---: | :---: | :--- | :--- | :--- |
+| **Frankfurt vs Hamburg** | BTTS Yes @ 1.68 | 65.8% | 59.5% | +6.3 | +0.105 | O1.5: 87% \| O2.5: 64% \| BTTS: 66% \| U3.5: 65% | **RECOMMENDED** | `None` |
+| **Lyon vs Angers** | Over 2.5 @ 1.64 | 62.6% | 61.0% | +1.6 | +0.027 | O1.5: 85% \| O2.5: 63% \| BTTS: 61% \| U3.5: 67% | **RECOMMENDED** | `ONE_SIDED_SCORING_RISK` |
+| **Bilbao vs Sociedad** | Under 3.5 @ 1.33 | 77.8% | 75.2% | +2.6 | +0.035 | O1.5: 74% \| O2.5: 46% \| BTTS: 51% \| U3.5: 78% | **CONSIDER** | `DERBY_MATCH_VOLATILITY` |
 
 ---
 
-## LEVEL 2: Ticket Selection & App Import JSON Generation
+## THE AUTOMATED SELECTION WORKFLOW (RECOMMENDED)
 
-After reviewing the Summary Table in `evaluation_YYYY-MM-DD.md`, decide which games are your primary **selections** and which are **alternatives**.
+You no longer need to manually shortlist games or do back-and-forth preview loops. Feed your match options and Betmomo odds to Antigravity in one single prompt.
+
+### The Single-Step Automated Prompt:
+```text
+Evaluate today's matches (2026-11-02) according to our selection process:
+
+Eintracht Frankfurt vs Hamburger SV | BTTS Yes @ 1.68 | Over 2.5 @ 1.72 | Over 1.5 @ 1.19
+Olympique Lyonnais vs Angers SCO | Over 2.5 @ 1.64 | BTTS Yes @ 1.75 | Over 1.5 @ 1.21
+Athletic Bilbao vs Real Sociedad | Under 3.5 @ 1.33 | BTTS Yes @ 2.05 | Over 1.5 @ 1.40
+Hellas Verona vs Carrarese | Over 1.5 @ 1.28 | Over 2.5 @ 1.95
+Juventus vs SSC Napoli | BTTS Yes @ 1.88 | Under 3.5 @ 1.25
+
+Stake: 2000 FCFA. Please generate the full evaluation, ticket_2026-11-02_001.json, and candidates_2026-11-02.json according to selection_process.md.
+```
+
+### What Antigravity Produces in One Response:
+1. **`evaluation_YYYY-MM-DD.md`**: Full venue statistics, DCI openness index, and 4-market Poisson calculations for every fixture.
+2. **`candidates_YYYY-MM-DD.json`**: The complete catalog of **all qualified matches of the day** with their companion probabilities. You can inspect this file at any time to compare judgment, train the model, or swap selections.
+3. **`ticket_YYYY-MM-DD_001.json`**: The finalized ticket ready for 1-click import into the app:
+   - **Main Selections**: The optimal 2 legs (or max 3) satisfying the strict $\ge 2.00$ combined odds floor with maximum safety.
+   - **Alternatives**: The top 3–5 nearest contenders, imported into the app for formal tracking.
+4. Outputs the **Decision Table** and ready-to-import JSON directly in chat.
+
+---
+
+## LEVEL 2: Instant Ticket Swap (Optional)
+
+If, after reviewing the candidate catalog in `candidates_YYYY-MM-DD.json` or the summary table, you prefer a different match:
 
 ### The Prompt:
 ```text
-From betting-data/october/evaluation_2026-10-25.md:
-- Primary Selections: Chelsea vs Tottenham, Lazio vs Parma
-- Alternatives: Arsenal vs Everton
-- Stake: 2000 FCFA
-- Ticket Date: 2026-10-25
-
-Please generate the import ticket JSON according to our organization rules. Save it to betting-data/october/ticket_2026-10-25_001.json and output the JSON for me to paste into the app.
+In ticket_2026-11-02_001.json, swap Lyon vs Angers for Bilbao vs Sociedad (Under 3.5) from candidates.
 ```
 
-### What Antigravity Does:
-1. Reads all stats and calculated probabilities directly from `evaluation_YYYY-MM-DD.md` (**Zero redundant web searches**).
-2. Computes the combined ticket odds and aggregate probability $\prod P_i$.
-3. Formats the ticket number using the automated convention (e.g. `S-22-v2.1`).
-4. Generates both selections and alternatives with **100% schema parity** (12 venue performance attributes + 10 season-overall attributes) and records the **5 dual-baseline attributes** (`current_league_home_avg`, `current_league_away_avg`, `historical_league_home_avg`, `historical_league_away_avg`, `historical_estimated_probability`).
-5. Writes the payload directly to `betting-data/<month>/ticket_YYYY-MM-DD_001.json`.
-6. Outputs the JSON in chat so you can paste it directly into your app at:
-   `/admin/betting/import` -> **Validate** -> **Import Ticket**.
+Antigravity reads `candidates_YYYY-MM-DD.json`, updates the ticket JSON in 5 seconds, recalculates combined odds and ticket probability, and provides the updated JSON.
 
 ---
 
@@ -96,18 +107,18 @@ While matches are in play or after they conclude, track the scores.
 
 ### The Prompt:
 ```text
-Check the current scores for our ticket dated 2026-10-25 (ticket_2026-10-25_001.json).
+Check the current scores for our ticket dated 2026-11-02 (ticket_2026-11-02_001.json).
 ```
 
 ### What Antigravity Does:
 1. Queries the web for live/final scores of each match on that ticket.
-2. Returns a clean score progress table:
-   | Match | Current Score | Status | Over 1.5 Outcome |
-   | :--- | :--- | :--- | :--- |
-   | **Chelsea vs Tottenham** | 2 - 1 | FT | **WON** (3 goals) |
-   | **Lazio vs Parma** | 1 - 1 | 75' | **WON** (2 goals) |
-   | **Arsenal vs Everton** | 2 - 0 | FT | **WON** (2 goals) |
-3. You enter the final scores into your app (`/admin/betting/tickets/<uuid>`), and the app automatically settles each leg and determines if the ticket won.
+2. Returns a clean score progress table showing all multi-market statuses:
+   | Match | Current Score | Status | Pick Result | BTTS Status | O2.5 Status |
+   | :--- | :--- | :--- | :--- | :--- | :--- |
+   | **Frankfurt vs Hamburg** | 2 - 1 | FT | **WON** (BTTS Yes) | Both Scored | 3 Goals |
+   | **Lyon vs Angers** | 3 - 0 | FT | **WON** (Over 2.5) | One-Sided | 3 Goals |
+   | **Bilbao vs Sociedad** | 1 - 1 | FT | **WON** (Under 3.5) | Both Scored | 2 Goals |
+3. You enter the final scores into your app (`/admin/betting/tickets/<uuid>`), and the app automatically settles each leg.
 
 ---
 
@@ -117,20 +128,20 @@ Once all scores are entered and the ticket is settled, export the ticket data fr
 
 ### The Prompt:
 ```text
-Here is the settled ticket export from our app for ticket 004:
+Here is the settled ticket export from our app for ticket S-1-v3.0:
 
 [PASTE EXPORTED TICKET JSON HERE]
 
-Please review how our predictions performed:
-1. Did the estimated probabilities align with the match dynamics?
+Please review how our Model 3.0 predictions performed:
+1. Did the estimated probabilities align with the match dynamics across BTTS and Over 2.5?
 2. Did positive EV selections deliver?
-3. How did our cautionary warnings behave?
-4. What can we learn for Model 2.1 calibration?
+3. How did our multi-market cautionary warnings behave (e.g., ONE_SIDED_SCORING_RISK)?
+4. What can we learn for future market selection?
 ```
 
 ### What Antigravity Does:
 1. Compares expected goals ($\lambda_{home}, \lambda_{away}$) against actual scorelines.
-2. Evaluates whether positive edge selections were sound and dissects any surprises or unexpected clean sheets.
+2. Evaluates whether picking BTTS vs Over 2.5 was optimal for each fixture.
 3. Provides an objective strategic post-mortem to track model calibration over time.
 
 ---
@@ -152,7 +163,7 @@ Evaluate the following pending post-match warnings and generate the WarningBatch
    - `post_match_status`: `CONFIRMED` | `NOT_CONFIRMED` | `INCONCLUSIVE` | `NOT_APPLICABLE`
    - `evidence_assessment`: `SUPPORTED` | `CONTRADICTED` | `PARTIAL` | `INCONCLUSIVE`
    - `confidence`: `LOW` | `MEDIUM` | `HIGH`
-   - `review_notes`: Concise diagnostic explanation (e.g., *"Tottenham produced 0 away goals as feared; Chelsea conceded none, confirming LOW_AWAY_SCORING risk."*)
+   - `review_notes`: Concise diagnostic explanation.
 3. Generates the exact update payload adhering to `WarningBatchUpdateJSON`:
    ```json
    {
@@ -160,11 +171,11 @@ Evaluate the following pending post-match warnings and generate the WarningBatch
      "schema_version": "1.0",
      "updates": [
        {
-         "warning_id": "a31a6732-b1ff-4774-99a1-679f18a31a3c",
+         "warning_id": "41c60205-0275-45d0-994d-7bc476717a60",
          "post_match_status": "CONFIRMED",
          "evidence_assessment": "SUPPORTED",
          "confidence": "HIGH",
-         "review_notes": "Tottenham away attack was held to zero goals, confirming the low away scoring vulnerability."
+         "review_notes": "Lyon produced all 3 goals in a 3-0 win alone, confirming ONE_SIDED_SCORING_RISK and vindicating Over 2.5 over BTTS Yes."
        }
      ]
    }
@@ -179,15 +190,16 @@ Evaluate the following pending post-match warnings and generate the WarningBatch
 ```
 betting-data/
 ├── rules/
-│   ├── model_2.1.md                   # Core Roy Betting Engine Over 1.5 specification
+│   ├── model_3.0.md                   # Active: Roy Betting Engine BTS & Over 2.5 specification (v3.0)
+│   ├── model_2.1.md                   # Archived: Roy Betting Engine Over 1.5 specification (v2.1)
 │   ├── organization_rules.md          # File & directory organization conventions
 │   ├── prompting_guide.md             # This workflow & prompting guide
-│   ├── import_ticket_sample_data.md   # Schema reference for ticket import
-│   ├── export_ticket_sample_data.md   # Schema reference for ticket post-match export
-│   └── export_warnings_sample_data.md # Schema reference for warning post-match requests
+│   ├── import_ticket_sample_data.md   # Schema reference for ticket import (Model 3.0)
+│   ├── export_ticket_sample_data.md   # Schema reference for ticket post-match export (Model 3.0)
+│   └── export_warnings_sample_data.md # Schema reference for warning post-match requests (Model 3.0)
 ├── scripts/
-│   └── calculate_model.py             # Deterministic Poisson, EV, Edge, and Warning calculator
-└── <month>/ (e.g. october/)
+│   └── calculate_model.py             # Deterministic Multi-Market Poisson, EV, Edge, and Warning calculator
+└── <month>/ (e.g. november/)
     ├── evaluation_YYYY-MM-DD.md       # Pre-match stats snapshot & decision summary table
     ├── ticket_YYYY-MM-DD_001.json     # Ready-to-import ticket JSON
     └── warnings_update_YYYY-MM-DD.json# Post-match warning updates JSON
