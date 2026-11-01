@@ -1,36 +1,17 @@
-English premier league
-- liverpool vs Arsenal, over 1.5: 1.25
+Liga Portugal
+- FC Arouca vs CD Nacional Madeirover 1.5: 1.26, over 2.5: 1.83, BTTS yes 1.87
+- CS Maritimo vs Santa Clara, over 1.5: 1.46, over 2.5: 582., BTTS yes 2
+- Academico de Viseu FC vs Rio Ave, over 1.5: 1.29, over 2.5: 1.45, BTTS yes: 1.78
+- Braga vs Famalicao, over 1.5: 1.32, over 2.5: 1.96, BTTS yes: 1.95
 
-Spain laliga
-- Getafe vs Sevilla, over 1.5: 1.52
-- Elche CF vs Valencia, over 1.5: 1.27
-- Atletico Bilbao vs Real Sociedad, over 1.5: 1.2
+Liga portugal 2
+- lusitania fC vs Lourosa, over 1.5: 1.33, over 2.5: 2.05, BTTS yes: 1.8
 
-Spain Segunda Division
-- AD Ceuta FC vs Sporting Gijon, over 1.5: 1.24
-- Burgos CF vs CD CAstellon, over 1.5: 1.24
-- CD Tenerife vs FC Andorra, over 1.5: 1.32
+Belgium pro league
+- Lommel SK vs KAA Gent, over 1.5: 1.24, over 2.5: 1.78, BTTS yes: 1.73
+- Sporting de Charleroi vs RAAL La louviere, over 1.5: 1.26, over 2.53, BTTS yes: : 1.87
+- KV Kortrijk vs KV Mechelen, over 1.5: 1.25, over 2.5:1.75, BTTS yes: 1.63
+- Standard liege vs SK Beveren over 1.5: 1.2, over 2.5: 1.63, BTTS yes: 1.62
 
-Italy serie A
-- FC Como vs Venezia, over 1.5: 1.12
-- Frosinone Calcio vs Torino, over 1.5: 1.1
-- Lazio vs Cagliari, over 1.5: 1.23
-- Lecce vs Genoa, over 1.5: 1.42
-- Juventus vs SSC Napoli, over 1.5: 2.18
-
-Italy serie B
-- SS Arezzo vs Ascoli FC, over 1.5: 1.27
-- US Avellino vs AC Pisa, over 1.5: 1.3
-- Empoli FC vs SS Juvre Stabia, over 1.5: 1.27
-- Hellas Verona vs Carrarese, over 1.5: 1.2
-- Palermo vs LR Vicenza virtus, over 1.5: 1.15
-
-France league 1
-- Strasbourge alsace vs AJ Auxerre, over 1.5: 1.16
-- Paris FC vs AS Monaco, over 1.5: 1.23
-- Olympique lyonnaise vs Angers SCO, over 1.5: 1.15
-- Olympique de Marseiile vs Toulouse, over 1.5: 1.15
-
-Bundesliga
-- 1. FC Union berlin vs 1.FC Koln, over 1.5: 1.21
-- Eintracht Frankfurt vs Hamburger SV, over 1.5: 1.11
+Netherlands Eredivisie
+- Groningen vs Sparta Roterdam, ver 1.5: 1.13, over 2.5: 1.43, BTTS yes: 1.46

@@ -452,10 +452,12 @@ def determine_verdict(
     warnings: List[Dict[str, Any]],
     min_matches: int,
     selection_type: str = "Over 1.5",
+    dci: float = 1.0,
 ) -> Tuple[str, str]:
     """
-    Model 3.0 Section 10: Final Decision Rule
+    Model 3.0 Section 10 & selection_process.md: Final Decision Rule
     SELECT / CAUTION / NO BET
+    Includes DCI Hard Floor Enforcement for Over 2.5 and BTTS Yes.
     """
     critical_warnings = [w for w in warnings if w.get("severity") == "CRITICAL"]
     high_contradictory = [
@@ -467,6 +469,13 @@ def determine_verdict(
     # Disqualifying conditions -> NO BET
     if critical_warnings or min_matches <= 2:
         return "NO BET", "Extreme small-sample distortion or critical unresolved risk renders the statistical signal uncalibrated."
+
+    # DCI Hard Floor Enforcement (selection_process.md Section 2.1 & 3.3)
+    if selection_type in ["Over 2.5", "Over 2.5 Goals"] and dci < 0.45:
+        return "NO BET", f"DCI ({dci:.2f}) is below the 0.45 safety floor for Over 2.5. One-sided reliance threatens Over 2.5 if favorite underperforms. Downgrade to Over 1.5."
+
+    if selection_type in ["BTTS Yes", "Both Teams to Score", "Yes"] and dci < 0.50:
+        return "NO BET", f"DCI ({dci:.2f}) is below the 0.50 safety floor for BTTS Yes. Asymmetric scoring potential elevates shutout risk."
 
     min_prob = 0.50
     if selection_type in ["Over 1.5", "Over 1.5 Goals"]:
@@ -617,6 +626,41 @@ def evaluate_match(fixture: Dict[str, Any]) -> Dict[str, Any]:
     calc_min_matches = min(home_v_m, away_v_m)
     data_quality = "Verified"
 
+    # Small-Sample Regression Anchor (Model 3.0 Section 6.6 & selection_process.md Section 2.2)
+    sample_skew_warnings = []
+    if home_v_m <= 5 and overall_home_gf_per_game > 0 and home_gf_per_game > 1.35 * overall_home_gf_per_game:
+        unregressed_h = home_gf_per_game
+        home_gf_per_game = round(0.50 * home_gf_per_game + 0.50 * overall_home_gf_per_game, 2)
+        sample_skew_warnings.append({
+            "type": "SAMPLE_SIZE_SKEW",
+            "severity": "MEDIUM",
+            "market_relevance": "DIRECT",
+            "direction": "CONTRADICTORY",
+            "description": f"{home_team} home venue scoring rate regressed from {unregressed_h:.2f} to {home_gf_per_game:.2f} due to small sample (N={home_v_m}) vs season-overall ({overall_home_gf_per_game:.2f}).",
+            "evidence": f"Venue GF/G ({unregressed_h:.2f}) was >35% higher than overall season rate ({overall_home_gf_per_game:.2f}) over only {home_v_m} home matches.",
+            "verified": True,
+            "numerical_adjustment": True,
+            "pre_match_status": "PENDING",
+            "post_match_status": "PENDING",
+            "review_notes": None,
+        })
+    if away_v_m <= 5 and overall_away_gf_per_game > 0 and away_gf_per_game > 1.35 * overall_away_gf_per_game:
+        unregressed_a = away_gf_per_game
+        away_gf_per_game = round(0.50 * away_gf_per_game + 0.50 * overall_away_gf_per_game, 2)
+        sample_skew_warnings.append({
+            "type": "SAMPLE_SIZE_SKEW",
+            "severity": "MEDIUM",
+            "market_relevance": "DIRECT",
+            "direction": "CONTRADICTORY",
+            "description": f"{away_team} away venue scoring rate regressed from {unregressed_a:.2f} to {away_gf_per_game:.2f} due to small sample (N={away_v_m}) vs season-overall ({overall_away_gf_per_game:.2f}).",
+            "evidence": f"Venue GF/G ({unregressed_a:.2f}) was >35% higher than overall season rate ({overall_away_gf_per_game:.2f}) over only {away_v_m} away matches.",
+            "verified": True,
+            "numerical_adjustment": True,
+            "pre_match_status": "PENDING",
+            "post_match_status": "PENDING",
+            "review_notes": None,
+        })
+
     # League Baselines - Primary (Current-Season)
     league_home_avg = float(fixture.get("current_league_home_avg", fixture.get("league_home_scoring_avg", fixture.get("league_home_avg", DEFAULT_LEAGUE_HOME_GF))))
     league_away_avg = float(fixture.get("current_league_away_avg", fixture.get("league_away_scoring_avg", fixture.get("league_away_avg", DEFAULT_LEAGUE_AWAY_GF))))
@@ -706,7 +750,13 @@ def evaluate_match(fixture: Dict[str, Any]) -> Dict[str, Any]:
         lambda_away=lambda_away,
     )
 
-    # 6. Final Verdict (Section 10)
+    warnings = sample_skew_warnings + warnings
+
+    # 6. Dual Contribution Index (DCI) & Final Verdict
+    max_lambda = max(lambda_home, lambda_away)
+    min_lambda = min(lambda_home, lambda_away)
+    dci = round(min_lambda / max_lambda, 3) if max_lambda > 0 else 0.0
+
     verdict, verdict_reason = determine_verdict(
         prob=target_prob,
         edge_pp=market_val["edge_percentage_points"],
@@ -714,6 +764,7 @@ def evaluate_match(fixture: Dict[str, Any]) -> Dict[str, Any]:
         warnings=warnings,
         min_matches=calc_min_matches,
         selection_type=selection_type,
+        dci=dci,
     )
 
     # Human-readable commentary & notes
@@ -731,10 +782,7 @@ def evaluate_match(fixture: Dict[str, Any]) -> Dict[str, Any]:
 
     notes = "; ".join(notes_parts) if notes_parts else "Statistically stable sample with consistent goal output across leagues."
 
-    # 6b. Dual Contribution Index (DCI) - Game Openness
-    max_lambda = max(lambda_home, lambda_away)
-    min_lambda = min(lambda_home, lambda_away)
-    dci = round(min_lambda / max_lambda, 3) if max_lambda > 0 else 0.0
+    # 6b. Dual Contribution Index (DCI) - Game Openness (reused from step 6)
 
     # 7. Alignment & Edge Categorization (Model 3.0 Section 5.1A & 7)
     align_delta_pp = round(abs(target_prob - hist_target_prob) * 100.0, 2)
@@ -938,19 +986,148 @@ def generate_ticket_payload(
 def generate_candidates_payload(
     candidates: List[Dict[str, Any]],
     date: str = "2026-11-02",
+    top_n_selections: int = 2,
+    ticket_number: str = "A-1-v3.0",
 ) -> Dict[str, Any]:
     """
-    Builds the candidates_<date>.json structure cataloging all good/promising
-    fixtures evaluated for that day for user review, comparison, and model training.
+    Builds the candidates_<date>.json structure conforming strictly to TicketImportJSON
+    with root 'ticket', top selections in 'selections', and remaining fixtures in 'alternatives'.
+    Allows direct preview and audit in /admin/betting/import with zero schema errors.
     """
+    cleaned = [clean_selection(c) for c in candidates]
+    sel_items = cleaned[:top_n_selections] if len(cleaned) >= top_n_selections else cleaned
+    alt_items = cleaned[top_n_selections:] if len(cleaned) > top_n_selections else []
+
+    combined_odds = 1.0
+    agg_prob = 1.0
+    for s in sel_items:
+        combined_odds *= float(s.get("odds", 1.0))
+        agg_prob *= float(s.get("estimated_probability", 0.85))
+
+    combined_odds = round(combined_odds, 2)
+    agg_prob = round(agg_prob, 3)
+
     return {
-        "catalog_type": "daily_evaluated_candidates",
-        "date": date,
-        "model_version": MODEL_VERSION,
-        "model_name": MODEL_NAME,
-        "total_matches": len(candidates),
-        "candidates": [clean_selection(c) for c in candidates],
+        "ticket": {
+            "ticket_number": ticket_number,
+            "date": date,
+            "model_version": MODEL_VERSION,
+            "model_uuid": DEFAULT_MODEL_UUID,
+            "model_name": MODEL_NAME,
+            "stake": 100.0,
+            "combined_odds": combined_odds,
+            "estimated_ticket_probability": agg_prob,
+            "status": "pending",
+            "actual_result": None,
+            "profit_loss": 0,
+            "notes": (
+                f"Full candidate pool and watchlist for {date} evaluated under Model 3.0 ({MODEL_NAME}). "
+                f"Contains all {len(candidates)} shortlisted fixtures with full venue statistics, multi-market matrix, "
+                f"and DCI game openness. Main selections hold top {len(sel_items)} recommended bets; alternatives hold {len(alt_items)} other fixtures."
+            ),
+        },
+        "selections": sel_items,
+        "alternatives": alt_items,
     }
+
+
+def build_optimal_portfolio(
+    evaluated_fixtures: List[Dict[str, Any]],
+    target_odds_floor: float = 2.00,
+    max_legs: int = 3,
+) -> Tuple[List[Dict[str, Any]], List[Dict[str, Any]], str]:
+    """
+    Automated Selection Algorithm adhering to selection_process.md:
+    1. Filter out halted or non-viable fixtures.
+    2. Enforce DCI >= 0.45 for Over 2.5 and DCI >= 0.50 for BTTS Yes.
+    3. Try 2-leg combinations meeting target_odds_floor (2.00 - 2.50).
+    4. If no safe 2-leg combo can reach the floor without violating DCI/safety,
+       automatically trigger the 3-leg safety accumulator (2.20 - 2.80).
+    """
+    valid_candidates = [
+        f for f in evaluated_fixtures
+        if f.get("estimated_probability") is not None and f.get("verdict") != "INSUFFICIENT DATA"
+    ]
+
+    # Rank candidates by composite score: Prob * (1 + Edge/100) * (0.8 + 0.2*DCI)
+    def score_fixture(f: Dict[str, Any]) -> float:
+        p = float(f.get("estimated_probability", 0.5))
+        edge = float(f.get("edge_percentage_points", 0.0))
+        dci = float(f.get("dual_contribution_index", 0.5))
+        return p * (1.0 + max(edge, -10.0) / 100.0) * (0.8 + 0.2 * dci)
+
+    valid_candidates.sort(key=score_fixture, reverse=True)
+
+    # 1. Try 2-leg pairs
+    best_2leg_pair = None
+    best_2leg_prob = 0.0
+
+    for i in range(len(valid_candidates)):
+        for j in range(i + 1, len(valid_candidates)):
+            f1, f2 = valid_candidates[i], valid_candidates[j]
+            c_odds = round(float(f1.get("odds", 1.0)) * float(f2.get("odds", 1.0)), 2)
+            if c_odds >= target_odds_floor:
+                # Check DCI safety: Neither can be Over 2.5 with DCI < 0.45 or BTTS with DCI < 0.50
+                dci1 = float(f1.get("dual_contribution_index", 1.0))
+                dci2 = float(f2.get("dual_contribution_index", 1.0))
+                sel1 = f1.get("selection", "")
+                sel2 = f2.get("selection", "")
+
+                safe1 = not (("Over 2.5" in sel1 and dci1 < 0.45) or ("BTTS" in sel1 and dci1 < 0.50))
+                safe2 = not (("Over 2.5" in sel2 and dci2 < 0.45) or ("BTTS" in sel2 and dci2 < 0.50))
+
+                if safe1 and safe2:
+                    p_agg = float(f1.get("estimated_probability", 0.5)) * float(f2.get("estimated_probability", 0.5))
+                    if p_agg > best_2leg_prob:
+                        best_2leg_prob = p_agg
+                        best_2leg_pair = (f1, f2, c_odds)
+
+    # If valid safe 2-leg pair found and probability is solid (>= 48%), use it
+    if best_2leg_pair and best_2leg_prob >= 0.48:
+        sel = [best_2leg_pair[0], best_2leg_pair[1]]
+        alts = [f for f in valid_candidates if f not in sel]
+        return sel, alts, f"2-Leg Combination (Combined Odds: {best_2leg_pair[2]:.2f}, Agg Prob: {best_2leg_prob*100:.1f}%)"
+
+    # 2. Automated 3-Leg Safety Trigger
+    best_3leg_triplet = None
+    best_3leg_prob = 0.0
+
+    for i in range(len(valid_candidates)):
+        for j in range(i + 1, len(valid_candidates)):
+            for k in range(j + 1, len(valid_candidates)):
+                f1, f2, f3 = valid_candidates[i], valid_candidates[j], valid_candidates[k]
+                c_odds = round(float(f1.get("odds", 1.0)) * float(f2.get("odds", 1.0)) * float(f3.get("odds", 1.0)), 2)
+                if c_odds >= target_odds_floor:
+                    dci1 = float(f1.get("dual_contribution_index", 1.0))
+                    dci2 = float(f2.get("dual_contribution_index", 1.0))
+                    dci3 = float(f3.get("dual_contribution_index", 1.0))
+                    sel1 = f1.get("selection", "")
+                    sel2 = f2.get("selection", "")
+                    sel3 = f3.get("selection", "")
+
+                    safe1 = not (("Over 2.5" in sel1 and dci1 < 0.45) or ("BTTS" in sel1 and dci1 < 0.50))
+                    safe2 = not (("Over 2.5" in sel2 and dci2 < 0.45) or ("BTTS" in sel2 and dci2 < 0.50))
+                    safe3 = not (("Over 2.5" in sel3 and dci3 < 0.45) or ("BTTS" in sel3 and dci3 < 0.50))
+
+                    if safe1 and safe2 and safe3:
+                        p_agg = (
+                            float(f1.get("estimated_probability", 0.5)) *
+                            float(f2.get("estimated_probability", 0.5)) *
+                            float(f3.get("estimated_probability", 0.5))
+                        )
+                        if p_agg > best_3leg_prob:
+                            best_3leg_prob = p_agg
+                            best_3leg_triplet = (f1, f2, f3, c_odds)
+
+    if best_3leg_triplet:
+        sel = [best_3leg_triplet[0], best_3leg_triplet[1], best_3leg_triplet[2]]
+        alts = [f for f in valid_candidates if f not in sel]
+        return sel, alts, f"Automated 3-Leg Safety Trigger (Combined Odds: {best_3leg_triplet[3]:.2f}, Agg Prob: {best_3leg_prob*100:.1f}%)"
+
+    # Fallback to top 2
+    top2 = valid_candidates[:2]
+    alts = valid_candidates[2:]
+    return top2, alts, "Top 2 Ranked Selections (Fallback)"
 
 
 def format_markdown_summary_table(evaluated_fixtures: List[Dict[str, Any]]) -> str:
@@ -1107,7 +1284,36 @@ def run_self_tests():
     assert "over_2_5" in walsall_res["market_evaluations"]
     assert "btts_yes" in walsall_res["market_evaluations"]
 
-    print("✅ All Model 3.0 multi-market mathematical self-tests and Hard-Stop validations passed successfully!")
+    # Test 8: Small-sample regression anchor and DCI floor for Over 2.5
+    arouca_fixture = {
+        "home_team": "FC Arouca",
+        "away_team": "CD Nacional",
+        "odds": 1.83,
+        "country": "Portugal",
+        "league": "Liga Portugal",
+        "market": "Over/Under",
+        "selection": "Over 2.5",
+        "home_matches_played": 9,
+        "away_matches_played": 9,
+        "home_goals_scored": 12,
+        "home_goals_conceded": 7,
+        "away_goals_scored": 10,
+        "away_goals_conceded": 18,
+        "home_venue_matches": 4,
+        "home_venue_goals_scored": 8,
+        "home_venue_goals_conceded": 3,
+        "away_venue_matches": 4,
+        "away_venue_goals_scored": 4,
+        "away_venue_goals_conceded": 8,
+        "current_league_home_avg": 1.45,
+        "current_league_away_avg": 1.15,
+    }
+    arouca_res = evaluate_match(arouca_fixture)
+    assert any(w["type"] == "SAMPLE_SIZE_SKEW" for w in arouca_res["warnings"])
+    assert arouca_res["dual_contribution_index"] < 0.45
+    assert arouca_res["verdict"] == "NO BET"
+
+    print("✅ All Model 3.0 multi-market mathematical self-tests, DCI floors, and Hard-Stop validations passed successfully!")
 
 
 if __name__ == "__main__":
@@ -1133,10 +1339,14 @@ if __name__ == "__main__":
         evaluated = [evaluate_match(fx) for fx in fixtures]
         print(format_markdown_summary_table(evaluated))
 
+        main_sels, alts, strategy_desc = build_optimal_portfolio(evaluated, target_odds_floor=2.00, max_legs=3)
+        print(f"\nPortfolio Strategy: {strategy_desc}")
+
         if args.output_json:
             ticket_payload = generate_ticket_payload(
                 ticket_number=args.ticket_number,
-                selections=evaluated,
+                selections=main_sels,
+                alternatives=alts,
                 stake=args.stake,
                 ticket_date=args.date,
             )
@@ -1148,6 +1358,7 @@ if __name__ == "__main__":
             cand_payload = generate_candidates_payload(
                 candidates=evaluated,
                 date=args.date,
+                top_n_selections=len(main_sels),
             )
             with open(args.candidates_json, "w", encoding="utf-8") as out_c:
                 json.dump(cand_payload, out_c, indent=2)

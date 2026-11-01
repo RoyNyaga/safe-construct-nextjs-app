@@ -36,9 +36,19 @@ Where:
 
 | DCI Range | Category | Market Suitability | Strategic Risk Note |
 | :--- | :--- | :--- | :--- |
-| **$\text{DCI} \ge 0.55$** | **Highly Open / Balanced** | **BTTS Yes**, **Over 2.5** | Both teams score and concede reliably. High resilience: even if the favorite underperforms, the opponent can score first or compensate. |
-| **$0.40 \le \text{DCI} < 0.55$** | **Moderate Balance** | **Over 2.5**, **Over 1.5** | Valid for Over markets if combined $\lambda_{\text{total}} \ge 2.65$. BTTS Yes requires individual scrutiny. |
-| **$\text{DCI} < 0.40$** | **One-Sided Reliance** | **Over 1.5** (Anchor only) | Heavy favorite carries $> 70\%$ of the goal burden. **BTTS Yes is heavily deprioritized**. If favorite is held scoreless or wins 1-0, Over 2.5 / BTTS fail. |
+| **$\text{DCI} \ge 0.55$** | **Highly Open / Balanced** | **BTTS Yes**, **Over 2.5** | Both teams score and concede reliably. High resilience: even if the favorite underperforms, the opponent can score first or compensate. (e.g. Groningen vs Sparta 2-3 win, DCI 0.98). |
+| **$0.45 \le \text{DCI} < 0.55$** | **Moderate Balance** | **Over 2.5**, **Over 1.5** | Valid for Over 2.5 if combined $\lambda_{\text{total}} \ge 2.70$. BTTS Yes requires individual scrutiny. |
+| **$\text{DCI} < 0.45$** | **One-Sided Reliance** | **Over 1.5 ONLY** (Anchor) | Heavy favorite carries $> 70\%$ of the goal burden. **Over 2.5 and BTTS Yes are strictly DISQUALIFIED from main selections**. If favorite is held to 1 goal or wins 1-0/2-0, Over 2.5 fails (e.g. Arouca vs Nacional 1-0 loss, DCI 0.24). |
+
+### 2.2 Venue Small-Sample Regression Anchor ($N \le 5$)
+
+When early in a season or when a team has played $\le 5$ matches at their home or away venue, small-sample blowout noise (e.g. one 4-0 home win) can artificially balloon venue scoring rates.
+
+- **Trigger**: When venue matches $N \le 5$, check whether venue scoring rate exceeds season-overall rate by $> 35\%$:
+  $$\frac{\text{Venue GF/G}}{\text{Overall GF/G}} > 1.35$$
+- **Regression Formula**: Blend the venue rate with the season-overall rate (50/50):
+  $$\text{GF}_{\text{effective}} = 0.50 \times \text{Venue GF/G} + 0.50 \times \text{Overall GF/G}$$
+- **Impact**: In FC Arouca (4 home games, 8 GF = $2.00$/G vs 9 overall games, 12 GF = $1.33$/G), the unregressed $2.00$ venue rate produced an inflated $66.2\%$ Over 2.5 probability. Applying the regression anchor drops effective GF to $\mathbf{1.66}$, reducing Over 2.5 probability to $54.8\%$ and correctly preventing it from qualifying.
 
 ---
 
@@ -65,12 +75,13 @@ The engine selects from four standard goal markets, applying specific statistica
   - Venue Concession Rates: Home concedes $\ge 1.00$ at home; Away concedes $\ge 1.20$ away.
 
 ### 3.3 Market 3: High-Yield Over 2.5 Goals
-- **Role**: High-yield selection for fixtures with strong offensive tempo.
+- **Role**: High-yield selection for fixtures with strong offensive tempo and proven dual participation.
 - **Typical Odds**: $1.58 - 1.85$.
 - **Qualifications**:
-  - Model Estimated Probability: $\ge 58\%$.
+  - Model Estimated Probability: $\ge 60\%$.
   - Combined Expected Goals: $\lambda_{\text{total}} \ge 2.70$.
-  - Either $\text{DCI} \ge 0.45$ (both contribute) OR a dominant favorite ($\lambda \ge 2.25$) against a leaky defense conceding $\ge 1.75$.
+  - **MANDATORY HARD DCI FLOOR**: $\mathbf{\text{DCI} \ge 0.45}$.
+  - **One-Sided Disqualification Rule**: If $\text{DCI} < 0.45$, Over 2.5 is **strictly disqualified from main selections**, even if Poisson probability exceeds $65\%$. Requiring a single team to score 3 goals alone when an opponent is shut out introduces unacceptable fragility (as demonstrated in Ticket S-1-v3.0 where Arouca won 1-0 against scoreless Nacional). In low-DCI fixtures, downgrade to **Over 1.5** only.
 
 ### 3.4 Market 4: Tactical Under 3.5 Goals
 - **Role**: High-probability pick for cagey tactical battles or intense derbies.
@@ -86,6 +97,8 @@ The engine selects from four standard goal markets, applying specific statistica
 
 ### Step 1: Filter & Classify Candidates
 - Disqualify fixtures missing venue data (Hard-Stop Rule).
+- Apply Section 2.2 Small-Sample Regression Anchor ($N \le 5$).
+- Compute DCI and enforce the $\text{DCI} \ge 0.45$ floor for Over 2.5 and $\text{DCI} \ge 0.50$ for BTTS Yes.
 - Disqualify fixtures with unverified critical lineup absences or dead-rubber game state.
 - Retain all other fixtures regardless of positive or negative EV.
 
@@ -94,18 +107,23 @@ The engine selects from four standard goal markets, applying specific statistica
   $$\text{Combined Odds} = \text{Odds}_1 \times \text{Odds}_2 \ge 2.00 \quad (\text{ideal corridor: } 2.00 - 2.50)$$
 - **Optimal Template A (Anchor + Value)**:
   - Leg 1: Ultra-Safe Over 1.5 @ $1.25 - 1.35$ ($P \ge 84\%$)
-  - Leg 2: Balanced BTTS Yes or Over 2.5 @ $1.58 - 1.75$ ($P \ge 62\%$)
+  - Leg 2: Balanced BTTS Yes or Over 2.5 ($\text{DCI} \ge 0.45$) @ $1.58 - 1.75$ ($P \ge 62\%$)
   - Result: Combined Odds $\approx 2.00 - 2.36$, Aggregate Probability $\approx 52 - 55\%$.
 - **Optimal Template B (Two Moderate Value Legs)**:
-  - Leg 1: BTTS Yes @ $1.50$ ($P \ge 66\%$)
-  - Leg 2: Over 2.5 / BTTS Yes @ $1.45 - 1.55$ ($P \ge 65\%$)
+  - Leg 1: BTTS Yes @ $1.50$ ($P \ge 66\%$, $\text{DCI} \ge 0.55$)
+  - Leg 2: Over 2.5 / BTTS Yes @ $1.45 - 1.55$ ($P \ge 65\%$, $\text{DCI} \ge 0.45$)
   - Result: Combined Odds $\approx 2.18 - 2.33$, Aggregate Probability $\approx 43 - 48\%$.
 
-### Step 3: 3-Leg Fallback (Safety Exception)
-- If the day's matches only offer heavy favorites with short odds ($1.20 - 1.30$) and pushing for a 2-leg ticket would force selecting an unverified or high-risk single game:
-  - Form a **3-leg ticket** using only top-tier safe selections:
-    $$\text{Odds} = 1.28 \times 1.28 \times 1.25 \approx 2.05 \quad (\text{Each Leg } P \ge 80\%)$$
-- **Never expand beyond 3 legs.**
+### Step 3: Automated 3-Leg Safety Trigger (Crucial Protection Rule)
+- **The "2-Leg Odds Pressure" Problem**:
+  When our best qualifying pick has odds $\le 1.50$ (e.g. Groningen BTTS Yes @ 1.46), forcing a 2-leg ticket requires Leg 2 to have odds $\ge 1.37$ ($2.00 / 1.46 = 1.37$). If the remaining candidate slate only offers ultra-safe Over 1.5 picks (e.g. 1.25 – 1.32) and one-sided Over 2.5 picks, **never elevate a one-sided game to Over 2.5 just to hit the 2.00 floor in 2 games**.
+- **Automated 3-Leg Action**:
+  - The engine **automatically transitions to a 3-leg ticket** using only high-probability, high-safety picks ($\ge 78\%$ per leg):
+    $$\text{Ticket Odds} = \text{Odds}_1 \times \text{Odds}_2 \times \text{Odds}_3 \ge 2.00 \quad (\text{target corridor: } 2.20 - 2.80)$$
+  - **Empirical Proof (Ticket S-1-v3.0 Retrospective)**:
+    - *Forced 2-Leg*: Groningen BTTS (1.46, won 2-3) $\times$ Arouca O2.5 (1.83, **lost 1-0**) = LOST.
+    - *3-Leg Safety Solution*: Groningen BTTS (1.46, won 2-3) $\times$ Academico de Viseu O1.5 (1.29, **won 2-1**) $\times$ Braga O1.5 (1.32, **won 3-0**) = **Combined Odds 2.49, ALL 3 LEGS WON**.
+- **Hard Cap**: Never expand beyond 3 legs under any circumstance. Maximum allowable legs on any ticket is strictly 3.
 
 ---
 

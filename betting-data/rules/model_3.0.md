@@ -168,6 +168,12 @@ $$P(\text{Away scores } \ge 1) = 1 - e^{-\lambda_{\text{away}}}$$
 $$P(\text{BTTS Yes}) = (1 - e^{-\lambda_{\text{home}}}) \times (1 - e^{-\lambda_{\text{away}}})$$
 $$P(\text{BTTS No}) = 1 - P(\text{BTTS Yes})$$
 
+### 6.6 Dual Contribution Index (DCI) & Game Openness
+$$\text{DCI} = \frac{\min(\lambda_{\text{home}}, \lambda_{\text{away}})}{\max(\lambda_{\text{home}}, \lambda_{\text{away}})}$$
+- **BTTS Yes Hard Floor**: $\text{DCI} \ge 0.50$ (Both sides must reliably generate goal threats).
+- **Over 2.5 Hard Floor**: $\text{DCI} \ge 0.45$ (Disqualifies one-sided fixtures where a shutout forces one side to score 3 goals alone).
+- **Small-Sample Venue Regression Anchor ($N \le 5$)**: When venue sample is $\le 5$ matches and venue scoring rate exceeds season-overall rate by $> 35\%$, regress $\text{GF}_{\text{effective}} = 0.50 \times \text{Venue GF/G} + 0.50 \times \text{Overall GF/G}$.
+
 
 ## 7. BOOKMAKER PRICING, VALUE EDGE & EXPECTED VALUE (EV)
 

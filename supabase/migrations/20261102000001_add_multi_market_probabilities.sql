@@ -4,26 +4,33 @@
 -- to both betting_selections and betting_alternatives.
 
 -- 1. Register New Model 3.0 & Archive Model 2.1
-INSERT INTO public.betting_models (uuid, version, name, description, status, is_active)
-VALUES (
-  gen_random_uuid(),
-  '3.0',
-  'roys_betting_engine_BTS_O2-5',
-  'Multi-market statistical engine targeting Over 2.5, BTTS (Yes/No), Under 3.5, and Over 1.5 in short 2-3 leg accumulators.',
-  'active',
-  true
-)
-ON CONFLICT (version) DO UPDATE
-SET
-  name = EXCLUDED.name,
-  description = EXCLUDED.description,
-  status = 'active',
-  is_active = true,
-  updated_at = timezone('utc'::text, now());
+DO $$
+BEGIN
+  IF EXISTS (SELECT 1 FROM public.betting_models WHERE version = '3.0') THEN
+    UPDATE public.betting_models
+    SET
+      name = 'roys_betting_engine_BTS_O2-5',
+      description = 'Multi-market statistical engine targeting Over 2.5, BTTS (Yes/No), Under 3.5, and Over 1.5 in short 2-3 leg accumulators.',
+      status = 'active',
+      is_active = true,
+      updated_at = timezone('utc'::text, now())
+    WHERE version = '3.0';
+  ELSE
+    INSERT INTO public.betting_models (uuid, version, name, description, status, is_active)
+    VALUES (
+      gen_random_uuid(),
+      '3.0',
+      'roys_betting_engine_BTS_O2-5',
+      'Multi-market statistical engine targeting Over 2.5, BTTS (Yes/No), Under 3.5, and Over 1.5 in short 2-3 leg accumulators.',
+      'active',
+      true
+    );
+  END IF;
+END $$;
 
 UPDATE public.betting_models
 SET is_active = false, status = 'retired', updated_at = timezone('utc'::text, now())
-WHERE version = '2.1';
+WHERE version = '2.1' OR (version != '3.0' AND is_active = true);
 
 -- 2. Add Dedicated Tracking Columns to betting_selections
 ALTER TABLE public.betting_selections

@@ -79,11 +79,11 @@ Stake: 2000 FCFA. Please generate the full evaluation, ticket_2026-11-02_001.jso
 ```
 
 ### What Antigravity Produces in One Response:
-1. **`evaluation_YYYY-MM-DD.md`**: Full venue statistics, DCI openness index, and 4-market Poisson calculations for every fixture.
-2. **`candidates_YYYY-MM-DD.json`**: The complete catalog of **all qualified matches of the day** with their companion probabilities. You can inspect this file at any time to compare judgment, train the model, or swap selections.
+1. **`evaluation_YYYY-MM-DD.md`**: Full venue statistics, DCI openness index, small-sample venue regression ($N \le 5$), and 4-market Poisson calculations for every fixture.
+2. **`candidates_YYYY-MM-DD.json`**: The complete catalog of **all qualified matches of the day** formatted as a valid `TicketImportJSON` with root `"ticket"` (`#A-1-v3.0`). You can paste this directly into `/admin/betting/import` to inspect and preview all candidate fixtures, multi-market matrices, and warning flags in the app UI.
 3. **`ticket_YYYY-MM-DD_001.json`**: The finalized ticket ready for 1-click import into the app:
-   - **Main Selections**: The optimal 2 legs (or max 3) satisfying the strict $\ge 2.00$ combined odds floor with maximum safety.
-   - **Alternatives**: The top 3–5 nearest contenders, imported into the app for formal tracking.
+   - **Main Selections**: The optimal 2 legs (or 3-leg safety trigger) satisfying the strict $\ge 2.00$ combined odds floor with maximum safety, strictly enforcing the $\text{DCI} \ge 0.45$ floor on Over 2.5 and $\text{DCI} \ge 0.50$ on BTTS Yes.
+   - **Alternatives**: The top nearest contenders, imported into the app for formal tracking.
 4. Outputs the **Decision Table** and ready-to-import JSON directly in chat.
 
 ---
