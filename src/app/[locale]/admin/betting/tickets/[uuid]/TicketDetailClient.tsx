@@ -888,8 +888,60 @@ ${warningExportJson}`
                         <Typography variant="caption" color="text.secondary">
                           {sel.country ? `${sel.country} • ` : ''}{sel.league || '—'} &bull; {sel.match_date || ticket.ticket_date}
                         </Typography>
+                        {((sel.prob_home_win != null) || (sel.prob_draw != null) || (sel.prob_away_win != null)) && (
+                          <Box sx={{ display: 'flex', gap: 0.5, mt: 0.5, flexWrap: 'wrap', alignItems: 'center' }}>
+                            <Typography component="span" sx={{ fontSize: '0.62rem', color: '#9AA3B2', fontWeight: 700, mr: 0.25 }}>
+                              1X2:
+                            </Typography>
+                            {sel.prob_home_win != null && (
+                              <Chip
+                                label={`1: ${(Number(sel.prob_home_win) * 100).toFixed(0)}%`}
+                                size="small"
+                                sx={{
+                                  height: 18,
+                                  fontSize: '0.63rem',
+                                  fontWeight: 700,
+                                  backgroundColor: alpha('#66BB6A', 0.15),
+                                  color: '#66BB6A',
+                                  border: `1px solid ${alpha('#66BB6A', 0.35)}`,
+                                }}
+                              />
+                            )}
+                            {sel.prob_draw != null && (
+                              <Chip
+                                label={`X: ${(Number(sel.prob_draw) * 100).toFixed(0)}%`}
+                                size="small"
+                                sx={{
+                                  height: 18,
+                                  fontSize: '0.63rem',
+                                  fontWeight: 600,
+                                  backgroundColor: alpha('#FFA726', 0.12),
+                                  color: '#FFA726',
+                                  border: `1px solid ${alpha('#FFA726', 0.3)}`,
+                                }}
+                              />
+                            )}
+                            {sel.prob_away_win != null && (
+                              <Chip
+                                label={`2: ${(Number(sel.prob_away_win) * 100).toFixed(0)}%`}
+                                size="small"
+                                sx={{
+                                  height: 18,
+                                  fontSize: '0.63rem',
+                                  fontWeight: 700,
+                                  backgroundColor: alpha('#42A5F5', 0.15),
+                                  color: '#42A5F5',
+                                  border: `1px solid ${alpha('#42A5F5', 0.35)}`,
+                                }}
+                              />
+                            )}
+                          </Box>
+                        )}
                         {((sel.prob_over_1_5 != null) || (sel.prob_over_2_5 != null) || (sel.prob_btts_yes != null) || (sel.prob_under_3_5 != null)) && (
-                          <Box sx={{ display: 'flex', gap: 0.5, mt: 0.5, flexWrap: 'wrap' }}>
+                          <Box sx={{ display: 'flex', gap: 0.5, mt: 0.5, flexWrap: 'wrap', alignItems: 'center' }}>
+                            <Typography component="span" sx={{ fontSize: '0.62rem', color: '#9AA3B2', fontWeight: 700, mr: 0.25 }}>
+                              Goals:
+                            </Typography>
                             {sel.prob_over_1_5 != null && (
                               <Chip label={`O1.5: ${(Number(sel.prob_over_1_5) * 100).toFixed(0)}%`} size="small" sx={{ height: 16, fontSize: '0.62rem', backgroundColor: alpha('#42A5F5', 0.12), color: '#42A5F5', border: `1px solid ${alpha('#42A5F5', 0.3)}` }} />
                             )}
@@ -1113,8 +1165,60 @@ ${warningExportJson}`
                               {alt.country ? `${alt.country} • ` : ''}{alt.league || ''}
                             </Typography>
                           )}
+                          {((alt.prob_home_win != null) || (alt.prob_draw != null) || (alt.prob_away_win != null)) && (
+                            <Box sx={{ display: 'flex', gap: 0.5, mt: 0.5, flexWrap: 'wrap', alignItems: 'center' }}>
+                              <Typography component="span" sx={{ fontSize: '0.62rem', color: '#9AA3B2', fontWeight: 700, mr: 0.25 }}>
+                                1X2:
+                              </Typography>
+                              {alt.prob_home_win != null && (
+                                <Chip
+                                  label={`1: ${(Number(alt.prob_home_win) * 100).toFixed(0)}%`}
+                                  size="small"
+                                  sx={{
+                                    height: 18,
+                                    fontSize: '0.63rem',
+                                    fontWeight: 700,
+                                    backgroundColor: alpha('#66BB6A', 0.15),
+                                    color: '#66BB6A',
+                                    border: `1px solid ${alpha('#66BB6A', 0.35)}`,
+                                  }}
+                                />
+                              )}
+                              {alt.prob_draw != null && (
+                                <Chip
+                                  label={`X: ${(Number(alt.prob_draw) * 100).toFixed(0)}%`}
+                                  size="small"
+                                  sx={{
+                                    height: 18,
+                                    fontSize: '0.63rem',
+                                    fontWeight: 600,
+                                    backgroundColor: alpha('#FFA726', 0.12),
+                                    color: '#FFA726',
+                                    border: `1px solid ${alpha('#FFA726', 0.3)}`,
+                                  }}
+                                />
+                              )}
+                              {alt.prob_away_win != null && (
+                                <Chip
+                                  label={`2: ${(Number(alt.prob_away_win) * 100).toFixed(0)}%`}
+                                  size="small"
+                                  sx={{
+                                    height: 18,
+                                    fontSize: '0.63rem',
+                                    fontWeight: 700,
+                                    backgroundColor: alpha('#42A5F5', 0.15),
+                                    color: '#42A5F5',
+                                    border: `1px solid ${alpha('#42A5F5', 0.35)}`,
+                                  }}
+                                />
+                              )}
+                            </Box>
+                          )}
                           {((alt.prob_over_1_5 != null) || (alt.prob_over_2_5 != null) || (alt.prob_btts_yes != null) || (alt.prob_under_3_5 != null)) && (
-                            <Box sx={{ display: 'flex', gap: 0.5, mt: 0.5, flexWrap: 'wrap' }}>
+                            <Box sx={{ display: 'flex', gap: 0.5, mt: 0.5, flexWrap: 'wrap', alignItems: 'center' }}>
+                            <Typography component="span" sx={{ fontSize: '0.62rem', color: '#9AA3B2', fontWeight: 700, mr: 0.25 }}>
+                              Goals:
+                            </Typography>
                               {alt.prob_over_1_5 != null && (
                                 <Chip label={`O1.5: ${(Number(alt.prob_over_1_5) * 100).toFixed(0)}%`} size="small" sx={{ height: 16, fontSize: '0.62rem', backgroundColor: alpha('#42A5F5', 0.12), color: '#42A5F5', border: `1px solid ${alpha('#42A5F5', 0.3)}` }} />
                               )}
@@ -1850,12 +1954,15 @@ ${warningExportJson}`
                   </Paper>
                 )}
 
-              {/* Pre-Match Statistical Matchup Comparison */}
+              {/* Multi-Market & 1X2 Probabilities Grid */}
               {/* Multi-Market & 1X2 Probabilities Grid */}
               {((snapshotSelection.prob_home_win !== null && snapshotSelection.prob_home_win !== undefined) ||
+                (snapshotSelection.prob_draw !== null && snapshotSelection.prob_draw !== undefined) ||
+                (snapshotSelection.prob_away_win !== null && snapshotSelection.prob_away_win !== undefined) ||
                 (snapshotSelection.prob_over_1_5 !== null && snapshotSelection.prob_over_1_5 !== undefined) ||
                 (snapshotSelection.prob_over_2_5 !== null && snapshotSelection.prob_over_2_5 !== undefined) ||
-                (snapshotSelection.prob_btts_yes !== null && snapshotSelection.prob_btts_yes !== undefined)) && (
+                (snapshotSelection.prob_btts_yes !== null && snapshotSelection.prob_btts_yes !== undefined) ||
+                (snapshotSelection.prob_under_3_5 !== null && snapshotSelection.prob_under_3_5 !== undefined)) && (
                   <Paper
                     elevation={0}
                     sx={{
@@ -1939,6 +2046,7 @@ ${warningExportJson}`
                     </Grid>
                   </Paper>
                 )}
+              {/* Pre-Match Statistical Matchup Comparison */}
               <PreMatchStatsTables item={snapshotSelection} locale={locale} />
 
               {/* Methodology Reasoning */}
@@ -2180,6 +2288,7 @@ ${warningExportJson}`
                     </Typography>
                   </Grid>
                   {!((snapshotAlternative.home_goals_scored !== null && snapshotAlternative.home_goals_scored !== undefined) ||
+    
                     (snapshotAlternative.home_goals_per_game !== null && snapshotAlternative.home_goals_per_game !== undefined) ||
                     (snapshotAlternative.home_league_position !== null && snapshotAlternative.home_league_position !== undefined)) &&
                     ((snapshotAlternative.home_matches_played !== undefined && snapshotAlternative.home_matches_played !== null) ||
@@ -2349,15 +2458,18 @@ ${warningExportJson}`
                   </Paper>
                 )}
 
-              {/* Pre-Match Statistical Matchup Comparison */}
-              {((snapshotAlternative.home_goals_scored !== null && snapshotAlternative.home_goals_scored !== undefined) ||
-                (snapshotAlternative.home_goals_per_game !== null && snapshotAlternative.home_goals_per_game !== undefined) ||
-                (snapshotAlternative.home_league_position !== null && snapshotAlternative.home_league_position !== undefined)) && (
-                  {/* Multi-Market & 1X2 Probabilities Grid */ }
-                  {((snapshotAlternative.prob_home_win !== null && snapshotAlternative.prob_home_win !== undefined) ||
+              {/* Multi-Market & 1X2 Probabilities Grid */}
+
+
+
+
+              {((snapshotAlternative.prob_home_win !== null && snapshotAlternative.prob_home_win !== undefined) ||
+                (snapshotAlternative.prob_draw !== null && snapshotAlternative.prob_draw !== undefined) ||
+                (snapshotAlternative.prob_away_win !== null && snapshotAlternative.prob_away_win !== undefined) ||
                 (snapshotAlternative.prob_over_1_5 !== null && snapshotAlternative.prob_over_1_5 !== undefined) ||
                 (snapshotAlternative.prob_over_2_5 !== null && snapshotAlternative.prob_over_2_5 !== undefined) ||
-                (snapshotAlternative.prob_btts_yes !== null && snapshotAlternative.prob_btts_yes !== undefined)) && (
+                (snapshotAlternative.prob_btts_yes !== null && snapshotAlternative.prob_btts_yes !== undefined) ||
+                (snapshotAlternative.prob_under_3_5 !== null && snapshotAlternative.prob_under_3_5 !== undefined)) && (
                   <Paper
                     elevation={0}
                     sx={{
@@ -2442,8 +2554,20 @@ ${warningExportJson}`
                     </Grid>
                   </Paper>
                 )}
-              <PreMatchStatsTables item={snapshotAlternative} locale={locale} />
+              {/* Pre-Match Statistical Matchup Comparison */}
+              {((snapshotAlternative.home_goals_scored !== null && snapshotAlternative.home_goals_scored !== undefined) ||
+                (snapshotAlternative.home_goals_per_game !== null && snapshotAlternative.home_goals_per_game !== undefined) ||
+                (snapshotAlternative.home_league_position !== null && snapshotAlternative.home_league_position !== undefined)) && (
+                <PreMatchStatsTables item={snapshotAlternative} locale={locale} />
+              )}
+              {/*
+
+              )}
+
+              )}
                 )}
+
+              */}
 
               {/* Rejection Reason */}
               {snapshotAlternative.comment && (
