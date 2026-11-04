@@ -51,6 +51,55 @@ def lookup_historical_baseline(league_name: Optional[str]) -> Tuple[float, float
     return 1.45, 1.15
 
 
+def normalize_market_key(market_str: Optional[str], selection_str: Optional[str]) -> str:
+    """
+    Normalize any market string or selection into standard LMI keys:
+    over_1_5, over_2_5, btts_yes, under_3_5, to_win, draw_no_bet
+    """
+    m = (market_str or "").lower().strip()
+    s = (selection_str or "").lower().strip()
+
+    if "1.5" in m or "1.5" in s:
+        return "over_1_5"
+    if "2.5" in m or "2.5" in s:
+        return "over_2_5"
+    if "3.5" in m or "3.5" in s:
+        return "under_3_5"
+    if "btts" in m or "both teams to score" in m or "bts" in m or "btts" in s:
+        return "btts_yes"
+    if "draw no bet" in m or "dnb" in m or "draw no bet" in s or "dnb" in s:
+        return "draw_no_bet"
+    if "win" in m or "1x2" in m or "winner" in m or "to win" in m or "to win" in s:
+        return "to_win"
+    return "over_1_5"
+
+
+def lookup_league_market_integrity(league_name: Optional[str], market_key: str) -> Dict[str, Any]:
+    """
+    Look up competition-market integrity tier and priors from betting-data/rules/league_baselines.json.
+    """
+    if not league_name:
+        return {"tier": "TIER_2", "baseline_hit_rate": 0.50, "notes": "Unspecified competition fallback"}
+
+    norm = league_name.lower().replace(" ", "_").replace("-", "_").replace("—", "_")
+    base_file = os.path.join(os.path.dirname(__file__), "..", "rules", "league_baselines.json")
+    if os.path.exists(base_file):
+        try:
+            with open(base_file, "r") as f:
+                data = json.load(f)
+                comps = data.get("competitions", {})
+                for key, val in comps.items():
+                    if key in norm or norm in key or val.get("name", "").lower() in league_name.lower():
+                        integrity_map = val.get("market_integrity", {})
+                        if market_key in integrity_map:
+                            return integrity_map[market_key]
+                        return {"tier": "TIER_2", "baseline_hit_rate": 0.50, "notes": "Market untested in competition"}
+        except Exception:
+            pass
+
+    return {"tier": "TIER_2", "baseline_hit_rate": 0.50, "notes": "Default fallback"}
+
+
 def get_confidence_label(prob: float) -> str:
     """
     Model 3.0 Section 14: Probability Confidence Labels
@@ -309,6 +358,8 @@ def detect_standard_warnings(
     extra_warnings: Optional[List[Dict[str, Any]]] = None,
     lambda_home: float = 0.0,
     lambda_away: float = 0.0,
+    league: Optional[str] = None,
+    market_key: str = "over_1_5",
 ) -> List[Dict[str, Any]]:
     """
     Model 3.0 Section 8: Automated Standardized Warnings Detection
@@ -431,7 +482,23 @@ def detect_standard_warnings(
             "review_notes": None,
         })
 
-    # 5. H2H Check if notes provide evidence
+    # 4d. League-Market Integrity Filter (Gate 6)
+    if league:
+        integrity = lookup_league_market_integrity(league, market_key)
+        if integrity.get("tier") == "TIER_3":
+            warnings.append({
+                "type": "LEAGUE_INTEGRITY_RESTRICTED",
+                "severity": "HIGH",
+                "market_relevance": "DIRECT",
+                "direction": "CONTRADICTORY",
+                "description": f"Fat-tail volatility trap: {league} is classified TIER_3 (Restricted) for {market_key.replace('_', ' ').title()}.",
+                "evidence": integrity.get("notes") or f"Historical and empirical data in league_baselines.json restrict {market_key} in {league}.",
+                "verified": True,
+                "numerical_adjustment": False,
+                "pre_match_status": "PENDING",
+                "post_match_status": "PENDING",
+                "review_notes": None,
+            })
     if h2h_notes and any(term in h2h_notes.lower() for term in ["low-scoring", "0-0", "1-0", "tight", "tactical"]):
         warnings.append({
             "type": "H2H_LOW_GOALS",
@@ -514,6 +581,11 @@ def determine_verdict(
 
     if selection_type in ["BTTS Yes", "Both Teams to Score", "Yes"] and dci < 0.50:
         return "NO BET", f"DCI ({dci:.2f}) is below the 0.50 safety floor for BTTS Yes. Asymmetric scoring potential elevates shutout risk."
+
+    # Gate 6 Hard Floor (League-Market Integrity)
+    lmi_restricted = [w for w in warnings if w.get("type") == "LEAGUE_INTEGRITY_RESTRICTED"]
+    if lmi_restricted:
+        return "NO BET", f"Gate 6 Disqualification: {lmi_restricted[0]['description']} Relegate fixture to shadow alternative."
 
     min_prob = 0.50
     if selection_type in ["Over 1.5", "Over 1.5 Goals"]:
@@ -799,6 +871,7 @@ def evaluate_match(fixture: Dict[str, Any]) -> Dict[str, Any]:
     h2h_notes = fixture.get("h2h_notes")
     team_news_verified = fixture.get("team_news_verified", False)
     extra_warnings = fixture.get("extra_warnings", [])
+    m_key = normalize_market_key(market, selection_type)
 
     warnings = detect_standard_warnings(
         home_team=home_team,
@@ -814,6 +887,8 @@ def evaluate_match(fixture: Dict[str, Any]) -> Dict[str, Any]:
         extra_warnings=extra_warnings,
         lambda_home=lambda_home,
         lambda_away=lambda_away,
+        league=league,
+        market_key=m_key,
     )
 
     warnings = sample_skew_warnings + warnings
@@ -888,10 +963,14 @@ def evaluate_match(fixture: Dict[str, Any]) -> Dict[str, Any]:
         "away_dnb": build_eval_item("Draw No Bet", "Away DNB", poisson["p_away_dnb"], hist_poisson["p_away_dnb"], fixture.get("odds_away_dnb", odds if selection_type in ["Away DNB", "2 DNB"] else None)),
     }
 
+    integrity_record = lookup_league_market_integrity(league, m_key)
+
     return {
         "match_date": match_date,
         "country": country,
         "league": league,
+        "league_market_tier": integrity_record.get("tier", "UNTESTED"),
+        "league_integrity_notes": integrity_record.get("notes", ""),
         "home_team": home_team,
         "away_team": away_team,
         "home_league_position": fixture.get("home_league_position"),

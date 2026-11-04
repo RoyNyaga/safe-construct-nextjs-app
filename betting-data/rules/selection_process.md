@@ -132,6 +132,15 @@ In real-world bookmaker pricing, fixtures with hyper-dominant offensive tempo of
   - Low Loss Risk: Underdog win probability $P(\text{Loss}) \le 16.0\%$.
   - Draw Buffer: Match has moderate draw risk ($22\% - 28\%$). Under DNB, a draw settles as **`void`** (stake preserved, effective combined odds recalculate), keeping the ticket alive!
 
+### 3.7 Gate 6: League-Market Integrity Filter (LMI Matrix Gate)
+- **Role**: Disqualify fat-tail league traps where macro tactical metas or cynical defense suppress market hit rates regardless of individual fixture Poisson stats.
+- **Rules & Restrictions**:
+  - **Tier 1 (High Reliability)**: Green light for main ticket wagers (e.g. Netherlands Eerste Divisie on Over 1.5/2.5; Germany 2. Bundesliga on Over 1.5; Japan J1 on Under 3.5).
+  - **Tier 2 (Moderate / Controlled)**: Permitted on main ticket only if DCI and probability exceed primary thresholds with positive edge.
+  - **Tier 3 (Restricted / Fat-Tail Trap)**: **STRICTLY DISQUALIFIED from Main Tickets (`selections`)**.
+    - *Examples*: Japan J1 League on Over 1.5 / Over 2.5 (28% 0-0/1-0 rate); France Ligue 2 on Over 1.5 / Over 2.5; Argentina Primera on Over 1.5; Spain Segunda on Over 1.5.
+    - *Action*: Divert candidate fixture exclusively to the **Shadow Tracking Portfolio (`alternatives`)**. Real money capital must never be risked on a Tier 3 market corridor.
+
 ---
 
 ## 4. TICKET PORTFOLIO CONSTRUCTION LOGIC
@@ -140,6 +149,7 @@ In real-world bookmaker pricing, fixtures with hyper-dominant offensive tempo of
 - Disqualify fixtures missing venue data (Hard-Stop Rule).
 - Apply Section 2.2 Small-Sample Regression Anchor ($N \le 5$).
 - Compute DCI and enforce the $\text{DCI} \ge 0.45$ floor for Over 2.5 and $\text{DCI} \ge 0.50$ for BTTS Yes.
+- **Enforce Gate 6 (League-Market Integrity)**: Check `league_baselines.json` and in-app empirical LMI matrix. If the match falls in a **`TIER_3`** corridor for that market, **divert to shadow alternatives immediately**.
 - Disqualify fixtures with unverified critical lineup absences or dead-rubber game state.
 - Retain all other fixtures regardless of positive or negative EV.
 

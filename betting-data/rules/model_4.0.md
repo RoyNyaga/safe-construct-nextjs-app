@@ -249,6 +249,9 @@ The model actively searches for evidence that challenges market viability. Warni
 - `CONFLICTING_SOURCES`: Significant discrepancy between data providers.
 - `TEAM_NEWS_UNVERIFIED`: Starting lineups not verified prior to match.
 
+#### F. League-Market Integrity Warnings (Gate 6)
+- `LEAGUE_INTEGRITY_RESTRICTED`: The competition is classified as `TIER_3` (Restricted / Fat-Tail Trap) for the targeted market in `league_baselines.json`. Disqualifies the fixture from Main Tickets and diverts it to the Shadow Tracking Portfolio.
+
 
 ## 9. RECOMMENDED ACCUMULATOR CONSTRUCTION (NON-RESTRICTIVE)
 

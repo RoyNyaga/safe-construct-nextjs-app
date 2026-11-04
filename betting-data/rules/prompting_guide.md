@@ -188,22 +188,36 @@ Evaluate the following pending post-match warnings and generate the WarningBatch
 
 ---
 
+## LEVEL 6: League-Market Integrity (LMI) Matrix Calibration
+
+After matches settle in the app:
+1. Navigate to `/{locale}/admin/betting/statistics/league-integrity`.
+2. Review the cross-matrix of empirical hit rates vs macro priors across competitions and markets.
+3. Click **"Sync & Save to Baselines"** to automatically calibrate and update `betting-data/rules/league_baselines.json` with your real-world win rates, or click **"Export JSON"** to download/copy the calibrated JSON.
+4. Antigravity and `calculate_model.py` automatically utilize this file to enforce Gate 6 and block Tier 3 fat-tail traps from main tickets.
+
+---
+
 ## Summary of File Roles in `betting-data/`
 
 ```
 betting-data/
 ├── rules/
-│   ├── model_3.0.md                   # Active: Roy Betting Engine BTS & Over 2.5 specification (v3.0)
+│   ├── model_4.0.md                   # Active: Roy Betting Engine BTS, O2.5 & Win specification (v4.0)
+│   ├── model_3.0.md                   # Archived: Roy Betting Engine BTS & Over 2.5 specification (v3.0)
 │   ├── model_2.1.md                   # Archived: Roy Betting Engine Over 1.5 specification (v2.1)
+│   ├── league_baselines.json          # Locked scoring baselines & empirical league-market integrity matrix (v2.0)
+│   ├── selection_process.md           # Automated 2-to-3 leg portfolio rules & 6-gate checklist
 │   ├── organization_rules.md          # File & directory organization conventions
 │   ├── prompting_guide.md             # This workflow & prompting guide
-│   ├── import_ticket_sample_data.md   # Schema reference for ticket import (Model 3.0)
-│   ├── export_ticket_sample_data.md   # Schema reference for ticket post-match export (Model 3.0)
-│   └── export_warnings_sample_data.md # Schema reference for warning post-match requests (Model 3.0)
+│   ├── import_ticket_sample_data.md   # Schema reference for ticket import (Model 4.0)
+│   ├── export_ticket_sample_data.md   # Schema reference for ticket post-match export (Model 4.0)
+│   └── export_warnings_sample_data.md # Schema reference for warning post-match requests (Model 4.0)
 ├── scripts/
-│   └── calculate_model.py             # Deterministic Multi-Market Poisson, EV, Edge, and Warning calculator
+│   └── calculate_model.py             # Deterministic Multi-Market & 1X2 Poisson, EV, Edge, and Warning calculator
 └── <month>/ (e.g. november/)
     ├── evaluation_YYYY-MM-DD.md       # Pre-match stats snapshot & decision summary table
+    ├── candidates_YYYY-MM-DD.json     # All other evaluated qualified matches
     ├── ticket_YYYY-MM-DD_001.json     # Ready-to-import ticket JSON
     └── warnings_update_YYYY-MM-DD.json# Post-match warning updates JSON
 ```

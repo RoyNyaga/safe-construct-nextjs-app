@@ -1,91 +1,232 @@
 {
-  "_version": "1.0",
-  "_description": "Locked historical competition scoring baselines for Roy Betting Engine v2.1 benchmark calculations",
-  "_reference_date": "2026-10-26",
+  "_version": "2.0",
+  "_description": "Locked historical competition scoring baselines and market integrity priors for Roy Betting Engine Model 4.0",
+  "_reference_date": "2026-11-04",
   "competitions": {
-    "england_league_two": {
-      "name": "England League Two",
-      "historical_home_avg": 1.45,
-      "historical_away_avg": 1.15,
-      "season_basis": "2024/25 - 2025/26 multi-year aggregate"
+    "netherlands_eerste_divisie": {
+      "name": "Netherlands Eerste Divisie",
+      "country": "Netherlands",
+      "historical_home_avg": 1.75,
+      "historical_away_avg": 1.45,
+      "season_basis": "Multi-year aggregate (High-tempo goal corridor)",
+      "market_integrity": {
+        "over_1_5": { "tier": "TIER_1", "baseline_hit_rate": 0.84, "notes": "Elite goal volume; very low 0-0/1-0 frequency." },
+        "over_2_5": { "tier": "TIER_1", "baseline_hit_rate": 0.63, "notes": "Reliable transitional openness across both halves." },
+        "btts_yes": { "tier": "TIER_1", "baseline_hit_rate": 0.61, "notes": "Both sides score in >60% of fixtures." },
+        "under_3_5": { "tier": "TIER_3", "baseline_hit_rate": 0.58, "notes": "High volatility explosive games; dangerous for Unders." },
+        "to_win": { "tier": "TIER_2", "baseline_hit_rate": 0.48, "notes": "Standard favorite dominance." },
+        "draw_no_bet": { "tier": "TIER_1", "baseline_hit_rate": 0.72, "notes": "Draws are rare; strong favorites capitalize cleanly." }
+      }
     },
-    "england_premier_league": {
-      "name": "England Premier League",
+    "germany_2_bundesliga": {
+      "name": "Germany 2. Bundesliga",
+      "country": "Germany",
+      "historical_home_avg": 1.70,
+      "historical_away_avg": 1.40,
+      "season_basis": "Multi-year aggregate",
+      "market_integrity": {
+        "over_1_5": { "tier": "TIER_1", "baseline_hit_rate": 0.83, "notes": "High offensive pace and consistent two-goal output." },
+        "over_2_5": { "tier": "TIER_1", "baseline_hit_rate": 0.61, "notes": "Strong multi-goal conversion rate." },
+        "btts_yes": { "tier": "TIER_1", "baseline_hit_rate": 0.59, "notes": "Reliable dual scoring." },
+        "under_3_5": { "tier": "TIER_3", "baseline_hit_rate": 0.60, "notes": "Elevated blowout risk." },
+        "to_win": { "tier": "TIER_2", "baseline_hit_rate": 0.47, "notes": "Competitive parity." },
+        "draw_no_bet": { "tier": "TIER_1", "baseline_hit_rate": 0.70, "notes": "DNB buffers against away counter-draws." }
+      }
+    },
+    "ecuador_serie_a": {
+      "name": "Ecuador Serie A",
+      "country": "Ecuador",
       "historical_home_avg": 1.55,
-      "historical_away_avg": 1.25,
-      "season_basis": "2024/25 - 2025/26 multi-year aggregate"
+      "historical_away_avg": 1.15,
+      "season_basis": "2024 - 2025 multi-year aggregate",
+      "market_integrity": {
+        "over_1_5": { "tier": "TIER_1", "baseline_hit_rate": 0.81, "notes": "Altitude splits and open transitions ensure multi-goal games." },
+        "over_2_5": { "tier": "TIER_2", "baseline_hit_rate": 0.52, "notes": "Moderate Over 2.5 rate; requires DCI >= 0.50." },
+        "btts_yes": { "tier": "TIER_2", "baseline_hit_rate": 0.51, "notes": "Strong when home teams play high-tempo altitude hosts." },
+        "under_3_5": { "tier": "TIER_2", "baseline_hit_rate": 0.73, "notes": "Solid for low-altitude coastal clashes." },
+        "to_win": { "tier": "TIER_2", "baseline_hit_rate": 0.50, "notes": "Extreme home altitude advantage for Andean clubs." },
+        "draw_no_bet": { "tier": "TIER_2", "baseline_hit_rate": 0.68, "notes": "Protects road favorites." }
+      }
     },
-    "spain_la_liga": {
-      "name": "Spain La Liga",
-      "historical_home_avg": 1.45,
-      "historical_away_avg": 1.10,
-      "season_basis": "2024/25 - 2025/26 multi-year aggregate"
-    },
-    "spain_segunda_division": {
-      "name": "Spain Segunda División",
-      "historical_home_avg": 1.35,
-      "historical_away_avg": 1.00,
-      "season_basis": "2024/25 - 2025/26 multi-year aggregate"
-    },
-    "france_ligue_1": {
-      "name": "France Ligue 1",
-      "historical_home_avg": 1.50,
-      "historical_away_avg": 1.20,
-      "season_basis": "2024/25 - 2025/26 multi-year aggregate"
+    "japan_j1_league": {
+      "name": "Japan J1 League",
+      "country": "Japan",
+      "historical_home_avg": 1.38,
+      "historical_away_avg": 1.18,
+      "season_basis": "2024 - 2025 multi-year aggregate",
+      "market_integrity": {
+        "over_1_5": { "tier": "TIER_3", "baseline_hit_rate": 0.71, "notes": "FAT LEFT TAIL TRAP: 28% of games end 0-0, 1-0, or 0-1. Highly volatile for Over 1.5." },
+        "over_2_5": { "tier": "TIER_3", "baseline_hit_rate": 0.46, "notes": "Tactical freeze after early goals suppresses 3rd goal." },
+        "btts_yes": { "tier": "TIER_3", "baseline_hit_rate": 0.49, "notes": "Frequent clean sheet locks." },
+        "under_3_5": { "tier": "TIER_1", "baseline_hit_rate": 0.79, "notes": "Elite reliability: 80% of fixtures finish under 3.5." },
+        "to_win": { "tier": "TIER_3", "baseline_hit_rate": 0.41, "notes": "Parity trap: bottom-table clubs frequently snatch 0-1 road upsets." },
+        "draw_no_bet": { "tier": "TIER_2", "baseline_hit_rate": 0.62, "notes": "Draw void protection mandatory for Japanese fixtures." }
+      }
     },
     "france_ligue_2": {
       "name": "France Ligue 2",
+      "country": "France",
       "historical_home_avg": 1.35,
       "historical_away_avg": 1.05,
-      "season_basis": "2024/25 - 2025/26 multi-year aggregate"
-    },
-    "portugal_primeira_liga": {
-      "name": "Portugal Primeira Liga",
-      "historical_home_avg": 1.45,
-      "historical_away_avg": 1.15,
-      "season_basis": "2024/25 - 2025/26 multi-year aggregate"
+      "season_basis": "2024/25 - 2025/26 multi-year aggregate",
+      "market_integrity": {
+        "over_1_5": { "tier": "TIER_3", "baseline_hit_rate": 0.69, "notes": "Conservative tactical meta with high 0-0/1-0 incidence." },
+        "over_2_5": { "tier": "TIER_3", "baseline_hit_rate": 0.43, "notes": "Low goal yield across majority of fixtures." },
+        "btts_yes": { "tier": "TIER_3", "baseline_hit_rate": 0.45, "notes": "Frequent shutouts." },
+        "under_3_5": { "tier": "TIER_1", "baseline_hit_rate": 0.81, "notes": "Premier competition for Under 3.5 Goals." },
+        "to_win": { "tier": "TIER_3", "baseline_hit_rate": 0.42, "notes": "Draws account for 32% of all league matches." },
+        "draw_no_bet": { "tier": "TIER_2", "baseline_hit_rate": 0.63, "notes": "Draw void protection is mandatory." }
+      }
     },
     "portugal_liga_portugal_2": {
       "name": "Portugal Liga Portugal 2",
+      "country": "Portugal",
       "historical_home_avg": 1.35,
       "historical_away_avg": 1.10,
-      "season_basis": "2024/25 - 2025/26 multi-year aggregate"
+      "season_basis": "2024/25 - 2025/26 multi-year aggregate",
+      "market_integrity": {
+        "over_1_5": { "tier": "TIER_3", "baseline_hit_rate": 0.70, "notes": "Tactical fouling and stop-start tempo suppresses rhythm." },
+        "over_2_5": { "tier": "TIER_3", "baseline_hit_rate": 0.44, "notes": "High concentration of 1-0 and 1-1 results." },
+        "btts_yes": { "tier": "TIER_3", "baseline_hit_rate": 0.48, "notes": "Underdog scoreless rate exceeds 42%." },
+        "under_3_5": { "tier": "TIER_1", "baseline_hit_rate": 0.80, "notes": "Elite Under 3.5 corridor." },
+        "to_win": { "tier": "TIER_3", "baseline_hit_rate": 0.43, "notes": "B-teams and senior clubs create volatile results." },
+        "draw_no_bet": { "tier": "TIER_2", "baseline_hit_rate": 0.64, "notes": "Strong DNB utility." }
+      }
     },
-    "brazil_serie_a": {
-      "name": "Brazil Serie A",
+    "italy_serie_b": {
+      "name": "Italy Serie B",
+      "country": "Italy",
       "historical_home_avg": 1.40,
+      "historical_away_avg": 1.12,
+      "season_basis": "2024/25 - 2025/26 multi-year aggregate",
+      "market_integrity": {
+        "over_1_5": { "tier": "TIER_2", "baseline_hit_rate": 0.76, "notes": "Solid when top-6 attacking sides are involved." },
+        "over_2_5": { "tier": "TIER_3", "baseline_hit_rate": 0.46, "notes": "Cautious second-half game management." },
+        "btts_yes": { "tier": "TIER_2", "baseline_hit_rate": 0.52, "notes": "Moderate reliability; DCI >= 0.55 required." },
+        "under_3_5": { "tier": "TIER_1", "baseline_hit_rate": 0.78, "notes": "Strong defensive shape across the league." },
+        "to_win": { "tier": "TIER_2", "baseline_hit_rate": 0.46, "notes": "Competitive balance." },
+        "draw_no_bet": { "tier": "TIER_2", "baseline_hit_rate": 0.67, "notes": "Viable with DNB." }
+      }
+    },
+    "england_championship": {
+      "name": "England Championship",
+      "country": "England",
+      "historical_home_avg": 1.48,
+      "historical_away_avg": 1.18,
+      "season_basis": "2024/25 - 2025/26 multi-year aggregate",
+      "market_integrity": {
+        "over_1_5": { "tier": "TIER_2", "baseline_hit_rate": 0.78, "notes": "High match congestion creates periodic fatigue-based 1-0s." },
+        "over_2_5": { "tier": "TIER_2", "baseline_hit_rate": 0.51, "notes": "Requires DCI >= 0.50 and pace verification." },
+        "btts_yes": { "tier": "TIER_2", "baseline_hit_rate": 0.53, "notes": "Solid mid-table goal exchanges." },
+        "under_3_5": { "tier": "TIER_1", "baseline_hit_rate": 0.74, "notes": "Reliable for mid-week evening fixtures." },
+        "to_win": { "tier": "TIER_2", "baseline_hit_rate": 0.46, "notes": "Relatively balanced." },
+        "draw_no_bet": { "tier": "TIER_1", "baseline_hit_rate": 0.69, "notes": "DNB mitigates late Championship equalizer drama." }
+      }
+    },
+    "england_league_two": {
+      "name": "England League Two",
+      "country": "England",
+      "historical_home_avg": 1.45,
+      "historical_away_avg": 1.15,
+      "season_basis": "2024/25 - 2025/26 multi-year aggregate",
+      "market_integrity": {
+        "over_1_5": { "tier": "TIER_1", "baseline_hit_rate": 0.79, "notes": "Defensive errors and direct play reliably produce 2+ goals." },
+        "over_2_5": { "tier": "TIER_2", "baseline_hit_rate": 0.51, "notes": "Requires DCI >= 0.45." },
+        "btts_yes": { "tier": "TIER_2", "baseline_hit_rate": 0.54, "notes": "Clean sheets are rare." },
+        "under_3_5": { "tier": "TIER_1", "baseline_hit_rate": 0.74, "notes": "Safe under anchor." },
+        "to_win": { "tier": "TIER_2", "baseline_hit_rate": 0.45, "notes": "Standard." },
+        "draw_no_bet": { "tier": "TIER_1", "baseline_hit_rate": 0.68, "notes": "Reliable." }
+      }
+    },
+    "england_premier_league": {
+      "name": "England Premier League",
+      "country": "England",
+      "historical_home_avg": 1.55,
+      "historical_away_avg": 1.25,
+      "season_basis": "2024/25 - 2025/26 multi-year aggregate",
+      "market_integrity": {
+        "over_1_5": { "tier": "TIER_1", "baseline_hit_rate": 0.83, "notes": "High goal-scoring frequency across all match tiers." },
+        "over_2_5": { "tier": "TIER_1", "baseline_hit_rate": 0.59, "notes": "Elite transitional tempo." },
+        "btts_yes": { "tier": "TIER_1", "baseline_hit_rate": 0.58, "notes": "Consistent away attacking presence." },
+        "under_3_5": { "tier": "TIER_2", "baseline_hit_rate": 0.67, "notes": "Top 6 matchups frequently exceed 3 goals." },
+        "to_win": { "tier": "TIER_1", "baseline_hit_rate": 0.48, "notes": "Top-tier favorites maintain high win conversion at home." },
+        "draw_no_bet": { "tier": "TIER_1", "baseline_hit_rate": 0.73, "notes": "Strong security." }
+      }
+    },
+    "spain_la_liga": {
+      "name": "Spain La Liga",
+      "country": "Spain",
+      "historical_home_avg": 1.45,
+      "historical_away_avg": 1.10,
+      "season_basis": "2024/25 - 2025/26 multi-year aggregate",
+      "market_integrity": {
+        "over_1_5": { "tier": "TIER_2", "baseline_hit_rate": 0.75, "notes": "Tactical discipline and low blocks can suppress goals." },
+        "over_2_5": { "tier": "TIER_2", "baseline_hit_rate": 0.48, "notes": "Requires DCI >= 0.50." },
+        "btts_yes": { "tier": "TIER_2", "baseline_hit_rate": 0.50, "notes": "Strong for mid-table clashes." },
+        "under_3_5": { "tier": "TIER_1", "baseline_hit_rate": 0.78, "notes": "Reliable for non-Real Madrid/Barcelona fixtures." },
+        "to_win": { "tier": "TIER_2", "baseline_hit_rate": 0.47, "notes": "Home advantage is strong." },
+        "draw_no_bet": { "tier": "TIER_1", "baseline_hit_rate": 0.70, "notes": "Solid." }
+      }
+    },
+    "spain_segunda_division": {
+      "name": "Spain Segunda División",
+      "country": "Spain",
+      "historical_home_avg": 1.35,
       "historical_away_avg": 1.00,
-      "season_basis": "2024 - 2025 multi-year aggregate"
+      "season_basis": "2024/25 - 2025/26 multi-year aggregate",
+      "market_integrity": {
+        "over_1_5": { "tier": "TIER_3", "baseline_hit_rate": 0.69, "notes": "Extremely tight defense and slow possession pace." },
+        "over_2_5": { "tier": "TIER_3", "baseline_hit_rate": 0.42, "notes": "High concentration of 0-0 and 1-0." },
+        "btts_yes": { "tier": "TIER_3", "baseline_hit_rate": 0.44, "notes": "Away scoreless rate is high." },
+        "under_3_5": { "tier": "TIER_1", "baseline_hit_rate": 0.82, "notes": "Premier Under 3.5 league." },
+        "to_win": { "tier": "TIER_3", "baseline_hit_rate": 0.44, "notes": "High draw incidence (>31%)." },
+        "draw_no_bet": { "tier": "TIER_2", "baseline_hit_rate": 0.64, "notes": "DNB is mandatory." }
+      }
+    },
+    "portugal_primeira_liga": {
+      "name": "Portugal Primeira Liga",
+      "country": "Portugal",
+      "historical_home_avg": 1.45,
+      "historical_away_avg": 1.15,
+      "season_basis": "2024/25 - 2025/26 multi-year aggregate",
+      "market_integrity": {
+        "over_1_5": { "tier": "TIER_2", "baseline_hit_rate": 0.77, "notes": "Bifurcated: Big 3 (Benfica/Sporting/Porto) are Tier 1; rest of league is Tier 3." },
+        "over_2_5": { "tier": "TIER_2", "baseline_hit_rate": 0.50, "notes": "Top clubs score heavily." },
+        "btts_yes": { "tier": "TIER_2", "baseline_hit_rate": 0.51, "notes": "Moderate." },
+        "under_3_5": { "tier": "TIER_1", "baseline_hit_rate": 0.75, "notes": "Good for non-Big 3." },
+        "to_win": { "tier": "TIER_1", "baseline_hit_rate": 0.46, "notes": "Big 3 win rates exceed 75%." },
+        "draw_no_bet": { "tier": "TIER_1", "baseline_hit_rate": 0.71, "notes": "Solid." }
+      }
     },
     "argentina_liga_profesional": {
       "name": "Argentina Liga Profesional",
+      "country": "Argentina",
       "historical_home_avg": 1.30,
       "historical_away_avg": 1.05,
-      "season_basis": "2024 - 2025 multi-year aggregate"
-    },
-    "armenia_premier_league": {
-      "name": "Armenia Premier League",
-      "historical_home_avg": 1.45,
-      "historical_away_avg": 1.15,
-      "season_basis": "2024/25 - 2025/26 multi-year aggregate"
-    },
-    "bolivia_primera_division": {
-      "name": "Bolivia Primera División",
-      "historical_home_avg": 1.70,
-      "historical_away_avg": 1.05,
-      "season_basis": "2024 - 2025 multi-year aggregate"
-    },
-    "bulgaria_first_league": {
-      "name": "Bulgaria First League",
-      "historical_home_avg": 1.35,
-      "historical_away_avg": 1.05,
-      "season_basis": "2024/25 - 2025/26 multi-year aggregate"
+      "season_basis": "2024 - 2025 multi-year aggregate",
+      "market_integrity": {
+        "over_1_5": { "tier": "TIER_3", "baseline_hit_rate": 0.67, "notes": "High physical friction, cynical fouls, and frequent 0-0 locks." },
+        "over_2_5": { "tier": "TIER_3", "baseline_hit_rate": 0.39, "notes": "Dangerous for Over 2.5." },
+        "btts_yes": { "tier": "TIER_3", "baseline_hit_rate": 0.44, "notes": "Low scoring." },
+        "under_3_5": { "tier": "TIER_1", "baseline_hit_rate": 0.83, "notes": "Exceptional reliability for Under 3.5." },
+        "to_win": { "tier": "TIER_3", "baseline_hit_rate": 0.43, "notes": "High draw rate." },
+        "draw_no_bet": { "tier": "TIER_2", "baseline_hit_rate": 0.65, "notes": "DNB necessary." }
+      }
     },
     "default_fallback": {
       "name": "Default Competition Fallback",
+      "country": null,
       "historical_home_avg": 1.45,
       "historical_away_avg": 1.15,
-      "season_basis": "Standard European lower/mid tier baseline"
+      "season_basis": "Standard European lower/mid tier baseline",
+      "market_integrity": {
+        "over_1_5": { "tier": "TIER_2", "baseline_hit_rate": 0.76, "notes": "Conservative default fallback." },
+        "over_2_5": { "tier": "TIER_2", "baseline_hit_rate": 0.50, "notes": "Standard default." },
+        "btts_yes": { "tier": "TIER_2", "baseline_hit_rate": 0.51, "notes": "Standard default." },
+        "under_3_5": { "tier": "TIER_1", "baseline_hit_rate": 0.75, "notes": "Conservative default." },
+        "to_win": { "tier": "TIER_2", "baseline_hit_rate": 0.46, "notes": "Standard default." },
+        "draw_no_bet": { "tier": "TIER_2", "baseline_hit_rate": 0.68, "notes": "Standard default." }
+      }
     }
   }
 }

@@ -752,6 +752,71 @@ export interface WarningBatchUpdateJSON {
   updates: WarningBatchUpdateItem[]
 }
 
+// ─── LEAGUE-MARKET INTEGRITY (LMI) TYPES ─────────────────────────────────────
+
+export type LeagueMarketTier = 'TIER_1' | 'TIER_2' | 'TIER_3' | 'UNTESTED'
+
+export interface LeagueIntegrityBetItem {
+  id: number
+  uuid: string
+  ticket_id?: number | null
+  ticket_number?: string | null
+  source_type: 'selection' | 'alternative'
+  match_date: string
+  home_team: string
+  away_team: string
+  country?: string | null
+  league: string
+  market: string
+  selection: string
+  odds?: number | null
+  estimated_probability?: number | null
+  actual_home_score?: number | null
+  actual_away_score?: number | null
+  result: SelectionResultStatus
+}
+
+export interface LeagueMarketIntegrityRecord {
+  league: string
+  market: string
+  market_key: string
+  tier: LeagueMarketTier
+  total_evaluated: number
+  total_settled: number
+  won_count: number
+  lost_count: number
+  void_count: number
+  actual_win_rate: number | null
+  predicted_avg_prob: number | null
+  calibration_gap_pp: number | null
+  macro_prior_win_rate?: number | null
+  status_label: string
+  items?: LeagueIntegrityBetItem[]
+}
+
+export interface LeagueIntegrityCompetitionSummary {
+  competition_key: string
+  name: string
+  country?: string | null
+  historical_home_avg?: number | null
+  historical_away_avg?: number | null
+  markets: Record<string, LeagueMarketIntegrityRecord>
+  overall_tier: LeagueMarketTier
+  total_bets: number
+  won_bets: number
+  lost_bets: number
+  win_rate: number | null
+  items?: LeagueIntegrityBetItem[]
+}
+
+export interface LeagueIntegrityMatrixPayload {
+  last_updated: string
+  total_competitions: number
+  total_settled_records: number
+  competitions: LeagueIntegrityCompetitionSummary[]
+}
+
+
 // ─── WARNING ANALYTICS TYPES ─────────────────────────────────────────────────
 
 export interface WarningAnalyticsSummary {
