@@ -709,8 +709,8 @@ export default function LeagueIntegrityClient({
                                 {rec?.actual_win_rate !== null
                                   ? `${rec.actual_win_rate}% (${rec.won_count}/${rec.total_settled})`
                                   : rec?.macro_prior_win_rate !== null && rec?.macro_prior_win_rate !== undefined
-                                  ? `~${rec.macro_prior_win_rate}% prior`
-                                  : 'Untested'}
+                                    ? `~${rec.macro_prior_win_rate}% prior`
+                                    : 'Untested'}
                               </Typography>
 
                               {rec?.calibration_gap_pp !== null && rec?.calibration_gap_pp !== undefined && (
@@ -723,8 +723,8 @@ export default function LeagueIntegrityClient({
                                       rec.calibration_gap_pp >= 0
                                         ? '#4ADE80'
                                         : rec.calibration_gap_pp < -10
-                                        ? '#F87171'
-                                        : '#FACC15',
+                                          ? '#F87171'
+                                          : '#FACC15',
                                   }}
                                 >
                                   Gap: {rec.calibration_gap_pp > 0 ? `+${rec.calibration_gap_pp}` : rec.calibration_gap_pp}pp
@@ -820,8 +820,8 @@ export default function LeagueIntegrityClient({
                         {selectedRecord.record.predicted_avg_prob !== null
                           ? `${selectedRecord.record.predicted_avg_prob}%`
                           : selectedRecord.record.macro_prior_win_rate !== null
-                          ? `~${selectedRecord.record.macro_prior_win_rate}%`
-                          : 'N/A'}
+                            ? `~${selectedRecord.record.macro_prior_win_rate}%`
+                            : 'N/A'}
                       </Typography>
                       <Typography variant="caption" color="text.secondary">
                         Expected Probability
@@ -842,8 +842,8 @@ export default function LeagueIntegrityClient({
                             (selectedRecord.record.calibration_gap_pp ?? 0) >= 0
                               ? '#4ADE80'
                               : (selectedRecord.record.calibration_gap_pp ?? 0) < -10
-                              ? '#F87171'
-                              : '#FACC15',
+                                ? '#F87171'
+                                : '#FACC15',
                         }}
                       >
                         {selectedRecord.record.calibration_gap_pp !== null
@@ -863,8 +863,8 @@ export default function LeagueIntegrityClient({
                       selectedRecord.record.tier === 'TIER_1'
                         ? 'success'
                         : selectedRecord.record.tier === 'TIER_3'
-                        ? 'error'
-                        : 'info'
+                          ? 'error'
+                          : 'info'
                     }
                     sx={{ borderRadius: 2, mb: 2 }}
                   >
@@ -913,13 +913,12 @@ export default function LeagueIntegrityClient({
                           p: 1.75,
                           borderRadius: 2,
                           backgroundColor: alpha('#1E2635', 0.6),
-                          border: `1px solid ${
-                            isWon
+                          border: `1px solid ${isWon
                               ? 'rgba(34, 197, 94, 0.3)'
                               : isLost
-                              ? 'rgba(239, 68, 68, 0.3)'
-                              : 'rgba(255, 255, 255, 0.08)'
-                          }`,
+                                ? 'rgba(239, 68, 68, 0.3)'
+                                : 'rgba(255, 255, 255, 0.08)'
+                            }`,
                         }}
                       >
                         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 0.75 }}>
@@ -954,8 +953,8 @@ export default function LeagueIntegrityClient({
                                 backgroundColor: isWon
                                   ? alpha('#22C55E', 0.2)
                                   : isLost
-                                  ? alpha('#EF4444', 0.2)
-                                  : alpha('#94A3B8', 0.2),
+                                    ? alpha('#EF4444', 0.2)
+                                    : alpha('#94A3B8', 0.2),
                                 color: isWon ? '#4ADE80' : isLost ? '#F87171' : '#CBD5E1',
                               }}
                             />
