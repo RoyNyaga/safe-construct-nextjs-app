@@ -104,6 +104,9 @@ function generateSamplePayload(activeModel?: BettingModel | null, initialSuggest
         prob_over_2_5: 0.612,
         prob_btts_yes: 0.671,
         prob_under_3_5: 0.675,
+        prob_home_win: 0.550,
+        prob_draw: 0.260,
+        prob_away_win: 0.190,
         actual_home_score: null,
         actual_away_score: null,
         result: 'pending',
@@ -157,6 +160,9 @@ function generateSamplePayload(activeModel?: BettingModel | null, initialSuggest
         prob_over_2_5: 0.612,
         prob_btts_yes: 0.671,
         prob_under_3_5: 0.675,
+        prob_home_win: 0.550,
+        prob_draw: 0.260,
+        prob_away_win: 0.190,
         actual_home_score: null,
         actual_away_score: null,
         result: 'pending',
@@ -202,6 +208,9 @@ function generateSamplePayload(activeModel?: BettingModel | null, initialSuggest
         prob_over_2_5: 0.612,
         prob_btts_yes: 0.671,
         prob_under_3_5: 0.675,
+        prob_home_win: 0.550,
+        prob_draw: 0.260,
+        prob_away_win: 0.190,
         actual_home_score: null,
         actual_away_score: null,
         result: 'pending',
@@ -276,51 +285,51 @@ export default function ImportClient({
       }>
     }> = []
 
-    // 1. From selections
-    ;(parsedPayload.selections || []).forEach((s, idx) => {
-      if (s.warnings && Array.isArray(s.warnings) && s.warnings.length > 0) {
-        groups.push({
-          key: `sel-${idx}`,
-          target: `${s.home_team} vs ${s.away_team}`,
-          targetType: 'selection',
-          country: s.country,
-          league: s.league,
-          market: s.market,
-          selection: s.selection,
-          odds: s.odds ? Number(s.odds) : null,
-          warnings: s.warnings.map((w) => ({
-            type: w.type,
-            severity: (w.severity || 'MEDIUM').toUpperCase(),
-            direction: (w.direction || 'CONTRADICTORY').toUpperCase(),
-            description: w.description,
-            evidence: w.evidence,
-          })),
-        })
-      }
-    })
+      // 1. From selections
+      ; (parsedPayload.selections || []).forEach((s, idx) => {
+        if (s.warnings && Array.isArray(s.warnings) && s.warnings.length > 0) {
+          groups.push({
+            key: `sel-${idx}`,
+            target: `${s.home_team} vs ${s.away_team}`,
+            targetType: 'selection',
+            country: s.country,
+            league: s.league,
+            market: s.market,
+            selection: s.selection,
+            odds: s.odds ? Number(s.odds) : null,
+            warnings: s.warnings.map((w) => ({
+              type: w.type,
+              severity: (w.severity || 'MEDIUM').toUpperCase(),
+              direction: (w.direction || 'CONTRADICTORY').toUpperCase(),
+              description: w.description,
+              evidence: w.evidence,
+            })),
+          })
+        }
+      })
 
-    // 2. From alternatives
-    ;(parsedPayload.alternatives || []).forEach((a, idx) => {
-      if (a.warnings && Array.isArray(a.warnings) && a.warnings.length > 0) {
-        groups.push({
-          key: `alt-${idx}`,
-          target: `${a.home_team} vs ${a.away_team}`,
-          targetType: 'alternative',
-          country: a.country,
-          league: a.league,
-          market: a.market,
-          selection: a.selection,
-          odds: a.odds ? Number(a.odds) : null,
-          warnings: a.warnings.map((w) => ({
-            type: w.type,
-            severity: (w.severity || 'MEDIUM').toUpperCase(),
-            direction: (w.direction || 'CONTRADICTORY').toUpperCase(),
-            description: w.description,
-            evidence: w.evidence,
-          })),
-        })
-      }
-    })
+      // 2. From alternatives
+      ; (parsedPayload.alternatives || []).forEach((a, idx) => {
+        if (a.warnings && Array.isArray(a.warnings) && a.warnings.length > 0) {
+          groups.push({
+            key: `alt-${idx}`,
+            target: `${a.home_team} vs ${a.away_team}`,
+            targetType: 'alternative',
+            country: a.country,
+            league: a.league,
+            market: a.market,
+            selection: a.selection,
+            odds: a.odds ? Number(a.odds) : null,
+            warnings: a.warnings.map((w) => ({
+              type: w.type,
+              severity: (w.severity || 'MEDIUM').toUpperCase(),
+              direction: (w.direction || 'CONTRADICTORY').toUpperCase(),
+              description: w.description,
+              evidence: w.evidence,
+            })),
+          })
+        }
+      })
 
     // 3. From legacy top-level warnings (for backward compatibility)
     if (parsedPayload.warnings && Array.isArray(parsedPayload.warnings) && parsedPayload.warnings.length > 0) {
@@ -713,11 +722,11 @@ ${JSON.stringify(sampleJson, null, 2)}`
       const newEstimatedProb =
         remainingSelections.length > 0
           ? Number(
-              remainingSelections.reduce(
-                (acc, s) => acc * (Number(s.estimated_probability) || 1),
-                1
-              ).toFixed(3)
-            )
+            remainingSelections.reduce(
+              (acc, s) => acc * (Number(s.estimated_probability) || 1),
+              1
+            ).toFixed(3)
+          )
           : 0
 
       // Clean any legacy top-level warnings associated with this selection
@@ -1346,19 +1355,71 @@ ${JSON.stringify(sampleJson, null, 2)}`
                       <tr key={idx} style={{ borderBottom: '1px solid rgba(240, 242, 245, 0.05)' }}>
                         <td style={{ padding: '12px 14px', fontWeight: 700 }}>
                           <div>{sel.home_team} <span style={{ color: '#9AA3B2' }}>vs</span> {sel.away_team}</div>
+                          {((sel.prob_home_win != null) || (sel.prob_draw != null) || (sel.prob_away_win != null)) && (
+                            <Box sx={{ mt: 0.5, display: 'flex', gap: 0.5, flexWrap: 'wrap', alignItems: 'center' }}>
+                              <Typography component="span" sx={{ fontSize: '0.62rem', color: '#9AA3B2', fontWeight: 700, mr: 0.25 }}>
+                                1X2:
+                              </Typography>
+                              {sel.prob_home_win != null && (
+                                <Chip
+                                  label={`1: ${(Number(sel.prob_home_win) * 100).toFixed(0)}%`}
+                                  size="small"
+                                  sx={{
+                                    height: 18,
+                                    fontSize: '0.63rem',
+                                    fontWeight: 700,
+                                    backgroundColor: alpha('#66BB6A', 0.15),
+                                    color: '#66BB6A',
+                                    border: `1px solid ${alpha('#66BB6A', 0.35)}`,
+                                  }}
+                                />
+                              )}
+                              {sel.prob_draw != null && (
+                                <Chip
+                                  label={`X: ${(Number(sel.prob_draw) * 100).toFixed(0)}%`}
+                                  size="small"
+                                  sx={{
+                                    height: 18,
+                                    fontSize: '0.63rem',
+                                    fontWeight: 600,
+                                    backgroundColor: alpha('#FFA726', 0.12),
+                                    color: '#FFA726',
+                                    border: `1px solid ${alpha('#FFA726', 0.3)}`,
+                                  }}
+                                />
+                              )}
+                              {sel.prob_away_win != null && (
+                                <Chip
+                                  label={`2: ${(Number(sel.prob_away_win) * 100).toFixed(0)}%`}
+                                  size="small"
+                                  sx={{
+                                    height: 18,
+                                    fontSize: '0.63rem',
+                                    fontWeight: 700,
+                                    backgroundColor: alpha('#42A5F5', 0.15),
+                                    color: '#42A5F5',
+                                    border: `1px solid ${alpha('#42A5F5', 0.35)}`,
+                                  }}
+                                />
+                              )}
+                            </Box>
+                          )}
                           {((sel.prob_over_1_5 != null) || (sel.prob_over_2_5 != null) || (sel.prob_btts_yes != null) || (sel.prob_under_3_5 != null)) && (
-                            <Box sx={{ mt: 0.5, display: 'flex', gap: 0.5, flexWrap: 'wrap' }}>
+                            <Box sx={{ mt: 0.5, display: 'flex', gap: 0.5, flexWrap: 'wrap', alignItems: 'center' }}>
+                              <Typography component="span" sx={{ fontSize: '0.62rem', color: '#9AA3B2', fontWeight: 700, mr: 0.25 }}>
+                                Goals:
+                              </Typography>
                               {sel.prob_over_1_5 != null && (
-                                <Chip label={`O1.5: ${(Number(sel.prob_over_1_5) * 100).toFixed(0)}%`} size="small" sx={{ height: 16, fontSize: '0.62rem', backgroundColor: alpha('#42A5F5', 0.12), color: '#42A5F5' }} />
+                                <Chip label={`O1.5: ${(Number(sel.prob_over_1_5) * 100).toFixed(0)}%`} size="small" sx={{ height: 18, fontSize: '0.62rem', backgroundColor: alpha('#42A5F5', 0.12), color: '#42A5F5', border: `1px solid ${alpha('#42A5F5', 0.25)}` }} />
                               )}
                               {sel.prob_over_2_5 != null && (
-                                <Chip label={`O2.5: ${(Number(sel.prob_over_2_5) * 100).toFixed(0)}%`} size="small" sx={{ height: 16, fontSize: '0.62rem', backgroundColor: alpha('#AB47BC', 0.12), color: '#AB47BC' }} />
+                                <Chip label={`O2.5: ${(Number(sel.prob_over_2_5) * 100).toFixed(0)}%`} size="small" sx={{ height: 18, fontSize: '0.62rem', backgroundColor: alpha('#AB47BC', 0.12), color: '#AB47BC', border: `1px solid ${alpha('#AB47BC', 0.25)}` }} />
                               )}
                               {sel.prob_btts_yes != null && (
-                                <Chip label={`BTTS: ${(Number(sel.prob_btts_yes) * 100).toFixed(0)}%`} size="small" sx={{ height: 16, fontSize: '0.62rem', backgroundColor: alpha('#F26419', 0.12), color: '#F26419' }} />
+                                <Chip label={`BTTS: ${(Number(sel.prob_btts_yes) * 100).toFixed(0)}%`} size="small" sx={{ height: 18, fontSize: '0.62rem', backgroundColor: alpha('#F26419', 0.12), color: '#F26419', border: `1px solid ${alpha('#F26419', 0.25)}` }} />
                               )}
                               {sel.prob_under_3_5 != null && (
-                                <Chip label={`U3.5: ${(Number(sel.prob_under_3_5) * 100).toFixed(0)}%`} size="small" sx={{ height: 16, fontSize: '0.62rem', backgroundColor: alpha('#26A69A', 0.12), color: '#26A69A' }} />
+                                <Chip label={`U3.5: ${(Number(sel.prob_under_3_5) * 100).toFixed(0)}%`} size="small" sx={{ height: 18, fontSize: '0.62rem', backgroundColor: alpha('#26A69A', 0.12), color: '#26A69A', border: `1px solid ${alpha('#26A69A', 0.25)}` }} />
                               )}
                             </Box>
                           )}
@@ -1463,8 +1524,8 @@ ${JSON.stringify(sampleJson, null, 2)}`
                                     ? 'Au moins une sélection requise pour un ticket'
                                     : 'At least 1 selection required for a ticket'
                                   : locale === 'fr'
-                                  ? 'Supprimer cette sélection et recalculer cotes & alertes'
-                                  : 'Remove this selection and recalculate odds, probability & warnings'
+                                    ? 'Supprimer cette sélection et recalculer cotes & alertes'
+                                    : 'Remove this selection and recalculate odds, probability & warnings'
                               }
                             >
                               <span>
@@ -1539,19 +1600,71 @@ ${JSON.stringify(sampleJson, null, 2)}`
                         <tr key={idx} style={{ borderBottom: '1px solid rgba(240, 242, 245, 0.05)' }}>
                           <td style={{ padding: '12px 14px', fontWeight: 600, color: 'text.secondary' }}>
                             <div>{alt.home_team} vs {alt.away_team}</div>
+                            {((alt.prob_home_win != null) || (alt.prob_draw != null) || (alt.prob_away_win != null)) && (
+                              <Box sx={{ mt: 0.5, display: 'flex', gap: 0.5, flexWrap: 'wrap', alignItems: 'center' }}>
+                                <Typography component="span" sx={{ fontSize: '0.62rem', color: '#9AA3B2', fontWeight: 700, mr: 0.25 }}>
+                                  1X2:
+                                </Typography>
+                                {alt.prob_home_win != null && (
+                                  <Chip
+                                    label={`1: ${(Number(alt.prob_home_win) * 100).toFixed(0)}%`}
+                                    size="small"
+                                    sx={{
+                                      height: 18,
+                                      fontSize: '0.63rem',
+                                      fontWeight: 700,
+                                      backgroundColor: alpha('#66BB6A', 0.15),
+                                      color: '#66BB6A',
+                                      border: `1px solid ${alpha('#66BB6A', 0.35)}`,
+                                    }}
+                                  />
+                                )}
+                                {alt.prob_draw != null && (
+                                  <Chip
+                                    label={`X: ${(Number(alt.prob_draw) * 100).toFixed(0)}%`}
+                                    size="small"
+                                    sx={{
+                                      height: 18,
+                                      fontSize: '0.63rem',
+                                      fontWeight: 600,
+                                      backgroundColor: alpha('#FFA726', 0.12),
+                                      color: '#FFA726',
+                                      border: `1px solid ${alpha('#FFA726', 0.3)}`,
+                                    }}
+                                  />
+                                )}
+                                {alt.prob_away_win != null && (
+                                  <Chip
+                                    label={`2: ${(Number(alt.prob_away_win) * 100).toFixed(0)}%`}
+                                    size="small"
+                                    sx={{
+                                      height: 18,
+                                      fontSize: '0.63rem',
+                                      fontWeight: 700,
+                                      backgroundColor: alpha('#42A5F5', 0.15),
+                                      color: '#42A5F5',
+                                      border: `1px solid ${alpha('#42A5F5', 0.35)}`,
+                                    }}
+                                  />
+                                )}
+                              </Box>
+                            )}
                             {((alt.prob_over_1_5 != null) || (alt.prob_over_2_5 != null) || (alt.prob_btts_yes != null) || (alt.prob_under_3_5 != null)) && (
-                              <Box sx={{ mt: 0.5, display: 'flex', gap: 0.5, flexWrap: 'wrap' }}>
+                              <Box sx={{ mt: 0.5, display: 'flex', gap: 0.5, flexWrap: 'wrap', alignItems: 'center' }}>
+                                <Typography component="span" sx={{ fontSize: '0.62rem', color: '#9AA3B2', fontWeight: 700, mr: 0.25 }}>
+                                  Goals:
+                                </Typography>
                                 {alt.prob_over_1_5 != null && (
-                                  <Chip label={`O1.5: ${(Number(alt.prob_over_1_5) * 100).toFixed(0)}%`} size="small" sx={{ height: 16, fontSize: '0.62rem', backgroundColor: alpha('#42A5F5', 0.12), color: '#42A5F5' }} />
+                                  <Chip label={`O1.5: ${(Number(alt.prob_over_1_5) * 100).toFixed(0)}%`} size="small" sx={{ height: 18, fontSize: '0.62rem', backgroundColor: alpha('#42A5F5', 0.12), color: '#42A5F5', border: `1px solid ${alpha('#42A5F5', 0.25)}` }} />
                                 )}
                                 {alt.prob_over_2_5 != null && (
-                                  <Chip label={`O2.5: ${(Number(alt.prob_over_2_5) * 100).toFixed(0)}%`} size="small" sx={{ height: 16, fontSize: '0.62rem', backgroundColor: alpha('#AB47BC', 0.12), color: '#AB47BC' }} />
+                                  <Chip label={`O2.5: ${(Number(alt.prob_over_2_5) * 100).toFixed(0)}%`} size="small" sx={{ height: 18, fontSize: '0.62rem', backgroundColor: alpha('#AB47BC', 0.12), color: '#AB47BC', border: `1px solid ${alpha('#AB47BC', 0.25)}` }} />
                                 )}
                                 {alt.prob_btts_yes != null && (
-                                  <Chip label={`BTTS: ${(Number(alt.prob_btts_yes) * 100).toFixed(0)}%`} size="small" sx={{ height: 16, fontSize: '0.62rem', backgroundColor: alpha('#F26419', 0.12), color: '#F26419' }} />
+                                  <Chip label={`BTTS: ${(Number(alt.prob_btts_yes) * 100).toFixed(0)}%`} size="small" sx={{ height: 18, fontSize: '0.62rem', backgroundColor: alpha('#F26419', 0.12), color: '#F26419', border: `1px solid ${alpha('#F26419', 0.25)}` }} />
                                 )}
                                 {alt.prob_under_3_5 != null && (
-                                  <Chip label={`U3.5: ${(Number(alt.prob_under_3_5) * 100).toFixed(0)}%`} size="small" sx={{ height: 16, fontSize: '0.62rem', backgroundColor: alpha('#26A69A', 0.12), color: '#26A69A' }} />
+                                  <Chip label={`U3.5: ${(Number(alt.prob_under_3_5) * 100).toFixed(0)}%`} size="small" sx={{ height: 18, fontSize: '0.62rem', backgroundColor: alpha('#26A69A', 0.12), color: '#26A69A', border: `1px solid ${alpha('#26A69A', 0.25)}` }} />
                                 )}
                               </Box>
                             )}
@@ -1686,8 +1799,8 @@ ${JSON.stringify(sampleJson, null, 2)}`
                                 isSelection
                                   ? locale === 'fr' ? 'SÉLECTION' : 'SELECTION'
                                   : group.targetType === 'alternative'
-                                  ? locale === 'fr' ? 'ALTERNATIVE' : 'ALTERNATIVE'
-                                  : 'TICKET'
+                                    ? locale === 'fr' ? 'ALTERNATIVE' : 'ALTERNATIVE'
+                                    : 'TICKET'
                               }
                               size="small"
                               sx={{
@@ -1773,14 +1886,14 @@ ${JSON.stringify(sampleJson, null, 2)}`
                                             w.direction === 'CONTRADICTORY'
                                               ? alpha('#EF5350', 0.5)
                                               : w.direction === 'SUPPORTIVE'
-                                              ? alpha('#66BB6A', 0.5)
-                                              : 'inherit',
+                                                ? alpha('#66BB6A', 0.5)
+                                                : 'inherit',
                                           color:
                                             w.direction === 'CONTRADICTORY'
                                               ? '#EF5350'
                                               : w.direction === 'SUPPORTIVE'
-                                              ? '#66BB6A'
-                                              : 'inherit',
+                                                ? '#66BB6A'
+                                                : 'inherit',
                                         }}
                                       />
                                     </td>
@@ -1823,17 +1936,17 @@ ${JSON.stringify(sampleJson, null, 2)}`
         {snapshotSelection && (() => {
           const homeGD =
             snapshotSelection.home_goals_scored !== null &&
-            snapshotSelection.home_goals_scored !== undefined &&
-            snapshotSelection.home_goals_conceded !== null &&
-            snapshotSelection.home_goals_conceded !== undefined
+              snapshotSelection.home_goals_scored !== undefined &&
+              snapshotSelection.home_goals_conceded !== null &&
+              snapshotSelection.home_goals_conceded !== undefined
               ? Number(snapshotSelection.home_goals_scored) - Number(snapshotSelection.home_goals_conceded)
               : null
 
           const awayGD =
             snapshotSelection.away_goals_scored !== null &&
-            snapshotSelection.away_goals_scored !== undefined &&
-            snapshotSelection.away_goals_conceded !== null &&
-            snapshotSelection.away_goals_conceded !== undefined
+              snapshotSelection.away_goals_scored !== undefined &&
+              snapshotSelection.away_goals_conceded !== null &&
+              snapshotSelection.away_goals_conceded !== undefined
               ? Number(snapshotSelection.away_goals_scored) - Number(snapshotSelection.away_goals_conceded)
               : null
 
@@ -1973,130 +2086,222 @@ ${JSON.stringify(sampleJson, null, 2)}`
 
               {/* Dual-Baseline Benchmark Card */}
               {((snapshotSelection.historical_estimated_probability !== null && snapshotSelection.historical_estimated_probability !== undefined) ||
-              (snapshotSelection.current_league_home_avg !== null && snapshotSelection.current_league_home_avg !== undefined) ||
-              (snapshotSelection.historical_league_home_avg !== null && snapshotSelection.historical_league_home_avg !== undefined)) && (
-                <Paper
-                  elevation={0}
-                  sx={{
-                    p: 2,
-                    borderRadius: 2,
-                    backgroundColor: alpha('#121824', 0.6),
-                    border: (theme) => `1px solid ${alpha(theme.palette.divider, 1)}`,
-                  }}
-                >
-                  <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1.5, flexWrap: 'wrap', gap: 1 }}>
+                (snapshotSelection.current_league_home_avg !== null && snapshotSelection.current_league_home_avg !== undefined) ||
+                (snapshotSelection.historical_league_home_avg !== null && snapshotSelection.historical_league_home_avg !== undefined)) && (
+                  <Paper
+                    elevation={0}
+                    sx={{
+                      p: 2,
+                      borderRadius: 2,
+                      backgroundColor: alpha('#121824', 0.6),
+                      border: (theme) => `1px solid ${alpha(theme.palette.divider, 1)}`,
+                    }}
+                  >
+                    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1.5, flexWrap: 'wrap', gap: 1 }}>
+                      <Typography
+                        variant="subtitle2"
+                        sx={{
+                          fontWeight: 700,
+                          color: '#42A5F5',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: 1,
+                        }}
+                      >
+                        <Scale size={16} />
+                        {locale === 'fr' ? 'Double Référence & Validation Historique' : 'Dual-Baseline Benchmark'}
+                      </Typography>
+                      {snapshotSelection.estimated_probability &&
+                        snapshotSelection.historical_estimated_probability !== null &&
+                        snapshotSelection.historical_estimated_probability !== undefined && (() => {
+                          const diffPct = snapshotSelection.alignment_delta_pp !== null && snapshotSelection.alignment_delta_pp !== undefined
+                            ? Number(snapshotSelection.alignment_delta_pp)
+                            : Math.abs(Number(snapshotSelection.estimated_probability) - Number(snapshotSelection.historical_estimated_probability)) * 100
+                          const rem = snapshotSelection.alignment_remark || (diffPct <= 1.5 ? 'very_high' : diffPct <= 3.0 ? 'high' : diffPct <= 5.0 ? 'medium' : diffPct <= 7.0 ? 'low' : 'very_low')
+                          const colorMap: Record<string, string> = {
+                            very_high: '#00E676',
+                            high: '#66BB6A',
+                            medium: '#FFA726',
+                            low: '#FF7043',
+                            very_low: '#EF5350',
+                          }
+                          const labelMap: Record<string, string> = {
+                            very_high: `Very High Alignment (Δ ${diffPct.toFixed(1)} pp)`,
+                            high: `High Alignment (Δ ${diffPct.toFixed(1)} pp)`,
+                            medium: `Medium Alignment (Δ ${diffPct.toFixed(1)} pp)`,
+                            low: `Low Alignment (Δ ${diffPct.toFixed(1)} pp)`,
+                            very_low: `Very Low Alignment (Δ ${diffPct.toFixed(1)} pp)`,
+                          }
+                          const color = colorMap[rem] || '#42A5F5'
+                          const label = labelMap[rem] || `Alignment (Δ ${diffPct.toFixed(1)} pp)`
+                          return (
+                            <Chip
+                              label={label}
+                              size="small"
+                              sx={{
+                                fontWeight: 700,
+                                fontSize: '0.675rem',
+                                height: 22,
+                                backgroundColor: alpha(color, 0.15),
+                                color,
+                                border: `1px solid ${alpha(color, 0.3)}`,
+                              }}
+                            />
+                          )
+                        })()}
+                    </Box>
+
+                    <Grid container spacing={1.5}>
+                      <Grid size={{ xs: 6, sm: 6 }}>
+                        <Box
+                          sx={{
+                            p: 1.25,
+                            borderRadius: 1.5,
+                            backgroundColor: alpha('#1E2638', 0.5),
+                            border: `1px solid ${alpha('#42A5F5', 0.2)}`,
+                          }}
+                        >
+                          <Typography variant="caption" sx={{ color: '#42A5F5', fontWeight: 700, display: 'block', mb: 0.5 }}>
+                            Current Season (Primary)
+                          </Typography>
+                          <Typography variant="h6" sx={{ fontWeight: 800, color: '#66BB6A', lineHeight: 1.2 }}>
+                            {snapshotSelection.estimated_probability
+                              ? `${(Number(snapshotSelection.estimated_probability) * 100).toFixed(1)}%`
+                              : '—'}
+                          </Typography>
+                          <Typography variant="caption" sx={{ color: '#9AA3B2', fontSize: '0.72rem', display: 'block', mt: 0.5 }}>
+                            League Baselines:{' '}
+                            {snapshotSelection.current_league_home_avg
+                              ? `H: ${Number(snapshotSelection.current_league_home_avg).toFixed(2)} / A: ${Number(snapshotSelection.current_league_away_avg ?? 0).toFixed(2)}`
+                              : 'Live Aggregates'}
+                          </Typography>
+                        </Box>
+                      </Grid>
+
+                      <Grid size={{ xs: 6, sm: 6 }}>
+                        <Box
+                          sx={{
+                            p: 1.25,
+                            borderRadius: 1.5,
+                            backgroundColor: alpha('#1E2638', 0.5),
+                            border: `1px solid ${alpha('#9AA3B2', 0.2)}`,
+                          }}
+                        >
+                          <Typography variant="caption" sx={{ color: '#9AA3B2', fontWeight: 700, display: 'block', mb: 0.5 }}>
+                            Historical Baseline (Benchmark)
+                          </Typography>
+                          <Typography variant="h6" sx={{ fontWeight: 800, color: '#F6AE2D', lineHeight: 1.2 }}>
+                            {snapshotSelection.historical_estimated_probability !== null && snapshotSelection.historical_estimated_probability !== undefined
+                              ? `${(Number(snapshotSelection.historical_estimated_probability) * 100).toFixed(1)}%`
+                              : '—'}
+                          </Typography>
+                          <Typography variant="caption" sx={{ color: '#9AA3B2', fontSize: '0.72rem', display: 'block', mt: 0.5 }}>
+                            Historical Baselines:{' '}
+                            {snapshotSelection.historical_league_home_avg
+                              ? `H: ${Number(snapshotSelection.historical_league_home_avg).toFixed(2)} / A: ${Number(snapshotSelection.historical_league_away_avg ?? 0).toFixed(2)}`
+                              : 'Locked Catalog'}
+                          </Typography>
+                        </Box>
+                      </Grid>
+                    </Grid>
+
+                    <Typography variant="caption" sx={{ color: '#9AA3B2', fontSize: '0.7rem', display: 'block', mt: 1, fontStyle: 'italic' }}>
+                      * Current season provides dynamic market edge; historical catalog acts as structural stability benchmark.
+                    </Typography>
+                  </Paper>
+                )}
+
+              {/* Multi-Market & 1X2 Probabilities Grid */}
+              {((snapshotSelection.prob_home_win !== null && snapshotSelection.prob_home_win !== undefined) ||
+                (snapshotSelection.prob_draw !== null && snapshotSelection.prob_draw !== undefined) ||
+                (snapshotSelection.prob_away_win !== null && snapshotSelection.prob_away_win !== undefined) ||
+                (snapshotSelection.prob_over_1_5 !== null && snapshotSelection.prob_over_1_5 !== undefined) ||
+                (snapshotSelection.prob_over_2_5 !== null && snapshotSelection.prob_over_2_5 !== undefined) ||
+                (snapshotSelection.prob_btts_yes !== null && snapshotSelection.prob_btts_yes !== undefined) ||
+                (snapshotSelection.prob_under_3_5 !== null && snapshotSelection.prob_under_3_5 !== undefined)) && (
+                  <Paper
+                    elevation={0}
+                    sx={{
+                      p: 2,
+                      borderRadius: 2,
+                      backgroundColor: alpha('#121824', 0.6),
+                      border: (theme) => `1px solid ${alpha(theme.palette.divider, 1)}`,
+                    }}
+                  >
                     <Typography
                       variant="subtitle2"
                       sx={{
                         fontWeight: 700,
-                        color: '#42A5F5',
+                        mb: 1.5,
+                        color: '#66BB6A',
                         display: 'flex',
                         alignItems: 'center',
                         gap: 1,
                       }}
                     >
-                      <Scale size={16} />
-                      {locale === 'fr' ? 'Double Référence & Validation Historique' : 'Dual-Baseline Benchmark'}
+                      <Target size={16} />
+                      {locale === 'fr' ? 'Probabilités Multi-Marchés & 1X2' : 'Multi-Market & 1X2 Probabilities'}
                     </Typography>
-                    {snapshotSelection.estimated_probability &&
-                    snapshotSelection.historical_estimated_probability !== null &&
-                    snapshotSelection.historical_estimated_probability !== undefined && (() => {
-                      const diffPct = snapshotSelection.alignment_delta_pp !== null && snapshotSelection.alignment_delta_pp !== undefined
-                        ? Number(snapshotSelection.alignment_delta_pp)
-                        : Math.abs(Number(snapshotSelection.estimated_probability) - Number(snapshotSelection.historical_estimated_probability)) * 100
-                      const rem = snapshotSelection.alignment_remark || (diffPct <= 1.5 ? 'very_high' : diffPct <= 3.0 ? 'high' : diffPct <= 5.0 ? 'medium' : diffPct <= 7.0 ? 'low' : 'very_low')
-                      const colorMap: Record<string, string> = {
-                        very_high: '#00E676',
-                        high: '#66BB6A',
-                        medium: '#FFA726',
-                        low: '#FF7043',
-                        very_low: '#EF5350',
-                      }
-                      const labelMap: Record<string, string> = {
-                        very_high: `Very High Alignment (Δ ${diffPct.toFixed(1)} pp)`,
-                        high: `High Alignment (Δ ${diffPct.toFixed(1)} pp)`,
-                        medium: `Medium Alignment (Δ ${diffPct.toFixed(1)} pp)`,
-                        low: `Low Alignment (Δ ${diffPct.toFixed(1)} pp)`,
-                        very_low: `Very Low Alignment (Δ ${diffPct.toFixed(1)} pp)`,
-                      }
-                      const color = colorMap[rem] || '#42A5F5'
-                      const label = labelMap[rem] || `Alignment (Δ ${diffPct.toFixed(1)} pp)`
-                      return (
-                        <Chip
-                          label={label}
-                          size="small"
-                          sx={{
-                            fontWeight: 700,
-                            fontSize: '0.675rem',
-                            height: 22,
-                            backgroundColor: alpha(color, 0.15),
-                            color,
-                            border: `1px solid ${alpha(color, 0.3)}`,
-                          }}
-                        />
-                      )
-                    })()}
-                  </Box>
-
-                  <Grid container spacing={1.5}>
-                    <Grid size={{ xs: 6, sm: 6 }}>
-                      <Box
-                        sx={{
-                          p: 1.25,
-                          borderRadius: 1.5,
-                          backgroundColor: alpha('#1E2638', 0.5),
-                          border: `1px solid ${alpha('#42A5F5', 0.2)}`,
-                        }}
-                      >
-                        <Typography variant="caption" sx={{ color: '#42A5F5', fontWeight: 700, display: 'block', mb: 0.5 }}>
-                          Current Season (Primary)
-                        </Typography>
-                        <Typography variant="h6" sx={{ fontWeight: 800, color: '#66BB6A', lineHeight: 1.2 }}>
-                          {snapshotSelection.estimated_probability
-                            ? `${(Number(snapshotSelection.estimated_probability) * 100).toFixed(1)}%`
-                            : '—'}
-                        </Typography>
-                        <Typography variant="caption" sx={{ color: '#9AA3B2', fontSize: '0.72rem', display: 'block', mt: 0.5 }}>
-                          League Baselines:{' '}
-                          {snapshotSelection.current_league_home_avg
-                            ? `H: ${Number(snapshotSelection.current_league_home_avg).toFixed(2)} / A: ${Number(snapshotSelection.current_league_away_avg ?? 0).toFixed(2)}`
-                            : 'Live Aggregates'}
-                        </Typography>
-                      </Box>
+                    <Grid container spacing={1}>
+                      {snapshotSelection.prob_home_win !== null && snapshotSelection.prob_home_win !== undefined && (
+                        <Grid size={{ xs: 4, sm: 4 }}>
+                          <Box sx={{ p: 1, borderRadius: 1.5, backgroundColor: alpha('#1E2638', 0.5), textAlign: 'center', border: `1px solid ${alpha('#66BB6A', 0.25)}` }}>
+                            <Typography variant="caption" sx={{ color: '#9AA3B2', display: 'block', fontSize: '0.7rem' }}>1 (Home)</Typography>
+                            <Typography variant="body2" sx={{ fontWeight: 800, color: '#66BB6A' }}>{(Number(snapshotSelection.prob_home_win) * 100).toFixed(1)}%</Typography>
+                          </Box>
+                        </Grid>
+                      )}
+                      {snapshotSelection.prob_draw !== null && snapshotSelection.prob_draw !== undefined && (
+                        <Grid size={{ xs: 4, sm: 4 }}>
+                          <Box sx={{ p: 1, borderRadius: 1.5, backgroundColor: alpha('#1E2638', 0.5), textAlign: 'center', border: `1px solid ${alpha('#FFA726', 0.25)}` }}>
+                            <Typography variant="caption" sx={{ color: '#9AA3B2', display: 'block', fontSize: '0.7rem' }}>X (Draw)</Typography>
+                            <Typography variant="body2" sx={{ fontWeight: 800, color: '#FFA726' }}>{(Number(snapshotSelection.prob_draw) * 100).toFixed(1)}%</Typography>
+                          </Box>
+                        </Grid>
+                      )}
+                      {snapshotSelection.prob_away_win !== null && snapshotSelection.prob_away_win !== undefined && (
+                        <Grid size={{ xs: 4, sm: 4 }}>
+                          <Box sx={{ p: 1, borderRadius: 1.5, backgroundColor: alpha('#1E2638', 0.5), textAlign: 'center', border: `1px solid ${alpha('#42A5F5', 0.25)}` }}>
+                            <Typography variant="caption" sx={{ color: '#9AA3B2', display: 'block', fontSize: '0.7rem' }}>2 (Away)</Typography>
+                            <Typography variant="body2" sx={{ fontWeight: 800, color: '#42A5F5' }}>{(Number(snapshotSelection.prob_away_win) * 100).toFixed(1)}%</Typography>
+                          </Box>
+                        </Grid>
+                      )}
+                      {snapshotSelection.prob_over_1_5 !== null && snapshotSelection.prob_over_1_5 !== undefined && (
+                        <Grid size={{ xs: 3, sm: 3 }}>
+                          <Box sx={{ p: 1, borderRadius: 1.5, backgroundColor: alpha('#1E2638', 0.5), textAlign: 'center' }}>
+                            <Typography variant="caption" sx={{ color: '#9AA3B2', display: 'block', fontSize: '0.68rem' }}>Over 1.5</Typography>
+                            <Typography variant="body2" sx={{ fontWeight: 700 }}>{(Number(snapshotSelection.prob_over_1_5) * 100).toFixed(1)}%</Typography>
+                          </Box>
+                        </Grid>
+                      )}
+                      {snapshotSelection.prob_over_2_5 !== null && snapshotSelection.prob_over_2_5 !== undefined && (
+                        <Grid size={{ xs: 3, sm: 3 }}>
+                          <Box sx={{ p: 1, borderRadius: 1.5, backgroundColor: alpha('#1E2638', 0.5), textAlign: 'center' }}>
+                            <Typography variant="caption" sx={{ color: '#9AA3B2', display: 'block', fontSize: '0.68rem' }}>Over 2.5</Typography>
+                            <Typography variant="body2" sx={{ fontWeight: 700 }}>{(Number(snapshotSelection.prob_over_2_5) * 100).toFixed(1)}%</Typography>
+                          </Box>
+                        </Grid>
+                      )}
+                      {snapshotSelection.prob_btts_yes !== null && snapshotSelection.prob_btts_yes !== undefined && (
+                        <Grid size={{ xs: 3, sm: 3 }}>
+                          <Box sx={{ p: 1, borderRadius: 1.5, backgroundColor: alpha('#1E2638', 0.5), textAlign: 'center' }}>
+                            <Typography variant="caption" sx={{ color: '#9AA3B2', display: 'block', fontSize: '0.68rem' }}>BTTS Yes</Typography>
+                            <Typography variant="body2" sx={{ fontWeight: 700 }}>{(Number(snapshotSelection.prob_btts_yes) * 100).toFixed(1)}%</Typography>
+                          </Box>
+                        </Grid>
+                      )}
+                      {snapshotSelection.prob_under_3_5 !== null && snapshotSelection.prob_under_3_5 !== undefined && (
+                        <Grid size={{ xs: 3, sm: 3 }}>
+                          <Box sx={{ p: 1, borderRadius: 1.5, backgroundColor: alpha('#1E2638', 0.5), textAlign: 'center' }}>
+                            <Typography variant="caption" sx={{ color: '#9AA3B2', display: 'block', fontSize: '0.68rem' }}>Under 3.5</Typography>
+                            <Typography variant="body2" sx={{ fontWeight: 700 }}>{(Number(snapshotSelection.prob_under_3_5) * 100).toFixed(1)}%</Typography>
+                          </Box>
+                        </Grid>
+                      )}
                     </Grid>
-
-                    <Grid size={{ xs: 6, sm: 6 }}>
-                      <Box
-                        sx={{
-                          p: 1.25,
-                          borderRadius: 1.5,
-                          backgroundColor: alpha('#1E2638', 0.5),
-                          border: `1px solid ${alpha('#9AA3B2', 0.2)}`,
-                        }}
-                      >
-                        <Typography variant="caption" sx={{ color: '#9AA3B2', fontWeight: 700, display: 'block', mb: 0.5 }}>
-                          Historical Baseline (Benchmark)
-                        </Typography>
-                        <Typography variant="h6" sx={{ fontWeight: 800, color: '#F6AE2D', lineHeight: 1.2 }}>
-                          {snapshotSelection.historical_estimated_probability !== null && snapshotSelection.historical_estimated_probability !== undefined
-                            ? `${(Number(snapshotSelection.historical_estimated_probability) * 100).toFixed(1)}%`
-                            : '—'}
-                        </Typography>
-                        <Typography variant="caption" sx={{ color: '#9AA3B2', fontSize: '0.72rem', display: 'block', mt: 0.5 }}>
-                          Historical Baselines:{' '}
-                          {snapshotSelection.historical_league_home_avg
-                            ? `H: ${Number(snapshotSelection.historical_league_home_avg).toFixed(2)} / A: ${Number(snapshotSelection.historical_league_away_avg ?? 0).toFixed(2)}`
-                            : 'Locked Catalog'}
-                        </Typography>
-                      </Box>
-                    </Grid>
-                  </Grid>
-
-                  <Typography variant="caption" sx={{ color: '#9AA3B2', fontSize: '0.7rem', display: 'block', mt: 1, fontStyle: 'italic' }}>
-                    * Current season provides dynamic market edge; historical catalog acts as structural stability benchmark.
-                  </Typography>
-                </Paper>
-              )}
+                  </Paper>
+                )}
 
               {/* Pre-Match Statistical Matchup Comparison */}
               <PreMatchStatsTables item={snapshotSelection} locale={locale} />
@@ -2305,17 +2510,17 @@ ${JSON.stringify(sampleJson, null, 2)}`
         {snapshotAlternative && (() => {
           const altHomeGD =
             snapshotAlternative.home_goals_scored !== null &&
-            snapshotAlternative.home_goals_scored !== undefined &&
-            snapshotAlternative.home_goals_conceded !== null &&
-            snapshotAlternative.home_goals_conceded !== undefined
+              snapshotAlternative.home_goals_scored !== undefined &&
+              snapshotAlternative.home_goals_conceded !== null &&
+              snapshotAlternative.home_goals_conceded !== undefined
               ? Number(snapshotAlternative.home_goals_scored) - Number(snapshotAlternative.home_goals_conceded)
               : null
 
           const altAwayGD =
             snapshotAlternative.away_goals_scored !== null &&
-            snapshotAlternative.away_goals_scored !== undefined &&
-            snapshotAlternative.away_goals_conceded !== null &&
-            snapshotAlternative.away_goals_conceded !== undefined
+              snapshotAlternative.away_goals_scored !== undefined &&
+              snapshotAlternative.away_goals_conceded !== null &&
+              snapshotAlternative.away_goals_conceded !== undefined
               ? Number(snapshotAlternative.away_goals_scored) - Number(snapshotAlternative.away_goals_conceded)
               : null
 
@@ -2428,137 +2633,229 @@ ${JSON.stringify(sampleJson, null, 2)}`
 
               {/* Dual-Baseline Benchmark Card */}
               {((snapshotAlternative.historical_estimated_probability !== null && snapshotAlternative.historical_estimated_probability !== undefined) ||
-              (snapshotAlternative.current_league_home_avg !== null && snapshotAlternative.current_league_home_avg !== undefined) ||
-              (snapshotAlternative.historical_league_home_avg !== null && snapshotAlternative.historical_league_home_avg !== undefined)) && (
-                <Paper
-                  elevation={0}
-                  sx={{
-                    p: 2,
-                    borderRadius: 2,
-                    backgroundColor: alpha('#121824', 0.6),
-                    border: (theme) => `1px solid ${alpha(theme.palette.divider, 1)}`,
-                  }}
-                >
-                  <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1.5, flexWrap: 'wrap', gap: 1 }}>
+                (snapshotAlternative.current_league_home_avg !== null && snapshotAlternative.current_league_home_avg !== undefined) ||
+                (snapshotAlternative.historical_league_home_avg !== null && snapshotAlternative.historical_league_home_avg !== undefined)) && (
+                  <Paper
+                    elevation={0}
+                    sx={{
+                      p: 2,
+                      borderRadius: 2,
+                      backgroundColor: alpha('#121824', 0.6),
+                      border: (theme) => `1px solid ${alpha(theme.palette.divider, 1)}`,
+                    }}
+                  >
+                    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1.5, flexWrap: 'wrap', gap: 1 }}>
+                      <Typography
+                        variant="subtitle2"
+                        sx={{
+                          fontWeight: 700,
+                          color: '#42A5F5',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: 1,
+                        }}
+                      >
+                        <Scale size={16} />
+                        {locale === 'fr' ? 'Double Référence & Validation Historique' : 'Dual-Baseline Benchmark'}
+                      </Typography>
+                      {snapshotAlternative.estimated_probability &&
+                        snapshotAlternative.historical_estimated_probability !== null &&
+                        snapshotAlternative.historical_estimated_probability !== undefined && (() => {
+                          const diffPct = snapshotAlternative.alignment_delta_pp !== null && snapshotAlternative.alignment_delta_pp !== undefined
+                            ? Number(snapshotAlternative.alignment_delta_pp)
+                            : Math.abs(Number(snapshotAlternative.estimated_probability) - Number(snapshotAlternative.historical_estimated_probability)) * 100
+                          const rem = snapshotAlternative.alignment_remark || (diffPct <= 1.5 ? 'very_high' : diffPct <= 3.0 ? 'high' : diffPct <= 5.0 ? 'medium' : diffPct <= 7.0 ? 'low' : 'very_low')
+                          const colorMap: Record<string, string> = {
+                            very_high: '#00E676',
+                            high: '#66BB6A',
+                            medium: '#FFA726',
+                            low: '#FF7043',
+                            very_low: '#EF5350',
+                          }
+                          const labelMap: Record<string, string> = {
+                            very_high: `Very High Alignment (Δ ${diffPct.toFixed(1)} pp)`,
+                            high: `High Alignment (Δ ${diffPct.toFixed(1)} pp)`,
+                            medium: `Medium Alignment (Δ ${diffPct.toFixed(1)} pp)`,
+                            low: `Low Alignment (Δ ${diffPct.toFixed(1)} pp)`,
+                            very_low: `Very Low Alignment (Δ ${diffPct.toFixed(1)} pp)`,
+                          }
+                          const color = colorMap[rem] || '#42A5F5'
+                          const label = labelMap[rem] || `Alignment (Δ ${diffPct.toFixed(1)} pp)`
+                          return (
+                            <Chip
+                              label={label}
+                              size="small"
+                              sx={{
+                                fontWeight: 700,
+                                fontSize: '0.675rem',
+                                height: 22,
+                                backgroundColor: alpha(color, 0.15),
+                                color,
+                                border: `1px solid ${alpha(color, 0.3)}`,
+                              }}
+                            />
+                          )
+                        })()}
+                    </Box>
+
+                    <Grid container spacing={1.5}>
+                      <Grid size={{ xs: 6, sm: 6 }}>
+                        <Box
+                          sx={{
+                            p: 1.25,
+                            borderRadius: 1.5,
+                            backgroundColor: alpha('#1E2638', 0.5),
+                            border: `1px solid ${alpha('#42A5F5', 0.2)}`,
+                          }}
+                        >
+                          <Typography variant="caption" sx={{ color: '#42A5F5', fontWeight: 700, display: 'block', mb: 0.5 }}>
+                            Current Season (Primary)
+                          </Typography>
+                          <Typography variant="h6" sx={{ fontWeight: 800, color: '#66BB6A', lineHeight: 1.2 }}>
+                            {snapshotAlternative.estimated_probability
+                              ? `${(Number(snapshotAlternative.estimated_probability) * 100).toFixed(1)}%`
+                              : '—'}
+                          </Typography>
+                          <Typography variant="caption" sx={{ color: '#9AA3B2', fontSize: '0.72rem', display: 'block', mt: 0.5 }}>
+                            League Baselines:{' '}
+                            {snapshotAlternative.current_league_home_avg
+                              ? `H: ${Number(snapshotAlternative.current_league_home_avg).toFixed(2)} / A: ${Number(snapshotAlternative.current_league_away_avg ?? 0).toFixed(2)}`
+                              : 'Live Aggregates'}
+                          </Typography>
+                        </Box>
+                      </Grid>
+
+                      <Grid size={{ xs: 6, sm: 6 }}>
+                        <Box
+                          sx={{
+                            p: 1.25,
+                            borderRadius: 1.5,
+                            backgroundColor: alpha('#1E2638', 0.5),
+                            border: `1px solid ${alpha('#9AA3B2', 0.2)}`,
+                          }}
+                        >
+                          <Typography variant="caption" sx={{ color: '#9AA3B2', fontWeight: 700, display: 'block', mb: 0.5 }}>
+                            Historical Baseline (Benchmark)
+                          </Typography>
+                          <Typography variant="h6" sx={{ fontWeight: 800, color: '#F6AE2D', lineHeight: 1.2 }}>
+                            {snapshotAlternative.historical_estimated_probability !== null && snapshotAlternative.historical_estimated_probability !== undefined
+                              ? `${(Number(snapshotAlternative.historical_estimated_probability) * 100).toFixed(1)}%`
+                              : '—'}
+                          </Typography>
+                          <Typography variant="caption" sx={{ color: '#9AA3B2', fontSize: '0.72rem', display: 'block', mt: 0.5 }}>
+                            Historical Baselines:{' '}
+                            {snapshotAlternative.historical_league_home_avg
+                              ? `H: ${Number(snapshotAlternative.historical_league_home_avg).toFixed(2)} / A: ${Number(snapshotAlternative.historical_league_away_avg ?? 0).toFixed(2)}`
+                              : 'Locked Catalog'}
+                          </Typography>
+                        </Box>
+                      </Grid>
+                    </Grid>
+
+                    <Typography variant="caption" sx={{ color: '#9AA3B2', fontSize: '0.7rem', display: 'block', mt: 1, fontStyle: 'italic' }}>
+                      * Current season provides dynamic market edge; historical catalog acts as structural stability benchmark.
+                    </Typography>
+                  </Paper>
+                )}
+
+              {/* Multi-Market & 1X2 Probabilities Grid */}
+              {((snapshotAlternative.prob_home_win !== null && snapshotAlternative.prob_home_win !== undefined) ||
+                (snapshotAlternative.prob_draw !== null && snapshotAlternative.prob_draw !== undefined) ||
+                (snapshotAlternative.prob_away_win !== null && snapshotAlternative.prob_away_win !== undefined) ||
+                (snapshotAlternative.prob_over_1_5 !== null && snapshotAlternative.prob_over_1_5 !== undefined) ||
+                (snapshotAlternative.prob_over_2_5 !== null && snapshotAlternative.prob_over_2_5 !== undefined) ||
+                (snapshotAlternative.prob_btts_yes !== null && snapshotAlternative.prob_btts_yes !== undefined) ||
+                (snapshotAlternative.prob_under_3_5 !== null && snapshotAlternative.prob_under_3_5 !== undefined)) && (
+                  <Paper
+                    elevation={0}
+                    sx={{
+                      p: 2,
+                      borderRadius: 2,
+                      backgroundColor: alpha('#121824', 0.6),
+                      border: (theme) => `1px solid ${alpha(theme.palette.divider, 1)}`,
+                    }}
+                  >
                     <Typography
                       variant="subtitle2"
                       sx={{
                         fontWeight: 700,
-                        color: '#42A5F5',
+                        mb: 1.5,
+                        color: '#F6AE2D',
                         display: 'flex',
                         alignItems: 'center',
                         gap: 1,
                       }}
                     >
-                      <Scale size={16} />
-                      {locale === 'fr' ? 'Double Référence & Validation Historique' : 'Dual-Baseline Benchmark'}
+                      <Target size={16} />
+                      {locale === 'fr' ? 'Probabilités Multi-Marchés & 1X2' : 'Multi-Market & 1X2 Probabilities'}
                     </Typography>
-                    {snapshotAlternative.estimated_probability &&
-                    snapshotAlternative.historical_estimated_probability !== null &&
-                    snapshotAlternative.historical_estimated_probability !== undefined && (() => {
-                      const diffPct = snapshotAlternative.alignment_delta_pp !== null && snapshotAlternative.alignment_delta_pp !== undefined
-                        ? Number(snapshotAlternative.alignment_delta_pp)
-                        : Math.abs(Number(snapshotAlternative.estimated_probability) - Number(snapshotAlternative.historical_estimated_probability)) * 100
-                      const rem = snapshotAlternative.alignment_remark || (diffPct <= 1.5 ? 'very_high' : diffPct <= 3.0 ? 'high' : diffPct <= 5.0 ? 'medium' : diffPct <= 7.0 ? 'low' : 'very_low')
-                      const colorMap: Record<string, string> = {
-                        very_high: '#00E676',
-                        high: '#66BB6A',
-                        medium: '#FFA726',
-                        low: '#FF7043',
-                        very_low: '#EF5350',
-                      }
-                      const labelMap: Record<string, string> = {
-                        very_high: `Very High Alignment (Δ ${diffPct.toFixed(1)} pp)`,
-                        high: `High Alignment (Δ ${diffPct.toFixed(1)} pp)`,
-                        medium: `Medium Alignment (Δ ${diffPct.toFixed(1)} pp)`,
-                        low: `Low Alignment (Δ ${diffPct.toFixed(1)} pp)`,
-                        very_low: `Very Low Alignment (Δ ${diffPct.toFixed(1)} pp)`,
-                      }
-                      const color = colorMap[rem] || '#42A5F5'
-                      const label = labelMap[rem] || `Alignment (Δ ${diffPct.toFixed(1)} pp)`
-                      return (
-                        <Chip
-                          label={label}
-                          size="small"
-                          sx={{
-                            fontWeight: 700,
-                            fontSize: '0.675rem',
-                            height: 22,
-                            backgroundColor: alpha(color, 0.15),
-                            color,
-                            border: `1px solid ${alpha(color, 0.3)}`,
-                          }}
-                        />
-                      )
-                    })()}
-                  </Box>
-
-                  <Grid container spacing={1.5}>
-                    <Grid size={{ xs: 6, sm: 6 }}>
-                      <Box
-                        sx={{
-                          p: 1.25,
-                          borderRadius: 1.5,
-                          backgroundColor: alpha('#1E2638', 0.5),
-                          border: `1px solid ${alpha('#42A5F5', 0.2)}`,
-                        }}
-                      >
-                        <Typography variant="caption" sx={{ color: '#42A5F5', fontWeight: 700, display: 'block', mb: 0.5 }}>
-                          Current Season (Primary)
-                        </Typography>
-                        <Typography variant="h6" sx={{ fontWeight: 800, color: '#66BB6A', lineHeight: 1.2 }}>
-                          {snapshotAlternative.estimated_probability
-                            ? `${(Number(snapshotAlternative.estimated_probability) * 100).toFixed(1)}%`
-                            : '—'}
-                        </Typography>
-                        <Typography variant="caption" sx={{ color: '#9AA3B2', fontSize: '0.72rem', display: 'block', mt: 0.5 }}>
-                          League Baselines:{' '}
-                          {snapshotAlternative.current_league_home_avg
-                            ? `H: ${Number(snapshotAlternative.current_league_home_avg).toFixed(2)} / A: ${Number(snapshotAlternative.current_league_away_avg ?? 0).toFixed(2)}`
-                            : 'Live Aggregates'}
-                        </Typography>
-                      </Box>
+                    <Grid container spacing={1}>
+                      {snapshotAlternative.prob_home_win !== null && snapshotAlternative.prob_home_win !== undefined && (
+                        <Grid size={{ xs: 4, sm: 4 }}>
+                          <Box sx={{ p: 1, borderRadius: 1.5, backgroundColor: alpha('#1E2638', 0.5), textAlign: 'center', border: `1px solid ${alpha('#66BB6A', 0.25)}` }}>
+                            <Typography variant="caption" sx={{ color: '#9AA3B2', display: 'block', fontSize: '0.7rem' }}>1 (Home)</Typography>
+                            <Typography variant="body2" sx={{ fontWeight: 800, color: '#66BB6A' }}>{(Number(snapshotAlternative.prob_home_win) * 100).toFixed(1)}%</Typography>
+                          </Box>
+                        </Grid>
+                      )}
+                      {snapshotAlternative.prob_draw !== null && snapshotAlternative.prob_draw !== undefined && (
+                        <Grid size={{ xs: 4, sm: 4 }}>
+                          <Box sx={{ p: 1, borderRadius: 1.5, backgroundColor: alpha('#1E2638', 0.5), textAlign: 'center', border: `1px solid ${alpha('#FFA726', 0.25)}` }}>
+                            <Typography variant="caption" sx={{ color: '#9AA3B2', display: 'block', fontSize: '0.7rem' }}>X (Draw)</Typography>
+                            <Typography variant="body2" sx={{ fontWeight: 800, color: '#FFA726' }}>{(Number(snapshotAlternative.prob_draw) * 100).toFixed(1)}%</Typography>
+                          </Box>
+                        </Grid>
+                      )}
+                      {snapshotAlternative.prob_away_win !== null && snapshotAlternative.prob_away_win !== undefined && (
+                        <Grid size={{ xs: 4, sm: 4 }}>
+                          <Box sx={{ p: 1, borderRadius: 1.5, backgroundColor: alpha('#1E2638', 0.5), textAlign: 'center', border: `1px solid ${alpha('#42A5F5', 0.25)}` }}>
+                            <Typography variant="caption" sx={{ color: '#9AA3B2', display: 'block', fontSize: '0.7rem' }}>2 (Away)</Typography>
+                            <Typography variant="body2" sx={{ fontWeight: 800, color: '#42A5F5' }}>{(Number(snapshotAlternative.prob_away_win) * 100).toFixed(1)}%</Typography>
+                          </Box>
+                        </Grid>
+                      )}
+                      {snapshotAlternative.prob_over_1_5 !== null && snapshotAlternative.prob_over_1_5 !== undefined && (
+                        <Grid size={{ xs: 3, sm: 3 }}>
+                          <Box sx={{ p: 1, borderRadius: 1.5, backgroundColor: alpha('#1E2638', 0.5), textAlign: 'center' }}>
+                            <Typography variant="caption" sx={{ color: '#9AA3B2', display: 'block', fontSize: '0.68rem' }}>Over 1.5</Typography>
+                            <Typography variant="body2" sx={{ fontWeight: 700 }}>{(Number(snapshotAlternative.prob_over_1_5) * 100).toFixed(1)}%</Typography>
+                          </Box>
+                        </Grid>
+                      )}
+                      {snapshotAlternative.prob_over_2_5 !== null && snapshotAlternative.prob_over_2_5 !== undefined && (
+                        <Grid size={{ xs: 3, sm: 3 }}>
+                          <Box sx={{ p: 1, borderRadius: 1.5, backgroundColor: alpha('#1E2638', 0.5), textAlign: 'center' }}>
+                            <Typography variant="caption" sx={{ color: '#9AA3B2', display: 'block', fontSize: '0.68rem' }}>Over 2.5</Typography>
+                            <Typography variant="body2" sx={{ fontWeight: 700 }}>{(Number(snapshotAlternative.prob_over_2_5) * 100).toFixed(1)}%</Typography>
+                          </Box>
+                        </Grid>
+                      )}
+                      {snapshotAlternative.prob_btts_yes !== null && snapshotAlternative.prob_btts_yes !== undefined && (
+                        <Grid size={{ xs: 3, sm: 3 }}>
+                          <Box sx={{ p: 1, borderRadius: 1.5, backgroundColor: alpha('#1E2638', 0.5), textAlign: 'center' }}>
+                            <Typography variant="caption" sx={{ color: '#9AA3B2', display: 'block', fontSize: '0.68rem' }}>BTTS Yes</Typography>
+                            <Typography variant="body2" sx={{ fontWeight: 700 }}>{(Number(snapshotAlternative.prob_btts_yes) * 100).toFixed(1)}%</Typography>
+                          </Box>
+                        </Grid>
+                      )}
+                      {snapshotAlternative.prob_under_3_5 !== null && snapshotAlternative.prob_under_3_5 !== undefined && (
+                        <Grid size={{ xs: 3, sm: 3 }}>
+                          <Box sx={{ p: 1, borderRadius: 1.5, backgroundColor: alpha('#1E2638', 0.5), textAlign: 'center' }}>
+                            <Typography variant="caption" sx={{ color: '#9AA3B2', display: 'block', fontSize: '0.68rem' }}>Under 3.5</Typography>
+                            <Typography variant="body2" sx={{ fontWeight: 700 }}>{(Number(snapshotAlternative.prob_under_3_5) * 100).toFixed(1)}%</Typography>
+                          </Box>
+                        </Grid>
+                      )}
                     </Grid>
-
-                    <Grid size={{ xs: 6, sm: 6 }}>
-                      <Box
-                        sx={{
-                          p: 1.25,
-                          borderRadius: 1.5,
-                          backgroundColor: alpha('#1E2638', 0.5),
-                          border: `1px solid ${alpha('#9AA3B2', 0.2)}`,
-                        }}
-                      >
-                        <Typography variant="caption" sx={{ color: '#9AA3B2', fontWeight: 700, display: 'block', mb: 0.5 }}>
-                          Historical Baseline (Benchmark)
-                        </Typography>
-                        <Typography variant="h6" sx={{ fontWeight: 800, color: '#F6AE2D', lineHeight: 1.2 }}>
-                          {snapshotAlternative.historical_estimated_probability !== null && snapshotAlternative.historical_estimated_probability !== undefined
-                            ? `${(Number(snapshotAlternative.historical_estimated_probability) * 100).toFixed(1)}%`
-                            : '—'}
-                        </Typography>
-                        <Typography variant="caption" sx={{ color: '#9AA3B2', fontSize: '0.72rem', display: 'block', mt: 0.5 }}>
-                          Historical Baselines:{' '}
-                          {snapshotAlternative.historical_league_home_avg
-                            ? `H: ${Number(snapshotAlternative.historical_league_home_avg).toFixed(2)} / A: ${Number(snapshotAlternative.historical_league_away_avg ?? 0).toFixed(2)}`
-                            : 'Locked Catalog'}
-                        </Typography>
-                      </Box>
-                    </Grid>
-                  </Grid>
-
-                  <Typography variant="caption" sx={{ color: '#9AA3B2', fontSize: '0.7rem', display: 'block', mt: 1, fontStyle: 'italic' }}>
-                    * Current season provides dynamic market edge; historical catalog acts as structural stability benchmark.
-                  </Typography>
-                </Paper>
-              )}
+                  </Paper>
+                )}
 
               {/* Pre-Match Statistical Matchup Comparison */}
               {((snapshotAlternative.home_goals_scored !== null && snapshotAlternative.home_goals_scored !== undefined) ||
-              (snapshotAlternative.home_goals_per_game !== null && snapshotAlternative.home_goals_per_game !== undefined) ||
-              (snapshotAlternative.home_league_position !== null && snapshotAlternative.home_league_position !== undefined)) && (
-                <PreMatchStatsTables item={snapshotAlternative} locale={locale} />
-              )}
+                (snapshotAlternative.home_goals_per_game !== null && snapshotAlternative.home_goals_per_game !== undefined) ||
+                (snapshotAlternative.home_league_position !== null && snapshotAlternative.home_league_position !== undefined)) && (
+                  <PreMatchStatsTables item={snapshotAlternative} locale={locale} />
+                )}
 
               {snapshotAlternative.comment && (
                 <Box

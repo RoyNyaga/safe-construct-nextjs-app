@@ -1211,6 +1211,9 @@ export async function updateBettingSelectionDetails(
     prob_over_2_5?: number | null
     prob_btts_yes?: number | null
     prob_under_3_5?: number | null
+    prob_home_win?: number | null
+    prob_away_win?: number | null
+    prob_draw?: number | null
     market_evaluations?: Record<string, any> | null
     comment?: string
     notes?: string
