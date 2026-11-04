@@ -1851,6 +1851,94 @@ ${warningExportJson}`
                 )}
 
               {/* Pre-Match Statistical Matchup Comparison */}
+              {/* Multi-Market & 1X2 Probabilities Grid */}
+              {((snapshotSelection.prob_home_win !== null && snapshotSelection.prob_home_win !== undefined) ||
+                (snapshotSelection.prob_over_1_5 !== null && snapshotSelection.prob_over_1_5 !== undefined) ||
+                (snapshotSelection.prob_over_2_5 !== null && snapshotSelection.prob_over_2_5 !== undefined) ||
+                (snapshotSelection.prob_btts_yes !== null && snapshotSelection.prob_btts_yes !== undefined)) && (
+                  <Paper
+                    elevation={0}
+                    sx={{
+                      p: 2,
+                      borderRadius: 2,
+                      backgroundColor: alpha('#121824', 0.6),
+                      border: (theme) => `1px solid ${alpha(theme.palette.divider, 1)}`,
+                    }}
+                  >
+                    <Typography
+                      variant="subtitle2"
+                      sx={{
+                        fontWeight: 700,
+                        mb: 1.5,
+                        color: '#66BB6A',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 1,
+                      }}
+                    >
+                      <Target size={16} />
+                      {locale === 'fr' ? 'Probabilités Multi-Marchés & 1X2' : 'Multi-Market & 1X2 Probabilities'}
+                    </Typography>
+                    <Grid container spacing={1}>
+                      {snapshotSelection.prob_home_win !== null && snapshotSelection.prob_home_win !== undefined && (
+                        <Grid size={{ xs: 4, sm: 4 }}>
+                          <Box sx={{ p: 1, borderRadius: 1.5, backgroundColor: alpha('#1E2638', 0.5), textAlign: 'center' }}>
+                            <Typography variant="caption" sx={{ color: '#9AA3B2', display: 'block', fontSize: '0.7rem' }}>1 (Home)</Typography>
+                            <Typography variant="body2" sx={{ fontWeight: 800, color: '#66BB6A' }}>{(Number(snapshotSelection.prob_home_win) * 100).toFixed(1)}%</Typography>
+                          </Box>
+                        </Grid>
+                      )}
+                      {snapshotSelection.prob_draw !== null && snapshotSelection.prob_draw !== undefined && (
+                        <Grid size={{ xs: 4, sm: 4 }}>
+                          <Box sx={{ p: 1, borderRadius: 1.5, backgroundColor: alpha('#1E2638', 0.5), textAlign: 'center' }}>
+                            <Typography variant="caption" sx={{ color: '#9AA3B2', display: 'block', fontSize: '0.7rem' }}>X (Draw)</Typography>
+                            <Typography variant="body2" sx={{ fontWeight: 800, color: '#F6AE2D' }}>{(Number(snapshotSelection.prob_draw) * 100).toFixed(1)}%</Typography>
+                          </Box>
+                        </Grid>
+                      )}
+                      {snapshotSelection.prob_away_win !== null && snapshotSelection.prob_away_win !== undefined && (
+                        <Grid size={{ xs: 4, sm: 4 }}>
+                          <Box sx={{ p: 1, borderRadius: 1.5, backgroundColor: alpha('#1E2638', 0.5), textAlign: 'center' }}>
+                            <Typography variant="caption" sx={{ color: '#9AA3B2', display: 'block', fontSize: '0.7rem' }}>2 (Away)</Typography>
+                            <Typography variant="body2" sx={{ fontWeight: 800, color: '#42A5F5' }}>{(Number(snapshotSelection.prob_away_win) * 100).toFixed(1)}%</Typography>
+                          </Box>
+                        </Grid>
+                      )}
+                      {snapshotSelection.prob_over_1_5 !== null && snapshotSelection.prob_over_1_5 !== undefined && (
+                        <Grid size={{ xs: 3, sm: 3 }}>
+                          <Box sx={{ p: 1, borderRadius: 1.5, backgroundColor: alpha('#1E2638', 0.5), textAlign: 'center' }}>
+                            <Typography variant="caption" sx={{ color: '#9AA3B2', display: 'block', fontSize: '0.68rem' }}>Over 1.5</Typography>
+                            <Typography variant="body2" sx={{ fontWeight: 700 }}>{(Number(snapshotSelection.prob_over_1_5) * 100).toFixed(1)}%</Typography>
+                          </Box>
+                        </Grid>
+                      )}
+                      {snapshotSelection.prob_over_2_5 !== null && snapshotSelection.prob_over_2_5 !== undefined && (
+                        <Grid size={{ xs: 3, sm: 3 }}>
+                          <Box sx={{ p: 1, borderRadius: 1.5, backgroundColor: alpha('#1E2638', 0.5), textAlign: 'center' }}>
+                            <Typography variant="caption" sx={{ color: '#9AA3B2', display: 'block', fontSize: '0.68rem' }}>Over 2.5</Typography>
+                            <Typography variant="body2" sx={{ fontWeight: 700 }}>{(Number(snapshotSelection.prob_over_2_5) * 100).toFixed(1)}%</Typography>
+                          </Box>
+                        </Grid>
+                      )}
+                      {snapshotSelection.prob_btts_yes !== null && snapshotSelection.prob_btts_yes !== undefined && (
+                        <Grid size={{ xs: 3, sm: 3 }}>
+                          <Box sx={{ p: 1, borderRadius: 1.5, backgroundColor: alpha('#1E2638', 0.5), textAlign: 'center' }}>
+                            <Typography variant="caption" sx={{ color: '#9AA3B2', display: 'block', fontSize: '0.68rem' }}>BTTS Yes</Typography>
+                            <Typography variant="body2" sx={{ fontWeight: 700 }}>{(Number(snapshotSelection.prob_btts_yes) * 100).toFixed(1)}%</Typography>
+                          </Box>
+                        </Grid>
+                      )}
+                      {snapshotSelection.prob_under_3_5 !== null && snapshotSelection.prob_under_3_5 !== undefined && (
+                        <Grid size={{ xs: 3, sm: 3 }}>
+                          <Box sx={{ p: 1, borderRadius: 1.5, backgroundColor: alpha('#1E2638', 0.5), textAlign: 'center' }}>
+                            <Typography variant="caption" sx={{ color: '#9AA3B2', display: 'block', fontSize: '0.68rem' }}>Under 3.5</Typography>
+                            <Typography variant="body2" sx={{ fontWeight: 700 }}>{(Number(snapshotSelection.prob_under_3_5) * 100).toFixed(1)}%</Typography>
+                          </Box>
+                        </Grid>
+                      )}
+                    </Grid>
+                  </Paper>
+                )}
               <PreMatchStatsTables item={snapshotSelection} locale={locale} />
 
               {/* Methodology Reasoning */}
@@ -2265,7 +2353,96 @@ ${warningExportJson}`
               {((snapshotAlternative.home_goals_scored !== null && snapshotAlternative.home_goals_scored !== undefined) ||
                 (snapshotAlternative.home_goals_per_game !== null && snapshotAlternative.home_goals_per_game !== undefined) ||
                 (snapshotAlternative.home_league_position !== null && snapshotAlternative.home_league_position !== undefined)) && (
-                  <PreMatchStatsTables item={snapshotAlternative} locale={locale} />
+                  {/* Multi-Market & 1X2 Probabilities Grid */ }
+                  {((snapshotAlternative.prob_home_win !== null && snapshotAlternative.prob_home_win !== undefined) ||
+                (snapshotAlternative.prob_over_1_5 !== null && snapshotAlternative.prob_over_1_5 !== undefined) ||
+                (snapshotAlternative.prob_over_2_5 !== null && snapshotAlternative.prob_over_2_5 !== undefined) ||
+                (snapshotAlternative.prob_btts_yes !== null && snapshotAlternative.prob_btts_yes !== undefined)) && (
+                  <Paper
+                    elevation={0}
+                    sx={{
+                      p: 2,
+                      mb: 2,
+                      borderRadius: 2,
+                      backgroundColor: alpha('#121824', 0.6),
+                      border: (theme) => `1px solid ${alpha(theme.palette.divider, 1)}`,
+                    }}
+                  >
+                    <Typography
+                      variant="subtitle2"
+                      sx={{
+                        fontWeight: 700,
+                        mb: 1.5,
+                        color: '#F6AE2D',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 1,
+                      }}
+                    >
+                      <Target size={16} />
+                      {locale === 'fr' ? 'Probabilités Multi-Marchés & 1X2' : 'Multi-Market & 1X2 Probabilities'}
+                    </Typography>
+                    <Grid container spacing={1}>
+                      {snapshotAlternative.prob_home_win !== null && snapshotAlternative.prob_home_win !== undefined && (
+                        <Grid size={{ xs: 4, sm: 4 }}>
+                          <Box sx={{ p: 1, borderRadius: 1.5, backgroundColor: alpha('#1E2638', 0.5), textAlign: 'center' }}>
+                            <Typography variant="caption" sx={{ color: '#9AA3B2', display: 'block', fontSize: '0.7rem' }}>1 (Home)</Typography>
+                            <Typography variant="body2" sx={{ fontWeight: 800, color: '#66BB6A' }}>{(Number(snapshotAlternative.prob_home_win) * 100).toFixed(1)}%</Typography>
+                          </Box>
+                        </Grid>
+                      )}
+                      {snapshotAlternative.prob_draw !== null && snapshotAlternative.prob_draw !== undefined && (
+                        <Grid size={{ xs: 4, sm: 4 }}>
+                          <Box sx={{ p: 1, borderRadius: 1.5, backgroundColor: alpha('#1E2638', 0.5), textAlign: 'center' }}>
+                            <Typography variant="caption" sx={{ color: '#9AA3B2', display: 'block', fontSize: '0.7rem' }}>X (Draw)</Typography>
+                            <Typography variant="body2" sx={{ fontWeight: 800, color: '#F6AE2D' }}>{(Number(snapshotAlternative.prob_draw) * 100).toFixed(1)}%</Typography>
+                          </Box>
+                        </Grid>
+                      )}
+                      {snapshotAlternative.prob_away_win !== null && snapshotAlternative.prob_away_win !== undefined && (
+                        <Grid size={{ xs: 4, sm: 4 }}>
+                          <Box sx={{ p: 1, borderRadius: 1.5, backgroundColor: alpha('#1E2638', 0.5), textAlign: 'center' }}>
+                            <Typography variant="caption" sx={{ color: '#9AA3B2', display: 'block', fontSize: '0.7rem' }}>2 (Away)</Typography>
+                            <Typography variant="body2" sx={{ fontWeight: 800, color: '#42A5F5' }}>{(Number(snapshotAlternative.prob_away_win) * 100).toFixed(1)}%</Typography>
+                          </Box>
+                        </Grid>
+                      )}
+                      {snapshotAlternative.prob_over_1_5 !== null && snapshotAlternative.prob_over_1_5 !== undefined && (
+                        <Grid size={{ xs: 3, sm: 3 }}>
+                          <Box sx={{ p: 1, borderRadius: 1.5, backgroundColor: alpha('#1E2638', 0.5), textAlign: 'center' }}>
+                            <Typography variant="caption" sx={{ color: '#9AA3B2', display: 'block', fontSize: '0.68rem' }}>Over 1.5</Typography>
+                            <Typography variant="body2" sx={{ fontWeight: 700 }}>{(Number(snapshotAlternative.prob_over_1_5) * 100).toFixed(1)}%</Typography>
+                          </Box>
+                        </Grid>
+                      )}
+                      {snapshotAlternative.prob_over_2_5 !== null && snapshotAlternative.prob_over_2_5 !== undefined && (
+                        <Grid size={{ xs: 3, sm: 3 }}>
+                          <Box sx={{ p: 1, borderRadius: 1.5, backgroundColor: alpha('#1E2638', 0.5), textAlign: 'center' }}>
+                            <Typography variant="caption" sx={{ color: '#9AA3B2', display: 'block', fontSize: '0.68rem' }}>Over 2.5</Typography>
+                            <Typography variant="body2" sx={{ fontWeight: 700 }}>{(Number(snapshotAlternative.prob_over_2_5) * 100).toFixed(1)}%</Typography>
+                          </Box>
+                        </Grid>
+                      )}
+                      {snapshotAlternative.prob_btts_yes !== null && snapshotAlternative.prob_btts_yes !== undefined && (
+                        <Grid size={{ xs: 3, sm: 3 }}>
+                          <Box sx={{ p: 1, borderRadius: 1.5, backgroundColor: alpha('#1E2638', 0.5), textAlign: 'center' }}>
+                            <Typography variant="caption" sx={{ color: '#9AA3B2', display: 'block', fontSize: '0.68rem' }}>BTTS Yes</Typography>
+                            <Typography variant="body2" sx={{ fontWeight: 700 }}>{(Number(snapshotAlternative.prob_btts_yes) * 100).toFixed(1)}%</Typography>
+                          </Box>
+                        </Grid>
+                      )}
+                      {snapshotAlternative.prob_under_3_5 !== null && snapshotAlternative.prob_under_3_5 !== undefined && (
+                        <Grid size={{ xs: 3, sm: 3 }}>
+                          <Box sx={{ p: 1, borderRadius: 1.5, backgroundColor: alpha('#1E2638', 0.5), textAlign: 'center' }}>
+                            <Typography variant="caption" sx={{ color: '#9AA3B2', display: 'block', fontSize: '0.68rem' }}>Under 3.5</Typography>
+                            <Typography variant="body2" sx={{ fontWeight: 700 }}>{(Number(snapshotAlternative.prob_under_3_5) * 100).toFixed(1)}%</Typography>
+                          </Box>
+                        </Grid>
+                      )}
+                    </Grid>
+                  </Paper>
+                )}
+              <PreMatchStatsTables item={snapshotAlternative} locale={locale} />
                 )}
 
               {/* Rejection Reason */}

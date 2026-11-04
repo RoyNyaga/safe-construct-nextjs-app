@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
 """
-Roy Betting Engine — Multi-Market Goal Engine (Model Version 3.0)
-Focus: Both Teams to Score (Yes/No), Over 2.5, Under 3.5, and Over 1.5 Anchor
+Roy Betting Engine — Multi-Market & Match Winner Engine (Model Version 4.0)
+Focus: Both Teams to Score (Yes/No), Over 2.5, Under 3.5, Over 1.5 Anchor, and Match Winner / DNB
 Deterministic Statistical Engine & Multi-Market Poisson Value Calculator
 
 Complies strictly with:
-- betting-data/rules/model_3.0.md
+- betting-data/rules/model_4.0.md
+- betting-data/rules/selection_process.md
 - betting-data/rules/organization_rules.md
 - src/types/betting.ts (TicketImportJSON & Warnings)
 """
@@ -17,8 +18,8 @@ import os
 import argparse
 from typing import Dict, List, Any, Optional, Tuple
 
-MODEL_NAME = "roys_betting_engine_BTS_O2-5"
-MODEL_VERSION = "3.0"
+MODEL_NAME = "roys_betting_engine_BTS_O2-5_win"
+MODEL_VERSION = "4.0"
 DEFAULT_MODEL_UUID = ""
 
 # Default league scoring baselines if unspecified
@@ -167,6 +168,36 @@ def calculate_poisson_probabilities(lambda_home: float, lambda_away: float) -> D
     p_btts_yes = p_home_scores * p_away_scores
     p_btts_no = 1.0 - p_btts_yes
 
+    # 1X2 Probabilities & Draw No Bet (Bivariate Poisson Grid 0 <= i, j <= 8)
+    p_home_win = 0.0
+    p_away_win = 0.0
+    p_draw = 0.0
+
+    if lambda_home > 0 and lambda_away > 0:
+        for i in range(9):
+            p_i = (lambda_home ** i * math.exp(-lambda_home)) / math.factorial(i)
+            for j in range(9):
+                p_j = (lambda_away ** j * math.exp(-lambda_away)) / math.factorial(j)
+                p_ij = p_i * p_j
+                if i > j:
+                    p_home_win += p_ij
+                elif i < j:
+                    p_away_win += p_ij
+                else:
+                    p_draw += p_ij
+
+        p_sum = p_home_win + p_away_win + p_draw
+        if p_sum > 0:
+            p_home_win /= p_sum
+            p_away_win /= p_sum
+            p_draw /= p_sum
+
+    non_draw = 1.0 - p_draw
+    p_home_dnb = p_home_win / non_draw if non_draw > 0.001 else 0.0
+    p_away_dnb = p_away_win / non_draw if non_draw > 0.001 else 0.0
+    p_1x = p_home_win + p_draw
+    p_x2 = p_away_win + p_draw
+
     return {
         "lambda_home": round(lambda_home, 4),
         "lambda_away": round(lambda_away, 4),
@@ -181,6 +212,13 @@ def calculate_poisson_probabilities(lambda_home: float, lambda_away: float) -> D
         "p_under_3_5": round(p_under_3_5, 4),
         "p_btts_yes": round(p_btts_yes, 4),
         "p_btts_no": round(p_btts_no, 4),
+        "p_home_win": round(p_home_win, 4),
+        "p_away_win": round(p_away_win, 4),
+        "p_draw": round(p_draw, 4),
+        "p_home_dnb": round(p_home_dnb, 4),
+        "p_away_dnb": round(p_away_dnb, 4),
+        "p_1x": round(p_1x, 4),
+        "p_x2": round(p_x2, 4),
     }
 
 
@@ -705,6 +743,20 @@ def evaluate_match(fixture: Dict[str, Any]) -> Dict[str, Any]:
         hist_target_prob = hist_poisson["p_btts_yes"]
     elif selection_type in ["BTTS No", "No"]:
         hist_target_prob = hist_poisson["p_btts_no"]
+    elif selection_type in ["Home Win", "1", "Home to Win", "Home"]:
+        hist_target_prob = hist_poisson["p_home_win"]
+    elif selection_type in ["Away Win", "2", "Away to Win", "Away"]:
+        hist_target_prob = hist_poisson["p_away_win"]
+    elif selection_type in ["Draw", "X"]:
+        hist_target_prob = hist_poisson["p_draw"]
+    elif selection_type in ["Home DNB", "1 DNB", "Draw No Bet - Home", "DNB Home"]:
+        hist_target_prob = hist_poisson["p_home_dnb"]
+    elif selection_type in ["Away DNB", "2 DNB", "Draw No Bet - Away", "DNB Away"]:
+        hist_target_prob = hist_poisson["p_away_dnb"]
+    elif selection_type in ["1X", "Home or Draw"]:
+        hist_target_prob = hist_poisson["p_1x"]
+    elif selection_type in ["X2", "Draw or Away"]:
+        hist_target_prob = hist_poisson["p_x2"]
     elif selection_type in ["Over 1.5", "Over 1.5 Goals"]:
         hist_target_prob = hist_poisson["p_over_1_5"]
 
@@ -723,6 +775,20 @@ def evaluate_match(fixture: Dict[str, Any]) -> Dict[str, Any]:
         target_prob = poisson["p_btts_yes"]
     elif selection_type in ["BTTS No", "No"]:
         target_prob = poisson["p_btts_no"]
+    elif selection_type in ["Home Win", "1", "Home to Win", "Home"]:
+        target_prob = poisson["p_home_win"]
+    elif selection_type in ["Away Win", "2", "Away to Win", "Away"]:
+        target_prob = poisson["p_away_win"]
+    elif selection_type in ["Draw", "X"]:
+        target_prob = poisson["p_draw"]
+    elif selection_type in ["Home DNB", "1 DNB", "Draw No Bet - Home", "DNB Home"]:
+        target_prob = poisson["p_home_dnb"]
+    elif selection_type in ["Away DNB", "2 DNB", "Draw No Bet - Away", "DNB Away"]:
+        target_prob = poisson["p_away_dnb"]
+    elif selection_type in ["1X", "Home or Draw"]:
+        target_prob = poisson["p_1x"]
+    elif selection_type in ["X2", "Draw or Away"]:
+        target_prob = poisson["p_x2"]
     elif selection_type in ["Over 1.5", "Over 1.5 Goals"]:
         target_prob = poisson["p_over_1_5"]
 
@@ -815,6 +881,11 @@ def evaluate_match(fixture: Dict[str, Any]) -> Dict[str, Any]:
         "over_2_5": build_eval_item("Over/Under", "Over 2.5", poisson["p_over_2_5"], hist_poisson["p_over_2_5"], fixture.get("odds_over_2_5", odds if selection_type in ["Over 2.5", "Over 2.5 Goals"] else None)),
         "btts_yes": build_eval_item("Both Teams to Score", "Yes", poisson["p_btts_yes"], hist_poisson["p_btts_yes"], fixture.get("odds_btts_yes", odds if selection_type in ["BTTS Yes", "Both Teams to Score", "Yes"] else None)),
         "under_3_5": build_eval_item("Over/Under", "Under 3.5", poisson["p_under_3_5"], hist_poisson["p_under_3_5"], fixture.get("odds_under_3_5", odds if selection_type in ["Under 3.5", "Under 3.5 Goals"] else None)),
+        "home_win": build_eval_item("Match Winner", "Home Win", poisson["p_home_win"], hist_poisson["p_home_win"], fixture.get("odds_home_win", odds if selection_type in ["Home Win", "1", "Home to Win", "Home"] else None)),
+        "draw": build_eval_item("Match Winner", "Draw", poisson["p_draw"], hist_poisson["p_draw"], fixture.get("odds_draw", odds if selection_type in ["Draw", "X"] else None)),
+        "away_win": build_eval_item("Match Winner", "Away Win", poisson["p_away_win"], hist_poisson["p_away_win"], fixture.get("odds_away_win", odds if selection_type in ["Away Win", "2", "Away to Win", "Away"] else None)),
+        "home_dnb": build_eval_item("Draw No Bet", "Home DNB", poisson["p_home_dnb"], hist_poisson["p_home_dnb"], fixture.get("odds_home_dnb", odds if selection_type in ["Home DNB", "1 DNB"] else None)),
+        "away_dnb": build_eval_item("Draw No Bet", "Away DNB", poisson["p_away_dnb"], hist_poisson["p_away_dnb"], fixture.get("odds_away_dnb", odds if selection_type in ["Away DNB", "2 DNB"] else None)),
     }
 
     return {
@@ -859,6 +930,9 @@ def evaluate_match(fixture: Dict[str, Any]) -> Dict[str, Any]:
         "prob_over_2_5": poisson["p_over_2_5"],
         "prob_btts_yes": poisson["p_btts_yes"],
         "prob_under_3_5": poisson["p_under_3_5"],
+        "prob_home_win": poisson["p_home_win"],
+        "prob_away_win": poisson["p_away_win"],
+        "prob_draw": poisson["p_draw"],
         "dual_contribution_index": dci,
         "market_evaluations": market_evaluations,
         "actual_home_score": None,
@@ -911,6 +985,9 @@ def clean_selection(item: Dict[str, Any]) -> Dict[str, Any]:
         "prob_over_2_5": item.get("prob_over_2_5"),
         "prob_btts_yes": item.get("prob_btts_yes"),
         "prob_under_3_5": item.get("prob_under_3_5"),
+        "prob_home_win": item.get("prob_home_win"),
+        "prob_away_win": item.get("prob_away_win"),
+        "prob_draw": item.get("prob_draw"),
         "dual_contribution_index": item.get("dual_contribution_index"),
         "market_evaluations": item.get("market_evaluations"),
         "actual_home_score": None,

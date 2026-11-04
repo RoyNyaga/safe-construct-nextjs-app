@@ -125,6 +125,9 @@ export interface BettingSelection {
   prob_over_2_5?: number | null
   prob_btts_yes?: number | null
   prob_under_3_5?: number | null
+  prob_home_win?: number | null
+  prob_away_win?: number | null
+  prob_draw?: number | null
   market_evaluations?: Record<string, MarketEvaluationItem> | null
   actual_home_score: number | null
   actual_away_score: number | null
@@ -186,6 +189,9 @@ export interface BettingAlternative {
   prob_over_2_5?: number | null
   prob_btts_yes?: number | null
   prob_under_3_5?: number | null
+  prob_home_win?: number | null
+  prob_away_win?: number | null
+  prob_draw?: number | null
   market_evaluations?: Record<string, MarketEvaluationItem> | null
   actual_home_score: number | null
   actual_away_score: number | null
@@ -352,6 +358,9 @@ export interface TicketImportJSON {
     prob_over_2_5?: number | null
     prob_btts_yes?: number | null
     prob_under_3_5?: number | null
+  prob_home_win?: number | null
+  prob_away_win?: number | null
+  prob_draw?: number | null
     market_evaluations?: Record<string, MarketEvaluationItem> | null
     actual_home_score?: number | null
     actual_away_score?: number | null
@@ -410,6 +419,9 @@ export interface TicketImportJSON {
     prob_over_2_5?: number | null
     prob_btts_yes?: number | null
     prob_under_3_5?: number | null
+  prob_home_win?: number | null
+  prob_away_win?: number | null
+  prob_draw?: number | null
     market_evaluations?: Record<string, MarketEvaluationItem> | null
     actual_home_score?: number | null
     actual_away_score?: number | null
@@ -484,6 +496,9 @@ export interface TicketExportJSON {
     prob_over_2_5?: number | null
     prob_btts_yes?: number | null
     prob_under_3_5?: number | null
+  prob_home_win?: number | null
+  prob_away_win?: number | null
+  prob_draw?: number | null
     market_evaluations?: Record<string, MarketEvaluationItem> | null
     actual_home_score: number | null
     actual_away_score: number | null
@@ -540,6 +555,9 @@ export interface TicketExportJSON {
     prob_over_2_5?: number | null
     prob_btts_yes?: number | null
     prob_under_3_5?: number | null
+  prob_home_win?: number | null
+  prob_away_win?: number | null
+  prob_draw?: number | null
     market_evaluations?: Record<string, MarketEvaluationItem> | null
     actual_home_score: number | null
     actual_away_score: number | null

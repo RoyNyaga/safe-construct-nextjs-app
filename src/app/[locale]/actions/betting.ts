@@ -467,6 +467,9 @@ function computeEdgeRemark(
       prob_over_2_5: parseNullableNumber(sel.prob_over_2_5),
       prob_btts_yes: parseNullableNumber(sel.prob_btts_yes),
       prob_under_3_5: parseNullableNumber(sel.prob_under_3_5),
+      prob_home_win: parseNullableNumber(sel.prob_home_win),
+      prob_away_win: parseNullableNumber(sel.prob_away_win),
+      prob_draw: parseNullableNumber(sel.prob_draw),
       market_evaluations: sel.market_evaluations || null,
       alignment_delta_pp: align.alignment_delta_pp,
       alignment_remark: align.alignment_remark,
@@ -551,6 +554,9 @@ function computeEdgeRemark(
         prob_over_2_5: parseNullableNumber(alt.prob_over_2_5),
         prob_btts_yes: parseNullableNumber(alt.prob_btts_yes),
         prob_under_3_5: parseNullableNumber(alt.prob_under_3_5),
+        prob_home_win: parseNullableNumber(alt.prob_home_win),
+        prob_away_win: parseNullableNumber(alt.prob_away_win),
+        prob_draw: parseNullableNumber(alt.prob_draw),
         market_evaluations: alt.market_evaluations || null,
         alignment_delta_pp: align.alignment_delta_pp,
         alignment_remark: align.alignment_remark,
@@ -940,7 +946,14 @@ export async function updateSelectionResult(params: {
   if (params.manualResult) {
     settledResult = params.manualResult
   } else {
-    const auto = autoSettleSelection(selection.market, selection.selection, homeScore, awayScore)
+    const auto = autoSettleSelection(
+      selection.market,
+      selection.selection,
+      homeScore,
+      awayScore,
+      selection.home_team,
+      selection.away_team
+    )
     settledResult = auto !== null ? auto : (selection.result || 'pending')
   }
 
@@ -1039,7 +1052,14 @@ export async function updateAlternativeResult(params: {
   if (params.manualResult) {
     settledResult = params.manualResult
   } else {
-    const auto = autoSettleSelection(alternative.market, alternative.selection, homeScore, awayScore)
+    const auto = autoSettleSelection(
+      alternative.market,
+      alternative.selection,
+      homeScore,
+      awayScore,
+      alternative.home_team,
+      alternative.away_team
+    )
     settledResult = auto !== null ? auto : (alternative.result || 'pending')
   }
 
@@ -1208,6 +1228,9 @@ export async function updateBettingSelectionDetails(
       ...(data.prob_over_2_5 !== undefined && { prob_over_2_5: data.prob_over_2_5 }),
       ...(data.prob_btts_yes !== undefined && { prob_btts_yes: data.prob_btts_yes }),
       ...(data.prob_under_3_5 !== undefined && { prob_under_3_5: data.prob_under_3_5 }),
+      ...(data.prob_home_win !== undefined && { prob_home_win: data.prob_home_win }),
+      ...(data.prob_away_win !== undefined && { prob_away_win: data.prob_away_win }),
+      ...(data.prob_draw !== undefined && { prob_draw: data.prob_draw }),
       ...(data.market_evaluations !== undefined && { market_evaluations: data.market_evaluations }),
       ...(data.comment !== undefined && { comment: data.comment }),
       ...(data.notes !== undefined && { notes: data.notes }),
@@ -1310,6 +1333,9 @@ export async function exportTicketAsJson(ticketUuid: string): Promise<{
       prob_over_2_5: s.prob_over_2_5 ?? null,
       prob_btts_yes: s.prob_btts_yes ?? null,
       prob_under_3_5: s.prob_under_3_5 ?? null,
+      prob_home_win: s.prob_home_win ?? null,
+      prob_away_win: s.prob_away_win ?? null,
+      prob_draw: s.prob_draw ?? null,
       market_evaluations: s.market_evaluations ?? null,
       alignment_delta_pp: s.alignment_delta_pp ?? null,
       alignment_remark: s.alignment_remark ?? null,
@@ -1378,6 +1404,9 @@ export async function exportTicketAsJson(ticketUuid: string): Promise<{
       prob_over_2_5: a.prob_over_2_5 ?? null,
       prob_btts_yes: a.prob_btts_yes ?? null,
       prob_under_3_5: a.prob_under_3_5 ?? null,
+      prob_home_win: a.prob_home_win ?? null,
+      prob_away_win: a.prob_away_win ?? null,
+      prob_draw: a.prob_draw ?? null,
       market_evaluations: a.market_evaluations ?? null,
       alignment_delta_pp: a.alignment_delta_pp ?? null,
       alignment_remark: a.alignment_remark ?? null,

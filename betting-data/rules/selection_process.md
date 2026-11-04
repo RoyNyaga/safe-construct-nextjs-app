@@ -1,6 +1,6 @@
 # AUTOMATED SELECTION PROCESS & PORTFOLIO RULES (`selection_process.md`)
 
-> **Model Compatibility**: Designed for **Model 3.0 (`roys_betting_engine_BTS_O2-5`)** and beyond.  
+> **Model Compatibility**: Designed for **Model 4.0 (`roys_betting_engine_BTS_O2-5_win`)** and beyond.  
 > **Primary Purpose**: Automate the transition from raw match shortlists into a finalized, high-safety **2-leg (maximum 3-leg)** betting ticket with combined odds $\ge 2.00$, while cataloging all other promising matches in a companion candidates file for user review and model training.
 
 ---
@@ -17,8 +17,19 @@
    - If two safe legs cannot reach 2.00, we prefer a **3-leg ultra-safe ticket** over forcing a high-variance single pick.
 4. **Solve the One-Sided Reliance Trap**:
    - Matches where only one team scores heavily carry high risk if that favorite hits a slump, rotates players, or meets a defensive low block. We evaluate **game openness** and the ability of **both teams** to contribute to the goal market.
-5. **Transparency & User Sovereignty**:
+5. **The Smart Probability-Odds Trade-Off (Graceful Degradation)**:
+   - **The Forbidden Trade-Off**: Never sacrifice double-digit probability to chase odds. It is strictly unacceptable to drop from an $85\%+$ win rate down into the $60\% - 70\%$ high-variance zone just to force a 2-leg ticket over 2.00 odds.
+   - **The Permitted Trade-Off (Graceful Degradation)**: Trading within the elite tier is encouraged. Leaving a $95\%$ pick for a $90\% - 94\%$ pick (e.g. from 1.15 to 1.43) is an intelligent trade-off because it captures meaningful odds while preserving elite reliability.
+6. **Transparency & User Sovereignty**:
    - **Negative EV matches are never discarded automatically**. Edge and EV are calculated and displayed transparently so the bettor retains final discretion.
+7. **The Two-Tier Portfolio Architecture (Active Capital vs. Shadow Tracking Portfolio)**:
+   - **Tier 1: Active Capital Portfolio (`selections`)**:
+     - Strictly restricted to **1 to 3 matches** (default: 2 legs, combined odds $\ge 2.00$).
+     - Real wagers are placed exclusively on these fixtures. This shields capital from multi-match fluke risks, referee errors, and accumulator drag.
+   - **Tier 2: Shadow Tracking Portfolio (`alternatives`)**:
+     - The top **3 to 5 next-best selections** that met all Poisson, DCI, and EV qualifications but were not included in the main ticket.
+     - **Treated with Identical Statistical Rigor**: Alternatives are never filler; they are evaluated with the exact same mathematical scrutiny, DCI verification, and market selection as main legs.
+     - **Purpose: Zero-Risk Empirical Benchmarking**: Alternatives are officially saved in the database to track multi-game prediction accuracy above 3 games without risking capital. If long-term post-match tracking shows that alternatives consistently achieve an elite win rate ($\ge 85\%$), the bettor can confidently expand ticket size or place secondary tickets on select high-quality slates.
 
 ---
 
@@ -65,6 +76,15 @@ The engine selects from four standard goal markets, applying specific statistica
   - Zero defensive asphyxiation warnings (`STRONG_DEFENSIVE_MATCHUP`).
   - If $\text{DCI} < 0.40$ (underdog rarely scores), the favorite must have conceded in at least $35\%$ of home fixtures or average $\ge 2.10$ goals scored.
 
+#### 3.1.1 Over 1.5 Odds Realities & The Smart Trade-Up Check
+In real-world bookmaker pricing, fixtures with hyper-dominant offensive tempo often price Over 1.5 heavily below $1.25$ (e.g. $1.12 - 1.18$).
+- **Tier 1: Viable Standalone Corridor ($1.24 - 1.36$)**:
+  In competitive or moderately open fixtures (e.g. Reims vs Sochaux @ $1.23$, Oviedo vs Las Palmas @ $1.27$, Red Star vs Nancy @ $1.29$), Over 1.5 provides huge safety ($86\% - 93\%$) while moving the needle toward our combined odds floor. These are prime candidates for 2-leg and 3-leg portfolios.
+- **Tier 2: Heavily Juiced Corridor ($< 1.22$)**:
+  When Over 1.5 odds drop below $1.22$ (e.g. $1.12 - 1.18$), multiplying three of them cannot reach the $2.00$ combined floor ($1.15^3 = 1.52$).
+  - **The Smart Trade-Up Check**: If Over 1.5 is $< 1.22$, inspect the same fixture's **Over 2.5** (if $\text{DCI} \ge 0.45$) or **BTTS Yes** (if $\text{DCI} \ge 0.50$). If Over 2.5 or BTTS probability remains **$\ge 88\% - 94\%$** (as seen in Jong Utrecht vs FC Dordrecht: O1.5 was $98.2\%$ @ $1.12$, but O2.5 was $93.7\%$ @ $1.43$), **trade up to the higher market**. Sacrificing only 4–5pp of probability captures a massive leap in odds.
+  - **The Safety Hold Rule**: If trading up to Over 2.5 causes the probability to plummet into the high-variance zone ($< 80\%$), **DO NOT trade up**. Either pair the Over 1.5 in a 3-leg hybrid ticket with a higher anchor or discard the fixture.
+
 ### 3.2 Market 2: Balanced Both Teams to Score (BTTS Yes)
 - **Role**: Primary odds booster with balanced game dynamics.
 - **Typical Odds**: $1.58 - 1.82$.
@@ -91,6 +111,27 @@ The engine selects from four standard goal markets, applying specific statistica
   - Combined Expected Goals: $\lambda_{\text{total}} \le 2.45$.
   - Defenses: Both teams conceding $\le 1.10$ goals/game at venue.
 
+### 3.5 Market 5: Dominant Match Winner ("To Win" / 1X2)
+- **Role**: Capitalize on massive attacking and defensive asymmetry when odds offer positive expected value.
+- **Typical Odds**: $1.40 - 2.05$.
+- **Qualifications (The 5-Gate Checklist)**:
+  1. **Dominance Ratio**: $\text{DR} = \frac{\lambda_{\text{favored}}}{\lambda_{\text{underdog}}} \ge 2.20$.
+  2. **Expected Goals Levels**: Favored team venue expected goals $\ge 1.75\text{ GF/G}$; Underdog venue expected goals $\le 0.85\text{ GF/G}$.
+  3. **Venue Isolation Record**:
+     - Home Win: Home team home win rate $\ge 65.0\%$; Away opponent road loss rate $\ge 50.0\%$.
+     - Away Win (Extremely Rare): Away team road win rate $\ge 60.0\%$; Home opponent home loss rate $\ge 50.0\%$.
+  4. **Poisson Floor & Draw Suppression**: $P(\text{Win}) \ge 70.0\%$ (or $66.0\% - 69.9\%$ if Edge $\ge +5.0\text{pp}$), and **$P(\text{Draw}) \le 22.0\%$**. If draw probability exceeds $22\%$, straight win is prohibited.
+  5. **Clean Sheet / Outscore Resilience**: If the favorite regularly concedes at venue ($\text{GA/G} > 1.15$), venue scoring must exceed $2.30\text{ GF/G}$.
+  - **Contextual Gate**: Disqualified if key spine players are injured, fixture follows exhausting midweek European travel, or match is a local derby.
+
+### 3.6 Market 6: Draw No Bet (DNB / Asian Handicap 0) — Shock Absorber
+- **Role**: Exploits high win probability while insulating the accumulator against draw attrition.
+- **Typical Odds**: $1.28 - 1.75$.
+- **Qualifications**:
+  - Strong Favorite: $P(\text{Win}) \ge 60.0\%$ and Dominance Ratio $\text{DR} \ge 1.80$.
+  - Low Loss Risk: Underdog win probability $P(\text{Loss}) \le 16.0\%$.
+  - Draw Buffer: Match has moderate draw risk ($22\% - 28\%$). Under DNB, a draw settles as **`void`** (stake preserved, effective combined odds recalculate), keeping the ticket alive!
+
 ---
 
 ## 4. TICKET PORTFOLIO CONSTRUCTION LOGIC
@@ -105,24 +146,37 @@ The engine selects from four standard goal markets, applying specific statistica
 ### Step 2: Try 2-Leg Combinations First (Default Target)
 - Search for the highest-probability pair whose combined odds meet:
   $$\text{Combined Odds} = \text{Odds}_1 \times \text{Odds}_2 \ge 2.00 \quad (\text{ideal corridor: } 2.00 - 2.50)$$
-- **Optimal Template A (Anchor + Value)**:
-  - Leg 1: Ultra-Safe Over 1.5 @ $1.25 - 1.35$ ($P \ge 84\%$)
-  - Leg 2: Balanced BTTS Yes or Over 2.5 ($\text{DCI} \ge 0.45$) @ $1.58 - 1.75$ ($P \ge 62\%$)
-  - Result: Combined Odds $\approx 2.00 - 2.36$, Aggregate Probability $\approx 52 - 55\%$.
-- **Optimal Template B (Two Moderate Value Legs)**:
-  - Leg 1: BTTS Yes @ $1.50$ ($P \ge 66\%$, $\text{DCI} \ge 0.55$)
-  - Leg 2: Over 2.5 / BTTS Yes @ $1.45 - 1.55$ ($P \ge 65\%$, $\text{DCI} \ge 0.45$)
-  - Result: Combined Odds $\approx 2.18 - 2.33$, Aggregate Probability $\approx 43 - 48\%$.
+- **Priority 1: Elite High-Probability Pair (The Gold Standard)**:
+  - Two legs with single-leg probability $\ge 85\%$ and odds $1.40 - 1.52$.
+  - Yields combined odds $\approx 2.05 - 2.25$ with compound probability $> 80\%$ (Break-even $\approx 48\%$, Edge $> +30\text{pp}$).
+  - *Example (Ticket S-2-v3.0)*: Utrecht vs Dordrecht (O2.5 @ 1.43, 93.7%) $\times$ Sassuolo vs Fiorentina (BTTS @ 1.45, 87.9%) = **Combined Odds 2.07 @ 82.4% Probability (WON)**.
+- **Priority 2: Anchor + Value Pair**:
+  - Leg 1: Ultra-Safe Over 1.5 @ $1.25 - 1.35$ ($P \ge 85\%$)
+  - Leg 2: Balanced BTTS Yes or Over 2.5 ($\text{DCI} \ge 0.55$) @ $1.58 - 1.70$ ($P \ge 68\%$)
+  - Yields combined odds $\approx 2.00 - 2.30$, compound probability $\approx 58 - 62\%$.
+- **Priority 3: Dominant Winner + Anchor Pair (Model 4.0 Focus)**:
+  - Leg 1: Dominant Home Win or Draw No Bet (DNB) @ $1.45 - 1.65$ ($P \ge 70\%$, Dominance Ratio $\ge 2.20$, $P(\text{Draw}) \le 22\%$)
+  - Leg 2: Ultra-Safe Over 1.5 @ $1.25 - 1.35$ ($P \ge 85\%$)
+  - Yields combined odds $\approx 2.00 - 2.25$, compound probability $\approx 60 - 68\%$.
 
 ### Step 3: Automated 3-Leg Safety Trigger (Crucial Protection Rule)
 - **The "2-Leg Odds Pressure" Problem**:
-  When our best qualifying pick has odds $\le 1.50$ (e.g. Groningen BTTS Yes @ 1.46), forcing a 2-leg ticket requires Leg 2 to have odds $\ge 1.37$ ($2.00 / 1.46 = 1.37$). If the remaining candidate slate only offers ultra-safe Over 1.5 picks (e.g. 1.25 – 1.32) and one-sided Over 2.5 picks, **never elevate a one-sided game to Over 2.5 just to hit the 2.00 floor in 2 games**.
+  When our best qualifying pick has odds $\le 1.50$ (e.g. Groningen BTTS Yes @ 1.46), forcing a 2-leg ticket requires Leg 2 to have odds $\ge 1.37$ ($2.00 / 1.46 = 1.37$). If the remaining candidate slate only offers ultra-safe Over 1.5 picks (e.g. 1.22 – 1.32) and one-sided Over 2.5 picks, **never elevate a one-sided or low-probability game to Over 2.5 just to hit the 2.00 floor in 2 games**.
 - **Automated 3-Leg Action**:
-  - The engine **automatically transitions to a 3-leg ticket** using only high-probability, high-safety picks ($\ge 78\%$ per leg):
-    $$\text{Ticket Odds} = \text{Odds}_1 \times \text{Odds}_2 \times \text{Odds}_3 \ge 2.00 \quad (\text{target corridor: } 2.20 - 2.80)$$
-  - **Empirical Proof (Ticket S-1-v3.0 Retrospective)**:
-    - *Forced 2-Leg*: Groningen BTTS (1.46, won 2-3) $\times$ Arouca O2.5 (1.83, **lost 1-0**) = LOST.
-    - *3-Leg Safety Solution*: Groningen BTTS (1.46, won 2-3) $\times$ Academico de Viseu O1.5 (1.29, **won 2-1**) $\times$ Braga O1.5 (1.32, **won 3-0**) = **Combined Odds 2.49, ALL 3 LEGS WON**.
+  The engine **automatically transitions to a 3-leg ticket** using only high-probability, high-safety picks ($\ge 80\%$ per leg):
+  $$\text{Ticket Odds} = \text{Odds}_1 \times \text{Odds}_2 \times \text{Odds}_3 \ge 2.00 \quad (\text{target corridor: } 2.05 - 2.60)$$
+- **3-Leg Portfolio Archetypes**:
+  1. **Archetype A: The Hybrid 3-Leg (1 Value Anchor + 2 Over 1.5 Anchors)**:
+     - Leg 1: High-openness BTTS Yes or Over 2.5 ($1.42 - 1.50$, $P \ge 85\%$)
+     - Leg 2: Over 1.5 ($1.20 - 1.26$, $P \ge 88\%$)
+     - Leg 3: Over 1.5 ($1.20 - 1.26$, $P \ge 88\%$)
+     - *Example*: $1.45 \times 1.22 \times 1.22 = \mathbf{2.15}$ combined odds, compound probability $\approx \mathbf{72\%}$.
+  2. **Archetype B: The Over 1.5 Triplet (High-Floor Safety)**:
+     - 3 Over 1.5 selections from competitive leagues.
+     - **Mathematical Constraint**: Individual legs must average at least **$1.26$** ($1.26^3 \approx 2.00$). If bookmakers price Over 1.5 below $1.24$, do not force a triplet of low odds—use the Hybrid or 2-Leg structure instead.
+- **Empirical Proof (Ticket S-1-v3.0 Retrospective)**:
+  - *Forced 2-Leg*: Groningen BTTS (1.46, won 2-3) $\times$ Arouca O2.5 (1.83, **lost 1-0**) = LOST.
+  - *3-Leg Safety Solution*: Groningen BTTS (1.46, won 2-3) $\times$ Academico de Viseu O1.5 (1.29, **won 2-1**) $\times$ Braga O1.5 (1.32, **won 3-0**) = **Combined Odds 2.49, ALL 3 LEGS WON**.
 - **Hard Cap**: Never expand beyond 3 legs under any circumstance. Maximum allowable legs on any ticket is strictly 3.
 
 ---
@@ -139,8 +193,8 @@ betting-data/<month>/
 ```
 
 ### 5.1 File 1: `ticket_<YYYY-MM-DD>_001.json`
-- **`selections`**: The primary 2 legs (or max 3) that form the official betting ticket to be wagered.
-- **`alternatives`**: The top 3–5 nearest contenders that were almost selected. These are imported into the app for formal settlement, warning tracking, and post-match audit.
+- **`selections`**: The primary 1 to 3 legs that form the official real-money betting ticket to be wagered.
+- **`alternatives`**: The **Official Shadow Tracking Portfolio** (3 to 5 next-best qualified fixtures). These are imported into the app for formal settlement, warning tracking, and post-match audit to measure prediction accuracy above 3 games risk-free.
 
 ### 5.2 File 2: `candidates_<YYYY-MM-DD>.json`
 - **Purpose**: A comprehensive watchlist of **all good matches evaluated for that day** that did not make the main ticket or top alternatives.
