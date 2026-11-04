@@ -1,0 +1,274 @@
+{
+  "date": "2026-11-04",
+  "model_version": "4.0",
+  "model_name": "roys_betting_engine_BTS_O2-5_win",
+  "summary": "Catalog of all qualified, borderline, and disqualified matches evaluated on 2026-11-04. Contains full Poisson probabilities, DCI ratings, value edge calculations, and explicit warning diagnostics for transparency, training, and 5-second swaps.",
+  "candidates": [
+    {
+      "match_date": "2026-11-04",
+      "country": "Kuwait",
+      "league": "Kuwait Division 1",
+      "home_team": "Al Jazira Kuwait",
+      "away_team": "Khaitan SC",
+      "status": "QUALIFIED_FOR_REVIEW",
+      "odds": {
+        "home_win": 2.95,
+        "draw": 3.2,
+        "away_win": 2.08,
+        "over_1_5": 1.28,
+        "over_2_5": 1.86,
+        "btts_yes": 1.74
+      },
+      "model_probabilities": {
+        "prob_over_1_5": 0.795,
+        "prob_over_2_5": 0.534,
+        "prob_btts_yes": 0.548,
+        "prob_under_3_5": 0.718,
+        "prob_home_win": 0.284,
+        "prob_draw": 0.272,
+        "prob_away_win": 0.444
+      },
+      "dual_contribution_index": 0.65,
+      "recommendation": "Khaitan Draw No Bet (DNB Away @ ~1.55) or Over 1.5 @ 1.28. Khaitan is undefeated in all recent head-to-head encounters against Al Jazira (2-0, 1-0, 2-2).",
+      "disqualification_reason": null,
+      "warnings": [
+        {
+          "type": "H2H_LOW_GOALS",
+          "severity": "LOW",
+          "description": "Previous meetings at Al Jazira's venue have been tight (0-1)."
+        }
+      ]
+    },
+    {
+      "match_date": "2026-11-04",
+      "country": "Paraguay",
+      "league": "Paraguay Primera Division",
+      "home_team": "Sportivo Ameliano",
+      "away_team": "Club Guarani Asuncion",
+      "status": "BORDERLINE_CAUTION",
+      "odds": {
+        "home_win": 2.84,
+        "draw": 3.1,
+        "away_win": 2.24,
+        "over_1_5": 1.29,
+        "over_2_5": 1.96,
+        "btts_yes": 1.77
+      },
+      "model_probabilities": {
+        "prob_over_1_5": 0.765,
+        "prob_over_2_5": 0.492,
+        "prob_btts_yes": 0.528,
+        "prob_under_3_5": 0.742,
+        "prob_home_win": 0.312,
+        "prob_draw": 0.364,
+        "prob_away_win": 0.324
+      },
+      "dual_contribution_index": 0.86,
+      "recommendation": "Over 1.5 Goals @ 1.29 (8 of last 9 H2H hit Over 1.5). Match Winner is strictly prohibited due to draw frequency.",
+      "disqualification_reason": "Draw concentration exceeds 55% (5 of last 9 meetings ended 1-1, 1-1, 2-2, 1-1, 0-0). Model Over 1.5 probability of 76.5% falls below the 82% anchor threshold.",
+      "warnings": [
+        {
+          "type": "DRAW_TRAP_RISK",
+          "severity": "HIGH",
+          "description": "Extreme head-to-head draw pattern (55.6% draws) invalidates 1X2 straight win wagers."
+        }
+      ]
+    },
+    {
+      "match_date": "2026-11-04",
+      "country": "Belgium",
+      "league": "Belgium Pro League",
+      "home_team": "KV Kortrijk",
+      "away_team": "KV Mechelen",
+      "status": "DISQUALIFIED_DEFENSIVE_TRAP",
+      "odds": {
+        "home_win": 2.26,
+        "draw": 3.3,
+        "away_win": 2.96,
+        "over_1_5": 1.24,
+        "over_2_5": 1.75,
+        "btts_yes": 1.61
+      },
+      "model_probabilities": {
+        "prob_over_1_5": 0.612,
+        "prob_over_2_5": 0.354,
+        "prob_btts_yes": 0.418,
+        "prob_under_3_5": 0.812,
+        "prob_home_win": 0.428,
+        "prob_draw": 0.285,
+        "prob_away_win": 0.287
+      },
+      "dual_contribution_index": 0.36,
+      "recommendation": "Avoid Over 1.5 at 1.24. Bookmaker pricing heavily mispriced against Belgian defensive realities. Under 3.5 Goals @ ~1.28 is the only mathematically aligned outcome.",
+      "disqualification_reason": "KV Kortrijk concedes only 0.53 GA/G at home (8 goals conceded in 15 home matches) and scores only 0.80 GF/G. Over 1.5 probability of 61.2% produces a severe negative value edge (-19.4pp) against the 80.6% break-even floor.",
+      "warnings": [
+        {
+          "type": "STRONG_DEFENSIVE_MATCHUP",
+          "severity": "HIGH",
+          "description": "Kortrijk maintains an elite 0.53 GA/G home defense, elevating 0-0 and 1-0 frequency."
+        },
+        {
+          "type": "LOW_HOME_SCORING",
+          "severity": "MEDIUM",
+          "description": "Kortrijk scores only 0.80 GF/G at home, suppressing goal expectancy."
+        }
+      ]
+    },
+    {
+      "match_date": "2026-11-04",
+      "country": "Morocco",
+      "league": "Morocco Botola 1",
+      "home_team": "FAR Rabat",
+      "away_team": "Raja CA Casablanca",
+      "status": "DISQUALIFIED_DERBY_RISK",
+      "odds": {
+        "home_win": 1.7,
+        "draw": 3.2,
+        "away_win": 4.5,
+        "over_1_5": 1.35,
+        "over_2_5": 2.07,
+        "btts_yes": 1.97
+      },
+      "model_probabilities": {
+        "prob_over_1_5": 0.635,
+        "prob_over_2_5": 0.368,
+        "prob_btts_yes": 0.384,
+        "prob_under_3_5": 0.824,
+        "prob_home_win": 0.524,
+        "prob_draw": 0.312,
+        "prob_away_win": 0.164
+      },
+      "dual_contribution_index": 0.61,
+      "recommendation": "Under 3.5 Goals or Under 2.5 Goals. Disqualified from all Over goal markets.",
+      "disqualification_reason": "Intense tactical derby. Direct head-to-head fixtures repeatedly produce 0-0, 0-0, and 1-1 scorelines. Both clubs maintain elite defensive concessions under 0.67 GA/G.",
+      "warnings": [
+        {
+          "type": "H2H_LOW_GOALS",
+          "severity": "HIGH",
+          "description": "Recurring 0-0 and 1-1 head-to-head results."
+        },
+        {
+          "type": "STRONG_DEFENSIVE_MATCHUP",
+          "severity": "HIGH",
+          "description": "Both teams allow under 0.67 GA/G, resulting in high tactical friction."
+        }
+      ]
+    },
+    {
+      "match_date": "2026-11-04",
+      "country": "Switzerland",
+      "league": "Switzerland Promotion League",
+      "home_team": "FC Schaffhausen",
+      "away_team": "FC Biel-Bienne",
+      "status": "DISQUALIFIED_MISSING_MARKET",
+      "odds": {
+        "home_win": 2.16,
+        "draw": 3.4,
+        "away_win": 2.9,
+        "over_1_5": null,
+        "over_2_5": 1.45,
+        "btts_yes": 1.39
+      },
+      "model_probabilities": {
+        "prob_over_1_5": 0.812,
+        "prob_over_2_5": 0.584,
+        "prob_btts_yes": 0.614,
+        "prob_under_3_5": 0.648,
+        "prob_home_win": 0.412,
+        "prob_draw": 0.258,
+        "prob_away_win": 0.33
+      },
+      "dual_contribution_index": 0.78,
+      "recommendation": "Candidate for review if Over 1.5 becomes available.",
+      "disqualification_reason": "Over 1.5 odds not provided in user shortlist. Recent head-to-head meetings saw Biel-Bienne win 2-0 and 1-0 with clean sheets, breaking BTTS Yes.",
+      "warnings": [
+        {
+          "type": "DATA_CONFLICT",
+          "severity": "MEDIUM",
+          "description": "Over 1.5 line unpriced by bookmaker; cannot evaluate anchor odds."
+        }
+      ]
+    },
+    {
+      "match_date": "2026-11-04",
+      "country": "Guatemala",
+      "league": "Guatemala Liga Primera Division",
+      "home_team": "Deportivo Fraijanes FC",
+      "away_team": "CD Huehueteco Xinabajul",
+      "status": "DISQUALIFIED_HARD_STOP",
+      "odds": {
+        "home_win": 1.69,
+        "draw": 3.2,
+        "away_win": 2.04,
+        "over_1_5": null,
+        "over_2_5": 1.78,
+        "btts_yes": 1.72
+      },
+      "model_probabilities": null,
+      "dual_contribution_index": null,
+      "recommendation": "Do not wager. Unreliable secondary tier data.",
+      "disqualification_reason": "Hard Stop Rule triggered: verified venue-specific splits (home goals/game, away goals/game) are unavailable online. Over 1.5 unpriced.",
+      "warnings": [
+        {
+          "type": "MISSING_HOME_AWAY_DATA",
+          "severity": "CRITICAL",
+          "description": "Mandatory venue-specific statistics missing online. Mathematical model calculation halted."
+        }
+      ]
+    },
+    {
+      "match_date": "2026-11-04",
+      "country": "Guatemala",
+      "league": "Guatemala Liga Primera Division",
+      "home_team": "Deportivo Coatepeque",
+      "away_team": "Nueva Santa Rosa CDF",
+      "status": "DISQUALIFIED_HARD_STOP",
+      "odds": {
+        "home_win": 1.52,
+        "draw": 3.4,
+        "away_win": 2.37,
+        "over_1_5": null,
+        "over_2_5": 2.1,
+        "btts_yes": 2.04
+      },
+      "model_probabilities": null,
+      "dual_contribution_index": null,
+      "recommendation": "Do not wager. Unreliable secondary tier data.",
+      "disqualification_reason": "Hard Stop Rule triggered: verified venue-specific splits are unavailable online. Over 1.5 unpriced.",
+      "warnings": [
+        {
+          "type": "MISSING_HOME_AWAY_DATA",
+          "severity": "CRITICAL",
+          "description": "Mandatory venue-specific statistics missing online. Mathematical model calculation halted."
+        }
+      ]
+    },
+    {
+      "match_date": "2026-11-04",
+      "country": "Venezuela",
+      "league": "Venezuela Primera Division",
+      "home_team": "Portuguesa Acarigua FC",
+      "away_team": "Deportivo La Guaira",
+      "status": "DISQUALIFIED_NO_GOAL_MARKETS",
+      "odds": {
+        "home_win": 2.59,
+        "draw": 3.1,
+        "away_win": 2.64,
+        "over_1_5": null,
+        "over_2_5": null,
+        "btts_yes": null
+      },
+      "model_probabilities": null,
+      "dual_contribution_index": null,
+      "recommendation": "Omitted. Incomplete bookmaker pricing.",
+      "disqualification_reason": "No goal market odds (Over 1.5, Over 2.5, BTTS Yes) provided in user shortlist.",
+      "warnings": [
+        {
+          "type": "DATA_CONFLICT",
+          "severity": "MEDIUM",
+          "description": "Goal markets omitted from input; cannot compute break-even or value edge."
+        }
+      ]
+    }
+  ]
+}
