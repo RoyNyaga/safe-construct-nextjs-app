@@ -9,7 +9,9 @@ export function autoSettleSelection(
   market: string,
   selection: string,
   homeScore: number | null | undefined,
-  awayScore: number | null | undefined
+  awayScore: number | null | undefined,
+  homeTeam?: string | null,
+  awayTeam?: string | null
 ): SelectionResultStatus | null {
   if (homeScore === null || homeScore === undefined || awayScore === null || awayScore === undefined) {
     return 'pending'
@@ -17,7 +19,12 @@ export function autoSettleSelection(
 
   const cleanMarket = market.trim().toLowerCase()
   const cleanSel = selection.trim().toLowerCase()
+  const cleanHomeTeam = homeTeam ? homeTeam.trim().toLowerCase() : ''
+  const cleanAwayTeam = awayTeam ? awayTeam.trim().toLowerCase() : ''
   const totalGoals = homeScore + awayScore
+  const isHomeWin = homeScore > awayScore
+  const isAwayWin = awayScore > homeScore
+  const isDraw = homeScore === awayScore
 
   // ─── OVER / UNDER MARKETS ──────────────────────────────────────────────────
   if (cleanMarket.includes('over') || cleanMarket.includes('under') || cleanMarket.includes('goal') || cleanSel.startsWith('over') || cleanSel.startsWith('under')) {
@@ -47,29 +54,73 @@ export function autoSettleSelection(
     }
   }
 
-  // ─── 1X2 / MATCH RESULT ────────────────────────────────────────────────────
-  if (cleanMarket.includes('1x2') || cleanMarket.includes('match result') || cleanMarket.includes('winner') || cleanMarket === 'result') {
-    const isHomeWin = homeScore > awayScore
-    const isAwayWin = awayScore > homeScore
-    const isDraw = homeScore === awayScore
+  // ─── DRAW NO BET (DNB / AH 0) ──────────────────────────────────────────────
+  if (
+    cleanMarket.includes('draw no bet') ||
+    cleanMarket.includes('dnb') ||
+    cleanMarket.includes('tie no bet') ||
+    cleanSel.includes('dnb') ||
+    cleanSel.includes('draw no bet')
+  ) {
+    if (isDraw) {
+      return 'void'
+    }
+    const isPickedHome =
+      cleanSel === '1' ||
+      cleanSel.includes('home') ||
+      (cleanHomeTeam && cleanSel.includes(cleanHomeTeam))
+    const isPickedAway =
+      cleanSel === '2' ||
+      cleanSel.includes('away') ||
+      (cleanAwayTeam && cleanSel.includes(cleanAwayTeam))
 
-    if (cleanSel === '1' || cleanSel.includes('home win') || cleanSel.includes('home')) {
+    if (isPickedHome) {
       return isHomeWin ? 'won' : 'lost'
     }
-    if (cleanSel === '2' || cleanSel.includes('away win') || cleanSel.includes('away')) {
+    if (isPickedAway) {
       return isAwayWin ? 'won' : 'lost'
     }
-    if (cleanSel === 'x' || cleanSel.includes('draw')) {
+  }
+
+  // ─── 1X2 / MATCH RESULT / TO WIN ───────────────────────────────────────────
+  if (
+    cleanMarket.includes('1x2') ||
+    cleanMarket.includes('match result') ||
+    cleanMarket.includes('to win') ||
+    cleanMarket.includes('winner') ||
+    cleanMarket.includes('moneyline') ||
+    cleanMarket === 'result'
+  ) {
+    const isPickedHome =
+      cleanSel === '1' ||
+      cleanSel.includes('home win') ||
+      cleanSel.includes('home to win') ||
+      cleanSel === 'home' ||
+      (cleanHomeTeam && cleanSel.includes(cleanHomeTeam))
+    const isPickedAway =
+      cleanSel === '2' ||
+      cleanSel.includes('away win') ||
+      cleanSel.includes('away to win') ||
+      cleanSel === 'away' ||
+      (cleanAwayTeam && cleanSel.includes(cleanAwayTeam))
+    const isPickedDraw =
+      cleanSel === 'x' ||
+      cleanSel.includes('draw') ||
+      cleanSel.includes('tie')
+
+    if (isPickedHome) {
+      return isHomeWin ? 'won' : 'lost'
+    }
+    if (isPickedAway) {
+      return isAwayWin ? 'won' : 'lost'
+    }
+    if (isPickedDraw) {
       return isDraw ? 'won' : 'lost'
     }
   }
 
   // ─── DOUBLE CHANCE ─────────────────────────────────────────────────────────
   if (cleanMarket.includes('double chance') || cleanSel === '1x' || cleanSel === 'x2' || cleanSel === '12') {
-    const isHomeWin = homeScore > awayScore
-    const isAwayWin = awayScore > homeScore
-    const isDraw = homeScore === awayScore
-
     if (cleanSel === '1x' || cleanSel.includes('1x') || cleanSel.includes('home or draw')) {
       return (isHomeWin || isDraw) ? 'won' : 'lost'
     }

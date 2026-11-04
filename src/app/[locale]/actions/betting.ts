@@ -1,5 +1,7 @@
 'use server'
 
+import { promises as fs } from 'fs'
+import path from 'path'
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/utils/supabase/server'
 import {
@@ -23,6 +25,11 @@ import {
   TicketSuggestionData,
   AlignmentRemark,
   EdgeRemark,
+  LeagueMarketTier,
+  LeagueIntegrityBetItem,
+  LeagueMarketIntegrityRecord,
+  LeagueIntegrityCompetitionSummary,
+  LeagueIntegrityMatrixPayload,
 } from '@/types/betting'
 import { autoSettleSelection, calculateTicketStatus, calculateProfitLoss } from '@/utils/bettingSettlement'
 import { checkVenueStatsMismatch } from '@/utils/bettingValidation'
@@ -467,6 +474,9 @@ function computeEdgeRemark(
       prob_over_2_5: parseNullableNumber(sel.prob_over_2_5),
       prob_btts_yes: parseNullableNumber(sel.prob_btts_yes),
       prob_under_3_5: parseNullableNumber(sel.prob_under_3_5),
+      prob_home_win: parseNullableNumber(sel.prob_home_win),
+      prob_away_win: parseNullableNumber(sel.prob_away_win),
+      prob_draw: parseNullableNumber(sel.prob_draw),
       market_evaluations: sel.market_evaluations || null,
       alignment_delta_pp: align.alignment_delta_pp,
       alignment_remark: align.alignment_remark,
@@ -551,6 +561,9 @@ function computeEdgeRemark(
         prob_over_2_5: parseNullableNumber(alt.prob_over_2_5),
         prob_btts_yes: parseNullableNumber(alt.prob_btts_yes),
         prob_under_3_5: parseNullableNumber(alt.prob_under_3_5),
+        prob_home_win: parseNullableNumber(alt.prob_home_win),
+        prob_away_win: parseNullableNumber(alt.prob_away_win),
+        prob_draw: parseNullableNumber(alt.prob_draw),
         market_evaluations: alt.market_evaluations || null,
         alignment_delta_pp: align.alignment_delta_pp,
         alignment_remark: align.alignment_remark,
@@ -940,7 +953,14 @@ export async function updateSelectionResult(params: {
   if (params.manualResult) {
     settledResult = params.manualResult
   } else {
-    const auto = autoSettleSelection(selection.market, selection.selection, homeScore, awayScore)
+    const auto = autoSettleSelection(
+      selection.market,
+      selection.selection,
+      homeScore,
+      awayScore,
+      selection.home_team,
+      selection.away_team
+    )
     settledResult = auto !== null ? auto : (selection.result || 'pending')
   }
 
@@ -1039,7 +1059,14 @@ export async function updateAlternativeResult(params: {
   if (params.manualResult) {
     settledResult = params.manualResult
   } else {
-    const auto = autoSettleSelection(alternative.market, alternative.selection, homeScore, awayScore)
+    const auto = autoSettleSelection(
+      alternative.market,
+      alternative.selection,
+      homeScore,
+      awayScore,
+      alternative.home_team,
+      alternative.away_team
+    )
     settledResult = auto !== null ? auto : (alternative.result || 'pending')
   }
 
@@ -1208,6 +1235,9 @@ export async function updateBettingSelectionDetails(
       ...(data.prob_over_2_5 !== undefined && { prob_over_2_5: data.prob_over_2_5 }),
       ...(data.prob_btts_yes !== undefined && { prob_btts_yes: data.prob_btts_yes }),
       ...(data.prob_under_3_5 !== undefined && { prob_under_3_5: data.prob_under_3_5 }),
+      ...(data.prob_home_win !== undefined && { prob_home_win: data.prob_home_win }),
+      ...(data.prob_away_win !== undefined && { prob_away_win: data.prob_away_win }),
+      ...(data.prob_draw !== undefined && { prob_draw: data.prob_draw }),
       ...(data.market_evaluations !== undefined && { market_evaluations: data.market_evaluations }),
       ...(data.comment !== undefined && { comment: data.comment }),
       ...(data.notes !== undefined && { notes: data.notes }),
@@ -1310,6 +1340,9 @@ export async function exportTicketAsJson(ticketUuid: string): Promise<{
       prob_over_2_5: s.prob_over_2_5 ?? null,
       prob_btts_yes: s.prob_btts_yes ?? null,
       prob_under_3_5: s.prob_under_3_5 ?? null,
+      prob_home_win: s.prob_home_win ?? null,
+      prob_away_win: s.prob_away_win ?? null,
+      prob_draw: s.prob_draw ?? null,
       market_evaluations: s.market_evaluations ?? null,
       alignment_delta_pp: s.alignment_delta_pp ?? null,
       alignment_remark: s.alignment_remark ?? null,
@@ -1378,6 +1411,9 @@ export async function exportTicketAsJson(ticketUuid: string): Promise<{
       prob_over_2_5: a.prob_over_2_5 ?? null,
       prob_btts_yes: a.prob_btts_yes ?? null,
       prob_under_3_5: a.prob_under_3_5 ?? null,
+      prob_home_win: a.prob_home_win ?? null,
+      prob_away_win: a.prob_away_win ?? null,
+      prob_draw: a.prob_draw ?? null,
       market_evaluations: a.market_evaluations ?? null,
       alignment_delta_pp: a.alignment_delta_pp ?? null,
       alignment_remark: a.alignment_remark ?? null,
@@ -2173,6 +2209,508 @@ export async function getModelTicketNumberSuggestion(params?: {
     alternativeCount,
     nextSelectionTicketNumber,
     nextAlternativeTicketNumber,
+  }
+}
+
+// ─── 8. LEAGUE-MARKET INTEGRITY (LMI) OPERATIONS ────────────────────────────
+
+const STANDARD_LMI_MARKETS = [
+  'over_1_5',
+  'over_2_5',
+  'btts_yes',
+  'under_3_5',
+  'to_win',
+  'draw_no_bet',
+] as const
+
+function normalizeLMIMarketKey(rawMarket?: string | null, rawSelection?: string | null): string {
+  if (!rawMarket) return 'other'
+  const m = rawMarket.trim().toLowerCase()
+  const s = (rawSelection || '').trim().toLowerCase()
+
+  if (m.includes('1.5') && (m.includes('over') || s.includes('over'))) return 'over_1_5'
+  if (m.includes('2.5') && (m.includes('over') || s.includes('over'))) return 'over_2_5'
+  if (m.includes('3.5') && (m.includes('under') || s.includes('under'))) return 'under_3_5'
+  if (m.includes('btts') || m.includes('both teams to score') || m.includes('bts')) return 'btts_yes'
+  if (m.includes('draw no bet') || m.includes('dnb') || s.includes('draw no bet') || s.includes('dnb')) return 'draw_no_bet'
+  if (m.includes('win') || m.includes('1x2') || m.includes('winner') || m.includes('to win') || s.includes('to win')) return 'to_win'
+  
+  return m.replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '') || 'other'
+}
+
+function getLMIMarketLabel(marketKey: string): string {
+  switch (marketKey) {
+    case 'over_1_5':
+      return 'Over 1.5 Goals'
+    case 'over_2_5':
+      return 'Over 2.5 Goals'
+    case 'btts_yes':
+      return 'Both Teams to Score'
+    case 'under_3_5':
+      return 'Under 3.5 Goals'
+    case 'to_win':
+      return 'To Win (1X2)'
+    case 'draw_no_bet':
+      return 'Draw No Bet (DNB)'
+    default:
+      return marketKey.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase())
+  }
+}
+
+function matchBaselineCompetition(
+  leagueName: string,
+  countryName?: string | null,
+  baselinesCompetitions?: Record<string, any>
+): { key: string; name: string; country: string | null; meta?: any } {
+  const normLeague = (leagueName || '').trim().toLowerCase()
+  const normCountry = (countryName || '').trim().toLowerCase()
+
+  if (baselinesCompetitions) {
+    for (const [key, comp] of Object.entries(baselinesCompetitions)) {
+      if (key === 'default_fallback') continue
+      const compName = (comp.name || '').toLowerCase()
+
+      // Direct full or exact matches
+      if (normLeague === compName || normLeague.includes(compName) || compName.includes(normLeague)) {
+        return { key, name: comp.name, country: comp.country || countryName || null, meta: comp }
+      }
+
+      // Keyword based matching
+      if (normLeague.includes('eerste') && key.includes('eerste')) return { key, name: comp.name, country: comp.country, meta: comp }
+      if (normLeague.includes('2. bundesliga') && key.includes('2_bundesliga')) return { key, name: comp.name, country: comp.country, meta: comp }
+      if ((normLeague.includes('j1') || normLeague.includes('j-league') || normLeague.includes('j league')) && key.includes('j1')) {
+        return { key, name: comp.name, country: comp.country, meta: comp }
+      }
+      if (normLeague.includes('ligue 2') && key.includes('ligue_2')) return { key, name: comp.name, country: comp.country, meta: comp }
+      if ((normLeague.includes('liga 2') || normLeague.includes('portugal 2')) && key.includes('liga_portugal_2')) {
+        return { key, name: comp.name, country: comp.country, meta: comp }
+      }
+      if (normLeague.includes('serie b') && key.includes('serie_b')) return { key, name: comp.name, country: comp.country, meta: comp }
+      if (normLeague.includes('championship') && key.includes('championship')) return { key, name: comp.name, country: comp.country, meta: comp }
+      if ((normLeague.includes('league two') || normLeague.includes('league 2')) && key.includes('league_two')) {
+        return { key, name: comp.name, country: comp.country, meta: comp }
+      }
+      if ((normLeague.includes('premier') || normLeague.includes('pl')) && (normCountry.includes('england') || normLeague.includes('england'))) {
+        if (key.includes('premier_league')) return { key, name: comp.name, country: comp.country, meta: comp }
+      }
+      if (normLeague.includes('la liga') || normLeague.includes('primera division')) {
+        if (key.includes('la_liga')) return { key, name: comp.name, country: comp.country, meta: comp }
+      }
+      if (normLeague.includes('segunda') && key.includes('segunda')) return { key, name: comp.name, country: comp.country, meta: comp }
+      if (normLeague.includes('serie a') && (normCountry.includes('ecuador') || normLeague.includes('ecuador'))) {
+        if (key.includes('ecuador')) return { key, name: comp.name, country: comp.country, meta: comp }
+      }
+      if ((normLeague.includes('argentina') || normCountry.includes('argentina')) && key.includes('argentina')) {
+        return { key, name: comp.name, country: comp.country, meta: comp }
+      }
+    }
+  }
+
+  // Dynamic fallback slug
+  const fallbackKey = (leagueName || 'unknown_league')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '_')
+    .replace(/^_+|_+$/g, '')
+
+  return {
+    key: fallbackKey,
+    name: leagueName || 'Unknown League',
+    country: countryName || null,
+  }
+}
+
+export async function getLeagueMarketIntegrity(): Promise<{
+  data: LeagueIntegrityMatrixPayload
+  error?: string
+}> {
+  try {
+    const supabase = await createClient()
+
+    // 1. Load League Baselines JSON
+    let baselinesJson: any = { competitions: {} }
+    const baselinesPath = path.join(process.cwd(), 'betting-data', 'rules', 'league_baselines.json')
+    try {
+      const fileRaw = await fs.readFile(baselinesPath, 'utf-8')
+      baselinesJson = JSON.parse(fileRaw)
+    } catch (err) {
+      console.warn('Could not read league_baselines.json from disk, using fallback empty baselines:', err)
+    }
+
+    const baselineCompetitions = baselinesJson.competitions || {}
+
+    // 2. Fetch all selections and alternatives from Supabase
+    const [selRes, altRes] = await Promise.all([
+      supabase
+        .from('betting_selections')
+        .select(`
+          id,
+          uuid,
+          ticket_id,
+          match_date,
+          home_team,
+          away_team,
+          country,
+          league,
+          market,
+          selection,
+          odds,
+          estimated_probability,
+          actual_home_score,
+          actual_away_score,
+          result,
+          betting_tickets (
+            ticket_number
+          )
+        `)
+        .order('match_date', { ascending: false }),
+      supabase
+        .from('betting_alternatives')
+        .select(`
+          id,
+          uuid,
+          ticket_id,
+          match_date,
+          home_team,
+          away_team,
+          country,
+          league,
+          market,
+          selection,
+          odds,
+          estimated_probability,
+          actual_home_score,
+          actual_away_score,
+          result,
+          betting_tickets (
+            ticket_number
+          )
+        `)
+        .order('match_date', { ascending: false }),
+    ])
+
+    if (selRes.error) {
+      console.error('Failed to fetch betting_selections for LMI:', selRes.error)
+    }
+    if (altRes.error) {
+      console.error('Failed to fetch betting_alternatives for LMI:', altRes.error)
+    }
+
+    const allBetItems: LeagueIntegrityBetItem[] = []
+
+    for (const s of selRes.data || []) {
+      allBetItems.push({
+        id: s.id,
+        uuid: s.uuid,
+        ticket_id: s.ticket_id,
+        ticket_number: (s.betting_tickets as any)?.ticket_number || null,
+        source_type: 'selection',
+        match_date: s.match_date,
+        home_team: s.home_team,
+        away_team: s.away_team,
+        country: s.country,
+        league: s.league,
+        market: s.market,
+        selection: s.selection,
+        odds: s.odds ? Number(s.odds) : null,
+        estimated_probability: s.estimated_probability ? Number(s.estimated_probability) : null,
+        actual_home_score: s.actual_home_score,
+        actual_away_score: s.actual_away_score,
+        result: s.result,
+      })
+    }
+
+    for (const a of altRes.data || []) {
+      allBetItems.push({
+        id: a.id,
+        uuid: a.uuid,
+        ticket_id: a.ticket_id,
+        ticket_number: (a.betting_tickets as any)?.ticket_number || null,
+        source_type: 'alternative',
+        match_date: a.match_date,
+        home_team: a.home_team,
+        away_team: a.away_team,
+        country: a.country,
+        league: a.league,
+        market: a.market,
+        selection: a.selection,
+        odds: a.odds ? Number(a.odds) : null,
+        estimated_probability: a.estimated_probability ? Number(a.estimated_probability) : null,
+        actual_home_score: a.actual_home_score,
+        actual_away_score: a.actual_away_score,
+        result: a.result,
+      })
+    }
+
+    // 3. Group by competition key
+    const competitionsMap: Record<
+      string,
+      {
+        key: string
+        name: string
+        country: string | null
+        meta?: any
+        items: LeagueIntegrityBetItem[]
+      }
+    > = {}
+
+    // Pre-populate with baseline competitions so they appear even before first bet
+    for (const [key, comp] of Object.entries(baselineCompetitions)) {
+      if (key === 'default_fallback') continue
+      competitionsMap[key] = {
+        key,
+        name: (comp as any).name || key,
+        country: (comp as any).country || null,
+        meta: comp,
+        items: [],
+      }
+    }
+
+    // Map each bet item into its matched competition
+    for (const item of allBetItems) {
+      if (!item.league) continue
+      const matched = matchBaselineCompetition(item.league, item.country, baselineCompetitions)
+      if (!competitionsMap[matched.key]) {
+        competitionsMap[matched.key] = {
+          key: matched.key,
+          name: matched.name,
+          country: matched.country,
+          meta: matched.meta,
+          items: [],
+        }
+      }
+      competitionsMap[matched.key].items.push(item)
+    }
+
+    // 4. Build output summary for each competition
+    let totalSettledRecords = 0
+    const summaries: LeagueIntegrityCompetitionSummary[] = []
+
+    for (const [compKey, compData] of Object.entries(competitionsMap)) {
+      const marketsRecord: Record<string, LeagueMarketIntegrityRecord> = {}
+      const compItems = compData.items
+      const baselineMarkets = compData.meta?.market_integrity || {}
+
+      // Calculate for each standard market
+      for (const mKey of STANDARD_LMI_MARKETS) {
+        const matchingItems = compItems.filter((i) => normalizeLMIMarketKey(i.market, i.selection) === mKey)
+        const settledItems = matchingItems.filter((i) => i.result === 'won' || i.result === 'lost' || i.result === 'void')
+        const wonCount = settledItems.filter((i) => i.result === 'won').length
+        const lostCount = settledItems.filter((i) => i.result === 'lost').length
+        const voidCount = settledItems.filter((i) => i.result === 'void').length
+        const totalSettled = wonCount + lostCount
+        totalSettledRecords += totalSettled
+
+        const actualWinRate = totalSettled > 0 ? Number(((wonCount / totalSettled) * 100).toFixed(1)) : null
+
+        const probItems = settledItems.filter((i) => i.estimated_probability != null && (i.result === 'won' || i.result === 'lost'))
+        const predictedAvgProb =
+          probItems.length > 0
+            ? Number(((probItems.reduce((acc, i) => acc + Number(i.estimated_probability), 0) / probItems.length) * 100).toFixed(1))
+            : null
+
+        const calibrationGapPp =
+          actualWinRate !== null && predictedAvgProb !== null ? Number((actualWinRate - predictedAvgProb).toFixed(1)) : null
+
+        const macroPrior = baselineMarkets[mKey]
+        const priorHitRate = macroPrior?.baseline_hit_rate ? Number((macroPrior.baseline_hit_rate * 100).toFixed(1)) : null
+        const priorTier: LeagueMarketTier = macroPrior?.tier || 'UNTESTED'
+
+        let tier: LeagueMarketTier = priorTier
+        let statusLabel = ''
+
+        if (totalSettled === 0) {
+          tier = priorTier
+          statusLabel = macroPrior?.notes ? `Prior: ${priorTier}` : 'Untested'
+        } else if (totalSettled < 5) {
+          const empiricalRate = actualWinRate ?? (priorHitRate ?? 50)
+          const priorRate = priorHitRate ?? 50
+          const blended = priorRate * 0.8 + empiricalRate * 0.2
+
+          if (lostCount >= 2 && wonCount === 0) {
+            tier = 'TIER_3'
+            statusLabel = `Caution (0/${totalSettled} Won) - Fat Tail Trap`
+          } else {
+            tier = priorTier
+            statusLabel = `Low Sample (N=${totalSettled}) - Prior Weighted`
+          }
+        } else if (totalSettled < 15) {
+          const empiricalRate = actualWinRate ?? 50
+          const priorRate = priorHitRate ?? 50
+          const blended = priorRate * 0.5 + empiricalRate * 0.5
+
+          if (blended >= 78) {
+            tier = 'TIER_1'
+          } else if (blended >= 65) {
+            tier = 'TIER_2'
+          } else {
+            tier = 'TIER_3'
+          }
+          statusLabel = `Calibrating (N=${totalSettled}, Blended ${blended.toFixed(1)}%)`
+        } else {
+          const rate = actualWinRate ?? 0
+          if (rate >= 80 && (calibrationGapPp === null || calibrationGapPp >= -8)) {
+            tier = 'TIER_1'
+          } else if (rate >= 65 && (calibrationGapPp === null || calibrationGapPp >= -12)) {
+            tier = 'TIER_2'
+          } else {
+            tier = 'TIER_3'
+          }
+          statusLabel = `Empirical Confirmed (N=${totalSettled})`
+        }
+
+        marketsRecord[mKey] = {
+          league: compData.name,
+          market: getLMIMarketLabel(mKey),
+          market_key: mKey,
+          tier,
+          total_evaluated: matchingItems.length,
+          total_settled: totalSettled,
+          won_count: wonCount,
+          lost_count: lostCount,
+          void_count: voidCount,
+          actual_win_rate: actualWinRate,
+          predicted_avg_prob: predictedAvgProb,
+          calibration_gap_pp: calibrationGapPp,
+          macro_prior_win_rate: priorHitRate,
+          status_label: statusLabel,
+          items: matchingItems,
+        }
+      }
+
+      // Competition overall totals
+      const compSettled = compItems.filter((i) => i.result === 'won' || i.result === 'lost')
+      const compWon = compSettled.filter((i) => i.result === 'won').length
+      const compLost = compSettled.filter((i) => i.result === 'lost').length
+      const compWinRate = compSettled.length > 0 ? Number(((compWon / compSettled.length) * 100).toFixed(1)) : null
+
+      // Determine overall tier
+      let overallTier: LeagueMarketTier = 'TIER_2'
+      if (compSettled.length >= 5) {
+        if ((compWinRate ?? 0) >= 75) overallTier = 'TIER_1'
+        else if ((compWinRate ?? 0) < 60) overallTier = 'TIER_3'
+        else overallTier = 'TIER_2'
+      } else {
+        // Fall back to baseline macro average tier
+        const tiers = Object.values(marketsRecord).map((m) => m.tier)
+        const tier3Count = tiers.filter((t) => t === 'TIER_3').length
+        const tier1Count = tiers.filter((t) => t === 'TIER_1').length
+        if (tier3Count >= 3) overallTier = 'TIER_3'
+        else if (tier1Count >= 3) overallTier = 'TIER_1'
+        else overallTier = 'TIER_2'
+      }
+
+      summaries.push({
+        competition_key: compKey,
+        name: compData.name,
+        country: compData.country,
+        historical_home_avg: compData.meta?.historical_home_avg ?? null,
+        historical_away_avg: compData.meta?.historical_away_avg ?? null,
+        markets: marketsRecord,
+        overall_tier: overallTier,
+        total_bets: compItems.length,
+        won_bets: compWon,
+        lost_bets: compLost,
+        win_rate: compWinRate,
+        items: compItems,
+      })
+    }
+
+    // Sort: competitions with empirical settled bets first, then alphabetical
+    summaries.sort((a, b) => {
+      const aSettled = a.won_bets + a.lost_bets
+      const bSettled = b.won_bets + b.lost_bets
+      if (bSettled !== aSettled) return bSettled - aSettled
+      return a.name.localeCompare(b.name)
+    })
+
+    return {
+      data: {
+        last_updated: new Date().toISOString(),
+        total_competitions: summaries.length,
+        total_settled_records: totalSettledRecords,
+        competitions: summaries,
+      },
+    }
+  } catch (err: any) {
+    console.error('Error in getLeagueMarketIntegrity:', err)
+    return {
+      data: {
+        last_updated: new Date().toISOString(),
+        total_competitions: 0,
+        total_settled_records: 0,
+        competitions: [],
+      },
+      error: err.message || 'Unknown error calculating league market integrity',
+    }
+  }
+}
+
+export async function syncLeagueBaselinesFromFile(): Promise<{
+  success: boolean
+  json?: string
+  updatedCompetitions?: number
+  error?: string
+}> {
+  try {
+    const { data: matrix, error: matrixError } = await getLeagueMarketIntegrity()
+    if (matrixError) {
+      return { success: false, error: matrixError }
+    }
+
+    const baselinesPath = path.join(process.cwd(), 'betting-data', 'rules', 'league_baselines.json')
+    let rawContent = '{}'
+    try {
+      rawContent = await fs.readFile(baselinesPath, 'utf-8')
+    } catch (readErr: any) {
+      return { success: false, error: `Could not read league_baselines.json: ${readErr.message}` }
+    }
+
+    const baselines = JSON.parse(rawContent)
+    baselines._reference_date = new Date().toISOString().split('T')[0]
+    let updatedCount = 0
+
+    if (baselines.competitions) {
+      for (const compSummary of matrix.competitions) {
+        const targetComp = baselines.competitions[compSummary.competition_key]
+        if (!targetComp) continue
+
+        if (!targetComp.market_integrity) {
+          targetComp.market_integrity = {}
+        }
+
+        for (const [mKey, marketRecord] of Object.entries(compSummary.markets)) {
+          if (!targetComp.market_integrity[mKey]) {
+            targetComp.market_integrity[mKey] = {
+              tier: marketRecord.tier,
+              baseline_hit_rate: marketRecord.macro_prior_win_rate ? marketRecord.macro_prior_win_rate / 100 : 0.5,
+              notes: marketRecord.status_label,
+            }
+          }
+
+          // Enrich with empirical ground truth
+          targetComp.market_integrity[mKey].tier = marketRecord.tier
+          targetComp.market_integrity[mKey].empirical_sample = marketRecord.total_settled
+          targetComp.market_integrity[mKey].empirical_win_rate =
+            marketRecord.actual_win_rate !== null ? Number((marketRecord.actual_win_rate / 100).toFixed(4)) : null
+          targetComp.market_integrity[mKey].calibration_gap_pp = marketRecord.calibration_gap_pp
+          targetComp.market_integrity[mKey].status_label = marketRecord.status_label
+        }
+        updatedCount++
+      }
+    }
+
+    const formattedJson = JSON.stringify(baselines, null, 2)
+    await fs.writeFile(baselinesPath, formattedJson, 'utf-8')
+
+    revalidatePath('/[locale]/admin/betting/statistics', 'layout')
+    return {
+      success: true,
+      json: formattedJson,
+      updatedCompetitions: updatedCount,
+    }
+  } catch (err: any) {
+    console.error('Failed to sync league baselines:', err)
+    return { success: false, error: err.message || 'Failed to sync baselines' }
   }
 }
 

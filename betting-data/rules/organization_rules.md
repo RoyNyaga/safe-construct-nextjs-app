@@ -7,7 +7,8 @@ All betting analytics, model specifications, prompt guidelines, and generated ti
 ```
 betting-data/
 ├── rules/
-│   ├── model_3.0.md                   # Active: Roy Betting Engine BTS & Over 2.5 Specification (v3.0)
+│   ├── model_4.0.md                   # Active: Roy Betting Engine BTS, Over 2.5 & Win Specification (v4.0)
+│   ├── model_3.0.md                   # Archived: Roy Betting Engine BTS & Over 2.5 Specification (v3.0)
 │   ├── model_2.1.md                   # Archived: Roy Betting Engine Over 1.5 Specification (v2.1)
 │   ├── selection_process.md           # Automated selection rules, DCI openness, and 2-leg portfolio logic
 │   ├── organization_rules.md          # File & directory organization rules (this document)
@@ -16,7 +17,7 @@ betting-data/
 │   ├── export_ticket_sample_data.md   # Schema reference for ticket post-match export
 │   └── export_warnings_sample_data.md # Schema reference for warning post-match requests
 ├── scripts/
-│   └── calculate_model.py             # Deterministic Model 3.0 Multi-Market Poisson & EV calculator
+│   └── calculate_model.py             # Deterministic Model 4.0 Multi-Market & Match Winner Poisson calculator
 ├── january/
 ├── february/
 ├── march/
@@ -29,7 +30,7 @@ betting-data/
 ├── october/
 ├── november/
 │   ├── evaluation_2026-11-01.md       # Pre-match evaluation & Poisson stats breakdown
-│   ├── ticket_2026-11-01_001.json     # Ready-to-import ticket (Main Selections + Primary Alternatives)
+│   ├── ticket_2026-11-01_001.json     # Ready-to-import ticket (Main Selections + Shadow Tracking Alternatives)
 │   └── candidates_2026-11-01.json     # All qualified/promising matches of the day for review & training
 └── december/
 ```
@@ -126,8 +127,8 @@ When instructing an AI agent or analyst to generate a betting ticket:
    - `expected_value` ($(\text{prob} \times \text{odds}) - 1$)
 7. **Negative EV Transparency Rule**:
    - Negative EV fixtures are **never** discarded automatically. All metrics are calculated and displayed for bettor discretion.
-8. **Full Schema Parity for Alternatives & Venue vs Overall Separation**:
-   - Alternatives (`betting_alternatives`) match primary selections attribute-for-attribute across all 12 venue attributes, 10 overall attributes, 8 dual-baseline metrics, and 5 multi-market tracking fields.
+8. **Full Schema Parity for Shadow Tracking Alternatives & Venue vs Overall Separation**:
+   - Alternatives (`betting_alternatives`) serve as the **Shadow Tracking Portfolio** (paper-trading 3 to 5 next-best picks to benchmark prediction accuracy beyond 3 games risk-free). They match primary selections attribute-for-attribute across all 12 venue attributes, 10 overall attributes, 8 dual-baseline metrics, and 5 multi-market tracking fields.
 9. **Portfolio Construction & Combined Odds Floor**:
    - Tickets strictly enforce a **combined odds floor $\ge 2.00$** (ideal sweet spot: $2.00 - 2.50$).
    - Formed using **2 legs by default**. If safe 2-leg combinations cannot reach 2.00, a **3-leg ultra-safe combination** is used as a safety fallback. Never 4 or more legs.

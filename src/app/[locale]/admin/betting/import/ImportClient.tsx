@@ -46,8 +46,8 @@ import { checkVenueStatsMismatch } from '@/utils/bettingValidation'
 import { PreMatchStatsTables } from '@/components/betting/PreMatchStatsTables'
 
 function generateSamplePayload(activeModel?: BettingModel | null, initialSuggestion?: TicketSuggestionData | null): TicketImportJSON {
-  const modelVersion = activeModel?.version || '3.0'
-  const modelName = activeModel?.name || 'roys_betting_engine_BTS_O2-5'
+  const modelVersion = activeModel?.version || '4.0'
+  const modelName = activeModel?.name || 'roys_betting_engine_BTS_O2-5_win'
   const versionStr = modelVersion.toLowerCase().startsWith('v') ? modelVersion : `v${modelVersion}`
   const ticketNum = initialSuggestion?.nextSelectionTicketNumber || `S-1-${versionStr}`
 

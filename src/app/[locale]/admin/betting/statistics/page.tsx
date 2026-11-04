@@ -1,5 +1,6 @@
 import { Box } from '@mui/material'
 import BettingSubNav from '../BettingSubNav'
+import StatisticsSubNav from './StatisticsSubNav'
 import StatisticsClient from './StatisticsClient'
 import { getActiveBankroll } from '@/app/[locale]/actions/bankroll'
 import {
@@ -34,6 +35,7 @@ export default async function BettingStatisticsPage({
         currentBalance={Number(bankroll?.current_balance || 0)}
         currency={bankroll?.currency || 'FCFA'}
       />
+      <StatisticsSubNav locale={locale} />
       <StatisticsClient
         locale={locale}
         summary={summary}
