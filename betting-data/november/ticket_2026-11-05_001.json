@@ -1,0 +1,913 @@
+{
+  "ticket": {
+    "ticket_number": "S-2-v4.0",
+    "date": "2026-11-05",
+    "model_version": "4.0",
+    "model_name": "roys_betting_engine_BTS_O2-5_win",
+    "stake": 375,
+    "combined_odds": 2.2,
+    "estimated_ticket_probability": 0.533,
+    "status": "pending",
+    "actual_result": null,
+    "profit_loss": 0,
+    "notes": "Two-leg value accumulator ticket constructed under Model 4.0 (roys_betting_engine_BTS_O2-5_win) and selection_process.md (Priority 3: Dominant Winner + Open Goal Market Booster). Features CD Luis Angel Firpo to Win (@ 1.72, 70.5% Model Prob, Dominance Ratio 2.96, +12.4pp Edge) and Genesis vs Real Espana Over 1.5 Goals (@ 1.28, 75.5% Model Prob, 100% 2026 H2H Over 1.5 hit rate). Combined odds: 2.2 vs compound probability 53.3% (break-even 45.5%, value edge +7.7pp, EV +0.170)."
+  },
+  "selections": [
+    {
+      "match_date": "2026-11-05",
+      "country": "El Salvador",
+      "league": "El Salvador Primera Division",
+      "home_team": "CD Luis Angel Firpo",
+      "away_team": "Alianza FC El Salvador",
+      "home_league_position": 2,
+      "away_league_position": 5,
+      "home_matches_played": 16,
+      "away_matches_played": 16,
+      "home_goals_scored": 29,
+      "home_goals_conceded": 12,
+      "away_goals_scored": 23,
+      "away_goals_conceded": 21,
+      "home_goals_per_game": 2.12,
+      "home_conceded_per_game": 0.62,
+      "away_goals_per_game": 1.38,
+      "away_conceded_per_game": 1.5,
+      "market": "Match Winner",
+      "selection": "Home Win",
+      "odds": 1.72,
+      "estimated_probability": 0.7053,
+      "breakeven_probability": 0.581,
+      "edge_percentage_points": 12.4,
+      "expected_value": 0.213,
+      "current_league_home_avg": 1.45,
+      "current_league_away_avg": 1.15,
+      "historical_league_home_avg": 1.45,
+      "historical_league_away_avg": 1.15,
+      "historical_estimated_probability": 0.7053,
+      "alignment_delta_pp": 0.0,
+      "alignment_remark": "very_high",
+      "edge_remark": "high",
+      "prob_over_1_5": 0.7913,
+      "prob_over_2_5": 0.5626,
+      "prob_btts_yes": 0.4662,
+      "prob_under_3_5": 0.6613,
+      "prob_home_win": 0.7053,
+      "prob_away_win": 0.1127,
+      "prob_draw": 0.182,
+      "dual_contribution_index": 0.339,
+      "market_evaluations": {
+        "over_1_5": {
+          "market": "Over/Under",
+          "selection": "Over 1.5",
+          "probability": 0.7913,
+          "historical_probability": 0.7913,
+          "alignment_delta_pp": 0.0,
+          "alignment_remark": "very_high"
+        },
+        "over_2_5": {
+          "market": "Over/Under",
+          "selection": "Over 2.5",
+          "probability": 0.5626,
+          "historical_probability": 0.5626,
+          "alignment_delta_pp": 0.0,
+          "alignment_remark": "very_high"
+        },
+        "btts_yes": {
+          "market": "Both Teams to Score",
+          "selection": "Yes",
+          "probability": 0.4662,
+          "historical_probability": 0.4662,
+          "alignment_delta_pp": 0.0,
+          "alignment_remark": "very_high"
+        },
+        "under_3_5": {
+          "market": "Over/Under",
+          "selection": "Under 3.5",
+          "probability": 0.6613,
+          "historical_probability": 0.6613,
+          "alignment_delta_pp": 0.0,
+          "alignment_remark": "very_high"
+        },
+        "home_win": {
+          "market": "Match Winner",
+          "selection": "Home Win",
+          "probability": 0.7053,
+          "historical_probability": 0.7053,
+          "alignment_delta_pp": 0.0,
+          "alignment_remark": "very_high",
+          "odds": 1.72,
+          "breakeven_probability": 0.581,
+          "edge_percentage_points": 12.4,
+          "expected_value": 0.213,
+          "edge_remark": "high"
+        },
+        "draw": {
+          "market": "Match Winner",
+          "selection": "Draw",
+          "probability": 0.182,
+          "historical_probability": 0.182,
+          "alignment_delta_pp": 0.0,
+          "alignment_remark": "very_high"
+        },
+        "away_win": {
+          "market": "Match Winner",
+          "selection": "Away Win",
+          "probability": 0.1127,
+          "historical_probability": 0.1127,
+          "alignment_delta_pp": 0.0,
+          "alignment_remark": "very_high"
+        },
+        "home_dnb": {
+          "market": "Draw No Bet",
+          "selection": "Home DNB",
+          "probability": 0.8623,
+          "historical_probability": 0.8623,
+          "alignment_delta_pp": 0.0,
+          "alignment_remark": "very_high"
+        },
+        "away_dnb": {
+          "market": "Draw No Bet",
+          "selection": "Away DNB",
+          "probability": 0.1377,
+          "historical_probability": 0.1377,
+          "alignment_delta_pp": 0.0,
+          "alignment_remark": "very_high"
+        }
+      },
+      "actual_home_score": null,
+      "actual_away_score": null,
+      "result": "pending",
+      "comment": "CAUTION. Model estimates an 70.5% Home Win probability versus bookmaker break-even of 58.1% at 1.72 odds (+12.4 edge, +0.213 EV). Model probability (70.5%) is viable, but high contradictory warning (ONE_SIDED_SCORING_RISK) requires caution.",
+      "notes": "Injuries/team news not verified",
+      "warnings": [
+        {
+          "type": "ONE_SIDED_SCORING_RISK",
+          "severity": "HIGH",
+          "market_relevance": "DIRECT",
+          "direction": "CONTRADICTORY",
+          "description": "Severe attacking asymmetry: dominant side heavily favored while opponent exhibits low scoring potential.",
+          "evidence": "Expected goals disparity (lambda_home: 2.19, lambda_away: 0.74) indicates elevated shutout/one-sided match probability."
+        },
+        {
+          "type": "TEAM_NEWS_UNVERIFIED",
+          "severity": "LOW",
+          "market_relevance": "CONTEXTUAL",
+          "direction": "NEUTRAL",
+          "description": "Pre-match team news and confirmed starting lineups remain unverified.",
+          "evidence": "Lineups have not been locked in; rotation or late injury risk unconfirmed."
+        }
+      ]
+    },
+    {
+      "match_date": "2026-11-05",
+      "country": "Honduras",
+      "league": "Honduras Liga Nacional",
+      "home_team": "Genesis Huracan",
+      "away_team": "Real Espana",
+      "home_league_position": 9,
+      "away_league_position": 2,
+      "home_matches_played": 12,
+      "away_matches_played": 12,
+      "home_goals_scored": 15,
+      "home_goals_conceded": 16,
+      "away_goals_scored": 22,
+      "away_goals_conceded": 10,
+      "home_goals_per_game": 1.5,
+      "home_conceded_per_game": 1.17,
+      "away_goals_per_game": 1.83,
+      "away_conceded_per_game": 0.83,
+      "market": "Over/Under",
+      "selection": "Over 1.5",
+      "odds": 1.28,
+      "estimated_probability": 0.755,
+      "breakeven_probability": 0.781,
+      "edge_percentage_points": -2.6,
+      "expected_value": -0.034,
+      "current_league_home_avg": 1.45,
+      "current_league_away_avg": 1.15,
+      "historical_league_home_avg": 1.45,
+      "historical_league_away_avg": 1.15,
+      "historical_estimated_probability": 0.755,
+      "alignment_delta_pp": 0.0,
+      "alignment_remark": "very_high",
+      "edge_remark": "low",
+      "prob_over_1_5": 0.755,
+      "prob_over_2_5": 0.5114,
+      "prob_btts_yes": 0.4867,
+      "prob_under_3_5": 0.7096,
+      "prob_home_win": 0.1682,
+      "prob_away_win": 0.6103,
+      "prob_draw": 0.2215,
+      "dual_contribution_index": 0.461,
+      "market_evaluations": {
+        "over_1_5": {
+          "market": "Over/Under",
+          "selection": "Over 1.5",
+          "probability": 0.755,
+          "historical_probability": 0.755,
+          "alignment_delta_pp": 0.0,
+          "alignment_remark": "very_high",
+          "odds": 1.28,
+          "breakeven_probability": 0.781,
+          "edge_percentage_points": -2.6,
+          "expected_value": -0.034,
+          "edge_remark": "low"
+        },
+        "over_2_5": {
+          "market": "Over/Under",
+          "selection": "Over 2.5",
+          "probability": 0.5114,
+          "historical_probability": 0.5114,
+          "alignment_delta_pp": 0.0,
+          "alignment_remark": "very_high"
+        },
+        "btts_yes": {
+          "market": "Both Teams to Score",
+          "selection": "Yes",
+          "probability": 0.4867,
+          "historical_probability": 0.4867,
+          "alignment_delta_pp": 0.0,
+          "alignment_remark": "very_high"
+        },
+        "under_3_5": {
+          "market": "Over/Under",
+          "selection": "Under 3.5",
+          "probability": 0.7096,
+          "historical_probability": 0.7096,
+          "alignment_delta_pp": 0.0,
+          "alignment_remark": "very_high"
+        },
+        "home_win": {
+          "market": "Match Winner",
+          "selection": "Home Win",
+          "probability": 0.1682,
+          "historical_probability": 0.1682,
+          "alignment_delta_pp": 0.0,
+          "alignment_remark": "very_high"
+        },
+        "draw": {
+          "market": "Match Winner",
+          "selection": "Draw",
+          "probability": 0.2215,
+          "historical_probability": 0.2215,
+          "alignment_delta_pp": 0.0,
+          "alignment_remark": "very_high"
+        },
+        "away_win": {
+          "market": "Match Winner",
+          "selection": "Away Win",
+          "probability": 0.6103,
+          "historical_probability": 0.6103,
+          "alignment_delta_pp": 0.0,
+          "alignment_remark": "very_high"
+        },
+        "home_dnb": {
+          "market": "Draw No Bet",
+          "selection": "Home DNB",
+          "probability": 0.2161,
+          "historical_probability": 0.2161,
+          "alignment_delta_pp": 0.0,
+          "alignment_remark": "very_high"
+        },
+        "away_dnb": {
+          "market": "Draw No Bet",
+          "selection": "Away DNB",
+          "probability": 0.7839,
+          "historical_probability": 0.7839,
+          "alignment_delta_pp": 0.0,
+          "alignment_remark": "very_high"
+        }
+      },
+      "actual_home_score": null,
+      "actual_away_score": null,
+      "result": "pending",
+      "comment": "CAUTION. Model estimates an 75.5% Over 1.5 probability versus bookmaker break-even of 78.1% at 1.28 odds (-2.6 edge, -0.034 EV). High probability (75.5%), but pricing offers no positive edge (-2.6pp). Disclosed under Principle 9.",
+      "notes": "Injuries/team news not verified",
+      "warnings": [
+        {
+          "type": "TEAM_NEWS_UNVERIFIED",
+          "severity": "LOW",
+          "market_relevance": "CONTEXTUAL",
+          "direction": "NEUTRAL",
+          "description": "Pre-match team news and confirmed starting lineups remain unverified.",
+          "evidence": "Lineups have not been locked in; rotation or late injury risk unconfirmed."
+        }
+      ]
+    }
+  ],
+  "alternatives": [
+    {
+      "match_date": "2026-11-05",
+      "country": "India",
+      "league": "Indian Super League",
+      "home_team": "Mohun Bagan SG",
+      "away_team": "Odisha FC",
+      "home_league_position": 1,
+      "away_league_position": 6,
+      "home_matches_played": 22,
+      "away_matches_played": 22,
+      "home_goals_scored": 47,
+      "home_goals_conceded": 26,
+      "away_goals_scored": 35,
+      "away_goals_conceded": 33,
+      "home_goals_per_game": 2.55,
+      "home_conceded_per_game": 1.0,
+      "away_goals_per_game": 1.55,
+      "away_conceded_per_game": 1.73,
+      "market": "Over/Under",
+      "selection": "Over 2.5",
+      "odds": 1.57,
+      "estimated_probability": 0.7742,
+      "breakeven_probability": 0.637,
+      "edge_percentage_points": 13.7,
+      "expected_value": 0.215,
+      "current_league_home_avg": 1.55,
+      "current_league_away_avg": 1.25,
+      "historical_league_home_avg": 1.55,
+      "historical_league_away_avg": 1.25,
+      "historical_estimated_probability": 0.7742,
+      "alignment_delta_pp": 0.0,
+      "alignment_remark": "very_high",
+      "edge_remark": "high",
+      "prob_over_1_5": 0.9145,
+      "prob_over_2_5": 0.7742,
+      "prob_btts_yes": 0.6694,
+      "prob_under_3_5": 0.4168,
+      "prob_home_win": 0.7053,
+      "prob_away_win": 0.1401,
+      "prob_draw": 0.1546,
+      "dual_contribution_index": 0.436,
+      "market_evaluations": {
+        "over_1_5": {
+          "market": "Over/Under",
+          "selection": "Over 1.5",
+          "probability": 0.9145,
+          "historical_probability": 0.9145,
+          "alignment_delta_pp": 0.0,
+          "alignment_remark": "very_high"
+        },
+        "over_2_5": {
+          "market": "Over/Under",
+          "selection": "Over 2.5",
+          "probability": 0.7742,
+          "historical_probability": 0.7742,
+          "alignment_delta_pp": 0.0,
+          "alignment_remark": "very_high",
+          "odds": 1.57,
+          "breakeven_probability": 0.637,
+          "edge_percentage_points": 13.7,
+          "expected_value": 0.215,
+          "edge_remark": "high"
+        },
+        "btts_yes": {
+          "market": "Both Teams to Score",
+          "selection": "Yes",
+          "probability": 0.6694,
+          "historical_probability": 0.6694,
+          "alignment_delta_pp": 0.0,
+          "alignment_remark": "very_high"
+        },
+        "under_3_5": {
+          "market": "Over/Under",
+          "selection": "Under 3.5",
+          "probability": 0.4168,
+          "historical_probability": 0.4168,
+          "alignment_delta_pp": 0.0,
+          "alignment_remark": "very_high"
+        },
+        "home_win": {
+          "market": "Match Winner",
+          "selection": "Home Win",
+          "probability": 0.7053,
+          "historical_probability": 0.7053,
+          "alignment_delta_pp": 0.0,
+          "alignment_remark": "very_high"
+        },
+        "draw": {
+          "market": "Match Winner",
+          "selection": "Draw",
+          "probability": 0.1546,
+          "historical_probability": 0.1546,
+          "alignment_delta_pp": 0.0,
+          "alignment_remark": "very_high"
+        },
+        "away_win": {
+          "market": "Match Winner",
+          "selection": "Away Win",
+          "probability": 0.1401,
+          "historical_probability": 0.1401,
+          "alignment_delta_pp": 0.0,
+          "alignment_remark": "very_high"
+        },
+        "home_dnb": {
+          "market": "Draw No Bet",
+          "selection": "Home DNB",
+          "probability": 0.8343,
+          "historical_probability": 0.8343,
+          "alignment_delta_pp": 0.0,
+          "alignment_remark": "very_high"
+        },
+        "away_dnb": {
+          "market": "Draw No Bet",
+          "selection": "Away DNB",
+          "probability": 0.1657,
+          "historical_probability": 0.1657,
+          "alignment_delta_pp": 0.0,
+          "alignment_remark": "very_high"
+        }
+      },
+      "actual_home_score": null,
+      "actual_away_score": null,
+      "result": "pending",
+      "comment": "NO BET. Model estimates an 77.4% Over 2.5 probability versus bookmaker break-even of 63.7% at 1.57 odds (+13.7 edge, +0.215 EV). DCI (0.44) is below the 0.45 safety floor for Over 2.5. One-sided reliance threatens Over 2.5 if favorite underperforms. Downgrade to Over 1.5.",
+      "notes": "Injuries/team news not verified",
+      "warnings": [
+        {
+          "type": "TEAM_NEWS_UNVERIFIED",
+          "severity": "LOW",
+          "market_relevance": "CONTEXTUAL",
+          "direction": "NEUTRAL",
+          "description": "Pre-match team news and confirmed starting lineups remain unverified.",
+          "evidence": "Lineups have not been locked in; rotation or late injury risk unconfirmed."
+        }
+      ]
+    },
+    {
+      "match_date": "2026-11-05",
+      "country": "Peru",
+      "league": "Peru Liga 1",
+      "home_team": "Universitario de Deportes",
+      "away_team": "Sport Boys Association",
+      "home_league_position": 1,
+      "away_league_position": 12,
+      "home_matches_played": 30,
+      "away_matches_played": 30,
+      "home_goals_scored": 55,
+      "home_goals_conceded": 22,
+      "away_goals_scored": 28,
+      "away_goals_conceded": 44,
+      "home_goals_per_game": 1.87,
+      "home_conceded_per_game": 0.8,
+      "away_goals_per_game": 0.71,
+      "away_conceded_per_game": 1.5,
+      "market": "Match Winner",
+      "selection": "Home Win",
+      "odds": 1.41,
+      "estimated_probability": 0.6947,
+      "breakeven_probability": 0.709,
+      "edge_percentage_points": -1.5,
+      "expected_value": -0.02,
+      "current_league_home_avg": 1.55,
+      "current_league_away_avg": 1.15,
+      "historical_league_home_avg": 1.55,
+      "historical_league_away_avg": 1.15,
+      "historical_estimated_probability": 0.6947,
+      "alignment_delta_pp": 0.0,
+      "alignment_remark": "very_high",
+      "edge_remark": "low",
+      "prob_over_1_5": 0.67,
+      "prob_over_2_5": 0.4049,
+      "prob_btts_yes": 0.326,
+      "prob_under_3_5": 0.7986,
+      "prob_home_win": 0.6947,
+      "prob_away_win": 0.094,
+      "prob_draw": 0.2113,
+      "dual_contribution_index": 0.273,
+      "market_evaluations": {
+        "over_1_5": {
+          "market": "Over/Under",
+          "selection": "Over 1.5",
+          "probability": 0.67,
+          "historical_probability": 0.67,
+          "alignment_delta_pp": 0.0,
+          "alignment_remark": "very_high"
+        },
+        "over_2_5": {
+          "market": "Over/Under",
+          "selection": "Over 2.5",
+          "probability": 0.4049,
+          "historical_probability": 0.4049,
+          "alignment_delta_pp": 0.0,
+          "alignment_remark": "very_high"
+        },
+        "btts_yes": {
+          "market": "Both Teams to Score",
+          "selection": "Yes",
+          "probability": 0.326,
+          "historical_probability": 0.326,
+          "alignment_delta_pp": 0.0,
+          "alignment_remark": "very_high"
+        },
+        "under_3_5": {
+          "market": "Over/Under",
+          "selection": "Under 3.5",
+          "probability": 0.7986,
+          "historical_probability": 0.7986,
+          "alignment_delta_pp": 0.0,
+          "alignment_remark": "very_high"
+        },
+        "home_win": {
+          "market": "Match Winner",
+          "selection": "Home Win",
+          "probability": 0.6947,
+          "historical_probability": 0.6947,
+          "alignment_delta_pp": 0.0,
+          "alignment_remark": "very_high",
+          "odds": 1.41,
+          "breakeven_probability": 0.709,
+          "edge_percentage_points": -1.5,
+          "expected_value": -0.02,
+          "edge_remark": "low"
+        },
+        "draw": {
+          "market": "Match Winner",
+          "selection": "Draw",
+          "probability": 0.2113,
+          "historical_probability": 0.2113,
+          "alignment_delta_pp": 0.0,
+          "alignment_remark": "very_high"
+        },
+        "away_win": {
+          "market": "Match Winner",
+          "selection": "Away Win",
+          "probability": 0.094,
+          "historical_probability": 0.094,
+          "alignment_delta_pp": 0.0,
+          "alignment_remark": "very_high"
+        },
+        "home_dnb": {
+          "market": "Draw No Bet",
+          "selection": "Home DNB",
+          "probability": 0.8808,
+          "historical_probability": 0.8808,
+          "alignment_delta_pp": 0.0,
+          "alignment_remark": "very_high"
+        },
+        "away_dnb": {
+          "market": "Draw No Bet",
+          "selection": "Away DNB",
+          "probability": 0.1192,
+          "historical_probability": 0.1192,
+          "alignment_delta_pp": 0.0,
+          "alignment_remark": "very_high"
+        }
+      },
+      "actual_home_score": null,
+      "actual_away_score": null,
+      "result": "pending",
+      "comment": "CAUTION. Model estimates an 69.5% Home Win probability versus bookmaker break-even of 70.9% at 1.41 odds (-1.5 edge, -0.020 EV). High probability (69.5%), but pricing offers no positive edge (-1.5pp). Disclosed under Principle 9.",
+      "notes": "Sport Boys Association low away scoring rate (0.71 GF/G); Injuries/team news not verified",
+      "warnings": [
+        {
+          "type": "LOW_AWAY_SCORING",
+          "severity": "MEDIUM",
+          "market_relevance": "DIRECT",
+          "direction": "CONTRADICTORY",
+          "description": "Sport Boys Association averages only 0.71 goals per game, increasing shutout risk.",
+          "evidence": "Sport Boys Association away scoring average is 0.71 GF/game, placing heavy reliance on Universitario de Deportes to produce goals."
+        },
+        {
+          "type": "TEAM_NEWS_UNVERIFIED",
+          "severity": "LOW",
+          "market_relevance": "CONTEXTUAL",
+          "direction": "NEUTRAL",
+          "description": "Pre-match team news and confirmed starting lineups remain unverified.",
+          "evidence": "Lineups have not been locked in; rotation or late injury risk unconfirmed."
+        }
+      ]
+    },
+    {
+      "match_date": "2026-11-05",
+      "country": "El Salvador",
+      "league": "El Salvador Primera Division",
+      "home_team": "CD Municipal Limeno",
+      "away_team": "Fuerte San Francisco",
+      "home_league_position": 8,
+      "away_league_position": 11,
+      "home_matches_played": 16,
+      "away_matches_played": 16,
+      "home_goals_scored": 22,
+      "home_goals_conceded": 19,
+      "away_goals_scored": 12,
+      "away_goals_conceded": 25,
+      "home_goals_per_game": 1.75,
+      "home_conceded_per_game": 1.12,
+      "away_goals_per_game": 0.62,
+      "away_conceded_per_game": 1.88,
+      "market": "Over/Under",
+      "selection": "Over 1.5",
+      "odds": 1.24,
+      "estimated_probability": 0.781,
+      "breakeven_probability": 0.806,
+      "edge_percentage_points": -2.5,
+      "expected_value": -0.032,
+      "current_league_home_avg": 1.45,
+      "current_league_away_avg": 1.15,
+      "historical_league_home_avg": 1.45,
+      "historical_league_away_avg": 1.15,
+      "historical_estimated_probability": 0.781,
+      "alignment_delta_pp": 0.0,
+      "alignment_remark": "very_high",
+      "edge_remark": "low",
+      "prob_over_1_5": 0.781,
+      "prob_over_2_5": 0.5477,
+      "prob_btts_yes": 0.4064,
+      "prob_under_3_5": 0.6757,
+      "prob_home_win": 0.7521,
+      "prob_away_win": 0.0828,
+      "prob_draw": 0.165,
+      "dual_contribution_index": 0.266,
+      "market_evaluations": {
+        "over_1_5": {
+          "market": "Over/Under",
+          "selection": "Over 1.5",
+          "probability": 0.781,
+          "historical_probability": 0.781,
+          "alignment_delta_pp": 0.0,
+          "alignment_remark": "very_high",
+          "odds": 1.24,
+          "breakeven_probability": 0.806,
+          "edge_percentage_points": -2.5,
+          "expected_value": -0.032,
+          "edge_remark": "low"
+        },
+        "over_2_5": {
+          "market": "Over/Under",
+          "selection": "Over 2.5",
+          "probability": 0.5477,
+          "historical_probability": 0.5477,
+          "alignment_delta_pp": 0.0,
+          "alignment_remark": "very_high"
+        },
+        "btts_yes": {
+          "market": "Both Teams to Score",
+          "selection": "Yes",
+          "probability": 0.4064,
+          "historical_probability": 0.4064,
+          "alignment_delta_pp": 0.0,
+          "alignment_remark": "very_high"
+        },
+        "under_3_5": {
+          "market": "Over/Under",
+          "selection": "Under 3.5",
+          "probability": 0.6757,
+          "historical_probability": 0.6757,
+          "alignment_delta_pp": 0.0,
+          "alignment_remark": "very_high"
+        },
+        "home_win": {
+          "market": "Match Winner",
+          "selection": "Home Win",
+          "probability": 0.7521,
+          "historical_probability": 0.7521,
+          "alignment_delta_pp": 0.0,
+          "alignment_remark": "very_high"
+        },
+        "draw": {
+          "market": "Match Winner",
+          "selection": "Draw",
+          "probability": 0.165,
+          "historical_probability": 0.165,
+          "alignment_delta_pp": 0.0,
+          "alignment_remark": "very_high"
+        },
+        "away_win": {
+          "market": "Match Winner",
+          "selection": "Away Win",
+          "probability": 0.0828,
+          "historical_probability": 0.0828,
+          "alignment_delta_pp": 0.0,
+          "alignment_remark": "very_high"
+        },
+        "home_dnb": {
+          "market": "Draw No Bet",
+          "selection": "Home DNB",
+          "probability": 0.9008,
+          "historical_probability": 0.9008,
+          "alignment_delta_pp": 0.0,
+          "alignment_remark": "very_high"
+        },
+        "away_dnb": {
+          "market": "Draw No Bet",
+          "selection": "Away DNB",
+          "probability": 0.0992,
+          "historical_probability": 0.0992,
+          "alignment_delta_pp": 0.0,
+          "alignment_remark": "very_high"
+        }
+      },
+      "actual_home_score": null,
+      "actual_away_score": null,
+      "result": "pending",
+      "comment": "CAUTION. Model estimates an 78.1% Over 1.5 probability versus bookmaker break-even of 80.6% at 1.24 odds (-2.5 edge, -0.032 EV). Model probability (78.1%) is viable, but high contradictory warning (ONE_SIDED_SCORING_RISK) requires caution.",
+      "notes": "Fuerte San Francisco low away scoring rate (0.62 GF/G); Injuries/team news not verified",
+      "warnings": [
+        {
+          "type": "LOW_AWAY_SCORING",
+          "severity": "MEDIUM",
+          "market_relevance": "DIRECT",
+          "direction": "CONTRADICTORY",
+          "description": "Fuerte San Francisco averages only 0.62 goals per game, increasing shutout risk.",
+          "evidence": "Fuerte San Francisco away scoring average is 0.62 GF/game, placing heavy reliance on CD Municipal Limeno to produce goals."
+        },
+        {
+          "type": "ONE_SIDED_SCORING_RISK",
+          "severity": "HIGH",
+          "market_relevance": "DIRECT",
+          "direction": "CONTRADICTORY",
+          "description": "Severe attacking asymmetry: dominant side heavily favored while opponent exhibits low scoring potential.",
+          "evidence": "Expected goals disparity (lambda_home: 2.27, lambda_away: 0.60) indicates elevated shutout/one-sided match probability."
+        },
+        {
+          "type": "TEAM_NEWS_UNVERIFIED",
+          "severity": "LOW",
+          "market_relevance": "CONTEXTUAL",
+          "direction": "NEUTRAL",
+          "description": "Pre-match team news and confirmed starting lineups remain unverified.",
+          "evidence": "Lineups have not been locked in; rotation or late injury risk unconfirmed."
+        }
+      ]
+    }
+  ],
+  "warnings": [
+    {
+      "target_type": "selection",
+      "match": {
+        "home_team": "CD Luis Angel Firpo",
+        "away_team": "Alianza FC El Salvador",
+        "country": "El Salvador",
+        "league": "El Salvador Primera Division",
+        "market": "Match Winner",
+        "selection": "Home Win"
+      },
+      "type": "ONE_SIDED_SCORING_RISK",
+      "severity": "HIGH",
+      "direction": "CONTRADICTORY",
+      "market_relevance": "DIRECT",
+      "description": "Severe attacking asymmetry: dominant side heavily favored while opponent exhibits low scoring potential.",
+      "evidence": "Expected goals disparity (lambda_home: 2.19, lambda_away: 0.74) indicates elevated shutout/one-sided match probability.",
+      "pre_match_status": "PENDING",
+      "post_match_status": "PENDING",
+      "review_notes": null
+    },
+    {
+      "target_type": "selection",
+      "match": {
+        "home_team": "CD Luis Angel Firpo",
+        "away_team": "Alianza FC El Salvador",
+        "country": "El Salvador",
+        "league": "El Salvador Primera Division",
+        "market": "Match Winner",
+        "selection": "Home Win"
+      },
+      "type": "TEAM_NEWS_UNVERIFIED",
+      "severity": "LOW",
+      "direction": "NEUTRAL",
+      "market_relevance": "CONTEXTUAL",
+      "description": "Pre-match team news and confirmed starting lineups remain unverified.",
+      "evidence": "Lineups have not been locked in; rotation or late injury risk unconfirmed.",
+      "pre_match_status": "PENDING",
+      "post_match_status": "PENDING",
+      "review_notes": null
+    },
+    {
+      "target_type": "selection",
+      "match": {
+        "home_team": "Genesis Huracan",
+        "away_team": "Real Espana",
+        "country": "Honduras",
+        "league": "Honduras Liga Nacional",
+        "market": "Over/Under",
+        "selection": "Over 1.5"
+      },
+      "type": "TEAM_NEWS_UNVERIFIED",
+      "severity": "LOW",
+      "direction": "NEUTRAL",
+      "market_relevance": "CONTEXTUAL",
+      "description": "Pre-match team news and confirmed starting lineups remain unverified.",
+      "evidence": "Lineups have not been locked in; rotation or late injury risk unconfirmed.",
+      "pre_match_status": "PENDING",
+      "post_match_status": "PENDING",
+      "review_notes": null
+    },
+    {
+      "target_type": "alternative",
+      "match": {
+        "home_team": "Mohun Bagan SG",
+        "away_team": "Odisha FC",
+        "country": "India",
+        "league": "Indian Super League",
+        "market": "Over/Under",
+        "selection": "Over 2.5"
+      },
+      "type": "TEAM_NEWS_UNVERIFIED",
+      "severity": "LOW",
+      "direction": "NEUTRAL",
+      "market_relevance": "CONTEXTUAL",
+      "description": "Pre-match team news and confirmed starting lineups remain unverified.",
+      "evidence": "Lineups have not been locked in; rotation or late injury risk unconfirmed.",
+      "pre_match_status": "PENDING",
+      "post_match_status": "PENDING",
+      "review_notes": null
+    },
+    {
+      "target_type": "alternative",
+      "match": {
+        "home_team": "Universitario de Deportes",
+        "away_team": "Sport Boys Association",
+        "country": "Peru",
+        "league": "Peru Liga 1",
+        "market": "Match Winner",
+        "selection": "Home Win"
+      },
+      "type": "LOW_AWAY_SCORING",
+      "severity": "MEDIUM",
+      "direction": "CONTRADICTORY",
+      "market_relevance": "DIRECT",
+      "description": "Sport Boys Association averages only 0.71 goals per game, increasing shutout risk.",
+      "evidence": "Sport Boys Association away scoring average is 0.71 GF/game, placing heavy reliance on Universitario de Deportes to produce goals.",
+      "pre_match_status": "PENDING",
+      "post_match_status": "PENDING",
+      "review_notes": null
+    },
+    {
+      "target_type": "alternative",
+      "match": {
+        "home_team": "Universitario de Deportes",
+        "away_team": "Sport Boys Association",
+        "country": "Peru",
+        "league": "Peru Liga 1",
+        "market": "Match Winner",
+        "selection": "Home Win"
+      },
+      "type": "TEAM_NEWS_UNVERIFIED",
+      "severity": "LOW",
+      "direction": "NEUTRAL",
+      "market_relevance": "CONTEXTUAL",
+      "description": "Pre-match team news and confirmed starting lineups remain unverified.",
+      "evidence": "Lineups have not been locked in; rotation or late injury risk unconfirmed.",
+      "pre_match_status": "PENDING",
+      "post_match_status": "PENDING",
+      "review_notes": null
+    },
+    {
+      "target_type": "alternative",
+      "match": {
+        "home_team": "CD Municipal Limeno",
+        "away_team": "Fuerte San Francisco",
+        "country": "El Salvador",
+        "league": "El Salvador Primera Division",
+        "market": "Over/Under",
+        "selection": "Over 1.5"
+      },
+      "type": "LOW_AWAY_SCORING",
+      "severity": "MEDIUM",
+      "direction": "CONTRADICTORY",
+      "market_relevance": "DIRECT",
+      "description": "Fuerte San Francisco averages only 0.62 goals per game, increasing shutout risk.",
+      "evidence": "Fuerte San Francisco away scoring average is 0.62 GF/game, placing heavy reliance on CD Municipal Limeno to produce goals.",
+      "pre_match_status": "PENDING",
+      "post_match_status": "PENDING",
+      "review_notes": null
+    },
+    {
+      "target_type": "alternative",
+      "match": {
+        "home_team": "CD Municipal Limeno",
+        "away_team": "Fuerte San Francisco",
+        "country": "El Salvador",
+        "league": "El Salvador Primera Division",
+        "market": "Over/Under",
+        "selection": "Over 1.5"
+      },
+      "type": "ONE_SIDED_SCORING_RISK",
+      "severity": "HIGH",
+      "direction": "CONTRADICTORY",
+      "market_relevance": "DIRECT",
+      "description": "Severe attacking asymmetry: dominant side heavily favored while opponent exhibits low scoring potential.",
+      "evidence": "Expected goals disparity (lambda_home: 2.27, lambda_away: 0.60) indicates elevated shutout/one-sided match probability.",
+      "pre_match_status": "PENDING",
+      "post_match_status": "PENDING",
+      "review_notes": null
+    },
+    {
+      "target_type": "alternative",
+      "match": {
+        "home_team": "CD Municipal Limeno",
+        "away_team": "Fuerte San Francisco",
+        "country": "El Salvador",
+        "league": "El Salvador Primera Division",
+        "market": "Over/Under",
+        "selection": "Over 1.5"
+      },
+      "type": "TEAM_NEWS_UNVERIFIED",
+      "severity": "LOW",
+      "direction": "NEUTRAL",
+      "market_relevance": "CONTEXTUAL",
+      "description": "Pre-match team news and confirmed starting lineups remain unverified.",
+      "evidence": "Lineups have not been locked in; rotation or late injury risk unconfirmed.",
+      "pre_match_status": "PENDING",
+      "post_match_status": "PENDING",
+      "review_notes": null
+    }
+  ]
+}
