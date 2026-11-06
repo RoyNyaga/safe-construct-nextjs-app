@@ -335,10 +335,17 @@ export default function ImportClient({
     if (parsedPayload.warnings && Array.isArray(parsedPayload.warnings) && parsedPayload.warnings.length > 0) {
       const legacyMap = new Map<string, typeof groups[0]>()
       parsedPayload.warnings.forEach((w) => {
-        const target = w.selection_reference
-          ? `${w.selection_reference.home_team} vs ${w.selection_reference.away_team}`
+        const ref = w.selection_reference || (w as any).match
+        const target = ref
+          ? `${ref.home_team} vs ${ref.away_team}`
           : 'Ticket Scope'
-        const targetType = (w.selection_reference?.target_type || 'ticket') as any
+        const targetType = (ref?.target_type || (w as any).target_type || 'ticket') as any
+
+        // If this fixture already contains this warning from nested selections/alternatives, skip duplicate
+        const existingGroup = groups.find((g) => g.target.toLowerCase() === target.toLowerCase())
+        if (existingGroup && existingGroup.warnings.some((ew) => ew.type.toUpperCase() === (w.type || '').toUpperCase())) {
+          return
+        }
 
         if (!legacyMap.has(target)) {
           legacyMap.set(target, {

@@ -299,69 +299,69 @@ export async function importBettingTicket(payload: TicketImportJSON): Promise<{
   const { bankroll } = await getActiveBankroll()
   const bankrollId = bankroll ? bankroll.id : null
 
-function parseNullableNumber(val: any): number | null {
-  if (val === null || val === undefined || val === '') return null
-  const num = Number(val)
-  return isNaN(num) ? null : num
-}
-
-function parseNullableString(val: any): string | null {
-  if (val === null || val === undefined) return null
-  const s = String(val).trim()
-  return s.length > 0 ? s : null
-}
-
-function computeAlignmentMetrics(
-  estimatedProb: number | null | undefined,
-  historicalProb: number | null | undefined,
-  providedDelta?: number | null,
-  providedRemark?: AlignmentRemark | null
-): { alignment_delta_pp: number | null; alignment_remark: AlignmentRemark | null } {
-  if (providedDelta !== undefined && providedDelta !== null && providedRemark) {
-    return { alignment_delta_pp: providedDelta, alignment_remark: providedRemark }
+  function parseNullableNumber(val: any): number | null {
+    if (val === null || val === undefined || val === '') return null
+    const num = Number(val)
+    return isNaN(num) ? null : num
   }
 
-  if (estimatedProb === null || estimatedProb === undefined || historicalProb === null || historicalProb === undefined) {
+  function parseNullableString(val: any): string | null {
+    if (val === null || val === undefined) return null
+    const s = String(val).trim()
+    return s.length > 0 ? s : null
+  }
+
+  function computeAlignmentMetrics(
+    estimatedProb: number | null | undefined,
+    historicalProb: number | null | undefined,
+    providedDelta?: number | null,
+    providedRemark?: AlignmentRemark | null
+  ): { alignment_delta_pp: number | null; alignment_remark: AlignmentRemark | null } {
+    if (providedDelta !== undefined && providedDelta !== null && providedRemark) {
+      return { alignment_delta_pp: providedDelta, alignment_remark: providedRemark }
+    }
+
+    if (estimatedProb === null || estimatedProb === undefined || historicalProb === null || historicalProb === undefined) {
+      return {
+        alignment_delta_pp: providedDelta ?? null,
+        alignment_remark: providedRemark ?? null,
+      }
+    }
+
+    const delta = Number((Math.abs(Number(estimatedProb) - Number(historicalProb)) * 100).toFixed(2))
+    let remark: AlignmentRemark = 'very_high'
+    if (delta <= 1.5) {
+      remark = 'very_high'
+    } else if (delta <= 3.0) {
+      remark = 'high'
+    } else if (delta <= 5.0) {
+      remark = 'medium'
+    } else if (delta <= 7.0) {
+      remark = 'low'
+    } else {
+      remark = 'very_low'
+    }
+
     return {
-      alignment_delta_pp: providedDelta ?? null,
-      alignment_remark: providedRemark ?? null,
+      alignment_delta_pp: providedDelta ?? delta,
+      alignment_remark: providedRemark ?? remark,
     }
   }
 
-  const delta = Number((Math.abs(Number(estimatedProb) - Number(historicalProb)) * 100).toFixed(2))
-  let remark: AlignmentRemark = 'very_high'
-  if (delta <= 1.5) {
-    remark = 'very_high'
-  } else if (delta <= 3.0) {
-    remark = 'high'
-  } else if (delta <= 5.0) {
-    remark = 'medium'
-  } else if (delta <= 7.0) {
-    remark = 'low'
-  } else {
-    remark = 'very_low'
+  function computeEdgeRemark(
+    edgePp: number | null | undefined,
+    providedRemark?: EdgeRemark | null
+  ): EdgeRemark | null {
+    if (providedRemark) return providedRemark
+    if (edgePp === null || edgePp === undefined) return null
+
+    const edge = Number(edgePp)
+    if (edge > 15.0) return 'very_high'
+    if (edge > 5.0) return 'high'
+    if (edge >= 0.0) return 'medium'
+    if (edge >= -10.0) return 'low'
+    return 'very_low'
   }
-
-  return {
-    alignment_delta_pp: providedDelta ?? delta,
-    alignment_remark: providedRemark ?? remark,
-  }
-}
-
-function computeEdgeRemark(
-  edgePp: number | null | undefined,
-  providedRemark?: EdgeRemark | null
-): EdgeRemark | null {
-  if (providedRemark) return providedRemark
-  if (edgePp === null || edgePp === undefined) return null
-
-  const edge = Number(edgePp)
-  if (edge > 15.0) return 'very_high'
-  if (edge > 5.0) return 'high'
-  if (edge >= 0.0) return 'medium'
-  if (edge >= -10.0) return 'low'
-  return 'very_low'
-}
 
   const stake = parseNullableNumber(payload.ticket.stake) ?? 0
 
@@ -713,8 +713,8 @@ function computeEdgeRemark(
 
     for (let i = 0; i < payload.warnings.length; i++) {
       const w = payload.warnings[i]
-      const ref = w.selection_reference || ({} as any)
-      const targetType = ref.target_type
+      const ref = w.selection_reference || (w as any).match || ({} as any)
+      const targetType = ref.target_type || (w as any).target_type
 
       const homeNorm = (ref.home_team || '').trim().toLowerCase()
       const awayNorm = (ref.away_team || '').trim().toLowerCase()
@@ -769,6 +769,17 @@ function computeEdgeRemark(
         warningsErrors.push(
           `Warning #${i + 1} (${w.type}): Could not match fixture "${ref.home_team || 'Unknown'} vs ${ref.away_team || 'Unknown'}" in ticket selections or alternatives.`
         )
+        continue
+      }
+
+      // Deduplicate: If this warning was already registered via nested match warnings, skip
+      const alreadyExists = warningsPayload.some(
+        (existing) =>
+          ((matchedSelectionId && existing.selection_id === matchedSelectionId) ||
+            (matchedAlternativeId && existing.alternative_id === matchedAlternativeId)) &&
+          existing.warning_type === (w.type || 'OTHER').toUpperCase()
+      )
+      if (alreadyExists) {
         continue
       }
 
@@ -1211,6 +1222,9 @@ export async function updateBettingSelectionDetails(
     prob_over_2_5?: number | null
     prob_btts_yes?: number | null
     prob_under_3_5?: number | null
+    prob_home_win?: number | null
+    prob_away_win?: number | null
+    prob_draw?: number | null
     market_evaluations?: Record<string, any> | null
     comment?: string
     notes?: string
@@ -1929,11 +1943,11 @@ function computeCalibrationBuckets(
     const avgPredictedProb =
       totalBets > 0
         ? Number(
-            (
-              (itemsInBucket.reduce((acc, s) => acc + Number(s.estimated_probability || 0), 0) / totalBets) *
-              100
-            ).toFixed(1)
-          )
+          (
+            (itemsInBucket.reduce((acc, s) => acc + Number(s.estimated_probability || 0), 0) / totalBets) *
+            100
+          ).toFixed(1)
+        )
         : 0
 
     const differencePp = totalBets > 0 ? Number((actualWinRate - avgPredictedProb).toFixed(1)) : 0
@@ -2234,7 +2248,7 @@ function normalizeLMIMarketKey(rawMarket?: string | null, rawSelection?: string 
   if (m.includes('btts') || m.includes('both teams to score') || m.includes('bts')) return 'btts_yes'
   if (m.includes('draw no bet') || m.includes('dnb') || s.includes('draw no bet') || s.includes('dnb')) return 'draw_no_bet'
   if (m.includes('win') || m.includes('1x2') || m.includes('winner') || m.includes('to win') || s.includes('to win')) return 'to_win'
-  
+
   return m.replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '') || 'other'
 }
 

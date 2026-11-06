@@ -266,7 +266,7 @@ export default function LeagueIntegrityClient({
         </Box>
 
         {/* Global Actions */}
-        <Stack direction="row" spacing={1.5} alignItems="center">
+        <Stack direction="row" spacing={1.5} sx={{ alignItems: 'center' }}>
           <Button
             variant="outlined"
             startIcon={<FileJson size={16} />}
@@ -466,12 +466,14 @@ export default function LeagueIntegrityClient({
               backgroundColor: 'rgba(0, 0, 0, 0.2)',
             },
           }}
-          InputProps={{
-            startAdornment: (
-              <InputAdornment position="start">
-                <Search size={16} color="rgba(255,255,255,0.4)" />
-              </InputAdornment>
-            ),
+          slotProps={{
+            input: {
+              startAdornment: (
+                <InputAdornment position="start">
+                  <Search size={16} color="rgba(255,255,255,0.4)" />
+                </InputAdornment>
+              ),
+            },
           }}
         />
 
@@ -627,8 +629,7 @@ export default function LeagueIntegrityClient({
                         />
                         <Typography
                           variant="caption"
-                          display="block"
-                          sx={{ color: '#94A3B8', mt: 0.5, fontSize: '0.68rem' }}
+                          sx={{ display: 'block', color: '#94A3B8', mt: 0.5, fontSize: '0.68rem' }}
                         >
                           {comp.total_bets} bets ({comp.win_rate !== null ? `${comp.win_rate}%` : 'N/A'})
                         </Typography>
@@ -748,12 +749,14 @@ export default function LeagueIntegrityClient({
         anchor="right"
         open={Boolean(selectedRecord)}
         onClose={() => setSelectedRecord(null)}
-        PaperProps={{
-          sx: {
-            width: { xs: '100%', sm: 540, md: 620 },
-            backgroundColor: '#111722',
-            borderLeft: '1px solid rgba(255, 255, 255, 0.1)',
-            p: 3,
+        slotProps={{
+          paper: {
+            sx: {
+              width: { xs: '100%', sm: 540, md: 620 },
+              backgroundColor: '#111722',
+              borderLeft: '1px solid rgba(255, 255, 255, 0.1)',
+              p: 3,
+            },
           },
         }}
       >
@@ -992,11 +995,13 @@ export default function LeagueIntegrityClient({
         onClose={() => setExportJsonOpen(false)}
         maxWidth="md"
         fullWidth
-        PaperProps={{
-          sx: {
-            backgroundColor: '#111722',
-            border: '1px solid rgba(255, 255, 255, 0.1)',
-            borderRadius: 3,
+        slotProps={{
+          paper: {
+            sx: {
+              backgroundColor: '#111722',
+              border: '1px solid rgba(255, 255, 255, 0.1)',
+              borderRadius: 3,
+            },
           },
         }}
       >
@@ -1018,13 +1023,15 @@ export default function LeagueIntegrityClient({
             fullWidth
             value={exportedJsonText}
             variant="outlined"
-            InputProps={{
-              readOnly: true,
-              sx: {
-                fontFamily: 'monospace',
-                fontSize: '0.8rem',
-                backgroundColor: 'rgba(0,0,0,0.4)',
-                borderRadius: 2,
+            slotProps={{
+              input: {
+                readOnly: true,
+                sx: {
+                  fontFamily: 'monospace',
+                  fontSize: '0.8rem',
+                  backgroundColor: 'rgba(0,0,0,0.4)',
+                  borderRadius: 2,
+                },
               },
             }}
           />
