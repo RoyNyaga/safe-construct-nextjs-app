@@ -1,32 +1,38 @@
-Belgium Pro league
-- KV Kortrijk(to win: 2.26) vs KV Mechelen(to win: 2.96), over 1.5: 1.24, over 2.5: 1.75, BTTS yes: 1.61
+England Premier league
+- Everton(1.7) vs Coventry city(4.8), over 1.5: 1.23, over 2.5: 1.74, BTTS yes: 1.74
 
-Brazil Series A
-- CA Paranaense(2.03) vs CR Vasco da Gama(2.45), over 1.5: 1.25, over 2.5: 1.77, BTTs yes: 1.64
+England Championship
 
-Algeria league 1
-- MC Alger(1.55) vs MC Oran(6.6), over 1.5: 1.48, over 2.5: 2.44, BTTS yes: 2.4
+- Derby country(2.37) vs Bolton Wanderers(2.66), over 1.5: 1.21, over 2.5: 1.67, BTTS yes: 1.57
 
-Czechia first league
-- SK Artis(2.45) Brno vs Bohemians 1905(2.72), over 1.5: 1.25, over 2.5: 1.8, BTTS yes: 1.63
+Spain La Liga
+- Sevilla(1.91) vs Deportivo Alaves(4.2), over 1.5: 1.38, over 2.5: 2.14, BTTS yes: 2
 
-Guatemala liga Primera division
-- Deportivo Fraijanes FC(1.69) vs CD Heuhuetoco Xinabajul(2.04), over 1.5: not provided, over 2.5: 1.78, BTTS yes: 1.72
-- Deportivo Caotepeque(1.52) vs Nueva Santa Rosa CDF(2.37), over 1.5: not provided, over 2.5: 2.10, BTTS yes: 2.04
+Spain Segunda division
+- CD CAstellon(1.56) vs Eibar(4.7), over 1.5: 1.17, over 2.5: 1.58. BTTS yes: 1.62
 
-Kuwait Division 1
-- Burgan SC(1.34) vs AI Shamiya FC(5.4), over 1.5: not provided, over 2.5: 1.55, BTTs yes: 1.95
-- AI Jazira Kuwait(2.95) vs Khaitan(2.08), over 1.5: 1.28, over 2.5: 1.86, BTTS yes: 1.74
+Italy Serie A
+- Venezia(2.29) vs Udinese(3.14), over 1.5: 1.25, over 2.5: 1.83, BTTs yes: 1.65
 
-Morocco Botola 1
-- FAR Rabat(1.7) vs Raja CA CAsablanca(4.5), over 1.5: 1.35, over 2.5: 2.07, BTTS yes: 1.97
+Ital Serie B
+- Ascoli(2.99) FC vs Paermo(2.14), over 1.5: 1.18, over 2.5: 1.63, BTTS yes: 1.48
 
-Paraguay primera division
-- Club libertad(2.36) vs club Cerro Porteno Asuncion(2.69), over 1.5: 1.28, over 2.5: 1.87, BTTS yes: 1.7
-- Sportivo Ameliano(2.84) vs Club Guarani vs Asuncion(2.24), over 1.5: 1.29, over 2.5: 1.96, BTTs yes: 1.77
+France ligue 1
+- Toulouse(2.09) vs Strasbourg Alsace(3.39), over 1.5: 1.19, over 2.5: 1.67, BTTS yes: 1.55
 
-Switzerland promotion league
-- FC Schaffhausen(2.16) vs FC Biel Bienne(2.9), over 1.5: not provided, over 2.5: 1.45, BTTs yes: 1.39
+France ligue 2
+- USL Dunkerque(2.69) vs En Avant Guingamps(2.24), over 1.5: 1.19, over 2.5: 1.62, BTTS yes: 1.53
+- Grenoble foot 38(3.63) vs Stade Reims(1.83), over 1.5: 1.27, over 2.5: 1.84, BTTS yes: 1.75
+- Nancy lorraine(1.57) vs Sochaux Montbeliard(5.1) over 1.5: 1.26, over 2.5: 1.84, BTTS yes: 1.84
+- Montpellier(1.87) vs Metz(3.68), over 1.5: 1.2, over 2.5: not provided, BTTS yes: 1.53
+- US Boulonge (2.35) vs Annecy FC(2.88) over 1.5: 1.38, over 2.5: 2.16, BTTS yes: 1.84
+- Digon(2.58) vs Red Star FC(2.36) over 1.5: 1.19, over 2.5: 1.62, BTTS yes: 1.52
 
-Venezuela primera division
-- Portugeuesa Acarigua FC(2.59) vs Deportivo la Guaira(2.64)
+Germany Bundesliga
+- Hamburger SV(2.42) vs Borussia Monchengladbach(2.77) over 1.5: 1.2, over 2.5: 1.67, BTTs yes: 1.55
+
+Portugal liga Portugal
+- Famalicao(2.1) vs FC Arouca(3.36), over 1.5: 1.35, over 2.5: 2.06, BTTS yes: 1.84
+
+Liga portugal 2
+- AVS Vila des Aves(3.02) vs FC Vizela(2.08), over 1.5: 1.27, over 2.5: 1.89, BTTS yes: 
