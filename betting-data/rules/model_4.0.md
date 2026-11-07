@@ -239,6 +239,7 @@ The model actively searches for evidence that challenges market viability. Warni
 - `UNDERDOG_RESILIENCE`: Away underdog concedes $\le 1.10$ GA/G away and has a draw rate $\ge 35\%$.
 - `VENUE_INVERSION`: Favorite holds weak venue win record ($< 60\%$) despite high overall league table standing.
 - `DERBY_MATCH_VOLATILITY`: Intense local derby introducing high-card and low-margin disruption.
+- `RESERVE_SQUAD_VOLATILITY`: One of the participating clubs is a youth academy or reserve squad (e.g. Dutch *"Jong"*, Spanish *"B"*, German *"II"*). Development squads suffer from unpredictable weekly roster turnover, first-team drop-downs, and non-standard promotional incentives, introducing fat-tail draw and upset variance in 1X2 Match Winner markets. Disqualifies straight win picks from main tickets; re-channels selection into open goal markets or Draw No Bet.
 
 #### D. Under 3.5 Warnings
 - `HIGH_VOLATILITY_SCORING`: Both teams average $> 1.80$ GF/G and concede $> 1.60$ GA/G, elevating risk of explosive scorelines (3–2, 4–1, 2–2).

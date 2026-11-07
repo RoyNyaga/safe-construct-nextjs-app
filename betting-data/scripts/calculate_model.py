@@ -499,6 +499,27 @@ def detect_standard_warnings(
                 "post_match_status": "PENDING",
                 "review_notes": None,
             })
+
+    # 4e. Reserve / Youth Academy Squad Volatility Check (Section 3.5 Reserve Squad Rule)
+    reserve_indicators = ["jong ", "jong_", " b", " ii", " u21", " u23", "castilla", "amateur", "reserves"]
+    is_home_reserve = any(ind in home_team.lower() for ind in reserve_indicators)
+    is_away_reserve = any(ind in away_team.lower() for ind in reserve_indicators)
+    if is_home_reserve or is_away_reserve:
+        reserve_name = home_team if is_home_reserve else away_team
+        is_to_win = market_key in ["to_win", "match_winner", "1x2"]
+        warnings.append({
+            "type": "RESERVE_SQUAD_VOLATILITY",
+            "severity": "HIGH" if is_to_win else "LOW",
+            "market_relevance": "DIRECT",
+            "direction": "CONTRADICTORY" if is_to_win else "SUPPORTIVE",
+            "description": f"Reserve/academy squad participation ({reserve_name}): roster turnover and non-standard incentives introduce fat-tail outcome variance.",
+            "evidence": f"{reserve_name} is a development squad. 1X2 straight win is prohibited on main tickets under Section 3.5; prioritize open goal markets (Over 2.5/BTTS) or Draw No Bet.",
+            "verified": True,
+            "numerical_adjustment": False,
+            "pre_match_status": "CONFIRMED",
+            "post_match_status": "PENDING",
+            "review_notes": None,
+        })
     if h2h_notes and any(term in h2h_notes.lower() for term in ["low-scoring", "0-0", "1-0", "tight", "tactical"]):
         warnings.append({
             "type": "H2H_LOW_GOALS",
