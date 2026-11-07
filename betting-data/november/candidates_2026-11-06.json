@@ -1,0 +1,731 @@
+{
+  "date": "2026-11-06",
+  "generated_at": "2026-11-06T06:25:00Z",
+  "model_version": "4.0",
+  "model_name": "roys_betting_engine_BTS_O2-5_win",
+  "total_candidates": 24,
+  "top_selections_count": 2,
+  "candidates": [
+    {
+      "match_date": "2026-11-06",
+      "country": "Netherlands",
+      "league": "Netherlands Eerste Divisie",
+      "home_team": "VVV-Venlo",
+      "away_team": "Jong PSV Eindhoven",
+      "status": "QUALIFIED_MAIN_LEG_1",
+      "odds": {
+        "home_win": 1.55,
+        "draw": 4.1,
+        "away_win": 4.2,
+        "over_1_5": 1.14,
+        "over_2_5": 1.26,
+        "btts_yes": 1.33
+      },
+      "model_probabilities": {
+        "home_win": 0.723,
+        "draw": 0.1387,
+        "away_win": 0.1383,
+        "over_1_5": 0.95,
+        "over_2_5": 0.852,
+        "btts_yes": 0.7424,
+        "under_3_5": 0.303
+      },
+      "dual_contribution_index": 0.453,
+      "dominance_ratio": 2.21,
+      "recommendation": "Main Ticket Leg 1 (Match Winner: Home Win @ 1.55)",
+      "disqualification_reason": null,
+      "notes": "VVV-Venlo sits 2nd in Eerste Divisie (28 pts) with 20 GF in 7 home matches (2.86 GF/G). Dominance Ratio = 2.21 (Gate 1 Pass >= 2.20). Draw suppressed at 13.9% (Gate 4 Pass <= 22.0%). Value Edge +7.8pp, EV +0.121."
+    },
+    {
+      "match_date": "2026-11-06",
+      "country": "Netherlands",
+      "league": "Netherlands Eerste Divisie",
+      "home_team": "FC Eindhoven",
+      "away_team": "Jong Ajax Amsterdam",
+      "status": "QUALIFIED_MAIN_LEG_2",
+      "odds": {
+        "home_win": 2.03,
+        "draw": 3.75,
+        "away_win": 2.78,
+        "over_1_5": 1.12,
+        "over_2_5": 1.32,
+        "btts_yes": 1.32
+      },
+      "model_probabilities": {
+        "home_win": 0.544,
+        "draw": 0.164,
+        "away_win": 0.292,
+        "over_1_5": 0.961,
+        "over_2_5": 0.878,
+        "btts_yes": 0.805,
+        "under_3_5": 0.258
+      },
+      "dual_contribution_index": 0.697,
+      "dominance_ratio": 1.43,
+      "recommendation": "Main Ticket Leg 2 (Over/Under: Over 2.5 Goals @ 1.32)",
+      "disqualification_reason": null,
+      "notes": "Explosive multi-goal corridor. Combined venue goal average of 4.71 goals/game. Total expected goals Lambda = 5.04. DCI = 0.697 (Gate 2 Pass >= 0.45). Model P(Over 2.5) = 87.8% vs Break-even 75.8% (+12.1pp Edge, EV +0.160)."
+    },
+    {
+      "match_date": "2026-11-06",
+      "country": "Germany",
+      "league": "Germany Bundesliga",
+      "home_team": "Hamburger SV",
+      "away_team": "Borussia Monchengladbach",
+      "status": "QUALIFIED_SHADOW_ALT_1",
+      "odds": {
+        "home_win": 2.42,
+        "draw": 3.55,
+        "away_win": 2.77,
+        "over_1_5": 1.2,
+        "over_2_5": 1.67,
+        "btts_yes": 1.55
+      },
+      "model_probabilities": {
+        "home_win": 0.462,
+        "draw": 0.221,
+        "away_win": 0.317,
+        "over_1_5": 0.832,
+        "over_2_5": 0.691,
+        "btts_yes": 0.627,
+        "under_3_5": 0.564
+      },
+      "dual_contribution_index": 0.822,
+      "dominance_ratio": 1.22,
+      "recommendation": "Shadow Alternative 1 (Over/Under: Over 2.5 Goals @ 1.67)",
+      "disqualification_reason": "High payout booster (EV +0.154, Edge +9.2pp), preserved for shadow portfolio to maintain conservative ~2.00 main ticket profile.",
+      "notes": "Both teams averaging over 1.50 goals at home/away. Symmetrical open match with DCI = 0.822."
+    },
+    {
+      "match_date": "2026-11-06",
+      "country": "Netherlands",
+      "league": "Netherlands Eerste Divisie",
+      "home_team": "Jong AZ Alkmaar",
+      "away_team": "Almere City FC",
+      "status": "QUALIFIED_SHADOW_ALT_2",
+      "odds": {
+        "home_win": 2.63,
+        "draw": 3.8,
+        "away_win": 2.05,
+        "over_1_5": 1.11,
+        "over_2_5": 1.26,
+        "btts_yes": 1.27
+      },
+      "model_probabilities": {
+        "home_win": 0.285,
+        "draw": 0.182,
+        "away_win": 0.533,
+        "over_1_5": 0.934,
+        "over_2_5": 0.823,
+        "btts_yes": 0.748,
+        "under_3_5": 0.361
+      },
+      "dual_contribution_index": 0.698,
+      "dominance_ratio": 0.7,
+      "recommendation": "Shadow Alternative 2 (Over/Under: Over 2.5 Goals @ 1.26)",
+      "disqualification_reason": "FC Eindhoven vs Jong Ajax offers slightly higher edge (+12.1pp vs +2.9pp) at better odds (1.32 vs 1.26).",
+      "notes": "Almere City 3rd in league with 25 pts; high scoring Jong AZ fixture profile (4.28 expected goals). DCI = 0.698."
+    },
+    {
+      "match_date": "2026-11-06",
+      "country": "Netherlands",
+      "league": "Netherlands Eerste Divisie",
+      "home_team": "Heracles Almelo",
+      "away_team": "Roda JC Kerkrade",
+      "status": "QUALIFIED_SHADOW_ALT_3",
+      "odds": {
+        "home_win": 1.4,
+        "draw": 4.6,
+        "away_win": 5.6,
+        "over_1_5": 1.14,
+        "over_2_5": 1.42,
+        "btts_yes": 1.58
+      },
+      "model_probabilities": {
+        "home_win": 0.725,
+        "draw": 0.168,
+        "away_win": 0.107,
+        "over_1_5": 0.885,
+        "over_2_5": 0.702,
+        "btts_yes": 0.463,
+        "under_3_5": 0.458
+      },
+      "dual_contribution_index": 0.268,
+      "dominance_ratio": 3.73,
+      "recommendation": "Shadow Alternative 3 (Match Winner: Home Win @ 1.40)",
+      "disqualification_reason": "Low odds (1.40, Edge +1.1pp) and DCI 0.268 disqualifies Over 2.5 under Gate 2 (DCI < 0.45). Home Win qualified for shadow portfolio.",
+      "notes": "Heracles 1st in Eerste Divisie (32 pts, 6-0-0 at home, 19 GF, 4 GA). Dominance Ratio = 3.73."
+    },
+    {
+      "match_date": "2026-11-06",
+      "country": "France",
+      "league": "France Ligue 1",
+      "home_team": "Toulouse",
+      "away_team": "Strasbourg Alsace",
+      "status": "QUALIFIED_SHADOW_ALT_4",
+      "odds": {
+        "home_win": 2.09,
+        "draw": 3.4,
+        "away_win": 3.39,
+        "over_1_5": 1.19,
+        "over_2_5": 1.67,
+        "btts_yes": 1.55
+      },
+      "model_probabilities": {
+        "home_win": 0.458,
+        "draw": 0.228,
+        "away_win": 0.314,
+        "over_1_5": 0.816,
+        "over_2_5": 0.664,
+        "btts_yes": 0.695,
+        "under_3_5": 0.601
+      },
+      "dual_contribution_index": 0.59,
+      "dominance_ratio": 1.2,
+      "recommendation": "Shadow Alternative 4 (Both Teams to Score: BTTS Yes @ 1.55)",
+      "disqualification_reason": "Slightly higher risk than Eerste Divisie selections; allocated to shadow portfolio.",
+      "notes": "Strong French top-flight pairing with reciprocal scoring. DCI = 0.590 (Gate 3 Pass >= 0.50). Edge +5.0pp, EV +0.077."
+    },
+    {
+      "match_date": "2026-11-06",
+      "country": "Spain",
+      "league": "Spain Segunda Division",
+      "home_team": "CD Castellon",
+      "away_team": "SD Eibar",
+      "status": "QUALIFIED_SHADOW_ALT_5",
+      "odds": {
+        "home_win": 1.56,
+        "draw": 3.75,
+        "away_win": 4.7,
+        "over_1_5": 1.17,
+        "over_2_5": 1.58,
+        "btts_yes": 1.62
+      },
+      "model_probabilities": {
+        "home_win": 0.728,
+        "draw": 0.175,
+        "away_win": 0.097,
+        "over_1_5": 0.802,
+        "over_2_5": 0.571,
+        "btts_yes": 0.445,
+        "under_3_5": 0.638
+      },
+      "dual_contribution_index": 0.349,
+      "dominance_ratio": 2.87,
+      "recommendation": "Shadow Alternative 5 (Match Winner: Home Win @ 1.56)",
+      "disqualification_reason": "Gate 6 LMI Matrix Diversion: Spain Segunda is classified as Tier 3 Low-Integrity / fat-tail trap. Diverted to shadow tracking.",
+      "notes": "Dominance Ratio = 2.87, Model Prob = 72.8% (+8.7pp Edge). Exceptional statistical profile protected by LMI protocol."
+    },
+    {
+      "match_date": "2026-11-06",
+      "country": "Netherlands",
+      "league": "Netherlands Eerste Divisie",
+      "home_team": "TOP Oss",
+      "away_team": "Waalwijk",
+      "status": "DISQUALIFIED_MARGINAL_EDGE",
+      "odds": {
+        "home_win": 3.47,
+        "draw": 3.6,
+        "away_win": 1.77,
+        "over_1_5": 1.18,
+        "over_2_5": 1.5,
+        "btts_yes": 1.48
+      },
+      "model_probabilities": {
+        "home_win": 0.261,
+        "draw": 0.204,
+        "away_win": 0.535,
+        "over_1_5": 0.852,
+        "over_2_5": 0.682,
+        "btts_yes": 0.624,
+        "under_3_5": 0.525
+      },
+      "dual_contribution_index": 0.667,
+      "dominance_ratio": 0.67,
+      "recommendation": "Over 2.5 Goals @ 1.50 (Consideration)",
+      "disqualification_reason": "Marginal edge (+1.5pp) at 1.50 odds; inferior to FC Eindhoven vs Jong Ajax (+12.1pp).",
+      "notes": "Waalwijk away win (DR 1.50) fails Gate 1 floor (2.20). Goal markets viable but not optimal."
+    },
+    {
+      "match_date": "2026-11-06",
+      "country": "Netherlands",
+      "league": "Netherlands Eredivisie",
+      "home_team": "Willem II Tilburg",
+      "away_team": "PEC Zwolle",
+      "status": "DISQUALIFIED_VIG_AND_DRAW_RISK",
+      "odds": {
+        "home_win": 3.03,
+        "draw": 3.4,
+        "away_win": 2.19,
+        "over_1_5": 1.15,
+        "over_2_5": 1.57,
+        "btts_yes": 1.5
+      },
+      "model_probabilities": {
+        "home_win": 0.336,
+        "draw": 0.243,
+        "away_win": 0.421,
+        "over_1_5": 0.805,
+        "over_2_5": 0.642,
+        "btts_yes": 0.618,
+        "under_3_5": 0.575
+      },
+      "dual_contribution_index": 0.888,
+      "dominance_ratio": 0.89,
+      "recommendation": "None",
+      "disqualification_reason": "Elevated draw probability (24.3%); Over 2.5 edge marginal (+0.5pp) due to heavy bookmaker margin.",
+      "notes": "Both sides closely matched with symmetrical scoring rates."
+    },
+    {
+      "match_date": "2026-11-06",
+      "country": "Belgium",
+      "league": "Belgium Pro League",
+      "home_team": "Standard Liege",
+      "away_team": "SK Beveren",
+      "status": "DISQUALIFIED_SUB_THRESHOLD_EDGE",
+      "odds": {
+        "home_win": 1.81,
+        "draw": 3.45,
+        "away_win": 3.84,
+        "over_1_5": 1.19,
+        "over_2_5": 1.61,
+        "btts_yes": 1.6
+      },
+      "model_probabilities": {
+        "home_win": 0.587,
+        "draw": 0.218,
+        "away_win": 0.195,
+        "over_1_5": 0.795,
+        "over_2_5": 0.615,
+        "btts_yes": 0.532,
+        "under_3_5": 0.635
+      },
+      "dual_contribution_index": 0.51,
+      "dominance_ratio": 1.96,
+      "recommendation": "None",
+      "disqualification_reason": "Standard Liege Dominance Ratio (1.96) falls below Gate 1 threshold (2.20); Over 2.5 edge is negative (-0.6pp).",
+      "notes": "Standard Liege defensive solidity suppresses total match openness."
+    },
+    {
+      "match_date": "2026-11-06",
+      "country": "Spain",
+      "league": "Spain La Liga",
+      "home_team": "Sevilla",
+      "away_team": "Deportivo Alaves",
+      "status": "DISQUALIFIED_LOW_GOAL_AND_DRAW_RISK",
+      "odds": {
+        "home_win": 1.91,
+        "draw": 3.3,
+        "away_win": 4.2,
+        "over_1_5": 1.38,
+        "over_2_5": 2.14,
+        "btts_yes": 2.0
+      },
+      "model_probabilities": {
+        "home_win": 0.512,
+        "draw": 0.271,
+        "away_win": 0.217,
+        "over_1_5": 0.672,
+        "over_2_5": 0.415,
+        "btts_yes": 0.431,
+        "under_3_5": 0.765
+      },
+      "dual_contribution_index": 0.607,
+      "dominance_ratio": 1.65,
+      "recommendation": "Under 3.5 Goals @ 1.25 (Pass)",
+      "disqualification_reason": "Low goal expectancy corridor (Lambda 2.17); Draw risk elevated at 27.1%; Sevilla win DR 1.65 < 2.20.",
+      "notes": "Alaves exhibits tight low-block away posture (0.80 GF/G away)."
+    },
+    {
+      "match_date": "2026-11-06",
+      "country": "England",
+      "league": "England Premier League",
+      "home_team": "Everton",
+      "away_team": "Coventry City",
+      "status": "DISQUALIFIED_NEGATIVE_EDGE",
+      "odds": {
+        "home_win": 1.7,
+        "draw": 3.65,
+        "away_win": 4.8,
+        "over_1_5": 1.23,
+        "over_2_5": 1.74,
+        "btts_yes": 1.74
+      },
+      "model_probabilities": {
+        "home_win": 0.538,
+        "draw": 0.232,
+        "away_win": 0.23,
+        "over_1_5": 0.784,
+        "over_2_5": 0.598,
+        "btts_yes": 0.556,
+        "under_3_5": 0.652
+      },
+      "dual_contribution_index": 0.669,
+      "dominance_ratio": 1.5,
+      "recommendation": "None",
+      "disqualification_reason": "Everton win priced at 1.70 implies 58.8% break-even vs model 53.8% (-5.0pp negative edge). Over 2.5 probability below 60% floor.",
+      "notes": "Everton inconsistency and Coventry counter-attack variance creates negative EV."
+    },
+    {
+      "match_date": "2026-11-06",
+      "country": "England",
+      "league": "England Championship",
+      "home_team": "Derby County",
+      "away_team": "Bolton Wanderers",
+      "status": "DISQUALIFIED_HIGH_PARITY",
+      "odds": {
+        "home_win": 2.37,
+        "draw": 3.3,
+        "away_win": 2.66,
+        "over_1_5": 1.21,
+        "over_2_5": 1.67,
+        "btts_yes": 1.57
+      },
+      "model_probabilities": {
+        "home_win": 0.435,
+        "draw": 0.245,
+        "away_win": 0.32,
+        "over_1_5": 0.812,
+        "over_2_5": 0.649,
+        "btts_yes": 0.625,
+        "under_3_5": 0.582
+      },
+      "dual_contribution_index": 0.845,
+      "dominance_ratio": 1.18,
+      "recommendation": "Over 2.5 Goals @ 1.67 (Secondary Watchlist)",
+      "disqualification_reason": "Championship match winner is a coin flip; Over 2.5 viable (+5.0pp edge) but ranked behind Netherlands corridor.",
+      "notes": "High mutual openness (DCI 0.845). Bolton concedes 1.62 GA/G away."
+    },
+    {
+      "match_date": "2026-11-06",
+      "country": "Italy",
+      "league": "Italy Serie A",
+      "home_team": "Venezia",
+      "away_team": "Udinese",
+      "status": "DISQUALIFIED_LOW_CONFIDENCE",
+      "odds": {
+        "home_win": 2.29,
+        "draw": 3.25,
+        "away_win": 3.14,
+        "over_1_5": 1.25,
+        "over_2_5": 1.83,
+        "btts_yes": 1.65
+      },
+      "model_probabilities": {
+        "home_win": 0.365,
+        "draw": 0.272,
+        "away_win": 0.363,
+        "over_1_5": 0.748,
+        "over_2_5": 0.526,
+        "btts_yes": 0.548,
+        "under_3_5": 0.688
+      },
+      "dual_contribution_index": 0.914,
+      "dominance_ratio": 0.91,
+      "recommendation": "None",
+      "disqualification_reason": "High draw probability (27.2%); Over 2.5 probability (52.6%) fails 60.0% qualification floor.",
+      "notes": "Low overall goal expectations in typical mid-table Serie A clash."
+    },
+    {
+      "match_date": "2026-11-06",
+      "country": "Italy",
+      "league": "Italy Serie B",
+      "home_team": "Ascoli",
+      "away_team": "Palermo",
+      "status": "DISQUALIFIED_SERIE_B_NEGATIVE_EDGE",
+      "odds": {
+        "home_win": 2.99,
+        "draw": 3.2,
+        "away_win": 2.14,
+        "over_1_5": 1.18,
+        "over_2_5": 1.63,
+        "btts_yes": 1.48
+      },
+      "model_probabilities": {
+        "home_win": 0.332,
+        "draw": 0.265,
+        "away_win": 0.403,
+        "over_1_5": 0.761,
+        "over_2_5": 0.542,
+        "btts_yes": 0.564,
+        "under_3_5": 0.672
+      },
+      "dual_contribution_index": 0.862,
+      "dominance_ratio": 0.86,
+      "recommendation": "None",
+      "disqualification_reason": "Over 2.5 Model prob (54.2%) vs break-even (61.3%) creates -7.1pp negative edge.",
+      "notes": "Italian Serie B exhibits historically suppressed scoring rates."
+    },
+    {
+      "match_date": "2026-11-06",
+      "country": "Portugal",
+      "league": "Portugal Liga Portugal",
+      "home_team": "Famalicao",
+      "away_team": "FC Arouca",
+      "status": "DISQUALIFIED_LOW_GOALS",
+      "odds": {
+        "home_win": 2.1,
+        "draw": 3.2,
+        "away_win": 3.36,
+        "over_1_5": 1.35,
+        "over_2_5": 2.06,
+        "btts_yes": 1.84
+      },
+      "model_probabilities": {
+        "home_win": 0.515,
+        "draw": 0.268,
+        "away_win": 0.217,
+        "over_1_5": 0.71,
+        "over_2_5": 0.452,
+        "btts_yes": 0.458,
+        "under_3_5": 0.745
+      },
+      "dual_contribution_index": 0.62,
+      "dominance_ratio": 1.61,
+      "recommendation": "Under 3.5 Goals @ 1.25 (Pass)",
+      "disqualification_reason": "Over 2.5 probability (45.2%) far below qualification thresholds. Famalicao DR 1.61 < 2.20.",
+      "notes": "Arouca away fixtures average only 2.20 total match goals."
+    },
+    {
+      "match_date": "2026-11-06",
+      "country": "Portugal",
+      "league": "Portugal Liga Portugal 2",
+      "home_team": "AVS Vila das Aves",
+      "away_team": "FC Vizela",
+      "status": "DISQUALIFIED_DRAW_TRAP",
+      "odds": {
+        "home_win": 3.02,
+        "draw": 3.15,
+        "away_win": 2.08,
+        "over_1_5": 1.27,
+        "over_2_5": 1.89,
+        "btts_yes": 1.7
+      },
+      "model_probabilities": {
+        "home_win": 0.341,
+        "draw": 0.275,
+        "away_win": 0.384,
+        "over_1_5": 0.735,
+        "over_2_5": 0.512,
+        "btts_yes": 0.53,
+        "under_3_5": 0.702
+      },
+      "dual_contribution_index": 0.884,
+      "dominance_ratio": 0.88,
+      "recommendation": "None",
+      "disqualification_reason": "High draw probability (27.5%); Over 2.5 probability below 55%.",
+      "notes": "Portuguese second division fixtures exhibit high frequency of 1-1 / 0-0 draws."
+    },
+    {
+      "match_date": "2026-11-06",
+      "country": "France",
+      "league": "France Ligue 2",
+      "home_team": "Nancy Lorraine",
+      "away_team": "Sochaux Montbeliard",
+      "status": "DISQUALIFIED_LMI_TIER_3_RESTRICTION",
+      "odds": {
+        "home_win": 1.57,
+        "draw": 3.7,
+        "away_win": 5.1,
+        "over_1_5": 1.26,
+        "over_2_5": 1.84,
+        "btts_yes": 1.84
+      },
+      "model_probabilities": {
+        "home_win": 0.718,
+        "draw": 0.182,
+        "away_win": 0.1,
+        "over_1_5": 0.805,
+        "over_2_5": 0.575,
+        "btts_yes": 0.452,
+        "under_3_5": 0.655
+      },
+      "dual_contribution_index": 0.349,
+      "dominance_ratio": 2.87,
+      "recommendation": "Shadow Tracking Only (Match Winner: Home Win @ 1.57)",
+      "disqualification_reason": "Gate 6 LMI Matrix Diversion: France Ligue 2 classified as Tier 3 Low-Integrity / fat-tail trap. Diverted from main ticket to protect capital.",
+      "notes": "Nancy strong at home (1.80 GF/G, 0.70 GA/G). Statistical profile solid (+8.1pp edge) but restricted by LMI protocol."
+    },
+    {
+      "match_date": "2026-11-06",
+      "country": "France",
+      "league": "France Ligue 2",
+      "home_team": "USL Dunkerque",
+      "away_team": "En Avant Guingamp",
+      "status": "DISQUALIFIED_LMI_AND_NEGATIVE_EDGE",
+      "odds": {
+        "home_win": 2.69,
+        "draw": 3.2,
+        "away_win": 2.24,
+        "over_1_5": 1.19,
+        "over_2_5": 1.62,
+        "btts_yes": 1.53
+      },
+      "model_probabilities": {
+        "home_win": 0.375,
+        "draw": 0.25,
+        "away_win": 0.375,
+        "over_1_5": 0.795,
+        "over_2_5": 0.612,
+        "btts_yes": 0.61,
+        "under_3_5": 0.615
+      },
+      "dual_contribution_index": 0.935,
+      "dominance_ratio": 0.94,
+      "recommendation": "None",
+      "disqualification_reason": "Over 2.5 offers zero value edge (61.2% vs 61.7% break-even); Gate 6 LMI Tier 3 League.",
+      "notes": "Evenly matched sides with heavy bookmaker vig."
+    },
+    {
+      "match_date": "2026-11-06",
+      "country": "France",
+      "league": "France Ligue 2",
+      "home_team": "Grenoble Foot 38",
+      "away_team": "Stade Reims",
+      "status": "DISQUALIFIED_LMI_AND_NEGATIVE_EDGE",
+      "odds": {
+        "home_win": 3.63,
+        "draw": 3.4,
+        "away_win": 1.83,
+        "over_1_5": 1.27,
+        "over_2_5": 1.84,
+        "btts_yes": 1.75
+      },
+      "model_probabilities": {
+        "home_win": 0.245,
+        "draw": 0.235,
+        "away_win": 0.52,
+        "over_1_5": 0.792,
+        "over_2_5": 0.605,
+        "btts_yes": 0.572,
+        "under_3_5": 0.628
+      },
+      "dual_contribution_index": 0.622,
+      "dominance_ratio": 0.62,
+      "recommendation": "None",
+      "disqualification_reason": "Stade Reims away win edge negative (-2.6pp); Gate 6 LMI Tier 3 League.",
+      "notes": "Reims favored away but bookmaker odds of 1.83 provide no mathematical cushion."
+    },
+    {
+      "match_date": "2026-11-06",
+      "country": "France",
+      "league": "France Ligue 2",
+      "home_team": "Montpellier",
+      "away_team": "Metz",
+      "status": "DISQUALIFIED_INCOMPLETE_MARKET_AND_LMI",
+      "odds": {
+        "home_win": 1.87,
+        "draw": 3.4,
+        "away_win": 3.68,
+        "over_1_5": 1.2,
+        "over_2_5": null,
+        "btts_yes": 1.53
+      },
+      "model_probabilities": {
+        "home_win": 0.542,
+        "draw": 0.235,
+        "away_win": 0.223,
+        "over_1_5": 0.798,
+        "over_2_5": 0.595,
+        "btts_yes": 0.582,
+        "under_3_5": 0.635
+      },
+      "dual_contribution_index": 0.686,
+      "dominance_ratio": 1.46,
+      "recommendation": "None",
+      "disqualification_reason": "Over 2.5 odds missing; Montpellier DR 1.46 fails Gate 1 floor; Gate 6 LMI Tier 3.",
+      "notes": "Montpellier relegated side finding feet; unproven consistency."
+    },
+    {
+      "match_date": "2026-11-06",
+      "country": "France",
+      "league": "France Ligue 2",
+      "home_team": "US Boulogne",
+      "away_team": "Annecy FC",
+      "status": "DISQUALIFIED_LOW_GOALS_AND_DRAW_RISK",
+      "odds": {
+        "home_win": 2.35,
+        "draw": 3.1,
+        "away_win": 2.88,
+        "over_1_5": 1.38,
+        "over_2_5": 2.16,
+        "btts_yes": 1.84
+      },
+      "model_probabilities": {
+        "home_win": 0.415,
+        "draw": 0.285,
+        "away_win": 0.3,
+        "over_1_5": 0.702,
+        "over_2_5": 0.458,
+        "btts_yes": 0.495,
+        "under_3_5": 0.742
+      },
+      "dual_contribution_index": 0.898,
+      "dominance_ratio": 1.11,
+      "recommendation": "None",
+      "disqualification_reason": "Over 2.5 probability (45.8%) well below threshold; Draw risk high (28.5%); Gate 6 LMI Tier 3.",
+      "notes": "Low-event French second tier matchup."
+    },
+    {
+      "match_date": "2026-11-06",
+      "country": "France",
+      "league": "France Ligue 2",
+      "home_team": "Dijon",
+      "away_team": "Red Star FC",
+      "status": "DISQUALIFIED_LMI_AND_NEGATIVE_EDGE",
+      "odds": {
+        "home_win": 2.58,
+        "draw": 3.2,
+        "away_win": 2.36,
+        "over_1_5": 1.19,
+        "over_2_5": 1.62,
+        "btts_yes": 1.52
+      },
+      "model_probabilities": {
+        "home_win": 0.37,
+        "draw": 0.255,
+        "away_win": 0.375,
+        "over_1_5": 0.788,
+        "over_2_5": 0.602,
+        "btts_yes": 0.608,
+        "under_3_5": 0.625
+      },
+      "dual_contribution_index": 0.967,
+      "dominance_ratio": 0.97,
+      "recommendation": "None",
+      "disqualification_reason": "Over 2.5 offers negative edge (-1.5pp); Gate 6 LMI Tier 3 League.",
+      "notes": "Reciprocal attack but high variance in final third execution."
+    },
+    {
+      "match_date": "2026-11-06",
+      "country": "Brazil",
+      "league": "Brazil Serie B",
+      "home_team": "Operario Ferroviario EC",
+      "away_team": "Sport Recife",
+      "status": "DISQUALIFIED_LOW_GOAL_CORRIDOR",
+      "odds": {
+        "home_win": 3.0,
+        "draw": 3.05,
+        "away_win": 2.29,
+        "over_1_5": 1.31,
+        "over_2_5": 1.95,
+        "btts_yes": 1.74
+      },
+      "model_probabilities": {
+        "home_win": 0.372,
+        "draw": 0.298,
+        "away_win": 0.33,
+        "over_1_5": 0.708,
+        "over_2_5": 0.471,
+        "btts_yes": 0.502,
+        "under_3_5": 0.732
+      },
+      "dual_contribution_index": 0.96,
+      "dominance_ratio": 1.04,
+      "recommendation": "Under 3.5 Goals @ 1.22 (Pass)",
+      "disqualification_reason": "Brazil Serie B low scoring corridor (Lambda 2.45); high draw risk (29.8%); Over 2.5 fails floor.",
+      "notes": "Defensively rigid Brazilian second division encounter."
+    }
+  ]
+}
+
