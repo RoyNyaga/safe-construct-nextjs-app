@@ -5,12 +5,12 @@
     "model_version": "4.0",
     "model_uuid": "d0cc5b32-5a48-4262-88d2-67bfd58c5dac",
     "model_name": "roys_betting_engine_BTS_O2-5_win",
-    "stake": 375,
+    "stake": 2000,
     "combined_odds": 2.51,
     "estimated_ticket_probability": 0.565,
-    "status": "pending",
-    "actual_result": null,
-    "profit_loss": 0,
+    "status": "won",
+    "actual_result": "won",
+    "profit_loss": 3020.4,
     "notes": "Two-leg value accumulator ticket constructed under Model 4.0 (roys_betting_engine_BTS_O2-5_win) and selection_process.md (Priority 3: Dominant Winner + Open Goal Market Booster). Features Queens Park Rangers to Win (@ 1.63, 71.2% Model Prob, Dominance Ratio 3.31, +9.9pp Edge) and Blackburn Rovers vs West Ham United Over 2.5 Goals (@ 1.54, 79.4% Model Prob, DCI 0.59, +14.5pp Edge). Combined odds: 2.51 vs compound probability 56.5% (break-even 39.8%, value edge +16.7pp, EV +0.418)."
   },
   "selections": [
@@ -31,7 +31,7 @@
       "home_goals_per_game": 1.86,
       "home_conceded_per_game": 0.86,
       "away_goals_per_game": 0.71,
-      "away_conceded_per_game": 2.0,
+      "away_conceded_per_game": 2,
       "home_overall_matches_played": 14,
       "home_overall_goals_scored": 22,
       "home_overall_goals_conceded": 17,
@@ -40,7 +40,7 @@
       "away_overall_matches_played": 14,
       "away_overall_goals_scored": 14,
       "away_overall_goals_conceded": 24,
-      "away_overall_goals_per_game": 1.0,
+      "away_overall_goals_per_game": 1,
       "away_overall_conceded_per_game": 1.71,
       "market": "Match Winner",
       "selection": "Home Win",
@@ -163,14 +163,14 @@
       "alignment_delta_pp": 0,
       "alignment_remark": "very_high",
       "edge_remark": "high",
-      "actual_home_score": null,
-      "actual_away_score": null,
-      "result": "pending",
+      "actual_home_score": 2,
+      "actual_away_score": 1,
+      "result": "won",
       "comment": "Main Ticket Leg 1. Dominant Home Winner selection under Model 4.0 Section 3.5. QPR is solid at Loftus Road (4W-2D-1L, 13 GF, 6 GA, conceding only 0.86 GA/G). Lincoln City is struggling on the road (1W-1D-5L, conceding 2.00 GA/G). Dominance ratio of 3.31 comfortably passes Gate 1 (>= 2.20). Draw risk is heavily suppressed at 16.8% (Gate 4 Pass <= 22.0%). Both clubs are established senior squads, complying fully with the Reserve Squad Restriction.",
       "notes": "EFL Championship Matchday 15.",
       "warnings": [
         {
-          "warning_uuid": "d8213b94-82a1-42e1-95b7-7893a9b1c201",
+          "warning_uuid": "3d5214d9-95b8-4005-b706-b059e9090e42",
           "type": "ONE_SIDED_SCORING_RISK",
           "severity": "HIGH",
           "market_relevance": "DIRECT",
@@ -178,8 +178,8 @@
           "description": "Severe attacking asymmetry: dominant host heavily favored while opponent exhibits low scoring potential.",
           "evidence": "Lincoln City away scoring rate is only 0.71 GF/G against QPR home defense of 0.86 GA/G. Properly channeled into Home Win market.",
           "pre_match_status": "CONFIRMED",
-          "post_match_status": "PENDING",
-          "review_notes": "Value is captured in the Match Winner market."
+          "post_match_status": "CONFIRMED",
+          "review_notes": "Dominant home performance verified. QPR converted superiority into a 2-1 victory, capturing the +9.9pp value edge."
         }
       ]
     },
@@ -332,14 +332,14 @@
       "alignment_delta_pp": 0,
       "alignment_remark": "very_high",
       "edge_remark": "very_high",
-      "actual_home_score": null,
-      "actual_away_score": null,
-      "result": "pending",
+      "actual_home_score": 2,
+      "actual_away_score": 1,
+      "result": "won",
       "comment": "Main Ticket Leg 2. High-Yield Over 2.5 Goals selection under Model 4.0 Section 3.3. West Ham has generated an astonishing 57 goals in 14 matches (36 GF, 21 GA, averaging 4.07 goals/match). Away from home, West Ham scores 2.29 GF/G and concedes 1.57 GA/G. Blackburn scores 1.57 GF/G at Ewood Park. Combined expected goals is 4.20 with a massive DCI of 0.585 (satisfying Gate 2 >= 0.45). Model probability of 79.4% yields an elite +14.5pp edge and +0.223 EV at 1.54 odds.",
       "notes": "EFL Championship Matchday 15.",
       "warnings": [
         {
-          "warning_uuid": "3a921d05-4c55-467f-9b41-55fa1982b102",
+          "warning_uuid": "2ea24203-877b-489b-a7fa-8fd1781d597f",
           "type": "HIGH_SCORING_CORRIDOR",
           "severity": "LOW",
           "market_relevance": "DIRECT",
@@ -347,182 +347,13 @@
           "description": "West Ham's league-leading attack (36 GF in 14 MP) and reciprocal defensive leakage confirm explosive multi-goal environment.",
           "evidence": "Total expected goals lambda is 4.20 with DCI 0.585.",
           "pre_match_status": "CONFIRMED",
-          "post_match_status": "PENDING",
-          "review_notes": "Ideal booster leg."
+          "post_match_status": "CONFIRMED",
+          "review_notes": "High scoring confirmed. Match finished 2-1 (3 goals), clearing Over 2.5 cleanly and validating the DCI model."
         }
       ]
     }
   ],
   "alternatives": [
-    {
-      "match_date": "2026-11-07",
-      "country": "England",
-      "league": "England Premier League",
-      "home_team": "Nottingham Forest",
-      "away_team": "Manchester City",
-      "home_league_position": 19,
-      "away_league_position": 2,
-      "home_matches_played": 4,
-      "away_matches_played": 4,
-      "home_goals_scored": 3,
-      "home_goals_conceded": 5,
-      "away_goals_scored": 9,
-      "away_goals_conceded": 4,
-      "home_goals_per_game": 0.75,
-      "home_conceded_per_game": 1.25,
-      "away_goals_per_game": 2.25,
-      "away_conceded_per_game": 1.0,
-      "home_overall_matches_played": 9,
-      "home_overall_goals_scored": 6,
-      "home_overall_goals_conceded": 12,
-      "home_overall_goals_per_game": 0.67,
-      "home_overall_conceded_per_game": 1.33,
-      "away_overall_matches_played": 9,
-      "away_overall_goals_scored": 20,
-      "away_overall_goals_conceded": 10,
-      "away_overall_goals_per_game": 2.22,
-      "away_overall_conceded_per_game": 1.11,
-      "market": "Match Winner",
-      "selection": "Away Win",
-      "odds": 1.75,
-      "estimated_probability": 0.698,
-      "breakeven_probability": 0.571,
-      "edge_percentage_points": 12.7,
-      "expected_value": 0.222,
-      "current_league_home_avg": 1.58,
-      "current_league_away_avg": 1.28,
-      "historical_league_home_avg": 1.55,
-      "historical_league_away_avg": 1.25,
-      "historical_estimated_probability": 0.694,
-      "prob_over_1_5": 0.848,
-      "prob_over_2_5": 0.612,
-      "prob_btts_yes": 0.485,
-      "prob_under_3_5": 0.682,
-      "prob_home_win": 0.124,
-      "prob_away_win": 0.698,
-      "prob_draw": 0.178,
-      "market_evaluations": {
-        "draw": {
-          "market": "Match Winner",
-          "selection": "Draw",
-          "probability": 0.178,
-          "alignment_remark": "very_high",
-          "alignment_delta_pp": 0.3,
-          "historical_probability": 0.181
-        },
-        "away_dnb": {
-          "market": "Draw No Bet",
-          "selection": "Away DNB",
-          "probability": 0.8491,
-          "alignment_remark": "very_high",
-          "alignment_delta_pp": 0.3,
-          "historical_probability": 0.846
-        },
-        "away_win": {
-          "odds": 1.75,
-          "market": "Match Winner",
-          "selection": "Away Win",
-          "edge_remark": "very_high",
-          "probability": 0.698,
-          "expected_value": 0.222,
-          "alignment_remark": "very_high",
-          "alignment_delta_pp": 0.4,
-          "breakeven_probability": 0.571,
-          "edge_percentage_points": 12.7,
-          "historical_probability": 0.694
-        },
-        "btts_yes": {
-          "odds": 1.63,
-          "market": "Both Teams to Score",
-          "selection": "Yes",
-          "edge_remark": "very_low",
-          "probability": 0.485,
-          "expected_value": -0.209,
-          "alignment_remark": "very_high",
-          "alignment_delta_pp": 0.4,
-          "breakeven_probability": 0.613,
-          "edge_percentage_points": -12.8,
-          "historical_probability": 0.489
-        },
-        "home_dnb": {
-          "market": "Draw No Bet",
-          "selection": "Home DNB",
-          "probability": 0.1509,
-          "alignment_remark": "very_high",
-          "alignment_delta_pp": 0.3,
-          "historical_probability": 0.154
-        },
-        "home_win": {
-          "odds": 4.5,
-          "market": "Match Winner",
-          "selection": "Home Win",
-          "edge_remark": "very_low",
-          "probability": 0.124,
-          "expected_value": -0.442,
-          "alignment_remark": "very_high",
-          "alignment_delta_pp": 0.1,
-          "breakeven_probability": 0.222,
-          "edge_percentage_points": -9.8,
-          "historical_probability": 0.125
-        },
-        "over_1_5": {
-          "odds": 1.21,
-          "market": "Over/Under",
-          "selection": "Over 1.5",
-          "edge_remark": "low",
-          "probability": 0.848,
-          "expected_value": 0.026,
-          "alignment_remark": "very_high",
-          "alignment_delta_pp": 0.3,
-          "breakeven_probability": 0.826,
-          "edge_percentage_points": 2.2,
-          "historical_probability": 0.845
-        },
-        "over_2_5": {
-          "odds": 1.67,
-          "market": "Over/Under",
-          "selection": "Over 2.5",
-          "edge_remark": "medium",
-          "probability": 0.612,
-          "expected_value": 0.022,
-          "alignment_remark": "very_high",
-          "alignment_delta_pp": 0.4,
-          "breakeven_probability": 0.599,
-          "edge_percentage_points": 1.3,
-          "historical_probability": 0.608
-        },
-        "under_3_5": {
-          "market": "Over/Under",
-          "selection": "Under 3.5",
-          "probability": 0.682,
-          "alignment_remark": "very_high",
-          "alignment_delta_pp": 0.3,
-          "historical_probability": 0.685
-        }
-      },
-      "alignment_delta_pp": 0.4,
-      "alignment_remark": "very_high",
-      "edge_remark": "very_high",
-      "actual_home_score": null,
-      "actual_away_score": null,
-      "result": "pending",
-      "comment": "Shadow Alternative 1. Title contenders Manchester City (2nd, 21 pts) visit relegation-threatened Nottingham Forest (19th, 6 pts). City averages 2.25 GF/G away, while Forest scores only 0.75 GF/G at home. Dominance ratio is 3.26 with draw suppressed at 17.8%. High model probability of 69.8% yields +12.7pp value edge and +0.222 EV at 1.75 odds.",
-      "notes": "Small-sample venue trigger (4 venue matches each); regression anchors applied.",
-      "warnings": [
-        {
-          "warning_uuid": "b5102f41-0982-452a-9218-a66428c0b201",
-          "type": "SMALL_SAMPLE",
-          "severity": "LOW",
-          "market_relevance": "CONTEXTUAL",
-          "direction": "NEUTRAL",
-          "description": "Venue matches played is 4 for both teams (below 5-match sample anchor).",
-          "evidence": "Forest 4 home matches, Man City 4 away matches; sample size reflects early Matchday 10 calendar.",
-          "pre_match_status": "CONFIRMED",
-          "post_match_status": "PENDING",
-          "review_notes": null
-        }
-      ]
-    },
     {
       "match_date": "2026-11-07",
       "country": "England",
@@ -672,9 +503,9 @@
       "alignment_delta_pp": 0,
       "alignment_remark": "very_high",
       "edge_remark": "high",
-      "actual_home_score": null,
-      "actual_away_score": null,
-      "result": "pending",
+      "actual_home_score": 0,
+      "actual_away_score": 5,
+      "result": "won",
       "comment": "Shadow Alternative 2. Norwich City matches produce a league-high 3.64 total goals per game (27 GF, 24 GA). Norwich away games average 3.71 total goals (13 GF, 13 GA in 7 MP). DCI of 0.96 indicates exceptional reciprocal openness. Over 2.5 probability of 71.5% delivers an elite +12.7pp edge and +0.216 EV at 1.70 odds.",
       "notes": "Norwich City has scored and conceded in 6 of 7 away fixtures.",
       "warnings": []
@@ -695,7 +526,7 @@
       "away_goals_conceded": 8,
       "home_goals_per_game": 0.86,
       "home_conceded_per_game": 1.57,
-      "away_goals_per_game": 2.0,
+      "away_goals_per_game": 2,
       "away_conceded_per_game": 1.14,
       "home_overall_matches_played": 14,
       "home_overall_goals_scored": 13,
@@ -828,14 +659,14 @@
       "alignment_delta_pp": 0,
       "alignment_remark": "very_high",
       "edge_remark": "medium",
-      "actual_home_score": null,
-      "actual_away_score": null,
-      "result": "pending",
+      "actual_home_score": 0,
+      "actual_away_score": 0,
+      "result": "lost",
       "comment": "Shadow Alternative 3. Championship leaders Middlesbrough (1st, 28 pts) travel to struggling Watford (20th, 14 pts). Dominance ratio of 2.99 confirms heavy superiority. Over 2.5 is disqualified by DCI floor (0.33 < 0.45). Away Win qualified under Section 3.5 with 69.8% model probability, draw suppressed at 17.5%, and positive EV (+0.054).",
       "notes": "Watford has won only 2 of 7 home matches.",
       "warnings": [
         {
-          "warning_uuid": "e9321c40-1092-4912-88fb-67da5102c301",
+          "warning_uuid": "fa4f6c09-e6c2-4531-a781-7e99bf0405a3",
           "type": "ONE_SIDED_SCORING_RISK",
           "severity": "HIGH",
           "market_relevance": "DIRECT",
@@ -843,8 +674,8 @@
           "description": "Severe attacking asymmetry: dominant side heavily favored while opponent exhibits low scoring potential.",
           "evidence": "Watford home scoring rate is only 0.86 GF/G against Boro away defense of 1.14 GA/G.",
           "pre_match_status": "CONFIRMED",
-          "post_match_status": "PENDING",
-          "review_notes": null
+          "post_match_status": "CONFIRMED",
+          "review_notes": "Away favorite fatigue and defensive obstruction materialized. Watford parked a compact low block, holding Middlesbrough to a 0-0 draw."
         }
       ]
     },
@@ -881,7 +712,7 @@
       "odds": 1.46,
       "estimated_probability": 0.735,
       "breakeven_probability": 0.685,
-      "edge_percentage_points": 5.0,
+      "edge_percentage_points": 5,
       "expected_value": 0.073,
       "current_league_home_avg": 1.48,
       "current_league_away_avg": 1.18,
@@ -922,7 +753,7 @@
           "alignment_remark": "very_high",
           "alignment_delta_pp": 0,
           "breakeven_probability": 0.308,
-          "edge_percentage_points": 3.0,
+          "edge_percentage_points": 3,
           "historical_probability": 0.338
         },
         "btts_yes": {
@@ -935,7 +766,7 @@
           "alignment_remark": "very_high",
           "alignment_delta_pp": 0,
           "breakeven_probability": 0.685,
-          "edge_percentage_points": 5.0,
+          "edge_percentage_points": 5,
           "historical_probability": 0.735
         },
         "home_dnb": {
@@ -997,12 +828,181 @@
       "alignment_delta_pp": 0,
       "alignment_remark": "very_high",
       "edge_remark": "medium",
-      "actual_home_score": null,
-      "actual_away_score": null,
-      "result": "pending",
+      "actual_home_score": 5,
+      "actual_away_score": 4,
+      "result": "won",
       "comment": "Shadow Alternative 4. Highly open Championship pairing. Both teams score 1.71 goals/game and concede 1.57 goals/game at venue. DCI is 0.88, demonstrating flawless bilateral scoring momentum. BTTS Yes probability of 73.5% provides +5.0pp value edge at 1.46 odds.",
       "notes": "Cardiff City matches average 3.21 goals per match this season.",
       "warnings": []
+    },
+    {
+      "match_date": "2026-11-07",
+      "country": "England",
+      "league": "England Premier League",
+      "home_team": "Nottingham Forest",
+      "away_team": "Manchester City",
+      "home_league_position": 19,
+      "away_league_position": 2,
+      "home_matches_played": 4,
+      "away_matches_played": 4,
+      "home_goals_scored": 3,
+      "home_goals_conceded": 5,
+      "away_goals_scored": 9,
+      "away_goals_conceded": 4,
+      "home_goals_per_game": 0.75,
+      "home_conceded_per_game": 1.25,
+      "away_goals_per_game": 2.25,
+      "away_conceded_per_game": 1,
+      "home_overall_matches_played": 9,
+      "home_overall_goals_scored": 6,
+      "home_overall_goals_conceded": 12,
+      "home_overall_goals_per_game": 0.67,
+      "home_overall_conceded_per_game": 1.33,
+      "away_overall_matches_played": 9,
+      "away_overall_goals_scored": 20,
+      "away_overall_goals_conceded": 10,
+      "away_overall_goals_per_game": 2.22,
+      "away_overall_conceded_per_game": 1.11,
+      "market": "Match Winner",
+      "selection": "Away Win",
+      "odds": 1.75,
+      "estimated_probability": 0.698,
+      "breakeven_probability": 0.571,
+      "edge_percentage_points": 12.7,
+      "expected_value": 0.222,
+      "current_league_home_avg": 1.58,
+      "current_league_away_avg": 1.28,
+      "historical_league_home_avg": 1.55,
+      "historical_league_away_avg": 1.25,
+      "historical_estimated_probability": 0.694,
+      "prob_over_1_5": 0.848,
+      "prob_over_2_5": 0.612,
+      "prob_btts_yes": 0.485,
+      "prob_under_3_5": 0.682,
+      "prob_home_win": 0.124,
+      "prob_away_win": 0.698,
+      "prob_draw": 0.178,
+      "market_evaluations": {
+        "draw": {
+          "market": "Match Winner",
+          "selection": "Draw",
+          "probability": 0.178,
+          "alignment_remark": "very_high",
+          "alignment_delta_pp": 0.3,
+          "historical_probability": 0.181
+        },
+        "away_dnb": {
+          "market": "Draw No Bet",
+          "selection": "Away DNB",
+          "probability": 0.8491,
+          "alignment_remark": "very_high",
+          "alignment_delta_pp": 0.3,
+          "historical_probability": 0.846
+        },
+        "away_win": {
+          "odds": 1.75,
+          "market": "Match Winner",
+          "selection": "Away Win",
+          "edge_remark": "very_high",
+          "probability": 0.698,
+          "expected_value": 0.222,
+          "alignment_remark": "very_high",
+          "alignment_delta_pp": 0.4,
+          "breakeven_probability": 0.571,
+          "edge_percentage_points": 12.7,
+          "historical_probability": 0.694
+        },
+        "btts_yes": {
+          "odds": 1.63,
+          "market": "Both Teams to Score",
+          "selection": "Yes",
+          "edge_remark": "very_low",
+          "probability": 0.485,
+          "expected_value": -0.209,
+          "alignment_remark": "very_high",
+          "alignment_delta_pp": 0.4,
+          "breakeven_probability": 0.613,
+          "edge_percentage_points": -12.8,
+          "historical_probability": 0.489
+        },
+        "home_dnb": {
+          "market": "Draw No Bet",
+          "selection": "Home DNB",
+          "probability": 0.1509,
+          "alignment_remark": "very_high",
+          "alignment_delta_pp": 0.3,
+          "historical_probability": 0.154
+        },
+        "home_win": {
+          "odds": 4.5,
+          "market": "Match Winner",
+          "selection": "Home Win",
+          "edge_remark": "very_low",
+          "probability": 0.124,
+          "expected_value": -0.442,
+          "alignment_remark": "very_high",
+          "alignment_delta_pp": 0.1,
+          "breakeven_probability": 0.222,
+          "edge_percentage_points": -9.8,
+          "historical_probability": 0.125
+        },
+        "over_1_5": {
+          "odds": 1.21,
+          "market": "Over/Under",
+          "selection": "Over 1.5",
+          "edge_remark": "low",
+          "probability": 0.848,
+          "expected_value": 0.026,
+          "alignment_remark": "very_high",
+          "alignment_delta_pp": 0.3,
+          "breakeven_probability": 0.826,
+          "edge_percentage_points": 2.2,
+          "historical_probability": 0.845
+        },
+        "over_2_5": {
+          "odds": 1.67,
+          "market": "Over/Under",
+          "selection": "Over 2.5",
+          "edge_remark": "medium",
+          "probability": 0.612,
+          "expected_value": 0.022,
+          "alignment_remark": "very_high",
+          "alignment_delta_pp": 0.4,
+          "breakeven_probability": 0.599,
+          "edge_percentage_points": 1.3,
+          "historical_probability": 0.608
+        },
+        "under_3_5": {
+          "market": "Over/Under",
+          "selection": "Under 3.5",
+          "probability": 0.682,
+          "alignment_remark": "very_high",
+          "alignment_delta_pp": 0.3,
+          "historical_probability": 0.685
+        }
+      },
+      "alignment_delta_pp": 0.4,
+      "alignment_remark": "very_high",
+      "edge_remark": "very_high",
+      "actual_home_score": 3,
+      "actual_away_score": 1,
+      "result": "lost",
+      "comment": "Shadow Alternative 1. Title contenders Manchester City (2nd, 21 pts) visit relegation-threatened Nottingham Forest (19th, 6 pts). City averages 2.25 GF/G away, while Forest scores only 0.75 GF/G at home. Dominance ratio is 3.26 with draw suppressed at 17.8%. High model probability of 69.8% yields +12.7pp value edge and +0.222 EV at 1.75 odds.",
+      "notes": "Small-sample venue trigger (4 venue matches each); regression anchors applied.",
+      "warnings": [
+        {
+          "warning_uuid": "4555b681-c76e-4ede-b67e-9cbe0521e549",
+          "type": "SMALL_SAMPLE",
+          "severity": "LOW",
+          "market_relevance": "CONTEXTUAL",
+          "direction": "NEUTRAL",
+          "description": "Venue matches played is 4 for both teams (below 5-match sample anchor).",
+          "evidence": "Forest 4 home matches, Man City 4 away matches; sample size reflects early Matchday 10 calendar.",
+          "pre_match_status": "CONFIRMED",
+          "post_match_status": "CONFIRMED",
+          "review_notes": "Away favorite vulnerability materialized dramatically. 19th-place Forest exploited high defensive transition vulnerabilities, shocking Manchester City 3-1."
+        }
+      ]
     },
     {
       "match_date": "2026-11-07",
@@ -1153,9 +1153,9 @@
       "alignment_delta_pp": 0.3,
       "alignment_remark": "very_high",
       "edge_remark": "medium",
-      "actual_home_score": null,
-      "actual_away_score": null,
-      "result": "pending",
+      "actual_home_score": 1,
+      "actual_away_score": 1,
+      "result": "won",
       "comment": "Shadow Alternative 5. Symmetrical Premier League mid-table encounter at Craven Cottage. Newcastle concedes 1.60 GA/G away while Fulham concedes 1.25 GA/G at home. DCI of 0.80 satisfies the 0.50 openness floor for BTTS Yes. Model probability of 66.5% gives +3.2pp value edge at 1.58 odds.",
       "notes": "Both teams have scored in 3 of Fulham's 4 home matches.",
       "warnings": []
@@ -1163,7 +1163,7 @@
   ],
   "warnings": [
     {
-      "warning_uuid": "d8213b94-82a1-42e1-95b7-7893a9b1c201",
+      "warning_uuid": "3d5214d9-95b8-4005-b706-b059e9090e42",
       "target_type": "selection",
       "match": {
         "home_team": "Queens Park Rangers",
@@ -1172,9 +1172,9 @@
         "league": "England Championship",
         "market": "Match Winner",
         "selection": "Home Win",
-        "actual_home_score": null,
-        "actual_away_score": null,
-        "result": "pending"
+        "actual_home_score": 2,
+        "actual_away_score": 1,
+        "result": "won"
       },
       "type": "ONE_SIDED_SCORING_RISK",
       "severity": "HIGH",
@@ -1183,11 +1183,11 @@
       "description": "Severe attacking asymmetry: dominant host heavily favored while opponent exhibits low scoring potential.",
       "evidence": "Lincoln City away scoring rate is only 0.71 GF/G against QPR home defense of 0.86 GA/G. Properly channeled into Home Win market.",
       "pre_match_status": "CONFIRMED",
-      "post_match_status": "PENDING",
-      "review_notes": "Value is captured in the Match Winner market."
+      "post_match_status": "CONFIRMED",
+      "review_notes": "Dominant home performance verified. QPR converted superiority into a 2-1 victory, capturing the +9.9pp value edge."
     },
     {
-      "warning_uuid": "3a921d05-4c55-467f-9b41-55fa1982b102",
+      "warning_uuid": "2ea24203-877b-489b-a7fa-8fd1781d597f",
       "target_type": "selection",
       "match": {
         "home_team": "Blackburn Rovers",
@@ -1196,9 +1196,9 @@
         "league": "England Championship",
         "market": "Over/Under",
         "selection": "Over 2.5",
-        "actual_home_score": null,
-        "actual_away_score": null,
-        "result": "pending"
+        "actual_home_score": 2,
+        "actual_away_score": 1,
+        "result": "won"
       },
       "type": "HIGH_SCORING_CORRIDOR",
       "severity": "LOW",
@@ -1207,11 +1207,11 @@
       "description": "West Ham's league-leading attack (36 GF in 14 MP) and reciprocal defensive leakage confirm explosive multi-goal environment.",
       "evidence": "Total expected goals lambda is 4.20 with DCI 0.585.",
       "pre_match_status": "CONFIRMED",
-      "post_match_status": "PENDING",
-      "review_notes": "Ideal booster leg."
+      "post_match_status": "CONFIRMED",
+      "review_notes": "High scoring confirmed. Match finished 2-1 (3 goals), clearing Over 2.5 cleanly and validating the DCI model."
     },
     {
-      "warning_uuid": "b5102f41-0982-452a-9218-a66428c0b201",
+      "warning_uuid": "4555b681-c76e-4ede-b67e-9cbe0521e549",
       "target_type": "alternative",
       "match": {
         "home_team": "Nottingham Forest",
@@ -1220,9 +1220,9 @@
         "league": "England Premier League",
         "market": "Match Winner",
         "selection": "Away Win",
-        "actual_home_score": null,
-        "actual_away_score": null,
-        "result": "pending"
+        "actual_home_score": 3,
+        "actual_away_score": 1,
+        "result": "lost"
       },
       "type": "SMALL_SAMPLE",
       "severity": "LOW",
@@ -1231,11 +1231,11 @@
       "description": "Venue matches played is 4 for both teams (below 5-match sample anchor).",
       "evidence": "Forest 4 home matches, Man City 4 away matches; sample size reflects early Matchday 10 calendar.",
       "pre_match_status": "CONFIRMED",
-      "post_match_status": "PENDING",
-      "review_notes": null
+      "post_match_status": "CONFIRMED",
+      "review_notes": "Away favorite vulnerability materialized dramatically. 19th-place Forest exploited high defensive transition vulnerabilities, shocking Manchester City 3-1."
     },
     {
-      "warning_uuid": "e9321c40-1092-4912-88fb-67da5102c301",
+      "warning_uuid": "fa4f6c09-e6c2-4531-a781-7e99bf0405a3",
       "target_type": "alternative",
       "match": {
         "home_team": "Watford",
@@ -1244,9 +1244,9 @@
         "league": "England Championship",
         "market": "Match Winner",
         "selection": "Away Win",
-        "actual_home_score": null,
-        "actual_away_score": null,
-        "result": "pending"
+        "actual_home_score": 0,
+        "actual_away_score": 0,
+        "result": "lost"
       },
       "type": "ONE_SIDED_SCORING_RISK",
       "severity": "HIGH",
@@ -1255,8 +1255,8 @@
       "description": "Severe attacking asymmetry: dominant side heavily favored while opponent exhibits low scoring potential.",
       "evidence": "Watford home scoring rate is only 0.86 GF/G against Boro away defense of 1.14 GA/G.",
       "pre_match_status": "CONFIRMED",
-      "post_match_status": "PENDING",
-      "review_notes": null
+      "post_match_status": "CONFIRMED",
+      "review_notes": "Away favorite fatigue and defensive obstruction materialized. Watford parked a compact low block, holding Middlesbrough to a 0-0 draw."
     }
   ]
 }
