@@ -520,6 +520,24 @@ def detect_standard_warnings(
             "post_match_status": "PENDING",
             "review_notes": None,
         })
+
+    # 4f. Away Favorite Vulnerability Check (Section 3.5 Away Favorite Restriction)
+    is_away_win_selection = (market_key in ["to_win", "match_winner", "1x2"] and "away" in (selection_type or "").lower())
+    is_away_favored = lambda_away > lambda_home or (odds <= 1.85 and "away" in (selection_type or "").lower())
+    if is_away_win_selection and is_away_favored:
+        warnings.append({
+            "type": "AWAY_FAVORITE_VULNERABILITY",
+            "severity": "HIGH",
+            "market_relevance": "DIRECT",
+            "direction": "CONTRADICTORY",
+            "description": f"Away favorite risk ({away_team}): home underdogs frequently deploy compact low blocks (5-4-1) or lethal transition counters.",
+            "evidence": f"{away_team} is favored away from home. Under Section 3.5 AWAY_FAVORITE_RESTRICTION, straight 1X2 Away Win is prohibited on main tickets. Use Draw No Bet (DNB), Double Chance (X2), or open Goal Markets.",
+            "verified": True,
+            "numerical_adjustment": False,
+            "pre_match_status": "CONFIRMED",
+            "post_match_status": "PENDING",
+            "review_notes": None,
+        })
     if h2h_notes and any(term in h2h_notes.lower() for term in ["low-scoring", "0-0", "1-0", "tight", "tactical"]):
         warnings.append({
             "type": "H2H_LOW_GOALS",

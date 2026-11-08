@@ -195,7 +195,8 @@ Using the bivariate joint probability matrix $P(i, j) = \frac{\lambda_{\text{hom
 
 ### 6.8 Dominance Ratio (DR) for "To Win" Qualification
 $$\text{DR} = \frac{\lambda_{\text{favored}}}{\lambda_{\text{underdog}}}$$
-- **Straight Win (1X2) Hard Threshold**: $\text{DR} \ge 2.20$, $\lambda_{\text{favored}} \ge 1.75\text{ GF/G}$, $\lambda_{\text{underdog}} \le 0.85\text{ GF/G}$, and $P(\text{Draw}) \le 22.0\%$.
+- **Dominant Home Win (1X2) Hard Threshold**: $\text{DR} \ge 2.20$, $\lambda_{\text{favored}} \ge 1.75\text{ GF/G}$, $\lambda_{\text{underdog}} \le 0.85\text{ GF/G}$, and $P(\text{Draw}) \le 22.0\%$. Permitted on main tickets strictly between established senior first-teams.
+- **Away Favorite Restriction (`AWAY_FAVORITE_RESTRICTION`)**: Straight 1X2 Away Win selections are **strictly prohibited on Main Capital Tickets (`selections`)** due to home underdog low-block draw traps and hostile venue transition volatility. Away favorites must use Draw No Bet (DNB), Double Chance (X2), or open Goal Markets (Over 1.5/2.5, BTTS Yes).
 - **Draw No Bet (DNB) Threshold**: $\text{DR} \ge 1.80$, $P(\text{Win}) \ge 60.0\%$, and $P(\text{Loss}) \le 16.0\%$. Draws void the leg.
 
 
@@ -236,7 +237,8 @@ The model actively searches for evidence that challenges market viability. Warni
 
 #### C. Match Winner / "To Win" Warnings
 - `DRAW_TRAP_RISK`: Calculated draw probability exceeds 22.0% ($P(\text{Draw}) > 0.22$), or head-to-head history is heavily concentrated in draws.
-- `UNDERDOG_RESILIENCE`: Away underdog concedes $\le 1.10$ GA/G away and has a draw rate $\ge 35\%$.
+- `UNDERDOG_RESILIENCE`: The underdog concedes $\le 1.15$ GA/G at venue and maintains a draw rate $\ge 35\%$, demonstrating systemic ability to grind out low-margin points.
+- `AWAY_FAVORITE_VULNERABILITY`: An away favorite with odds $\le 1.85$ or $P(\text{Win}) \ge 60\%$ visits a home underdog. Underdogs defending on home turf deploy compact low blocks (5-4-1) and leverage crowd energy, elevating fat-tail 0–0 / 1–1 draw rates and transition counter-attack risk above theoretical Poisson predictions (as observed in Watford 0–0 Middlesbrough and Forest 3–1 Man City). Under Section 3.5 of `selection_process.md`, straight Away Win is strictly prohibited on main capital tickets; mandates Draw No Bet (DNB), Double Chance (X2), or Goal Market conversion.
 - `VENUE_INVERSION`: Favorite holds weak venue win record ($< 60\%$) despite high overall league table standing.
 - `DERBY_MATCH_VOLATILITY`: Intense local derby introducing high-card and low-margin disruption.
 - `RESERVE_SQUAD_VOLATILITY`: One of the participating clubs is a youth academy or reserve squad (e.g. Dutch *"Jong"*, Spanish *"B"*, German *"II"*). Development squads suffer from unpredictable weekly roster turnover, first-team drop-downs, and non-standard promotional incentives, introducing fat-tail draw and upset variance in 1X2 Match Winner markets. Disqualifies straight win picks from main tickets; re-channels selection into open goal markets or Draw No Bet.
