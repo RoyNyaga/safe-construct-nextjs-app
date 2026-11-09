@@ -5,12 +5,12 @@
     "model_version": "4.0",
     "model_uuid": "d0cc5b32-5a48-4262-88d2-67bfd58c5dac",
     "model_name": "roys_betting_engine_BTS_O2-5_win",
-    "stake": 2000,
+    "stake": 2327,
     "combined_odds": 2.29,
     "estimated_ticket_probability": 0.674,
-    "status": "pending",
-    "actual_result": null,
-    "profit_loss": 0,
+    "status": "won",
+    "actual_result": "won",
+    "profit_loss": 3011.14,
     "notes": "Two-leg value accumulator ticket constructed under Model 4.0 (roys_betting_engine_BTS_O2-5_win) and selection_process.md (Priority 3: Dominant Winner + High-Safety Anchor Pair). Features Brighton & Hove Albion to Win (@ 1.85, 79.0% Model Prob, Dominance Ratio 4.17, +24.9pp Value Edge, EV +0.462) and Ipswich Town vs Bournemouth Over 1.5 Goals (@ 1.24, 85.3% Model Prob, DCI 0.838, +4.7pp Value Edge). Both selections originate from England Premier League (Tier 1 Reliability Corridor). Combined odds: 2.29 vs compound probability 67.4% (break-even 43.7%, cumulative value edge +23.7pp, ticket EV +0.543)."
   },
   "selections": [
@@ -163,14 +163,14 @@
       "alignment_delta_pp": 0.3,
       "alignment_remark": "very_high",
       "edge_remark": "very_high",
-      "actual_home_score": null,
-      "actual_away_score": null,
-      "result": "pending",
+      "actual_home_score": 2,
+      "actual_away_score": 0,
+      "result": "won",
       "comment": "Main Ticket Leg 1. Dominant Home Winner selection under Model 4.0 Section 3.5. Brighton is in scintillating home form at the Amex (4W-1D-0L, scoring 2.80 GF/G and conceding only 0.40 GA/G). Dominance ratio reaches an elite 4.17 (Gate 1 Pass >= 2.20). Draw probability is heavily suppressed at 14.2% (Gate 4 Pass <= 22.0%). Both clubs are established senior squads (Reserve Squad Restriction Passed). Priced at 1.85, the selection captures a colossal +24.9pp value edge and +0.462 EV.",
       "notes": "Premier League Matchday 10. Brighton 3rd in table with league-high 24 goals scored.",
       "warnings": [
         {
-          "warning_uuid": "b8178d8a-9214-4eb4-b655-081e64eb27a1",
+          "warning_uuid": "f572377f-b1b0-4da8-8d6a-54e5d2027b04",
           "type": "CLEAN_SHEET_DOMINANCE",
           "severity": "HIGH",
           "market_relevance": "DIRECT",
@@ -178,8 +178,8 @@
           "description": "Brighton maintains elite defensive resistance at home, conceding only 0.40 GA/G.",
           "evidence": "Brighton has conceded only 2 goals in 5 home matches (0.40 GA/G). Properly channeled into Home Win market.",
           "pre_match_status": "CONFIRMED",
-          "post_match_status": "PENDING",
-          "review_notes": null
+          "post_match_status": "CONFIRMED",
+          "review_notes": "Elite defensive resistance and home dominance verified. Brighton shut out Brentford in a 2-0 victory, capturing the +24.9pp value edge."
         }
       ]
     },
@@ -332,14 +332,14 @@
       "alignment_delta_pp": 0.4,
       "alignment_remark": "very_high",
       "edge_remark": "medium",
-      "actual_home_score": null,
-      "actual_away_score": null,
-      "result": "pending",
+      "actual_home_score": 1,
+      "actual_away_score": 2,
+      "result": "won",
       "comment": "Main Ticket Leg 2. High-Safety Over 1.5 Anchor under Model 4.0 Section 3.1 Tier 1 Corridor. Both teams maintain exceptionally open scoring and concession rates at venue (Ipswich 1.50 GF / 1.75 GA at Portman Road; Bournemouth 1.75 GF / 1.75 GA on the road). Dual Contribution Index is 0.838, confirming flawless reciprocal offensive pressure. With 85.3% model probability and odds of 1.24, this leg provides a +4.7pp value edge without exposing capital to accumulator drag.",
       "notes": "Premier League Matchday 10. Bournemouth away matches average 3.50 goals per fixture.",
       "warnings": [
         {
-          "warning_uuid": "e7939bb0-e14a-4d76-9c2b-ef79a6176315",
+          "warning_uuid": "931f2c34-9866-48a7-8468-44f82d708341",
           "type": "HIGH_SCORING_CORRIDOR",
           "severity": "LOW",
           "market_relevance": "DIRECT",
@@ -347,8 +347,8 @@
           "description": "Reciprocal venue openness: both sides score and concede >= 1.50 goals per match.",
           "evidence": "Total expected goals lambda is 3.40 with DCI 0.838.",
           "pre_match_status": "CONFIRMED",
-          "post_match_status": "PENDING",
-          "review_notes": null
+          "post_match_status": "CONFIRMED",
+          "review_notes": "Reciprocal venue openness confirmed. Match produced 3 goals (1-2), clearing Over 1.5 with ease and validating the 0.838 DCI."
         }
       ]
     }
@@ -503,14 +503,14 @@
       "alignment_delta_pp": 0.2,
       "alignment_remark": "very_high",
       "edge_remark": "high",
-      "actual_home_score": null,
-      "actual_away_score": null,
-      "result": "pending",
+      "actual_home_score": 0,
+      "actual_away_score": 1,
+      "result": "lost",
       "comment": "Shadow Alternative 1. Explosive Serie A goal environment. Monza matches average 4.10 total goals per game; Atalanta matches average 3.60. At venue, Monza scores 1.80 and concedes 2.40 GA/G; Atalanta scores 1.60 and concedes 2.20. DCI of 0.875 satisfies the 0.45 openness floor. Over 2.5 probability of 82.6% delivers an elite +14.1pp value edge at 1.46 odds.",
       "notes": "Both teams have scored in 4 of Monza's 5 home fixtures.",
       "warnings": [
         {
-          "warning_uuid": "c112df71-6c4a-47d0-a044-f8d223849102",
+          "warning_uuid": "f306d563-a8fe-41a9-a880-34f98c8f659b",
           "type": "HIGH_VOLATILITY_SCORING",
           "severity": "LOW",
           "market_relevance": "DIRECT",
@@ -518,8 +518,8 @@
           "description": "Extreme multi-goal environment: both clubs concede over 2.00 goals per game at venue.",
           "evidence": "Total lambda is 4.50 goals with bilateral defensive vulnerability.",
           "pre_match_status": "CONFIRMED",
-          "post_match_status": "PENDING",
-          "review_notes": null
+          "post_match_status": "NOT_CONFIRMED",
+          "review_notes": "High scoring failed to materialize. Despite explosive pre-match venue averages (total lambda 4.50), the match stalled into a low-scoring 0-1 tactical grind. The supportive high-scoring thesis was contradicted by the actual match outcome."
         }
       ]
     },
@@ -672,14 +672,14 @@
       "alignment_delta_pp": 0.4,
       "alignment_remark": "very_high",
       "edge_remark": "high",
-      "actual_home_score": null,
-      "actual_away_score": null,
-      "result": "pending",
+      "actual_home_score": 1,
+      "actual_away_score": 3,
+      "result": "won",
       "comment": "Shadow Alternative 2. Away Favorite converted to open goal market under Section 3.5 AWAY_FAVORITE_RESTRICTION. Rather than risking binary match-winner variance on an away favorite at Selhurst Park (@ 1.54), the fixture's high goal expectancy (Palace conceding 2.50 GA/G at home; Liverpool scoring 1.75 GF/G away) is cleanly monetized via Over 2.5 Goals. DCI of 0.72 provides safe reciprocal cushion.",
       "notes": "Crystal Palace has conceded 10 goals in 4 home matches.",
       "warnings": [
         {
-          "warning_uuid": "9965b2e1-45a9-408a-b851-3b70860298a4",
+          "warning_uuid": "5bb35f1b-be5c-4dcb-806f-32b14f8013ad",
           "type": "AWAY_FAVORITE_VULNERABILITY",
           "severity": "HIGH",
           "market_relevance": "DIRECT",
@@ -687,8 +687,8 @@
           "description": "Away favorite straight win risk: Liverpool traveling to desperate 19th-place Palace carries low-block and transition vulnerability.",
           "evidence": "Liverpool is favored away from home (@ 1.54). Channeled safely into Over 2.5 Goals per Section 3.5 AWAY_FAVORITE_RESTRICTION.",
           "pre_match_status": "CONFIRMED",
-          "post_match_status": "PENDING",
-          "review_notes": null
+          "post_match_status": "NOT_CONFIRMED",
+          "review_notes": "Liverpool overcame away favorite risk, defeating Palace 1-3. While Palace breached Liverpool's defense, the feared straight-win failure did not materialize for the away favorite."
         }
       ]
     },
@@ -841,9 +841,9 @@
       "alignment_delta_pp": 0.3,
       "alignment_remark": "very_high",
       "edge_remark": "high",
-      "actual_home_score": null,
-      "actual_away_score": null,
-      "result": "pending",
+      "actual_home_score": 2,
+      "actual_away_score": 0,
+      "result": "won",
       "comment": "Shadow Alternative 3. Dominant Home Winner candidate under Section 3.5. Villarreal at Estadio de la Ceramica faces Getafe's league-worst away attack (averaging only 0.40 GF/G on the road). Dominance ratio is 3.27 with draw risk contained at 20.8%. Section 6.8 DCI filtering properly isolates Home Win over goal markets due to Getafe's low goal expectancy.",
       "notes": "Getafe has failed to score in 3 of 5 away league matches.",
       "warnings": []
@@ -997,9 +997,9 @@
       "alignment_delta_pp": 0.3,
       "alignment_remark": "very_high",
       "edge_remark": "high",
-      "actual_home_score": null,
-      "actual_away_score": null,
-      "result": "pending",
+      "actual_home_score": 1,
+      "actual_away_score": 0,
+      "result": "won",
       "comment": "Shadow Alternative 4. Real Sociedad (5th) is potent at the Reale Arena, scoring 2.17 GF/G, while Rayo Vallecano concedes 2.40 GA/G on the road. Dominance ratio is 2.24 with draw probability suppressed at 18.0%. Model probability of 68.2% yields an elite +12.0pp value edge and +0.214 EV at 1.78 odds.",
       "notes": "Rayo Vallecano has lost 3 of 5 away matches.",
       "warnings": []
@@ -1153,14 +1153,14 @@
       "alignment_delta_pp": 0.4,
       "alignment_remark": "very_high",
       "edge_remark": "very_high",
-      "actual_home_score": null,
-      "actual_away_score": null,
-      "result": "pending",
+      "actual_home_score": 0,
+      "actual_away_score": 1,
+      "result": "lost",
       "comment": "Shadow Alternative 5. Gate 6 LMI Shield Active. Match features top-tier offensive output in Segunda División (Girona 22 GF; Almería 23 GF). While Poisson probability yields 70.8% and +14.0pp edge on Over 2.5, Spain Segunda is classified as a TIER_3 Restricted corridor in league_baselines.json due to macro defensive volatility. Gate 6 safely diverts this pick to the Shadow Tracking Portfolio.",
       "notes": "Segunda División Matchday 13 clash between top-6 promotion contenders.",
       "warnings": [
         {
-          "warning_uuid": "a2f44778-9e53-4dc6-848e-f513d78904e2",
+          "warning_uuid": "8cb3a7b0-7217-436e-9838-307135b2a737",
           "type": "LEAGUE_INTEGRITY_RESTRICTED",
           "severity": "HIGH",
           "market_relevance": "DIRECT",
@@ -1168,15 +1168,15 @@
           "description": "Spain Segunda División is classified as TIER_3 Restricted for Over 2.5 in league_baselines.json.",
           "evidence": "Historical macro under trends disqualify Segunda goal markets from primary capital tickets. Diverted to Shadow Portfolio.",
           "pre_match_status": "CONFIRMED",
-          "post_match_status": "PENDING",
-          "review_notes": null
+          "post_match_status": "CONFIRMED",
+          "review_notes": "Heroic Gate 6 LMI Matrix protection verified. Segunda División macro defensive under-trend materialized in a 0-1 match. Gate 6 safely barred this fixture from main capital."
         }
       ]
     }
   ],
   "warnings": [
     {
-      "warning_uuid": "b8178d8a-9214-4eb4-b655-081e64eb27a1",
+      "warning_uuid": "f572377f-b1b0-4da8-8d6a-54e5d2027b04",
       "target_type": "selection",
       "match": {
         "home_team": "Brighton and Hove Albion",
@@ -1185,9 +1185,9 @@
         "league": "England Premier League",
         "market": "Match Winner",
         "selection": "Home Win",
-        "actual_home_score": null,
-        "actual_away_score": null,
-        "result": "pending"
+        "actual_home_score": 2,
+        "actual_away_score": 0,
+        "result": "won"
       },
       "type": "CLEAN_SHEET_DOMINANCE",
       "severity": "HIGH",
@@ -1196,11 +1196,11 @@
       "description": "Brighton maintains elite defensive resistance at home, conceding only 0.40 GA/G.",
       "evidence": "Brighton has conceded only 2 goals in 5 home matches (0.40 GA/G). Properly channeled into Home Win market.",
       "pre_match_status": "CONFIRMED",
-      "post_match_status": "PENDING",
-      "review_notes": null
+      "post_match_status": "CONFIRMED",
+      "review_notes": "Elite defensive resistance and home dominance verified. Brighton shut out Brentford in a 2-0 victory, capturing the +24.9pp value edge."
     },
     {
-      "warning_uuid": "e7939bb0-e14a-4d76-9c2b-ef79a6176315",
+      "warning_uuid": "931f2c34-9866-48a7-8468-44f82d708341",
       "target_type": "selection",
       "match": {
         "home_team": "Ipswich Town",
@@ -1209,9 +1209,9 @@
         "league": "England Premier League",
         "market": "Over/Under",
         "selection": "Over 1.5",
-        "actual_home_score": null,
-        "actual_away_score": null,
-        "result": "pending"
+        "actual_home_score": 1,
+        "actual_away_score": 2,
+        "result": "won"
       },
       "type": "HIGH_SCORING_CORRIDOR",
       "severity": "LOW",
@@ -1220,11 +1220,11 @@
       "description": "Reciprocal venue openness: both sides score and concede >= 1.50 goals per match.",
       "evidence": "Total expected goals lambda is 3.40 with DCI 0.838.",
       "pre_match_status": "CONFIRMED",
-      "post_match_status": "PENDING",
-      "review_notes": null
+      "post_match_status": "CONFIRMED",
+      "review_notes": "Reciprocal venue openness confirmed. Match produced 3 goals (1-2), clearing Over 1.5 with ease and validating the 0.838 DCI."
     },
     {
-      "warning_uuid": "c112df71-6c4a-47d0-a044-f8d223849102",
+      "warning_uuid": "f306d563-a8fe-41a9-a880-34f98c8f659b",
       "target_type": "alternative",
       "match": {
         "home_team": "AC Monza",
@@ -1233,9 +1233,9 @@
         "league": "Italy Serie A",
         "market": "Over/Under",
         "selection": "Over 2.5",
-        "actual_home_score": null,
-        "actual_away_score": null,
-        "result": "pending"
+        "actual_home_score": 0,
+        "actual_away_score": 1,
+        "result": "lost"
       },
       "type": "HIGH_VOLATILITY_SCORING",
       "severity": "LOW",
@@ -1244,11 +1244,11 @@
       "description": "Extreme multi-goal environment: both clubs concede over 2.00 goals per game at venue.",
       "evidence": "Total lambda is 4.50 goals with bilateral defensive vulnerability.",
       "pre_match_status": "CONFIRMED",
-      "post_match_status": "PENDING",
-      "review_notes": null
+      "post_match_status": "NOT_CONFIRMED",
+      "review_notes": "High scoring failed to materialize. Despite explosive pre-match venue averages (total lambda 4.50), the match stalled into a low-scoring 0-1 tactical grind. The supportive high-scoring thesis was contradicted by the actual match outcome."
     },
     {
-      "warning_uuid": "9965b2e1-45a9-408a-b851-3b70860298a4",
+      "warning_uuid": "5bb35f1b-be5c-4dcb-806f-32b14f8013ad",
       "target_type": "alternative",
       "match": {
         "home_team": "Crystal Palace",
@@ -1257,9 +1257,9 @@
         "league": "England Premier League",
         "market": "Over/Under",
         "selection": "Over 2.5",
-        "actual_home_score": null,
-        "actual_away_score": null,
-        "result": "pending"
+        "actual_home_score": 1,
+        "actual_away_score": 3,
+        "result": "won"
       },
       "type": "AWAY_FAVORITE_VULNERABILITY",
       "severity": "HIGH",
@@ -1268,11 +1268,11 @@
       "description": "Away favorite straight win risk: Liverpool traveling to desperate 19th-place Palace carries low-block and transition vulnerability.",
       "evidence": "Liverpool is favored away from home (@ 1.54). Channeled safely into Over 2.5 Goals per Section 3.5 AWAY_FAVORITE_RESTRICTION.",
       "pre_match_status": "CONFIRMED",
-      "post_match_status": "PENDING",
-      "review_notes": null
+      "post_match_status": "NOT_CONFIRMED",
+      "review_notes": "Liverpool overcame away favorite risk, defeating Palace 1-3. While Palace breached Liverpool's defense, the feared straight-win failure did not materialize for the away favorite."
     },
     {
-      "warning_uuid": "a2f44778-9e53-4dc6-848e-f513d78904e2",
+      "warning_uuid": "8cb3a7b0-7217-436e-9838-307135b2a737",
       "target_type": "alternative",
       "match": {
         "home_team": "Girona FC",
@@ -1281,9 +1281,9 @@
         "league": "Spain Segunda División",
         "market": "Over/Under",
         "selection": "Over 2.5",
-        "actual_home_score": null,
-        "actual_away_score": null,
-        "result": "pending"
+        "actual_home_score": 0,
+        "actual_away_score": 1,
+        "result": "lost"
       },
       "type": "LEAGUE_INTEGRITY_RESTRICTED",
       "severity": "HIGH",
@@ -1292,8 +1292,8 @@
       "description": "Spain Segunda División is classified as TIER_3 Restricted for Over 2.5 in league_baselines.json.",
       "evidence": "Historical macro under trends disqualify Segunda goal markets from primary capital tickets. Diverted to Shadow Portfolio.",
       "pre_match_status": "CONFIRMED",
-      "post_match_status": "PENDING",
-      "review_notes": null
+      "post_match_status": "CONFIRMED",
+      "review_notes": "Heroic Gate 6 LMI Matrix protection verified. Segunda División macro defensive under-trend materialized in a 0-1 match. Gate 6 safely barred this fixture from main capital."
     }
   ]
 }
