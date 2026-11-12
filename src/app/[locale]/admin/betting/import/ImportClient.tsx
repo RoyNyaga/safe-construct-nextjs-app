@@ -411,14 +411,29 @@ export default function ImportClient({
         }
       }
 
-      // Resolve matching model UUID
+      // Resolve matching model UUID: strictly adhere to model stated in JSON unless retired
       const match =
         models.find((m) => m.uuid === obj.ticket?.model_uuid) ||
-        models.find((m) => m.version === obj.ticket?.model_version) ||
-        models.find((m) => m.is_active) ||
-        models[0]
+        models.find((m) => m.version === obj.ticket?.model_version)
+
       if (match) {
-        setSelectedModelUuid(match.uuid)
+        if (match.status === 'retired') {
+          // Model stated in JSON is retired: fallback to active model
+          const fallbackActive = models.find((m) => m.is_active) || models[0]
+          if (fallbackActive) {
+            setSelectedModelUuid(fallbackActive.uuid)
+          }
+        } else {
+          // Non-retired: strictly preserve
+          setSelectedModelUuid(match.uuid)
+        }
+      } else if (obj.ticket?.model_uuid) {
+        setSelectedModelUuid(obj.ticket.model_uuid)
+      } else {
+        const fallbackActive = models.find((m) => m.is_active) || models[0]
+        if (fallbackActive) {
+          setSelectedModelUuid(fallbackActive.uuid)
+        }
       }
 
       // Check ticket type and auto-generate ticket_number if missing or generic '001'

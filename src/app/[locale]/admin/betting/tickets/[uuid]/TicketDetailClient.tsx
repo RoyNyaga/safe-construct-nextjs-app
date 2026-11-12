@@ -48,6 +48,7 @@ import {
   ShieldAlert,
 } from 'lucide-react'
 import {
+  BettingModel,
   BettingTicket,
   BettingSelection,
   BettingAlternative,
@@ -77,12 +78,14 @@ import { PreMatchStatsTables } from '@/components/betting/PreMatchStatsTables'
 interface TicketDetailClientProps {
   locale: string
   ticket: BettingTicket
+  models?: BettingModel[]
   currency?: string
 }
 
 export default function TicketDetailClient({
   locale,
   ticket: initialTicket,
+  models = [],
   currency = 'FCFA',
 }: TicketDetailClientProps) {
   const router = useRouter()
@@ -95,6 +98,7 @@ export default function TicketDetailClient({
   const [editStake, setEditStake] = useState(ticket.stake ? ticket.stake.toString() : '')
   const [editNotes, setEditNotes] = useState(ticket.notes || '')
   const [editStatus, setEditStatus] = useState<TicketStatus>(ticket.status as TicketStatus)
+  const [editModelId, setEditModelId] = useState<number | ''>(ticket.model_id || '')
   const [isUpdatingTicket, setIsUpdatingTicket] = useState(false)
 
   // Delete Ticket State
@@ -507,6 +511,7 @@ ${warningExportJson}`
     setEditStake(ticket.stake ? ticket.stake.toString() : '')
     setEditNotes(ticket.notes || '')
     setEditStatus(ticket.status as TicketStatus)
+    setEditModelId(ticket.model_id || '')
     setIsEditTicketOpen(true)
   }
 
@@ -514,12 +519,16 @@ ${warningExportJson}`
   const handleSaveEditTicket = async () => {
     setIsUpdatingTicket(true)
     const stakeNum = parseFloat(editStake)
+    const newModelId = editModelId !== '' ? Number(editModelId) : null
     const res = await updateBettingTicket(ticket.id, {
       ticket_number: editTicketNumber,
       ticket_date: editTicketDate,
       stake: !isNaN(stakeNum) ? stakeNum : Number(ticket.stake),
       notes: editNotes,
       status: editStatus,
+      model_id: newModelId,
+
+
     })
     setIsUpdatingTicket(false)
 
@@ -533,9 +542,14 @@ ${warningExportJson}`
         stake: !isNaN(stakeNum) ? stakeNum : Number(ticket.stake),
         notes: editNotes,
         status: editStatus,
+        model_id: newModelId,
+
+
+        betting_models: (models || []).find((m) => m.id === newModelId) || (newModelId ? ticket.betting_models : null),
         actual_result: editStatus,
       })
       setIsEditTicketOpen(false)
+      router.refresh()
       setNotification({
         open: true,
         message: locale === 'fr' ? 'Ticket modifié avec succès !' : 'Ticket updated successfully!',
@@ -1272,9 +1286,9 @@ ${warningExportJson}`
                           )}
                           {((alt.prob_over_1_5 != null) || (alt.prob_over_2_5 != null) || (alt.prob_btts_yes != null) || (alt.prob_under_3_5 != null)) && (
                             <Box sx={{ display: 'flex', gap: 0.5, mt: 0.5, flexWrap: 'wrap', alignItems: 'center' }}>
-                            <Typography component="span" sx={{ fontSize: '0.62rem', color: '#9AA3B2', fontWeight: 700, mr: 0.25 }}>
-                              Goals:
-                            </Typography>
+                              <Typography component="span" sx={{ fontSize: '0.62rem', color: '#9AA3B2', fontWeight: 700, mr: 0.25 }}>
+                                Goals:
+                              </Typography>
                               {alt.prob_over_1_5 != null && (
                                 <Chip label={`O1.5: ${(Number(alt.prob_over_1_5) * 100).toFixed(0)}%`} size="small" sx={{ height: 16, fontSize: '0.62rem', backgroundColor: alpha('#42A5F5', 0.12), color: '#42A5F5', border: `1px solid ${alpha('#42A5F5', 0.3)}` }} />
                               )}
@@ -2344,7 +2358,7 @@ ${warningExportJson}`
                     </Typography>
                   </Grid>
                   {!((snapshotAlternative.home_goals_scored !== null && snapshotAlternative.home_goals_scored !== undefined) ||
-    
+
                     (snapshotAlternative.home_goals_per_game !== null && snapshotAlternative.home_goals_per_game !== undefined) ||
                     (snapshotAlternative.home_league_position !== null && snapshotAlternative.home_league_position !== undefined)) &&
                     ((snapshotAlternative.home_matches_played !== undefined && snapshotAlternative.home_matches_played !== null) ||
@@ -2614,8 +2628,8 @@ ${warningExportJson}`
               {((snapshotAlternative.home_goals_scored !== null && snapshotAlternative.home_goals_scored !== undefined) ||
                 (snapshotAlternative.home_goals_per_game !== null && snapshotAlternative.home_goals_per_game !== undefined) ||
                 (snapshotAlternative.home_league_position !== null && snapshotAlternative.home_league_position !== undefined)) && (
-                <PreMatchStatsTables item={snapshotAlternative} locale={locale} />
-              )}
+                  <PreMatchStatsTables item={snapshotAlternative} locale={locale} />
+                )}
               {/*
 
               )}
@@ -3021,6 +3035,31 @@ ${warningExportJson}`
             placeholder="Add general ticket rationale..."
             value={editNotes}
             onChange={(e) => setEditNotes(e.target.value)}
+            sx={{ mb: 2 }}
+          />
+
+          <Grid container spacing={2}>
+            <Grid size={{ xs: 12 }}>
+              <FormControl fullWidth>
+                <InputLabel>{locale === 'fr' ? 'Modèle Statistique' : 'Betting Model'}</InputLabel>
+                <Select
+                  value={editModelId}
+                  label={locale === 'fr' ? 'Modèle Statistique' : 'Betting Model'}
+                  onChange={(e) => setEditModelId(e.target.value as number | '')}
+                >
+                  <MenuItem value="">
+                    <em>{locale === 'fr' ? 'Aucun modèle (non assigné)' : 'No Model (Unassigned)'}</em>
+                  </MenuItem>
+                  {(models || []).map((m) => (
+                    <MenuItem key={m.id} value={m.id}>
+                      v{m.version} - {m.name} {m.is_active ? `(${locale === 'fr' ? 'Actif' : 'Active'})` : ''} {m.status === 'retired' ? `(${locale === 'fr' ? 'Retiré' : 'Retired'})` : ''}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            </Grid>
+          </Grid>
+          <Box sx={{ display: 'none' }}
           />
         </Box>
       </CustomModal>
