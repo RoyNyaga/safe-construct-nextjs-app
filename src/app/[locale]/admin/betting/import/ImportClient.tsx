@@ -1477,6 +1477,15 @@ ${JSON.stringify(sampleJson, null, 2)}`
                         </td>
                         <td style={{ padding: '12px 14px', fontSize: '0.75rem' }}>
                           <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mb: 0.25, flexWrap: 'wrap' }}>
+                            {sel.elo_home != null && sel.elo_away != null && (
+                              <Box sx={{ mb: 0.5, display: 'flex', gap: 0.5, alignItems: 'center' }}>
+                                <Chip
+                                  label={`Elo: ${sel.elo_home} vs ${sel.elo_away} (Δ${Number(sel.elo_home) - Number(sel.elo_away) > 0 ? '+' : ''}${Number(sel.elo_home) - Number(sel.elo_away)})`}
+                                  size="small"
+                                  sx={{ height: 18, fontSize: '0.62rem', fontWeight: 800, backgroundColor: alpha('#00BCD4', 0.15), color: '#00BCD4' }}
+                                />
+                              </Box>
+                            )}
                             <span style={{ color: '#9AA3B2' }}>Pos:</span>
                             <span style={{ color: '#F6AE2D', fontWeight: 700 }}>
                               #{sel.home_league_position ?? '—'}
@@ -1714,7 +1723,7 @@ ${JSON.stringify(sampleJson, null, 2)}`
                             )}
                           </td>
                           <td style={{ padding: '12px 14px', fontSize: '0.8rem', color: '#9AA3B2', fontStyle: 'italic' }}>
-                            {alt.comment || '—'}
+                            {alt.comment || alt.notes || '—'}
                           </td>
                           <td style={{ padding: '12px 14px', textAlign: 'center' }}>
                             <CustomButton
