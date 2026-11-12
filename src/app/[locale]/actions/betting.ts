@@ -40,7 +40,7 @@ import { executeTransaction, getActiveBankroll, deleteBankrollTransaction } from
 export async function getBettingModels(): Promise<{ models: BettingModel[]; error?: string }> {
   const supabase = await createClient()
 
-  const { data: models, error } = await supabase
+  let { data: models, error } = await supabase
     .from('betting_models')
     .select(`
       *,
@@ -56,6 +56,41 @@ export async function getBettingModels(): Promise<{ models: BettingModel[]; erro
   if (error) {
     console.error('Failed to get betting models:', error)
     return { models: [], error: error.message }
+  }
+
+  // Auto-seed Model 5.0 if not yet present in betting_models
+  const hasModel50 = (models || []).some(
+    (m: any) => m.version === '5.0' || m.name === 'roys_tournament_international_engine'
+  )
+  if (!hasModel50) {
+    try {
+      await supabase.from('betting_models').insert({
+        uuid: 'f1b2c3d4-e5f6-4a5b-8c9d-0e1f2a3b4c5d',
+        version: '5.0',
+        name: 'roys_tournament_international_engine',
+        description:
+          'Dedicated bivariate Poisson and World Football Elo-calibrated betting engine for Continental Club Tournaments (UCL, UEL, CAF CL) and National Team Tournaments (AFCON, Euro, World Cup, Nations League, Qualifiers).',
+        content:
+          'Model 5.0 operates across two specialized calculation tracks: Track A: Continental Club Competitions with CSI normalization; Track B: National Team Competitions with World Football Elo Differentials, Neutral Venue Protocol, and Knockout Compression.',
+        status: 'active',
+        is_active: false,
+      })
+      const { data: refetched } = await supabase
+        .from('betting_models')
+        .select(`
+          *,
+          betting_tickets (
+            id,
+            status,
+            stake,
+            profit_loss
+          )
+        `)
+        .order('created_at', { ascending: false })
+      if (refetched) models = refetched
+    } catch (seedErr) {
+      console.warn('Auto-seed Model 5.0 in getBettingModels skipped/failed:', seedErr)
+    }
   }
 
   // Calculate dynamic model aggregates
@@ -258,34 +293,93 @@ export async function importBettingTicket(payload: TicketImportJSON): Promise<{
 
   // 1. Resolve Model
   let modelId: number | null = null
+  let specifiedModel: any = null
+
   if (payload.ticket.model_uuid) {
     const { data: m } = await supabase
       .from('betting_models')
-      .select('id')
+      .select('id, version, name, status, is_active')
       .eq('uuid', payload.ticket.model_uuid)
-      .single()
-    if (m) modelId = m.id
+      .maybeSingle()
+    if (m) specifiedModel = m
   }
 
-  if (!modelId && payload.ticket.model_version) {
+  if (!specifiedModel && payload.ticket.model_version) {
     const { data: m } = await supabase
       .from('betting_models')
-      .select('id')
+      .select('id, version, name, status, is_active')
       .eq('version', payload.ticket.model_version)
       .order('is_active', { ascending: false })
       .limit(1)
-      .single()
-    if (m) modelId = m.id
+      .maybeSingle()
+    if (m) specifiedModel = m
   }
 
-  // If still no model, fallback to active model
+  if (specifiedModel) {
+    if (specifiedModel.status === 'retired') {
+      // Model explicitly stated in JSON is retired: fallback to active model
+      const { data: activeM } = await supabase
+        .from('betting_models')
+        .select('id')
+        .eq('is_active', true)
+        .limit(1)
+        .maybeSingle()
+      modelId = activeM ? activeM.id : specifiedModel.id
+    } else {
+      // Model is active or draft: strictly adhere to the model stated in JSON
+      modelId = specifiedModel.id
+    }
+  } else if (payload.ticket.model_version || payload.ticket.model_uuid) {
+    // Stated model is not yet in betting_models: auto-register to prevent silent hijacking by active model
+    try {
+      const isV5 =
+        payload.ticket.model_version === '5.0' ||
+        payload.ticket.model_name?.includes('tournament') ||
+        payload.ticket.model_name?.includes('roys_tournament_international_engine')
+      const targetUuid =
+        payload.ticket.model_uuid &&
+          /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(payload.ticket.model_uuid)
+          ? payload.ticket.model_uuid
+          : isV5
+            ? 'f1b2c3d4-e5f6-4a5b-8c9d-0e1f2a3b4c5d'
+            : crypto.randomUUID()
+
+      const { data: insertedM, error: insertErr } = await supabase
+        .from('betting_models')
+        .insert({
+          uuid: targetUuid,
+          version: payload.ticket.model_version || (isV5 ? '5.0' : '1.0'),
+          name:
+            payload.ticket.model_name ||
+            (isV5 ? 'roys_tournament_international_engine' : `Model ${payload.ticket.model_version || '1.0'}`),
+          description: isV5
+            ? 'Dedicated bivariate Poisson and World Football Elo-calibrated betting engine for Continental Club Tournaments (UCL, UEL, CAF CL) and National Team Tournaments (AFCON, Euro, World Cup, Nations League, Qualifiers).'
+            : `Imported model ${payload.ticket.model_version || ''}`,
+          content: isV5
+            ? 'Model 5.0 operates across two specialized calculation tracks: Track A: Continental Club Competitions with CSI normalization; Track B: National Team Competitions with World Football Elo Differentials, Neutral Venue Protocol, and Knockout Compression.'
+            : null,
+          status: 'active',
+          is_active: false,
+        })
+        .select('id')
+        .single()
+
+      if (insertedM && !insertErr) {
+        modelId = insertedM.id
+      }
+    } catch (e) {
+      console.warn('Auto-register stated model during import skipped/failed:', e)
+    }
+  }
+
+  // Fallback to active model only if no model was stated in JSON or auto-register failed
   if (!modelId) {
     const { data: m } = await supabase
       .from('betting_models')
       .select('id')
       .eq('is_active', true)
       .limit(1)
-      .single()
+      .maybeSingle()
     if (m) modelId = m.id
   }
 
@@ -1160,6 +1254,7 @@ export async function deleteBettingTicket(ticketId: number): Promise<{ success: 
 
   revalidatePath('/[locale]/admin/betting', 'layout')
   revalidatePath('/[locale]/admin/betting/tickets', 'layout')
+  revalidatePath('/[locale]/admin/betting/tickets/[uuid]', 'page')
   return { success: true }
 }
 
@@ -1195,6 +1290,7 @@ export async function updateBettingTicket(
 
   revalidatePath('/[locale]/admin/betting', 'layout')
   revalidatePath('/[locale]/admin/betting/tickets', 'layout')
+  revalidatePath('/[locale]/admin/betting/tickets/[uuid]', 'page')
   return { success: true }
 }
 

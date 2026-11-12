@@ -3,7 +3,7 @@ import { Box } from '@mui/material'
 import BettingSubNav from '../../BettingSubNav'
 import TicketDetailClient from './TicketDetailClient'
 import { getActiveBankroll } from '@/app/[locale]/actions/bankroll'
-import { getBettingTicketByUuid } from '@/app/[locale]/actions/betting'
+import { getBettingTicketByUuid, getBettingModels } from '@/app/[locale]/actions/betting'
 
 export default async function BettingTicketDetailPage({
   params,
@@ -12,9 +12,10 @@ export default async function BettingTicketDetailPage({
 }) {
   const { locale, uuid } = await params
 
-  const [{ bankroll }, { ticket }] = await Promise.all([
+  const [{ bankroll }, { ticket }, { models }] = await Promise.all([
     getActiveBankroll(),
     getBettingTicketByUuid(uuid),
+    getBettingModels(),
   ])
 
   if (!ticket) {
@@ -31,6 +32,7 @@ export default async function BettingTicketDetailPage({
       <TicketDetailClient
         locale={locale}
         ticket={ticket}
+        models={models || []}
         currency={bankroll?.currency || 'FCFA'}
       />
     </Box>
