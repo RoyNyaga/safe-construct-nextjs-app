@@ -20,6 +20,10 @@
    - **Tier 2: Shadow Tracking Portfolio (`alternatives`)**:
      - The top **3 to 5 next-best candidate fixtures** that met all Elo, CSI, and EV thresholds but were not included in the primary ticket.
      - Evaluated with identical mathematical rigor and saved permanently in the database to benchmark Model 5.0's predictive accuracy over time.
+   - **Mandatory Shadow Candidate Attributes**:
+     - Every candidate logged in `alternatives` must include both:
+       1. **`comment`**: Exactly one clear sentence defining the explicit rejection reason (e.g. juiced odds $< 1.22$, elevated draw risk, or away favorite hazard).
+       2. **`warnings`**: Structured warning objects detailing the risks identified with `type`, `severity`, `direction`, `description`, and `evidence`.
 
 ---
 
@@ -132,6 +136,14 @@ To prevent catastrophic failures, the engine strictly halts or disqualifies sele
    - *Reason*: The trailing team is forced to abandon low blocks and attack recklessly, opening wide transition spaces.
 5. **The Host Disadvantage Illusion**:
    - Never apply standard domestic home advantage ($+100$ Elo) to neutral tournament matches played in another country. Doing so artificially overrates nominal "home" teams.
+6. **The Heavy-Mismatch Unquoted Anchor & Over 2.5 Trap Rule**:
+   - If a heavy favorite is priced $\le 1.12$ and bookmakers omit the Over 1.5 line (`-`), **NEVER force a trade-up to Over 2.5** unless the underdog averages $\ge 0.90$ GF/G in away qualifiers or match $\text{DCI} \ge 0.35$.
+   - *Reason*: Underdogs like Somalia or Sudan virtually never score. Once the powerhouse takes a 2-0 lead, they slow game tempo, rotate starters, and finish 2-0, causing Over 2.5 to fail. Such matches must be marked `UNQUOTED_ANCHOR_DISQUALIFIED` and discarded.
+7. **The Market-Elo Odds Inversion Hard-Stop**:
+   - If bookmaker pricing directly contradicts a net Elo superiority of $\ge +120$ points (i.e. the higher-ranked home nation is priced as a heavy underdog, e.g. `Armenia Elo 1,420 @ 2.97 vs Cyprus Elo 1,320 @ 2.56`), the fixture is **strictly disqualified from active capital**.
+   - *Reason*: Bookmakers have priced in critical unmodeled team news (star withdrawals, coaching boycotts, or sudden squad rotation) that historical ratings lag behind (`EXTERNAL_ODDS_INVERSION_WARNING`).
+8. **The Juiced Odds Corridor Relegation Rule ($< 1.22$)**:
+   - In tournaments, when Over 1.5 odds drop below $1.22$ (e.g. $1.13 - 1.18$), they are **disqualified from 2-leg main tickets** and relegated to shadow tracking (`alternatives`) unless paired in an approved 3-leg hybrid ticket where remaining legs provide sufficient odds buffer.
 
 ---
 

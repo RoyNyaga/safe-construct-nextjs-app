@@ -128,6 +128,23 @@ $$\lambda_B = \max\left(0.20, \; \frac{\mu_{\text{comp}} \times K_s - \Delta \la
 - **Single-Leg Knockout Stage (Round of 16 through Final)**: $K_s = 0.88$ (**Knockout Compression Factor**)  
   *Rationale*: In single-elimination knockout matches, teams play conservatively in regular time (90 mins) to avoid catastrophic defensive errors, relying on extra time or penalties. The $0.88$ factor compresses expected goals to prevent overestimating goal markets.
 
+### 4.7 National Team Statistical Ingestion Protocol (Uniform Data Mapping)
+In the absence of closed domestic league tables, national team matches must map the following standard parameters into the database and JSON schema to ensure rich, uniform statistical snapshots for UI previews, modal drawers, and automated post-match calibration:
+1. **`home_league_position` / `away_league_position`**: Formally mapped to the team's official **World Football Elo Global Ranking** (e.g. England `#3`, Croatia `#11`, Cameroon `#58`, Namibia `#135`).
+2. **`home_matches_played` / `away_matches_played`**: Number of matches played in the **active competition / qualifying campaign window** (e.g. current Nations League or AFCON qualifying campaign).
+3. **`home_goals_scored` / `home_goals_conceded` & `away_goals_scored` / `away_goals_conceded`**: Goals scored and conceded during the active campaign.
+4. **`home_goals_per_game` & `home_conceded_per_game`**: Active campaign venue rates ($GF / MP, GA / MP$).
+5. **`home_overall_matches_played` / `away_overall_matches_played`**: The nation's **calendar-year / past 10 competitive international matches** (capturing full-strength roster performance).
+6. **`current_league_home_avg` / `current_league_away_avg`**: Official competition baseline scoring averages ($\mu_{\text{home}}, \mu_{\text{away}}$).
+7. **`elo_home` / `elo_away`**: Exact World Football Elo ratings at kickoff.
+
+### 4.8 Regional Goal Baseline Calibration (The AFCON Protocol)
+In low-scoring continental tournaments (such as the Africa Cup of Nations and its qualifiers where continental average goals are structurally $\mu \approx 2.05$), raw bivariate Poisson math mathematically deflates Over 1.5 probabilities down into the $60\% - 68\%$ range.
+- **The Empirical Reality**: Elite African home powerhouses (e.g. Cameroon in Yaoundé, DR Congo in Kinshasa, Cote d'Ivoire in Abidjan, Senegal in Diamniadio) win by 2+ goals in $78\% - 85\%$ of home qualifiers.
+- **The Calibration Anchor**: When modeling home favorites in competitions with $\mu \le 2.10$, the engine blends the raw Elo Poisson probability with the host nation's 10-match home qualifying goal output when $GF_{\text{home}} \ge 1.70$:
+  $$P(\text{Over } 1.5)_{\text{eff}} = 0.50 \times P_{\text{Poisson}} + 0.50 \times \text{HitRate}_{10\text{-match home}}$$
+This prevents false-negative disqualification of genuine home fortress fixtures while preserving mathematical rigor.
+
 ---
 
 ## 5. STANDARDIZED GATED MARKETS & QUALIFICATION THRESHOLDS
@@ -213,6 +230,11 @@ Model 5.0 introduces standardized tournament-specific risk warnings:
 | `TACTICAL_LOW_BLOCK_KNOCKOUT` | Moderate | Single-leg knockout match where both nations prioritize defensive structure in 90 mins. | Promotes Under 3.5 and DNB; disqualifies Over 2.5. |
 | `HIGH_DRAW_PROPENSITY` | High | Computed regular-time draw probability exceeds $30.0\%$. | Disqualifies straight 1X2; redirects to DNB or Double Chance. |
 | `NATIONAL_TEAM_ROSTER_DISRUPTION` | Critical | Top goalscorer or central defensive anchor is unavailable for international call-up. | Triggers manual probability discount or disqualifies pick. |
+| `EXTERNAL_ODDS_INVERSION_WARNING` | Critical | Bookmaker pricing directly contradicts net Elo advantage by $\ge +120$ points (e.g. higher-rated home team priced as underdog). | Strictly halts and disqualifies fixture from active capital. |
+| `UNQUOTED_ANCHOR_DISQUALIFICATION` | Critical | Heavy favorite ($\le 1.12$) where Over 1.5 is unquoted. | Prohibits forced trade-up to Over 2.5 when DCI $< 0.35$. Disqualifies match. |
+| `LOW_BASELINE_AFCON` | Moderate | Continental competition baseline is $\mu \le 2.10$ goals per game. | Activates Home Fortress Form Anchor when host GF $\ge 1.70$. |
+| `UNDERDOG_DEFENSIVE_BLOCK` | Moderate | Away underdog deploys an ultra-defensive low block (rarely attacks). | Disqualifies BTTS Yes; evaluates single-team goal lines. |
+| `ODDS_CORRIDOR_COMPRESSION` | Low / Informational | Selection odds fall below standalone viability floor ($< 1.22$). | Disqualifies from 2-leg main ticket; relegates to shadow tracking. |
 
 ---
 
