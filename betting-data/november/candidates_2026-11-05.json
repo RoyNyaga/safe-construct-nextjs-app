@@ -1,0 +1,346 @@
+{
+  "date": "2026-11-05",
+  "generated_at": "2026-11-05T01:25:00Z",
+  "model_version": "4.0",
+  "model_name": "roys_betting_engine_BTS_O2-5_win",
+  "total_candidates": 12,
+  "top_selections_count": 2,
+  "candidates": [
+    {
+      "match_date": "2026-11-05",
+      "country": "El Salvador",
+      "league": "El Salvador Primera Division",
+      "home_team": "CD Luis Angel Firpo",
+      "away_team": "Alianza FC El Salvador",
+      "status": "QUALIFIED_MAIN_LEG_1",
+      "odds": {
+        "home_win": 1.72,
+        "draw": 3.4,
+        "away_win": 4.2,
+        "over_1_5": 1.26,
+        "over_2_5": 1.81,
+        "btts_yes": 1.74
+      },
+      "model_probabilities": {
+        "home_win": 0.705,
+        "draw": 0.182,
+        "away_win": 0.113,
+        "over_1_5": 0.791,
+        "over_2_5": 0.563,
+        "btts_yes": 0.466,
+        "under_3_5": 0.661
+      },
+      "dual_contribution_index": 0.339,
+      "dominance_ratio": 2.96,
+      "recommendation": "Main Ticket Leg 1 (Match Winner: Home Win @ 1.72)",
+      "disqualification_reason": null,
+      "notes": "Unbeaten at home (6W-2D-0L, 2.13 GF/G, 0.63 GA/G). Draw suppressed at 18.2%. Value Edge +12.4pp, EV +0.213."
+    },
+    {
+      "match_date": "2026-11-05",
+      "country": "Honduras",
+      "league": "Honduras Liga Nacional",
+      "home_team": "Genesis Huracan",
+      "away_team": "Real Espana",
+      "status": "QUALIFIED_MAIN_LEG_2",
+      "odds": {
+        "home_win": 2.96,
+        "draw": 3.1,
+        "away_win": 2.11,
+        "over_1_5": 1.28,
+        "over_2_5": 1.87,
+        "btts_yes": 1.7
+      },
+      "model_probabilities": {
+        "home_win": 0.203,
+        "draw": 0.228,
+        "away_win": 0.569,
+        "over_1_5": 0.755,
+        "over_2_5": 0.511,
+        "btts_yes": 0.487,
+        "under_3_5": 0.71
+      },
+      "dual_contribution_index": 0.461,
+      "dominance_ratio": 2.17,
+      "recommendation": "Main Ticket Leg 2 Replacement (Over/Under: Over 1.5 @ 1.28)",
+      "disqualification_reason": null,
+      "notes": "100% of 2026 H2H matches finished with Over 1.5 (2-0, 2-1, 1-2). Real Espana (2nd) lost only 1 in 12."
+    },
+    {
+      "match_date": "2026-11-05",
+      "country": "Brazil",
+      "league": "Brazil Serie A",
+      "home_team": "Botafogo",
+      "away_team": "Atletico MG",
+      "status": "DISQUALIFIED_ALREADY_STARTED",
+      "odds": {
+        "home_win": 1.54,
+        "draw": 3.75,
+        "away_win": 5.3,
+        "over_1_5": 1.22,
+        "over_2_5": 1.7,
+        "btts_yes": 1.79
+      },
+      "model_probabilities": {
+        "home_win": 0.445,
+        "draw": 0.222,
+        "away_win": 0.333,
+        "over_1_5": 0.861,
+        "over_2_5": 0.674,
+        "btts_yes": 0.675,
+        "under_3_5": 0.543
+      },
+      "dual_contribution_index": 0.855,
+      "dominance_ratio": 1.17,
+      "recommendation": "Main Ticket Leg 2 (Over/Under: Over 1.5 @ 1.22)",
+      "disqualification_reason": "Fixture kicked off before ticket placement; Botafogo scored early.",
+      "notes": "Mutual openness (DCI 0.855, Lambda Total 3.47). Over 1.5 probability of 86.1% provides safe companion anchor."
+    },
+    {
+      "match_date": "2026-11-05",
+      "country": "Brazil",
+      "league": "Brazil Serie A",
+      "home_team": "Botafogo",
+      "away_team": "Atletico MG",
+      "status": "DISQUALIFIED_ALREADY_STARTED",
+      "odds": {
+        "home_win": 1.54,
+        "draw": 3.75,
+        "away_win": 5.3,
+        "over_1_5": 1.22,
+        "over_2_5": 1.7,
+        "btts_yes": 1.79
+      },
+      "model_probabilities": {
+        "home_win": 0.445,
+        "draw": 0.222,
+        "away_win": 0.333,
+        "over_1_5": 0.861,
+        "over_2_5": 0.674,
+        "btts_yes": 0.675,
+        "under_3_5": 0.543
+      },
+      "dual_contribution_index": 0.855,
+      "dominance_ratio": 1.17,
+      "recommendation": "Shadow Alternative 1 (Both Teams to Score: BTTS Yes @ 1.79)",
+      "disqualification_reason": "Fixture kicked off before ticket placement; Botafogo scored early.",
+      "notes": "Elite multi-goal dynamic. DCI = 0.855. Edge +11.6pp, EV +0.209."
+    },
+    {
+      "match_date": "2026-11-05",
+      "country": "Peru",
+      "league": "Peru Liga 1",
+      "home_team": "Universitario de Deportes",
+      "away_team": "Sport Boys Association",
+      "status": "QUALIFIED_SHADOW_ALT_2",
+      "odds": {
+        "home_win": 1.41,
+        "draw": 4.1,
+        "away_win": 6.8,
+        "over_1_5": 1.26,
+        "over_2_5": 1.82,
+        "btts_yes": 2.0
+      },
+      "model_probabilities": {
+        "home_win": 0.695,
+        "draw": 0.211,
+        "away_win": 0.094,
+        "over_1_5": 0.67,
+        "over_2_5": 0.405,
+        "btts_yes": 0.326,
+        "under_3_5": 0.799
+      },
+      "dual_contribution_index": 0.273,
+      "dominance_ratio": 3.66,
+      "recommendation": "Shadow Alternative 2 (Match Winner: Home Win @ 1.41)",
+      "disqualification_reason": "Slight negative edge (-1.4pp) at 1.41 odds keeps it off main ticket; ideal shadow portfolio candidate.",
+      "notes": "Universitario undefeated in last 10 H2H meetings. Sport Boys lost 9 of 14 away fixtures."
+    },
+    {
+      "match_date": "2026-11-05",
+      "country": "El Salvador",
+      "league": "El Salvador Primera Division",
+      "home_team": "CD Municipal Limeno",
+      "away_team": "Fuerte San Francisco",
+      "status": "QUALIFIED_SHADOW_ALT_3",
+      "odds": {
+        "home_win": 1.9,
+        "draw": 3.3,
+        "away_win": 3.5,
+        "over_1_5": 1.24,
+        "over_2_5": 1.76,
+        "btts_yes": 1.67
+      },
+      "model_probabilities": {
+        "home_win": 0.73,
+        "draw": 0.17,
+        "away_win": 0.1,
+        "over_1_5": 0.781,
+        "over_2_5": 0.548,
+        "btts_yes": 0.406,
+        "under_3_5": 0.676
+      },
+      "dual_contribution_index": 0.266,
+      "dominance_ratio": 3.76,
+      "recommendation": "Shadow Alternative 3 (Over/Under: Over 1.5 @ 1.24)",
+      "disqualification_reason": "DCI = 0.266 < 0.45 strictly disqualifies Over 2.5 and BTTS Yes.",
+      "notes": "Municipal Limeno won the last three H2H encounters by 5-0, 2-0, 2-0."
+    },
+    {
+      "match_date": "2026-11-05",
+      "country": "Colombia",
+      "league": "Colombia Primera A",
+      "home_team": "Millonarios FC",
+      "away_team": "America de Cali",
+      "status": "QUALIFIED_SHADOW_ALT_4",
+      "odds": {
+        "home_win": 1.89,
+        "draw": 3.2,
+        "away_win": 4.1,
+        "over_1_5": 1.36,
+        "over_2_5": 2.08,
+        "btts_yes": 1.87
+      },
+      "model_probabilities": {
+        "home_win": 0.518,
+        "draw": 0.274,
+        "away_win": 0.208,
+        "over_1_5": 0.667,
+        "over_2_5": 0.401,
+        "btts_yes": 0.428,
+        "under_3_5": 0.802
+      },
+      "dual_contribution_index": 0.545,
+      "dominance_ratio": 1.83,
+      "recommendation": "Shadow Alternative 4 (Under/Over: Under 3.5 Goals)",
+      "disqualification_reason": "Over 1.5 @ 1.36 carries negative edge (-6.8pp); Under 3.5 holds 80.2% probability.",
+      "notes": "Cagey tactical derby match."
+    },
+    {
+      "match_date": "2026-11-05",
+      "country": "Brazil",
+      "league": "Brazil Serie A",
+      "home_team": "Sao Paulo FC",
+      "away_team": "Corinthians SP",
+      "status": "DISQUALIFIED_DERBY_DRAW_TRAP",
+      "odds": {
+        "home_win": 2.66,
+        "draw": 3.0,
+        "away_win": 2.73,
+        "over_1_5": 1.47,
+        "over_2_5": 2.42,
+        "btts_yes": 2.02
+      },
+      "model_probabilities": null,
+      "dual_contribution_index": null,
+      "recommendation": "Do not wager.",
+      "disqualification_reason": "Cl\u00e1ssico Majestoso intense derby friction. Historical draw rate >34% and heavy tactical caution.",
+      "notes": "Both teams tightly matched; high risk of 0-0 or 1-1 gridlock."
+    },
+    {
+      "match_date": "2026-11-05",
+      "country": "Argentina",
+      "league": "Argentina Liga Profesional",
+      "home_team": "CA Aldosivi",
+      "away_team": "CA River Plate BA",
+      "status": "DISQUALIFIED_GATE_6_LMI",
+      "odds": {
+        "home_win": 7.3,
+        "draw": 4.1,
+        "away_win": 1.38,
+        "over_1_5": 1.28,
+        "over_2_5": 1.86,
+        "btts_yes": 2.15
+      },
+      "model_probabilities": null,
+      "dual_contribution_index": null,
+      "recommendation": "Diverted to shadow portfolio.",
+      "disqualification_reason": "Gate 6 LMI Matrix: Argentina Liga Profesional is classified as Tier 3 (Fat-Tail Trap) for Over 1.5, Over 2.5, and BTTS. Disqualified from main ticket.",
+      "notes": "Cynical fouls and macro low-scoring tactical meta suppress goal reliability."
+    },
+    {
+      "match_date": "2026-11-05",
+      "country": "Argentina",
+      "league": "Argentina Liga Profesional",
+      "home_team": "Gimnasia y Esgrima La Plata",
+      "away_team": "CA Belgrano Cordoba",
+      "status": "DISQUALIFIED_GATE_6_LMI",
+      "odds": {
+        "home_win": 1.32,
+        "draw": 4.2,
+        "away_win": 3.21,
+        "over_1_5": 1.32,
+        "over_2_5": 1.97,
+        "btts_yes": 1.74
+      },
+      "model_probabilities": null,
+      "dual_contribution_index": null,
+      "recommendation": "Do not wager.",
+      "disqualification_reason": "Gate 6 LMI Matrix: Argentina Liga Profesional Tier 3 restriction. Over 1.5 hit rate <67% league-wide.",
+      "notes": "Frequent 0-0 and 1-0 results."
+    },
+    {
+      "match_date": "2026-11-05",
+      "country": "India",
+      "league": "Indian Super League",
+      "home_team": "Mohun Bagan SG",
+      "away_team": "Odisha FC",
+      "status": "DISQUALIFIED_MISSING_OVER_1_5",
+      "odds": {
+        "home_win": 1.28,
+        "draw": 5.2,
+        "away_win": 7.5,
+        "over_1_5": null,
+        "over_2_5": 1.57,
+        "btts_yes": 1.89
+      },
+      "model_probabilities": null,
+      "dual_contribution_index": null,
+      "recommendation": "Omitted.",
+      "disqualification_reason": "Over 1.5 Goals market odds omitted from bookmaker slate. Incomplete pricing prevents baseline validation.",
+      "notes": "Mohun Bagan is heavy home favorite but cannot verify Over 1.5 value."
+    },
+    {
+      "match_date": "2026-11-05",
+      "country": "Honduras",
+      "league": "Honduras Liga Nacional",
+      "home_team": "CD Olimpia Tegucigalpa",
+      "away_team": "Juticalpa FC",
+      "status": "DISQUALIFIED_MISSING_OVER_1_5",
+      "odds": {
+        "home_win": 1.14,
+        "draw": 6.5,
+        "away_win": 12.0,
+        "over_1_5": null,
+        "over_2_5": 1.24,
+        "btts_yes": 1.82
+      },
+      "model_probabilities": null,
+      "dual_contribution_index": null,
+      "recommendation": "Omitted.",
+      "disqualification_reason": "Over 1.5 Goals odds not provided. Heavy lopsided pricing (@ 1.14) carries negative value.",
+      "notes": "Extreme favorite skew."
+    },
+    {
+      "match_date": "2026-11-05",
+      "country": "Jordan",
+      "league": "Jordan Division 1",
+      "home_team": "Heyy Al-Amir Hassan",
+      "away_team": "Al Sareeh",
+      "status": "DISQUALIFIED_UNVERIFIED_DATA",
+      "odds": {
+        "home_win": 2.89,
+        "draw": 3.1,
+        "away_win": 2.22,
+        "over_1_5": null,
+        "over_2_5": 2.02,
+        "btts_yes": 1.79
+      },
+      "model_probabilities": null,
+      "dual_contribution_index": null,
+      "recommendation": "Do not wager.",
+      "disqualification_reason": "Hard-Stop Rule: Mandatory venue-specific goal splits are unverified online. Over 1.5 unpriced.",
+      "notes": "Secondary division data deficiency."
+    }
+  ]
+}

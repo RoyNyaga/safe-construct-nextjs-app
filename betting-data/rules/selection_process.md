@@ -114,15 +114,26 @@ In real-world bookmaker pricing, fixtures with hyper-dominant offensive tempo of
 ### 3.5 Market 5: Dominant Match Winner ("To Win" / 1X2)
 - **Role**: Capitalize on massive attacking and defensive asymmetry when odds offer positive expected value.
 - **Typical Odds**: $1.40 - 2.05$.
-- **Qualifications (The 5-Gate Checklist)**:
+- **Qualifications (The 7-Gate Checklist)**:
   1. **Dominance Ratio**: $\text{DR} = \frac{\lambda_{\text{favored}}}{\lambda_{\text{underdog}}} \ge 2.20$.
   2. **Expected Goals Levels**: Favored team venue expected goals $\ge 1.75\text{ GF/G}$; Underdog venue expected goals $\le 0.85\text{ GF/G}$.
-  3. **Venue Isolation Record**:
-     - Home Win: Home team home win rate $\ge 65.0\%$; Away opponent road loss rate $\ge 50.0\%$.
-     - Away Win (Extremely Rare): Away team road win rate $\ge 60.0\%$; Home opponent home loss rate $\ge 50.0\%$.
+  3. **Venue Isolation Record & Venue Asymmetry Protocol (`AWAY_FAVORITE_RESTRICTION`)**:
+     - **Dominant Home Win (Primary 1X2 Standard)**: Home team home win rate $\ge 65.0\%$; Away opponent road loss rate $\ge 50.0\%$. Home venue advantage (crowd momentum, turf familiarity, pitch dimensions, referee psychological bias) provides essential structural stability against draw congestion.
+     - **Straight Away Win Prohibition on Main Capital Tickets (`AWAY_FAVORITE_RESTRICTION`)**:
+       - Straight **1X2 Away Win selections are STRICTLY PROHIBITED on Main Capital Tickets (`selections`)**.
+       - *Tactical Rationale*: Away favorites at short odds ($1.40 - 1.75$) face asymmetric downside from home underdog low blocks (e.g. Watford 0–0 Middlesbrough), hostile venue counter-attacks (e.g. Nottingham Forest 3–1 Man City), and travel fatigue. Standard Poisson models underestimate the fat-tail draw trap in these environments.
+       - *Mandatory DNB / Double Chance Fallback*: If a dominant away favorite passes all numerical criteria ($\text{DR} \ge 2.20$, $P(\text{Win}) \ge 65\%$), it may ONLY be wagered on main tickets via **Draw No Bet (DNB / Asian Handicap 0)** or **Double Chance (X2)**. A draw voids the leg (or wins the DC), preserving accumulator capital!
+       - *Shadow Portfolio Tracking*: Statistically qualified straight Away Win picks may still be tracked in the **Shadow Tracking Portfolio (`alternatives`)** for model calibration, but real capital must never be risked on them.
+     - **The Goal Market Conversion Principle**:
+       - When an away favorite boasts high offensive output ($\ge 1.80\text{ GF/G}$), **prioritize Goal Markets (Over 1.5, Over 2.5, or BTTS Yes) over match winner markets**. Goal markets capture the team's offensive output without incurring the binary risk of an unexpected draw or upset (as proven by Norwich Over 2.5 @ 1.70 winning 5-0 while Middlesbrough Away Win @ 1.51 failed 0-0).
   4. **Poisson Floor & Draw Suppression**: $P(\text{Win}) \ge 70.0\%$ (or $66.0\% - 69.9\%$ if Edge $\ge +5.0\text{pp}$), and **$P(\text{Draw}) \le 22.0\%$**. If draw probability exceeds $22\%$, straight win is prohibited.
   5. **Clean Sheet / Outscore Resilience**: If the favorite regularly concedes at venue ($\text{GA/G} > 1.15$), venue scoring must exceed $2.30\text{ GF/G}$.
-  - **Contextual Gate**: Disqualified if key spine players are injured, fixture follows exhausting midweek European travel, or match is a local derby.
+  6. **The Reserve / Academy Squad Disqualification Rule (`RESERVE_SQUAD_RESTRICTION`)**:
+     - **Strict Disqualification**: If either team in the fixture is a reserve, youth academy, or development squad (e.g. Dutch *"Jong"* teams, Spanish *"B"* or *"Castilla"* teams, German *"II"* teams, Austrian *"Liefering"*), straight **1X2 Match Winner picks are STRICTLY PROHIBITED on Main Capital Tickets (`selections`)**.
+     - **Mathematical Rationale**: Development squads experience extreme weekly roster turnover (senior team bench call-ups, youth rotations) and compete without standard promotional/relegation incentives. While their goal volume is predictable, their match outcome variance generates fat-tail draw and upset risks that Poisson distributions understate (as evidenced by VVV-Venlo 1–1 Jong PSV).
+     - **Required Action**: The match's high openness ($\text{DCI} \ge 0.50$) must be captured via **Goal Markets (Over 1.5, Over 2.5, BTTS Yes)**.
+     - **Shock Absorber Fallback**: If a favorite *must* be backed against a reserve squad, the selection **must use Market 6 (Draw No Bet / DNB)** so that a draw voids the selection rather than killing the accumulator.
+  7. **Contextual Gate**: Disqualified if key spine players are injured, fixture follows exhausting midweek European travel, or match is a local derby.
 
 ### 3.6 Market 6: Draw No Bet (DNB / Asian Handicap 0) — Shock Absorber
 - **Role**: Exploits high win probability while insulating the accumulator against draw attrition.
@@ -150,6 +161,8 @@ In real-world bookmaker pricing, fixtures with hyper-dominant offensive tempo of
 - Apply Section 2.2 Small-Sample Regression Anchor ($N \le 5$).
 - Compute DCI and enforce the $\text{DCI} \ge 0.45$ floor for Over 2.5 and $\text{DCI} \ge 0.50$ for BTTS Yes.
 - **Enforce Gate 6 (League-Market Integrity)**: Check `league_baselines.json` and in-app empirical LMI matrix. If the match falls in a **`TIER_3`** corridor for that market, **divert to shadow alternatives immediately**.
+- **Enforce the Reserve Squad Restriction (`RESERVE_SQUAD_RESTRICTION`)**: If either team is a reserve/academy squad ("Jong", "B", "II"), strictly prohibit straight 1X2 Match Winner picks from main tickets. Re-channel selection into Goal Markets or Draw No Bet (DNB).
+- **Enforce the Away Favorite Restriction (`AWAY_FAVORITE_RESTRICTION`)**: Strictly prohibit straight 1X2 Away Win picks from main tickets. Re-channel candidate fixtures into Goal Markets (Over 1.5, Over 2.5, BTTS) or require Draw No Bet (DNB) as a mandatory shock absorber against low-block draw traps.
 - Disqualify fixtures with unverified critical lineup absences or dead-rubber game state.
 - Retain all other fixtures regardless of positive or negative EV.
 
@@ -165,7 +178,9 @@ In real-world bookmaker pricing, fixtures with hyper-dominant offensive tempo of
   - Leg 2: Balanced BTTS Yes or Over 2.5 ($\text{DCI} \ge 0.55$) @ $1.58 - 1.70$ ($P \ge 68\%$)
   - Yields combined odds $\approx 2.00 - 2.30$, compound probability $\approx 58 - 62\%$.
 - **Priority 3: Dominant Winner + Anchor Pair (Model 4.0 Focus)**:
-  - Leg 1: Dominant Home Win or Draw No Bet (DNB) @ $1.45 - 1.65$ ($P \ge 70\%$, Dominance Ratio $\ge 2.20$, $P(\text{Draw}) \le 22\%$)
+  - Leg 1: Dominant Home Win or Draw No Bet (DNB) @ $1.45 - 1.65$ ($P \ge 70\%$, Dominance Ratio $\ge 2.20$, $P(\text{Draw}) \le 22\%$).
+    - *Reserve Squad Constraint*: Leg 1 Dominant Winner must be contested strictly between established senior first-teams (e.g. Heracles vs Roda JC 5-1). Straight 1X2 selections involving reserve/academy squads ("Jong", "B", "II") are strictly prohibited.
+    - *Away Favorite Constraint*: Straight Away Win is strictly barred from Leg 1. Away favorites may only occupy Leg 1 if backed as **Draw No Bet (DNB)** with $\text{DR} \ge 2.20$ and $P(\text{Win}) \ge 65\%$.
   - Leg 2: Ultra-Safe Over 1.5 @ $1.25 - 1.35$ ($P \ge 85\%$)
   - Yields combined odds $\approx 2.00 - 2.25$, compound probability $\approx 60 - 68\%$.
 

@@ -299,69 +299,69 @@ export async function importBettingTicket(payload: TicketImportJSON): Promise<{
   const { bankroll } = await getActiveBankroll()
   const bankrollId = bankroll ? bankroll.id : null
 
-function parseNullableNumber(val: any): number | null {
-  if (val === null || val === undefined || val === '') return null
-  const num = Number(val)
-  return isNaN(num) ? null : num
-}
-
-function parseNullableString(val: any): string | null {
-  if (val === null || val === undefined) return null
-  const s = String(val).trim()
-  return s.length > 0 ? s : null
-}
-
-function computeAlignmentMetrics(
-  estimatedProb: number | null | undefined,
-  historicalProb: number | null | undefined,
-  providedDelta?: number | null,
-  providedRemark?: AlignmentRemark | null
-): { alignment_delta_pp: number | null; alignment_remark: AlignmentRemark | null } {
-  if (providedDelta !== undefined && providedDelta !== null && providedRemark) {
-    return { alignment_delta_pp: providedDelta, alignment_remark: providedRemark }
+  function parseNullableNumber(val: any): number | null {
+    if (val === null || val === undefined || val === '') return null
+    const num = Number(val)
+    return isNaN(num) ? null : num
   }
 
-  if (estimatedProb === null || estimatedProb === undefined || historicalProb === null || historicalProb === undefined) {
+  function parseNullableString(val: any): string | null {
+    if (val === null || val === undefined) return null
+    const s = String(val).trim()
+    return s.length > 0 ? s : null
+  }
+
+  function computeAlignmentMetrics(
+    estimatedProb: number | null | undefined,
+    historicalProb: number | null | undefined,
+    providedDelta?: number | null,
+    providedRemark?: AlignmentRemark | null
+  ): { alignment_delta_pp: number | null; alignment_remark: AlignmentRemark | null } {
+    if (providedDelta !== undefined && providedDelta !== null && providedRemark) {
+      return { alignment_delta_pp: providedDelta, alignment_remark: providedRemark }
+    }
+
+    if (estimatedProb === null || estimatedProb === undefined || historicalProb === null || historicalProb === undefined) {
+      return {
+        alignment_delta_pp: providedDelta ?? null,
+        alignment_remark: providedRemark ?? null,
+      }
+    }
+
+    const delta = Number((Math.abs(Number(estimatedProb) - Number(historicalProb)) * 100).toFixed(2))
+    let remark: AlignmentRemark = 'very_high'
+    if (delta <= 1.5) {
+      remark = 'very_high'
+    } else if (delta <= 3.0) {
+      remark = 'high'
+    } else if (delta <= 5.0) {
+      remark = 'medium'
+    } else if (delta <= 7.0) {
+      remark = 'low'
+    } else {
+      remark = 'very_low'
+    }
+
     return {
-      alignment_delta_pp: providedDelta ?? null,
-      alignment_remark: providedRemark ?? null,
+      alignment_delta_pp: providedDelta ?? delta,
+      alignment_remark: providedRemark ?? remark,
     }
   }
 
-  const delta = Number((Math.abs(Number(estimatedProb) - Number(historicalProb)) * 100).toFixed(2))
-  let remark: AlignmentRemark = 'very_high'
-  if (delta <= 1.5) {
-    remark = 'very_high'
-  } else if (delta <= 3.0) {
-    remark = 'high'
-  } else if (delta <= 5.0) {
-    remark = 'medium'
-  } else if (delta <= 7.0) {
-    remark = 'low'
-  } else {
-    remark = 'very_low'
+  function computeEdgeRemark(
+    edgePp: number | null | undefined,
+    providedRemark?: EdgeRemark | null
+  ): EdgeRemark | null {
+    if (providedRemark) return providedRemark
+    if (edgePp === null || edgePp === undefined) return null
+
+    const edge = Number(edgePp)
+    if (edge > 15.0) return 'very_high'
+    if (edge > 5.0) return 'high'
+    if (edge >= 0.0) return 'medium'
+    if (edge >= -10.0) return 'low'
+    return 'very_low'
   }
-
-  return {
-    alignment_delta_pp: providedDelta ?? delta,
-    alignment_remark: providedRemark ?? remark,
-  }
-}
-
-function computeEdgeRemark(
-  edgePp: number | null | undefined,
-  providedRemark?: EdgeRemark | null
-): EdgeRemark | null {
-  if (providedRemark) return providedRemark
-  if (edgePp === null || edgePp === undefined) return null
-
-  const edge = Number(edgePp)
-  if (edge > 15.0) return 'very_high'
-  if (edge > 5.0) return 'high'
-  if (edge >= 0.0) return 'medium'
-  if (edge >= -10.0) return 'low'
-  return 'very_low'
-}
 
   const stake = parseNullableNumber(payload.ticket.stake) ?? 0
 
@@ -478,6 +478,11 @@ function computeEdgeRemark(
       prob_away_win: parseNullableNumber(sel.prob_away_win),
       prob_draw: parseNullableNumber(sel.prob_draw),
       market_evaluations: sel.market_evaluations || null,
+      is_neutral_venue: sel.is_neutral_venue !== undefined && sel.is_neutral_venue !== null ? Boolean(sel.is_neutral_venue) : false,
+      competition_type: parseNullableString(sel.competition_type),
+      stage: parseNullableString(sel.stage),
+      elo_home: parseNullableNumber(sel.elo_home),
+      elo_away: parseNullableNumber(sel.elo_away),
       alignment_delta_pp: align.alignment_delta_pp,
       alignment_remark: align.alignment_remark,
       edge_remark: edgeRem,
@@ -489,10 +494,21 @@ function computeEdgeRemark(
     }
   })
 
-  const { data: insertedSelections, error: selError } = await supabase
+  let { data: insertedSelections, error: selError } = await supabase
     .from('betting_selections')
     .insert(selectionsPayload)
     .select('id, home_team, away_team, market, selection')
+
+  // Graceful fallback if database schema migration hasn't been applied yet
+  if (selError && selError.message?.includes('column') && selError.message?.includes('does not exist')) {
+    const fallbackPayload = selectionsPayload.map(({ is_neutral_venue, competition_type, stage, elo_home, elo_away, ...rest }: any) => rest)
+    const retry = await supabase
+      .from('betting_selections')
+      .insert(fallbackPayload)
+      .select('id, home_team, away_team, market, selection')
+    insertedSelections = retry.data
+    selError = retry.error
+  }
 
   if (selError) {
     console.error('Failed to insert selections:', selError)
@@ -565,6 +581,11 @@ function computeEdgeRemark(
         prob_away_win: parseNullableNumber(alt.prob_away_win),
         prob_draw: parseNullableNumber(alt.prob_draw),
         market_evaluations: alt.market_evaluations || null,
+        is_neutral_venue: alt.is_neutral_venue !== undefined && alt.is_neutral_venue !== null ? Boolean(alt.is_neutral_venue) : false,
+        competition_type: parseNullableString(alt.competition_type),
+        stage: parseNullableString(alt.stage),
+        elo_home: parseNullableNumber(alt.elo_home),
+        elo_away: parseNullableNumber(alt.elo_away),
         alignment_delta_pp: align.alignment_delta_pp,
         alignment_remark: align.alignment_remark,
         edge_remark: edgeRem,
@@ -576,10 +597,21 @@ function computeEdgeRemark(
       }
     })
 
-    const { data: altData, error: altError } = await supabase
+    let { data: altData, error: altError } = await supabase
       .from('betting_alternatives')
       .insert(alternativesPayload)
       .select('id, home_team, away_team, market, selection')
+
+    // Graceful fallback if database schema migration hasn't been applied yet
+    if (altError && altError.message?.includes('column') && altError.message?.includes('does not exist')) {
+      const fallbackPayload = alternativesPayload.map(({ is_neutral_venue, competition_type, stage, elo_home, elo_away, ...rest }: any) => rest)
+      const retry = await supabase
+        .from('betting_alternatives')
+        .insert(fallbackPayload)
+        .select('id, home_team, away_team, market, selection')
+      altData = retry.data
+      altError = retry.error
+    }
 
     if (altError) {
       console.warn('Warning: Failed to insert alternatives:', altError)
@@ -713,8 +745,8 @@ function computeEdgeRemark(
 
     for (let i = 0; i < payload.warnings.length; i++) {
       const w = payload.warnings[i]
-      const ref = w.selection_reference || ({} as any)
-      const targetType = ref.target_type
+      const ref = w.selection_reference || (w as any).match || ({} as any)
+      const targetType = ref.target_type || (w as any).target_type
 
       const homeNorm = (ref.home_team || '').trim().toLowerCase()
       const awayNorm = (ref.away_team || '').trim().toLowerCase()
@@ -769,6 +801,17 @@ function computeEdgeRemark(
         warningsErrors.push(
           `Warning #${i + 1} (${w.type}): Could not match fixture "${ref.home_team || 'Unknown'} vs ${ref.away_team || 'Unknown'}" in ticket selections or alternatives.`
         )
+        continue
+      }
+
+      // Deduplicate: If this warning was already registered via nested match warnings, skip
+      const alreadyExists = warningsPayload.some(
+        (existing) =>
+          ((matchedSelectionId && existing.selection_id === matchedSelectionId) ||
+            (matchedAlternativeId && existing.alternative_id === matchedAlternativeId)) &&
+          existing.warning_type === (w.type || 'OTHER').toUpperCase()
+      )
+      if (alreadyExists) {
         continue
       }
 
@@ -1346,6 +1389,11 @@ export async function exportTicketAsJson(ticketUuid: string): Promise<{
       prob_home_win: s.prob_home_win ?? null,
       prob_away_win: s.prob_away_win ?? null,
       prob_draw: s.prob_draw ?? null,
+      is_neutral_venue: s.is_neutral_venue ?? null,
+      competition_type: s.competition_type ?? null,
+      stage: s.stage ?? null,
+      elo_home: s.elo_home ?? null,
+      elo_away: s.elo_away ?? null,
       market_evaluations: s.market_evaluations ?? null,
       alignment_delta_pp: s.alignment_delta_pp ?? null,
       alignment_remark: s.alignment_remark ?? null,
@@ -1417,6 +1465,11 @@ export async function exportTicketAsJson(ticketUuid: string): Promise<{
       prob_home_win: a.prob_home_win ?? null,
       prob_away_win: a.prob_away_win ?? null,
       prob_draw: a.prob_draw ?? null,
+      is_neutral_venue: a.is_neutral_venue ?? null,
+      competition_type: a.competition_type ?? null,
+      stage: a.stage ?? null,
+      elo_home: a.elo_home ?? null,
+      elo_away: a.elo_away ?? null,
       market_evaluations: a.market_evaluations ?? null,
       alignment_delta_pp: a.alignment_delta_pp ?? null,
       alignment_remark: a.alignment_remark ?? null,
@@ -1932,11 +1985,11 @@ function computeCalibrationBuckets(
     const avgPredictedProb =
       totalBets > 0
         ? Number(
-            (
-              (itemsInBucket.reduce((acc, s) => acc + Number(s.estimated_probability || 0), 0) / totalBets) *
-              100
-            ).toFixed(1)
-          )
+          (
+            (itemsInBucket.reduce((acc, s) => acc + Number(s.estimated_probability || 0), 0) / totalBets) *
+            100
+          ).toFixed(1)
+        )
         : 0
 
     const differencePp = totalBets > 0 ? Number((actualWinRate - avgPredictedProb).toFixed(1)) : 0
@@ -2237,7 +2290,7 @@ function normalizeLMIMarketKey(rawMarket?: string | null, rawSelection?: string 
   if (m.includes('btts') || m.includes('both teams to score') || m.includes('bts')) return 'btts_yes'
   if (m.includes('draw no bet') || m.includes('dnb') || s.includes('draw no bet') || s.includes('dnb')) return 'draw_no_bet'
   if (m.includes('win') || m.includes('1x2') || m.includes('winner') || m.includes('to win') || s.includes('to win')) return 'to_win'
-  
+
   return m.replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '') || 'other'
 }
 

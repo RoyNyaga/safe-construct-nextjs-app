@@ -33,6 +33,13 @@ export interface PreMatchStatsItem {
   away_overall_goals_conceded?: number | null
   away_overall_goals_per_game?: number | null
   away_overall_conceded_per_game?: number | null
+
+  // Tournament & International metrics
+  is_neutral_venue?: boolean | null
+  competition_type?: string | null
+  stage?: string | null
+  elo_home?: number | null
+  elo_away?: number | null
 }
 
 interface PreMatchStatsTablesProps {
@@ -113,6 +120,58 @@ export function PreMatchStatsTables({ item, locale = 'en' }: PreMatchStatsTables
         <TrendingUp size={16} />
         {isFr ? 'Profil & Statistiques Pré-Match' : 'Pre-Match Statistical Matchup'}
       </Typography>
+
+      {/* Tournament & Elo Strength Profile (Model 5.0) */}
+      {(item.elo_home != null || item.elo_away != null || item.is_neutral_venue || item.stage || item.competition_type) && (
+        <Box sx={{ mb: 2.5, p: 1.5, borderRadius: 2, backgroundColor: alpha('#00BCD4', 0.06), border: `1px solid ${alpha('#00BCD4', 0.25)}` }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1, flexWrap: 'wrap', gap: 1 }}>
+            <Typography variant="caption" sx={{ fontWeight: 800, color: '#00BCD4', textTransform: 'uppercase', letterSpacing: 0.5, fontSize: '0.7rem' }}>
+              {isFr ? 'Profil Tournoi & Force Elo (Modèle 5.0)' : 'Tournament & Elo Strength Profile (Model 5.0)'}
+            </Typography>
+            <Box sx={{ display: 'flex', gap: 0.75, flexWrap: 'wrap' }}>
+              {item.is_neutral_venue && (
+                <Chip
+                  size="small"
+                  label={isFr ? 'Terrain Neutre (H=0)' : 'Neutral Venue (H=0)'}
+                  sx={{ height: 20, fontSize: '0.62rem', fontWeight: 800, backgroundColor: alpha('#9E9E9E', 0.2), color: '#E0E0E0' }}
+                />
+              )}
+              {item.stage && (
+                <Chip
+                  size="small"
+                  label={item.stage.toUpperCase()}
+                  sx={{ height: 20, fontSize: '0.62rem', fontWeight: 800, backgroundColor: alpha('#3F51B5', 0.2), color: '#7986CB' }}
+                />
+              )}
+              {item.competition_type && (
+                <Chip
+                  size="small"
+                  label={item.competition_type.replace('_', ' ').toUpperCase()}
+                  sx={{ height: 20, fontSize: '0.62rem', fontWeight: 700, backgroundColor: alpha('#F26419', 0.15), color: '#F26419' }}
+                />
+              )}
+            </Box>
+          </Box>
+          {item.elo_home != null && item.elo_away != null && (
+            <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 1, textAlign: 'center', mt: 1 }}>
+              <Box sx={{ p: 1, borderRadius: 1.5, backgroundColor: alpha('#121824', 0.6) }}>
+                <Typography variant="caption" color="text.secondary">{item.home_team}</Typography>
+                <Typography variant="body2" sx={{ fontWeight: 800, color: '#00BCD4' }}>Elo {item.elo_home}</Typography>
+              </Box>
+              <Box sx={{ p: 1, borderRadius: 1.5, backgroundColor: alpha('#121824', 0.6) }}>
+                <Typography variant="caption" color="text.secondary">Net Elo Gap</Typography>
+                <Typography variant="body2" sx={{ fontWeight: 800, color: (Number(item.elo_home) - Number(item.elo_away)) >= 0 ? '#66BB6A' : '#EF5350' }}>
+                  {(Number(item.elo_home) - Number(item.elo_away)) > 0 ? `+${Number(item.elo_home) - Number(item.elo_away)}` : `${Number(item.elo_home) - Number(item.elo_away)}`} pts
+                </Typography>
+              </Box>
+              <Box sx={{ p: 1, borderRadius: 1.5, backgroundColor: alpha('#121824', 0.6) }}>
+                <Typography variant="caption" color="text.secondary">{item.away_team}</Typography>
+                <Typography variant="body2" sx={{ fontWeight: 800, color: '#00BCD4' }}>Elo {item.elo_away}</Typography>
+              </Box>
+            </Box>
+          )}
+        </Box>
+      )}
 
       {/* Block 1: Venue-Specific Form (Direct Poisson Engine Inputs) */}
       <Box sx={{ mb: hasOverallStats ? 2.5 : 0 }}>

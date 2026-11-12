@@ -1,0 +1,430 @@
+{
+  "date": "2026-11-07",
+  "generated_at": "2026-11-07T03:10:00Z",
+  "model_version": "4.0",
+  "model_name": "roys_betting_engine_BTS_O2-5_win",
+  "total_candidates": 14,
+  "top_selections_count": 2,
+  "candidates": [
+    {
+      "match_date": "2026-11-07",
+      "country": "England",
+      "league": "England Championship",
+      "home_team": "Queens Park Rangers",
+      "away_team": "Lincoln City",
+      "status": "QUALIFIED_MAIN_LEG_1",
+      "odds": {
+        "home_win": 1.63,
+        "draw": 3.65,
+        "away_win": 4.6,
+        "over_1_5": 1.23,
+        "over_2_5": 1.74,
+        "btts_yes": 1.77
+      },
+      "model_probabilities": {
+        "home_win": 0.712,
+        "draw": 0.168,
+        "away_win": 0.12,
+        "over_1_5": 0.851,
+        "over_2_5": 0.624,
+        "btts_yes": 0.468,
+        "under_3_5": 0.675
+      },
+      "dual_contribution_index": 0.302,
+      "dominance_ratio": 3.31,
+      "recommendation": "Main Ticket Leg 1 (Match Winner: Home Win @ 1.63)",
+      "disqualification_reason": null,
+      "notes": "QPR solid at Loftus Road (4W-2D-1L, 0.86 GA/G); Lincoln City lost 5 of 7 away (2.00 GA/G). Dominance Ratio 3.31 passes Gate 1 (>= 2.20). Draw suppressed at 16.8%. Value Edge +9.9pp, EV +0.161. Senior first-team clash adhering to Reserve Squad Restriction."
+    },
+    {
+      "match_date": "2026-11-07",
+      "country": "England",
+      "league": "England Championship",
+      "home_team": "Blackburn Rovers",
+      "away_team": "West Ham United",
+      "status": "QUALIFIED_MAIN_LEG_2",
+      "odds": {
+        "home_win": 4.85,
+        "draw": 3.9,
+        "away_win": 1.58,
+        "over_1_5": 1.16,
+        "over_2_5": 1.54,
+        "btts_yes": 1.6
+      },
+      "model_probabilities": {
+        "home_win": 0.187,
+        "draw": 0.195,
+        "away_win": 0.618,
+        "over_1_5": 0.935,
+        "over_2_5": 0.794,
+        "btts_yes": 0.732,
+        "under_3_5": 0.395
+      },
+      "dual_contribution_index": 0.585,
+      "dominance_ratio": 1.71,
+      "recommendation": "Main Ticket Leg 2 (Over/Under: Over 2.5 Goals @ 1.54)",
+      "disqualification_reason": null,
+      "notes": "West Ham produced 57 goals in 14 matches (36 GF, 21 GA, 4.07 goals/game). Combined expected goals Lambda = 4.20. DCI = 0.585 (Gate 2 Pass >= 0.45). Model P(Over 2.5) = 79.4% vs Break-even 64.9% (+14.5pp Edge, EV +0.223)."
+    },
+    {
+      "match_date": "2026-11-07",
+      "country": "England",
+      "league": "England Premier League",
+      "home_team": "Nottingham Forest",
+      "away_team": "Manchester City",
+      "status": "QUALIFIED_SHADOW_ALT_1",
+      "odds": {
+        "home_win": 4.5,
+        "draw": 3.8,
+        "away_win": 1.75,
+        "over_1_5": 1.21,
+        "over_2_5": 1.67,
+        "btts_yes": 1.63
+      },
+      "model_probabilities": {
+        "home_win": 0.124,
+        "draw": 0.178,
+        "away_win": 0.698,
+        "over_1_5": 0.848,
+        "over_2_5": 0.612,
+        "btts_yes": 0.485,
+        "under_3_5": 0.682
+      },
+      "dual_contribution_index": 0.306,
+      "dominance_ratio": 3.26,
+      "recommendation": "Shadow Alternative 1 (Match Winner: Away Win @ 1.75)",
+      "disqualification_reason": "High-payout away favorite (EV +0.222, Edge +12.7pp) preserved for shadow tracking to prioritize venue stability of home favorite QPR on main ticket.",
+      "notes": "Man City 2nd (21 pts, 2.25 GF/G away); Forest 19th (6 pts, 0.75 GF/G home). Dominance Ratio = 3.26. Draw suppressed at 17.8%."
+    },
+    {
+      "match_date": "2026-11-07",
+      "country": "England",
+      "league": "England Championship",
+      "home_team": "Bristol City",
+      "away_team": "Norwich City",
+      "status": "QUALIFIED_SHADOW_ALT_2",
+      "odds": {
+        "home_win": 2.76,
+        "draw": 3.4,
+        "away_win": 2.4,
+        "over_1_5": 1.22,
+        "over_2_5": 1.7,
+        "btts_yes": 1.75
+      },
+      "model_probabilities": {
+        "home_win": 0.385,
+        "draw": 0.22,
+        "away_win": 0.395,
+        "over_1_5": 0.872,
+        "over_2_5": 0.715,
+        "btts_yes": 0.678,
+        "under_3_5": 0.485
+      },
+      "dual_contribution_index": 0.962,
+      "dominance_ratio": 1.04,
+      "recommendation": "Shadow Alternative 2 (Over/Under: Over 2.5 Goals @ 1.70)",
+      "disqualification_reason": "Blackburn vs West Ham offers higher probability (79.4% vs 71.5%) and edge (+14.5pp vs +12.7pp).",
+      "notes": "Norwich matches average 3.64 goals/game (27 GF, 24 GA). DCI = 0.962. Exceptional reciprocal openness."
+    },
+    {
+      "match_date": "2026-11-07",
+      "country": "England",
+      "league": "England Championship",
+      "home_team": "Watford",
+      "away_team": "Middlesbrough",
+      "status": "QUALIFIED_SHADOW_ALT_3",
+      "odds": {
+        "home_win": 5.1,
+        "draw": 3.9,
+        "away_win": 1.51,
+        "over_1_5": 1.14,
+        "over_2_5": 1.48,
+        "btts_yes": 1.58
+      },
+      "model_probabilities": {
+        "home_win": 0.127,
+        "draw": 0.175,
+        "away_win": 0.698,
+        "over_1_5": 0.842,
+        "over_2_5": 0.615,
+        "btts_yes": 0.472,
+        "under_3_5": 0.685
+      },
+      "dual_contribution_index": 0.335,
+      "dominance_ratio": 2.99,
+      "recommendation": "Shadow Alternative 3 (Match Winner: Away Win @ 1.51)",
+      "disqualification_reason": "Lower value edge (+3.6pp) compared to QPR (+9.9pp) at 1.51 odds; DCI 0.335 disqualifies Over 2.5.",
+      "notes": "Boro 1st in Championship (28 pts); Watford 20th (14 pts). Dominance Ratio = 2.99."
+    },
+    {
+      "match_date": "2026-11-07",
+      "country": "England",
+      "league": "England Championship",
+      "home_team": "Cardiff City",
+      "away_team": "Burnley",
+      "status": "QUALIFIED_SHADOW_ALT_4",
+      "odds": {
+        "home_win": 1.99,
+        "draw": 3.4,
+        "away_win": 3.25,
+        "over_1_5": 1.15,
+        "over_2_5": 1.5,
+        "btts_yes": 1.46
+      },
+      "model_probabilities": {
+        "home_win": 0.442,
+        "draw": 0.22,
+        "away_win": 0.338,
+        "over_1_5": 0.892,
+        "over_2_5": 0.728,
+        "btts_yes": 0.735,
+        "under_3_5": 0.472
+      },
+      "dual_contribution_index": 0.882,
+      "dominance_ratio": 1.31,
+      "recommendation": "Shadow Alternative 4 (Both Teams to Score: BTTS Yes @ 1.46)",
+      "disqualification_reason": "Odds of 1.46 provide slightly lower value edge (+5.0pp) than Blackburn vs West Ham.",
+      "notes": "Cardiff averages 3.21 total match goals. DCI = 0.882."
+    },
+    {
+      "match_date": "2026-11-07",
+      "country": "England",
+      "league": "England Premier League",
+      "home_team": "Fulham",
+      "away_team": "Newcastle United",
+      "status": "QUALIFIED_SHADOW_ALT_5",
+      "odds": {
+        "home_win": 1.99,
+        "draw": 3.4,
+        "away_win": 3.55,
+        "over_1_5": 1.2,
+        "over_2_5": 1.67,
+        "btts_yes": 1.58
+      },
+      "model_probabilities": {
+        "home_win": 0.472,
+        "draw": 0.23,
+        "away_win": 0.298,
+        "over_1_5": 0.835,
+        "over_2_5": 0.642,
+        "btts_yes": 0.665,
+        "under_3_5": 0.575
+      },
+      "dual_contribution_index": 0.803,
+      "dominance_ratio": 1.58,
+      "recommendation": "Shadow Alternative 5 (Both Teams to Score: BTTS Yes @ 1.58)",
+      "disqualification_reason": "Moderate edge (+3.2pp) allocated to shadow portfolio.",
+      "notes": "Both sides score and concede over 1.20 goals per match."
+    },
+    {
+      "match_date": "2026-11-07",
+      "country": "England",
+      "league": "England Premier League",
+      "home_team": "Arsenal",
+      "away_team": "Hull City",
+      "status": "DISQUALIFIED_SUB_1_20_ODDS_AND_LOW_DCI",
+      "odds": {
+        "home_win": 1.15,
+        "draw": 7.5,
+        "away_win": 17.0,
+        "over_1_5": 1.15,
+        "over_2_5": 1.5,
+        "btts_yes": 2.4
+      },
+      "model_probabilities": {
+        "home_win": 0.842,
+        "draw": 0.118,
+        "away_win": 0.04,
+        "over_1_5": 0.785,
+        "over_2_5": 0.512,
+        "btts_yes": 0.245,
+        "under_3_5": 0.725
+      },
+      "dual_contribution_index": 0.114,
+      "dominance_ratio": 8.75,
+      "recommendation": "None",
+      "disqualification_reason": "Arsenal Win odds (1.15) and Over 1.5 odds (1.15) violate the minimum individual odds threshold (>= 1.20). Over 2.5 is disqualified by DCI floor (0.114 < 0.45).",
+      "notes": "Arsenal best defense in Premier League (5 GA in 9 MP); Hull away lambda only 0.20."
+    },
+    {
+      "match_date": "2026-11-07",
+      "country": "England",
+      "league": "England Premier League",
+      "home_team": "Leeds United",
+      "away_team": "Tottenham Hotspur",
+      "status": "DISQUALIFIED_DRAW_TRAP_RISK",
+      "odds": {
+        "home_win": 2.74,
+        "draw": 3.4,
+        "away_win": 2.55,
+        "over_1_5": 1.28,
+        "over_2_5": 1.91,
+        "btts_yes": 1.75
+      },
+      "model_probabilities": {
+        "home_win": 0.362,
+        "draw": 0.275,
+        "away_win": 0.363,
+        "over_1_5": 0.742,
+        "over_2_5": 0.495,
+        "btts_yes": 0.528,
+        "under_3_5": 0.715
+      },
+      "dual_contribution_index": 0.942,
+      "dominance_ratio": 1.0,
+      "recommendation": "None",
+      "disqualification_reason": "Elevated draw probability (27.5% > 22.0% ceiling); Leeds has drawn 5 of 9 matches this season. Over 2.5 probability below 50%.",
+      "notes": "High tactical caution and low finishing efficiency."
+    },
+    {
+      "match_date": "2026-11-07",
+      "country": "England",
+      "league": "England Championship",
+      "home_team": "Wrexham FC",
+      "away_team": "Wolverhampton Wanderers",
+      "status": "DISQUALIFIED_DR_BELOW_FLOOR",
+      "odds": {
+        "home_win": 3.33,
+        "draw": 3.25,
+        "away_win": 2.11,
+        "over_1_5": 1.29,
+        "over_2_5": 1.89,
+        "btts_yes": 1.72
+      },
+      "model_probabilities": {
+        "home_win": 0.315,
+        "draw": 0.265,
+        "away_win": 0.42,
+        "over_1_5": 0.748,
+        "over_2_5": 0.518,
+        "btts_yes": 0.535,
+        "under_3_5": 0.695
+      },
+      "dual_contribution_index": 0.812,
+      "dominance_ratio": 1.33,
+      "recommendation": "None",
+      "disqualification_reason": "Wolves Dominance Ratio (1.33) is well below Gate 1 threshold (2.20); draw risk elevated at 26.5%.",
+      "notes": "Wrexham resilient at the Racecourse Ground (only 8 GA in 7 matches)."
+    },
+    {
+      "match_date": "2026-11-07",
+      "country": "England",
+      "league": "England Championship",
+      "home_team": "Portsmouth",
+      "away_team": "Stoke City",
+      "status": "DISQUALIFIED_LOW_GOALS_PARITY",
+      "odds": {
+        "home_win": 2.16,
+        "draw": 3.2,
+        "away_win": 3.37,
+        "over_1_5": 1.37,
+        "over_2_5": 2.14,
+        "btts_yes": 1.87
+      },
+      "model_probabilities": {
+        "home_win": 0.452,
+        "draw": 0.278,
+        "away_win": 0.27,
+        "over_1_5": 0.705,
+        "over_2_5": 0.452,
+        "btts_yes": 0.468,
+        "under_3_5": 0.745
+      },
+      "dual_contribution_index": 0.715,
+      "dominance_ratio": 1.67,
+      "recommendation": "Under 3.5 Goals @ 1.28 (Pass)",
+      "disqualification_reason": "Over 2.5 probability (45.2%) far below model thresholds; high draw probability (27.8%).",
+      "notes": "Both sides exhibit tight defensive formations (<= 1.15 GA/G)."
+    },
+    {
+      "match_date": "2026-11-07",
+      "country": "England",
+      "league": "England Championship",
+      "home_team": "Charlton Athletic",
+      "away_team": "Sheffield United",
+      "status": "DISQUALIFIED_MARGINAL_EDGE",
+      "odds": {
+        "home_win": 3.37,
+        "draw": 3.25,
+        "away_win": 2.06,
+        "over_1_5": 1.28,
+        "over_2_5": 1.87,
+        "btts_yes": 1.72
+      },
+      "model_probabilities": {
+        "home_win": 0.302,
+        "draw": 0.262,
+        "away_win": 0.436,
+        "over_1_5": 0.755,
+        "over_2_5": 0.535,
+        "btts_yes": 0.542,
+        "under_3_5": 0.682
+      },
+      "dual_contribution_index": 0.742,
+      "dominance_ratio": 1.44,
+      "recommendation": "None",
+      "disqualification_reason": "Sheffield United away win edge is negative (-4.9pp); Over 2.5 probability below 55%.",
+      "notes": "Charlton low scoring rate (11 GF in 14 games) suppresses total match output."
+    },
+    {
+      "match_date": "2026-11-07",
+      "country": "England",
+      "league": "England Championship",
+      "home_team": "Birmingham City",
+      "away_team": "Swansea City",
+      "status": "DISQUALIFIED_TOP_TABLE_PARITY",
+      "odds": {
+        "home_win": 1.82,
+        "draw": 3.45,
+        "away_win": 4.1,
+        "over_1_5": 1.26,
+        "over_2_5": 1.82,
+        "btts_yes": 1.68
+      },
+      "model_probabilities": {
+        "home_win": 0.542,
+        "draw": 0.245,
+        "away_win": 0.213,
+        "over_1_5": 0.772,
+        "over_2_5": 0.558,
+        "btts_yes": 0.532,
+        "under_3_5": 0.665
+      },
+      "dual_contribution_index": 0.625,
+      "dominance_ratio": 1.75,
+      "recommendation": "None",
+      "disqualification_reason": "Clash between two top-5 teams (3rd vs 5th). Birmingham Dominance Ratio (1.75) fails Gate 1 floor (2.20). Draw risk 24.5% exceeds 22% ceiling.",
+      "notes": "Birmingham has conceded only 13 goals in 14 matches."
+    },
+    {
+      "match_date": "2026-11-07",
+      "country": "England",
+      "league": "England Championship",
+      "home_team": "West Bromwich Albion",
+      "away_team": "Millwall",
+      "status": "DISQUALIFIED_SUB_THRESHOLD_EDGE",
+      "odds": {
+        "home_win": 2.01,
+        "draw": 3.3,
+        "away_win": 3.35,
+        "over_1_5": 1.24,
+        "over_2_5": 1.74,
+        "btts_yes": 1.65
+      },
+      "model_probabilities": {
+        "home_win": 0.505,
+        "draw": 0.252,
+        "away_win": 0.243,
+        "over_1_5": 0.795,
+        "over_2_5": 0.582,
+        "btts_yes": 0.575,
+        "under_3_5": 0.642
+      },
+      "dual_contribution_index": 0.725,
+      "dominance_ratio": 1.55,
+      "recommendation": "None",
+      "disqualification_reason": "West Brom DR 1.55 < 2.20; Draw probability (25.2%) exceeds 22.0% ceiling; Over 2.5 probability below 60%.",
+      "notes": "Millwall has drawn 3 of their last 5 away games."
+    }
+  ]
+}
