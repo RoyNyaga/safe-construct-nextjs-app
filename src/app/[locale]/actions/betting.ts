@@ -478,6 +478,11 @@ export async function importBettingTicket(payload: TicketImportJSON): Promise<{
       prob_away_win: parseNullableNumber(sel.prob_away_win),
       prob_draw: parseNullableNumber(sel.prob_draw),
       market_evaluations: sel.market_evaluations || null,
+      is_neutral_venue: sel.is_neutral_venue !== undefined && sel.is_neutral_venue !== null ? Boolean(sel.is_neutral_venue) : false,
+      competition_type: parseNullableString(sel.competition_type),
+      stage: parseNullableString(sel.stage),
+      elo_home: parseNullableNumber(sel.elo_home),
+      elo_away: parseNullableNumber(sel.elo_away),
       alignment_delta_pp: align.alignment_delta_pp,
       alignment_remark: align.alignment_remark,
       edge_remark: edgeRem,
@@ -489,10 +494,21 @@ export async function importBettingTicket(payload: TicketImportJSON): Promise<{
     }
   })
 
-  const { data: insertedSelections, error: selError } = await supabase
+  let { data: insertedSelections, error: selError } = await supabase
     .from('betting_selections')
     .insert(selectionsPayload)
     .select('id, home_team, away_team, market, selection')
+
+  // Graceful fallback if database schema migration hasn't been applied yet
+  if (selError && selError.message?.includes('column') && selError.message?.includes('does not exist')) {
+    const fallbackPayload = selectionsPayload.map(({ is_neutral_venue, competition_type, stage, elo_home, elo_away, ...rest }: any) => rest)
+    const retry = await supabase
+      .from('betting_selections')
+      .insert(fallbackPayload)
+      .select('id, home_team, away_team, market, selection')
+    insertedSelections = retry.data
+    selError = retry.error
+  }
 
   if (selError) {
     console.error('Failed to insert selections:', selError)
@@ -565,6 +581,11 @@ export async function importBettingTicket(payload: TicketImportJSON): Promise<{
         prob_away_win: parseNullableNumber(alt.prob_away_win),
         prob_draw: parseNullableNumber(alt.prob_draw),
         market_evaluations: alt.market_evaluations || null,
+        is_neutral_venue: alt.is_neutral_venue !== undefined && alt.is_neutral_venue !== null ? Boolean(alt.is_neutral_venue) : false,
+        competition_type: parseNullableString(alt.competition_type),
+        stage: parseNullableString(alt.stage),
+        elo_home: parseNullableNumber(alt.elo_home),
+        elo_away: parseNullableNumber(alt.elo_away),
         alignment_delta_pp: align.alignment_delta_pp,
         alignment_remark: align.alignment_remark,
         edge_remark: edgeRem,
@@ -576,10 +597,21 @@ export async function importBettingTicket(payload: TicketImportJSON): Promise<{
       }
     })
 
-    const { data: altData, error: altError } = await supabase
+    let { data: altData, error: altError } = await supabase
       .from('betting_alternatives')
       .insert(alternativesPayload)
       .select('id, home_team, away_team, market, selection')
+
+    // Graceful fallback if database schema migration hasn't been applied yet
+    if (altError && altError.message?.includes('column') && altError.message?.includes('does not exist')) {
+      const fallbackPayload = alternativesPayload.map(({ is_neutral_venue, competition_type, stage, elo_home, elo_away, ...rest }: any) => rest)
+      const retry = await supabase
+        .from('betting_alternatives')
+        .insert(fallbackPayload)
+        .select('id, home_team, away_team, market, selection')
+      altData = retry.data
+      altError = retry.error
+    }
 
     if (altError) {
       console.warn('Warning: Failed to insert alternatives:', altError)
@@ -1357,6 +1389,11 @@ export async function exportTicketAsJson(ticketUuid: string): Promise<{
       prob_home_win: s.prob_home_win ?? null,
       prob_away_win: s.prob_away_win ?? null,
       prob_draw: s.prob_draw ?? null,
+      is_neutral_venue: s.is_neutral_venue ?? null,
+      competition_type: s.competition_type ?? null,
+      stage: s.stage ?? null,
+      elo_home: s.elo_home ?? null,
+      elo_away: s.elo_away ?? null,
       market_evaluations: s.market_evaluations ?? null,
       alignment_delta_pp: s.alignment_delta_pp ?? null,
       alignment_remark: s.alignment_remark ?? null,
@@ -1428,6 +1465,11 @@ export async function exportTicketAsJson(ticketUuid: string): Promise<{
       prob_home_win: a.prob_home_win ?? null,
       prob_away_win: a.prob_away_win ?? null,
       prob_draw: a.prob_draw ?? null,
+      is_neutral_venue: a.is_neutral_venue ?? null,
+      competition_type: a.competition_type ?? null,
+      stage: a.stage ?? null,
+      elo_home: a.elo_home ?? null,
+      elo_away: a.elo_away ?? null,
       market_evaluations: a.market_evaluations ?? null,
       alignment_delta_pp: a.alignment_delta_pp ?? null,
       alignment_remark: a.alignment_remark ?? null,

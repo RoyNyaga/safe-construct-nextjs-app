@@ -128,6 +128,12 @@ export interface BettingSelection {
   prob_home_win?: number | null
   prob_away_win?: number | null
   prob_draw?: number | null
+  // Tournament & International Optional Metrics
+  is_neutral_venue?: boolean | null
+  competition_type?: 'domestic_league' | 'continental_club' | 'national_team' | null
+  stage?: string | null
+  elo_home?: number | null
+  elo_away?: number | null
   market_evaluations?: Record<string, MarketEvaluationItem> | null
   actual_home_score: number | null
   actual_away_score: number | null
@@ -192,6 +198,12 @@ export interface BettingAlternative {
   prob_home_win?: number | null
   prob_away_win?: number | null
   prob_draw?: number | null
+  // Tournament & International Optional Metrics
+  is_neutral_venue?: boolean | null
+  competition_type?: 'domestic_league' | 'continental_club' | 'national_team' | null
+  stage?: string | null
+  elo_home?: number | null
+  elo_away?: number | null
   market_evaluations?: Record<string, MarketEvaluationItem> | null
   actual_home_score: number | null
   actual_away_score: number | null
@@ -358,9 +370,15 @@ export interface TicketImportJSON {
     prob_over_2_5?: number | null
     prob_btts_yes?: number | null
     prob_under_3_5?: number | null
-  prob_home_win?: number | null
-  prob_away_win?: number | null
-  prob_draw?: number | null
+    prob_home_win?: number | null
+    prob_away_win?: number | null
+    prob_draw?: number | null
+    // Tournament & International Optional Metrics
+    is_neutral_venue?: boolean | null
+    competition_type?: 'domestic_league' | 'continental_club' | 'national_team' | null
+    stage?: string | null
+    elo_home?: number | null
+    elo_away?: number | null
     market_evaluations?: Record<string, MarketEvaluationItem> | null
     actual_home_score?: number | null
     actual_away_score?: number | null
@@ -419,9 +437,15 @@ export interface TicketImportJSON {
     prob_over_2_5?: number | null
     prob_btts_yes?: number | null
     prob_under_3_5?: number | null
-  prob_home_win?: number | null
-  prob_away_win?: number | null
-  prob_draw?: number | null
+    prob_home_win?: number | null
+    prob_away_win?: number | null
+    prob_draw?: number | null
+    // Tournament & International Optional Metrics
+    is_neutral_venue?: boolean | null
+    competition_type?: 'domestic_league' | 'continental_club' | 'national_team' | null
+    stage?: string | null
+    elo_home?: number | null
+    elo_away?: number | null
     market_evaluations?: Record<string, MarketEvaluationItem> | null
     actual_home_score?: number | null
     actual_away_score?: number | null
@@ -496,9 +520,15 @@ export interface TicketExportJSON {
     prob_over_2_5?: number | null
     prob_btts_yes?: number | null
     prob_under_3_5?: number | null
-  prob_home_win?: number | null
-  prob_away_win?: number | null
-  prob_draw?: number | null
+    prob_home_win?: number | null
+    prob_away_win?: number | null
+    prob_draw?: number | null
+    // Tournament & International Optional Metrics
+    is_neutral_venue?: boolean | null
+    competition_type?: 'domestic_league' | 'continental_club' | 'national_team' | null
+    stage?: string | null
+    elo_home?: number | null
+    elo_away?: number | null
     market_evaluations?: Record<string, MarketEvaluationItem> | null
     actual_home_score: number | null
     actual_away_score: number | null
@@ -555,9 +585,15 @@ export interface TicketExportJSON {
     prob_over_2_5?: number | null
     prob_btts_yes?: number | null
     prob_under_3_5?: number | null
-  prob_home_win?: number | null
-  prob_away_win?: number | null
-  prob_draw?: number | null
+    prob_home_win?: number | null
+    prob_away_win?: number | null
+    prob_draw?: number | null
+    // Tournament & International Optional Metrics
+    is_neutral_venue?: boolean | null
+    competition_type?: 'domestic_league' | 'continental_club' | 'national_team' | null
+    stage?: string | null
+    elo_home?: number | null
+    elo_away?: number | null
     market_evaluations?: Record<string, MarketEvaluationItem> | null
     actual_home_score: number | null
     actual_away_score: number | null

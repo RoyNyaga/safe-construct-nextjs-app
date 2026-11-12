@@ -888,6 +888,33 @@ ${warningExportJson}`
                         <Typography variant="caption" color="text.secondary">
                           {sel.country ? `${sel.country} • ` : ''}{sel.league || '—'} &bull; {sel.match_date || ticket.ticket_date}
                         </Typography>
+                        {(sel.is_neutral_venue || sel.stage || (sel.elo_home != null && sel.elo_away != null)) && (
+                          <Box sx={{ display: 'flex', gap: 0.5, mt: 0.5, flexWrap: 'wrap', alignItems: 'center' }}>
+                            {sel.is_neutral_venue && (
+                              <Chip
+                                label="NEUTRAL"
+                                size="small"
+                                sx={{ height: 16, fontSize: '0.60rem', fontWeight: 800, backgroundColor: alpha('#9E9E9E', 0.2), color: '#E0E0E0' }}
+                              />
+                            )}
+                            {sel.stage && (
+                              <Chip
+                                label={sel.stage.toUpperCase()}
+                                size="small"
+                                sx={{ height: 16, fontSize: '0.60rem', fontWeight: 700, backgroundColor: alpha('#3F51B5', 0.2), color: '#7986CB' }}
+                              />
+                            )}
+                            {sel.elo_home != null && sel.elo_away != null && (
+                              <Chip
+                                label={`Elo: ${sel.elo_home} vs ${sel.elo_away}`}
+                                size="small"
+                                sx={{ height: 16, fontSize: '0.60rem', fontWeight: 700, backgroundColor: alpha('#00BCD4', 0.15), color: '#00BCD4' }}
+                              />
+                            )}
+                          </Box>
+                        )}
+                        <Typography sx={{ display: 'none' }}>
+                        </Typography>
                         {((sel.prob_home_win != null) || (sel.prob_draw != null) || (sel.prob_away_win != null)) && (
                           <Box sx={{ display: 'flex', gap: 0.5, mt: 0.5, flexWrap: 'wrap', alignItems: 'center' }}>
                             <Typography component="span" sx={{ fontSize: '0.62rem', color: '#9AA3B2', fontWeight: 700, mr: 0.25 }}>
@@ -1163,6 +1190,35 @@ ${warningExportJson}`
                           {(alt.country || alt.league) && (
                             <Typography variant="caption" color="text.secondary" sx={{ display: 'block', fontSize: '0.75rem' }}>
                               {alt.country ? `${alt.country} • ` : ''}{alt.league || ''}
+                            </Typography>
+                          )}
+                          {(alt.is_neutral_venue || alt.stage || (alt.elo_home != null && alt.elo_away != null)) && (
+                            <Box sx={{ display: 'flex', gap: 0.5, mt: 0.5, flexWrap: 'wrap', alignItems: 'center' }}>
+                              {alt.is_neutral_venue && (
+                                <Chip
+                                  label="NEUTRAL"
+                                  size="small"
+                                  sx={{ height: 16, fontSize: '0.60rem', fontWeight: 800, backgroundColor: alpha('#9E9E9E', 0.2), color: '#E0E0E0' }}
+                                />
+                              )}
+                              {alt.stage && (
+                                <Chip
+                                  label={alt.stage.toUpperCase()}
+                                  size="small"
+                                  sx={{ height: 16, fontSize: '0.60rem', fontWeight: 700, backgroundColor: alpha('#3F51B5', 0.2), color: '#7986CB' }}
+                                />
+                              )}
+                              {alt.elo_home != null && alt.elo_away != null && (
+                                <Chip
+                                  label={`Elo: ${alt.elo_home} vs ${alt.elo_away}`}
+                                  size="small"
+                                  sx={{ height: 16, fontSize: '0.60rem', fontWeight: 700, backgroundColor: alpha('#00BCD4', 0.15), color: '#00BCD4' }}
+                                />
+                              )}
+                            </Box>
+                          )}
+                          {false && (
+                            <Typography>
                             </Typography>
                           )}
                           {((alt.prob_home_win != null) || (alt.prob_draw != null) || (alt.prob_away_win != null)) && (
