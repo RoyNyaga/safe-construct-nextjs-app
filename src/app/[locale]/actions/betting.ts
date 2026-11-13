@@ -18,6 +18,7 @@ import {
   WarningAnalyticsSummary,
   SelectionResultStatus,
   TicketStatus,
+  TicketConfidence,
   CalibrationBucket,
   CalibrationScope,
   ModelCalibrationData,
