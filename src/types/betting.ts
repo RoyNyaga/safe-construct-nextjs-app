@@ -214,6 +214,8 @@ export interface BettingAlternative {
   updated_at: string
 }
 
+export type TicketConfidence = 'very_high' | 'high' | 'medium' | 'low' | 'very_low'
+
 export interface BettingTicket {
   id: number
   uuid: string
@@ -227,6 +229,8 @@ export interface BettingTicket {
   status: TicketStatus
   actual_result: string | null
   profit_loss: number
+  confidence?: TicketConfidence | null
+  confidence_notes?: string | null
   notes: string | null
   created_at: string
   updated_at: string
@@ -318,6 +322,9 @@ export interface TicketImportJSON {
     status?: TicketStatus
     actual_result?: string | null
     profit_loss?: number
+    confidence?: TicketConfidence | null
+    confidence_notes?: string | null
+    confidence_level_note?: string | null
     notes?: string | null
   }
   selections: Array<{
@@ -470,6 +477,8 @@ export interface TicketExportJSON {
     status: TicketStatus
     actual_result: string | null
     profit_loss: number
+    confidence: TicketConfidence | null
+    confidence_notes: string | null
     notes: string | null
   }
   selections: Array<{

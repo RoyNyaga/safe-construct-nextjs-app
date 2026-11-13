@@ -64,6 +64,8 @@ function generateSamplePayload(activeModel?: BettingModel | null, initialSuggest
       status: 'pending',
       actual_result: null,
       profit_loss: 0,
+      confidence: 'high',
+      confidence_notes: `High conviction ticket based on verified Tier 1 & 2 corridors with strong sample size.`,
       notes: `Two-leg statistical ticket based on our ${modelName}. Selected goal markets prioritize estimated probability above bookmaker break-even and positive expected value.`,
     },
     selections: [
@@ -649,11 +651,13 @@ CRITICAL INSTRUCTIONS:
    - "edge_percentage_points": Value edge in percentage points = (estimated_probability - breakeven_probability) * 100 (e.g., +3.8).
    - "expected_value": Expected value = (estimated_probability * odds) - 1 (e.g., (0.675 * 1.57) - 1 = +0.060).
 
-5. TICKET-LEVEL AGGREGATE PROBABILITY & FINANCIALS:
+5. TICKET-LEVEL AGGREGATE PROBABILITY, CONFIDENCE & FINANCIALS:
    In the root "ticket" object, you MUST specify:
    - "combined_odds": Product of the odds of all selected legs (e.g., 1.57 * 1.45 = 2.28).
    - "estimated_ticket_probability": Product of "estimated_probability" across all selected legs (e.g., 0.675 * 0.728 = 0.491).
    - "stake": The stake allocated to the ticket (e.g., 100).
+   - "confidence": Overall ticket confidence calibration: "very_high", "high", "medium", "low", or "very_low".
+   - "confidence_notes": Diagnostic rationale explaining the confidence level assigned to guide wagering decisions.
    - "notes": High-level rationale explaining the ticket's statistical thesis and model version.
 
 6. PRE-MATCH STATISTICAL SNAPSHOT (MANDATORY FOR EVERY SELECTION):
@@ -1302,6 +1306,29 @@ ${JSON.stringify(sampleJson, null, 2)}`
                               : '—'}
                           </span>
                         </Typography>
+                        {parsedPayload.ticket.confidence && (
+                          <Typography variant="caption" color="text.secondary">
+                            Confidence:{' '}
+                            <span
+                              style={{
+                                fontWeight: 800,
+                                textTransform: 'uppercase',
+                                color:
+                                  parsedPayload.ticket.confidence === 'very_high'
+                                    ? '#10B981'
+                                    : parsedPayload.ticket.confidence === 'high'
+                                      ? '#66BB6A'
+                                      : parsedPayload.ticket.confidence === 'medium'
+                                        ? '#F6AE2D'
+                                        : parsedPayload.ticket.confidence === 'low'
+                                          ? '#F26419'
+                                          : '#EF5350',
+                              }}
+                            >
+                              {parsedPayload.ticket.confidence.replace('_', ' ')}
+                            </span>
+                          </Typography>
+                        )}
                       </Box>
                     </Box>
                   </Box>
@@ -1336,6 +1363,17 @@ ${JSON.stringify(sampleJson, null, 2)}`
                   }}
                 />
               </Box>
+
+              {(parsedPayload.ticket.confidence_notes || parsedPayload.ticket.confidence_level_note) && (
+                <Box sx={{ mt: 1.5, p: 1.5, borderRadius: 1.5, backgroundColor: alpha('#121824', 0.5), border: '1px solid rgba(255,255,255,0.06)' }}>
+                  <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 700, display: 'block', mb: 0.25 }}>
+                    {locale === 'fr' ? 'Justification de la Confiance' : 'Confidence Rationale'}:
+                  </Typography>
+                  <Typography variant="caption" sx={{ color: '#F0F2F5', fontStyle: 'italic' }}>
+                    &ldquo;{parsedPayload.ticket.confidence_notes || parsedPayload.ticket.confidence_level_note}&rdquo;
+                  </Typography>
+                </Box>
+              )}
             </CardContent>
           </Card>
 

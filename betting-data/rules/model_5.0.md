@@ -181,6 +181,7 @@ Model 5.0 evaluates all standard markets but enforces specific gating tailored t
   - Model Draw Probability: $\ge 24\%$.
   - Expected Value (EV): $> +0.03$ (+3.0pp edge).
   - *Mechanism*: If the match finishes drawn at 90 minutes, the selection voids at odds 1.00, preserving ticket survival.
+  - **The Elite Away DNB Restriction**: Draw No Bet is **strictly prohibited on an away favorite** if the home nation ranks in the Global World Football Elo Top 25 or holds $P(\text{Home Win}) \ge 25.0\%$. DNB provides zero capital protection against a home defeat (it only voids on a draw). In such elite fixtures, the model must pivot to **Double Chance (X2)** or relegate the match to shadow tracking (`ELITE_AWAY_DNB_HAZARD`).
 
 ### 5.3 Market 3: Double Chance (1X / X2) — Resilience Anchor
 - **Role**: Defensive anchor in tightly contested tournament fixtures.
@@ -235,6 +236,7 @@ Model 5.0 introduces standardized tournament-specific risk warnings:
 | `LOW_BASELINE_AFCON` | Moderate | Continental competition baseline is $\mu \le 2.10$ goals per game. | Activates Home Fortress Form Anchor when host GF $\ge 1.70$. |
 | `UNDERDOG_DEFENSIVE_BLOCK` | Moderate | Away underdog deploys an ultra-defensive low block (rarely attacks). | Disqualifies BTTS Yes; evaluates single-team goal lines. |
 | `ODDS_CORRIDOR_COMPRESSION` | Low / Informational | Selection odds fall below standalone viability floor ($< 1.22$). | Disqualifies from 2-leg main ticket; relegates to shadow tracking. |
+| `ELITE_AWAY_DNB_HAZARD` | High | Away favorite backed on DNB against a Top-25 Elo host ($P(\text{Home Win}) \ge 25\%$). | Disqualifies away DNB; pivots to Double Chance X2 or shadow relegation. |
 
 ---
 
@@ -256,6 +258,8 @@ All tickets, selections, and shadow alternative candidates generated under Model
     "status": "pending",
     "actual_result": null,
     "profit_loss": 0,
+    "confidence": "high",
+    "confidence_notes": "High conviction tournament accumulator combining favorable Elo differentials with verified goal baselines.",
     "notes": "Two-leg tournament accumulator constructed under Model 5.0 (roys_tournament_international_engine) and selection_process_tournament.md."
   },
   "selections": [

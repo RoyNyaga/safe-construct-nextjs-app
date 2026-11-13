@@ -472,6 +472,14 @@ export async function importBettingTicket(payload: TicketImportJSON): Promise<{
     resolvedTicketNumber = suggestion.ticketNumber
   }
 
+  // Validate and parse confidence
+  const rawConfidence = parseNullableString(payload.ticket.confidence)?.toLowerCase()
+  const validConfidenceLevels = ['very_high', 'high', 'medium', 'low', 'very_low']
+  const resolvedConfidence = rawConfidence && validConfidenceLevels.includes(rawConfidence)
+    ? (rawConfidence as TicketConfidence)
+    : null
+  const resolvedConfidenceNotes = parseNullableString(payload.ticket.confidence_notes ?? payload.ticket.confidence_level_note)
+
   // 3. Insert Ticket
   const { data: ticket, error: ticketError } = await supabase
     .from('betting_tickets')
@@ -487,6 +495,8 @@ export async function importBettingTicket(payload: TicketImportJSON): Promise<{
         status: payload.ticket.status || 'pending',
         actual_result: parseNullableString(payload.ticket.actual_result),
         profit_loss: parseNullableNumber(payload.ticket.profit_loss) ?? 0.00,
+        confidence: resolvedConfidence,
+        confidence_notes: resolvedConfidenceNotes,
         notes: parseNullableString(payload.ticket.notes),
       },
     ])
@@ -1267,6 +1277,8 @@ export async function updateBettingTicket(
     notes?: string
     status?: TicketStatus
     model_id?: number | null
+    confidence?: TicketConfidence | null
+    confidence_notes?: string | null
   }
 ): Promise<{ success: boolean; error?: string }> {
   const supabase = await createClient()
@@ -1280,6 +1292,8 @@ export async function updateBettingTicket(
       ...(data.notes !== undefined && { notes: data.notes }),
       ...(data.status && { status: data.status, actual_result: data.status }),
       ...(data.model_id !== undefined && { model_id: data.model_id }),
+      ...(data.confidence !== undefined && { confidence: data.confidence }),
+      ...(data.confidence_notes !== undefined && { confidence_notes: data.confidence_notes }),
       updated_at: new Date().toISOString(),
     })
     .eq('id', ticketId)
@@ -1436,6 +1450,8 @@ export async function exportTicketAsJson(ticketUuid: string): Promise<{
       status: ticket.status,
       actual_result: ticket.actual_result,
       profit_loss: Number(ticket.profit_loss),
+      confidence: ticket.confidence || null,
+      confidence_notes: ticket.confidence_notes || null,
       notes: ticket.notes,
     },
     selections: (ticket.betting_selections || []).map((s) => ({

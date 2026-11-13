@@ -99,6 +99,7 @@ graph TD
 - **Combined Odds**: $2.00 - 2.25$.
 - **Safety Mechanism**: If Leg 1 finishes in a draw, the DNB selection voids at 1.00 odds, preventing ticket loss and returning stake or winning on Leg 2.
 - **Ideal For**: Competitive tournament fixtures where one side has a moderate edge but cannot be trusted to prevent a 90-minute stalemate.
+- **Mandatory Constraint**: Must strictly comply with **Rule 9 (Elite Away DNB Restriction)**. Backing DNB on an away team is prohibited if the host is a Top-25 Elo nation or has $P(\text{Home Win}) \ge 25\%$; in such derbies, use Double Chance (X2) or omit the fixture.
 
 ### 3.3 Archetype 3: The Knockout Fortress Pair (Under 3.5 + Double Chance)
 - **Structure**:
@@ -120,7 +121,7 @@ graph TD
 
 ## 4. HARD DISQUALIFICATION & STOP RULES FOR TOURNAMENTS
 
-To prevent catastrophic failures, the engine strictly halts or disqualifies selections under these five conditions:
+To prevent catastrophic failures, the engine strictly halts or disqualifies selections under these nine conditions:
 
 1. **The Knockout Match Winner Hard-Stop**:
    - In a single-leg knockout fixture between two balanced nations ($|\Delta \text{Elo}| < 150$), **straight 1X2 Match Winner bets are strictly DISQUALIFIED**. 
@@ -144,6 +145,12 @@ To prevent catastrophic failures, the engine strictly halts or disqualifies sele
    - *Reason*: Bookmakers have priced in critical unmodeled team news (star withdrawals, coaching boycotts, or sudden squad rotation) that historical ratings lag behind (`EXTERNAL_ODDS_INVERSION_WARNING`).
 8. **The Juiced Odds Corridor Relegation Rule ($< 1.22$)**:
    - In tournaments, when Over 1.5 odds drop below $1.22$ (e.g. $1.13 - 1.18$), they are **disqualified from 2-leg main tickets** and relegated to shadow tracking (`alternatives`) unless paired in an approved 3-leg hybrid ticket where remaining legs provide sufficient odds buffer.
+9. **The Elite Away Draw No Bet (DNB) Restriction Rule (`ELITE_AWAY_DNB_HAZARD`)**:
+   - In international and continental tournament fixtures, backing an away favorite on **Draw No Bet (DNB / Asian Handicap 0)** is **strictly DISQUALIFIED from real-money tickets** whenever either condition is met:
+     1. The home team ranks in the **Global World Football Elo Top 25** (e.g. Italy, Germany, Netherlands, Croatia, Uruguay), OR
+     2. The model projects a home win probability $P(\text{Home Win}) \ge 25.0\%$.
+   - *Reason*: DNB only protects against a 90-minute draw (voiding the selection at 1.00 odds). It provides **zero capital protection against an outright home defeat**. In elite fixtures played at hostile traditional venues (e.g. Italy at San Siro, England at Wembley, Brazil at Maracanã), home crowd momentum and world-class individual attacking quality frequently overcome modest negative Elo differentials.
+   - *Actionable Requirement*: In any elite away clash meeting these criteria, backing DNB is strictly forbidden. The selection must either be converted to **Double Chance (X2)** (which wins on both draw and away win) or relegated to the shadow candidate portfolio (`alternatives`).
 
 ---
 
