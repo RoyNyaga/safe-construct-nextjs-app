@@ -885,6 +885,132 @@
         }
       }
     },
+    "egypt_second_division_a": {
+      "name": "Egypt Second Division A",
+      "country": "Egypt",
+      "historical_home_avg": 1.15,
+      "historical_away_avg": 0.85,
+      "season_basis": "2024/25 - 2025/26 multi-year aggregate (Extreme low-goal, high-draw corridor)",
+      "market_integrity": {
+        "over_1_5": {
+          "tier": "TIER_3",
+          "baseline_hit_rate": 0.6,
+          "notes": "FAT LEFT TAIL & ZERO INFLATION: 38-42% of matches finish 0-0 or 1-0. Cynical low blocks and time-wasting make Over 1.5 a statistical trap. Strictly barred from main tickets.",
+          "empirical_sample": 2,
+          "empirical_win_rate": 0,
+          "calibration_gap_pp": -78,
+          "status_label": "Quarantined (N=2, 0% Hit Rate)"
+        },
+        "over_2_5": {
+          "tier": "TIER_3",
+          "baseline_hit_rate": 0.35,
+          "notes": "Defensive cynicism and physical disruption severely suppress 3+ goal outcomes.",
+          "empirical_sample": 0,
+          "empirical_win_rate": null,
+          "calibration_gap_pp": null,
+          "status_label": "Prior: TIER_3"
+        },
+        "btts_yes": {
+          "tier": "TIER_3",
+          "baseline_hit_rate": 0.38,
+          "notes": "Underdog scoreless rate exceeds 48%. Frequent shutouts.",
+          "empirical_sample": 0,
+          "empirical_win_rate": null,
+          "calibration_gap_pp": null,
+          "status_label": "Prior: TIER_3"
+        },
+        "under_3_5": {
+          "tier": "TIER_1",
+          "baseline_hit_rate": 0.86,
+          "notes": "Premier Under 3.5 corridor. 86% of fixtures stay below 4 goals.",
+          "empirical_sample": 2,
+          "empirical_win_rate": 1,
+          "calibration_gap_pp": 11.5,
+          "status_label": "Prior: TIER_1"
+        },
+        "to_win": {
+          "tier": "TIER_3",
+          "baseline_hit_rate": 0.39,
+          "notes": "Draw rate exceeds 33%. Heavy parity and 0-0 draw traps.",
+          "empirical_sample": 0,
+          "empirical_win_rate": null,
+          "calibration_gap_pp": null,
+          "status_label": "Prior: TIER_3"
+        },
+        "draw_no_bet": {
+          "tier": "TIER_2",
+          "baseline_hit_rate": 0.6,
+          "notes": "DNB mandatory to absorb excessive draws.",
+          "empirical_sample": 0,
+          "empirical_win_rate": null,
+          "calibration_gap_pp": null,
+          "status_label": "Prior: TIER_2"
+        }
+      }
+    },
+    "egypt_premier_league": {
+      "name": "Egypt Premier League",
+      "country": "Egypt",
+      "historical_home_avg": 1.25,
+      "historical_away_avg": 0.95,
+      "season_basis": "2024/25 - 2025/26 multi-year aggregate",
+      "market_integrity": {
+        "over_1_5": {
+          "tier": "TIER_3",
+          "baseline_hit_rate": 0.67,
+          "notes": "Frequent 1-0/0-0 tactical freezes outside top 2 (Al Ahly/Zamalek). Fat-tail low scoring.",
+          "empirical_sample": 0,
+          "empirical_win_rate": null,
+          "calibration_gap_pp": null,
+          "status_label": "Prior: TIER_3"
+        },
+        "over_2_5": {
+          "tier": "TIER_3",
+          "baseline_hit_rate": 0.4,
+          "notes": "Low goal yield across majority of mid-table fixtures.",
+          "empirical_sample": 0,
+          "empirical_win_rate": null,
+          "calibration_gap_pp": null,
+          "status_label": "Prior: TIER_3"
+        },
+        "btts_yes": {
+          "tier": "TIER_3",
+          "baseline_hit_rate": 0.42,
+          "notes": "Frequent shutouts.",
+          "empirical_sample": 0,
+          "empirical_win_rate": null,
+          "calibration_gap_pp": null,
+          "status_label": "Prior: TIER_3"
+        },
+        "under_3_5": {
+          "tier": "TIER_1",
+          "baseline_hit_rate": 0.82,
+          "notes": "Exceptional reliability for Under 3.5 Goals.",
+          "empirical_sample": 0,
+          "empirical_win_rate": null,
+          "calibration_gap_pp": null,
+          "status_label": "Prior: TIER_1"
+        },
+        "to_win": {
+          "tier": "TIER_2",
+          "baseline_hit_rate": 0.45,
+          "notes": "Solid favorite dominance for top clubs.",
+          "empirical_sample": 0,
+          "empirical_win_rate": null,
+          "calibration_gap_pp": null,
+          "status_label": "Prior: TIER_2"
+        },
+        "draw_no_bet": {
+          "tier": "TIER_1",
+          "baseline_hit_rate": 0.7,
+          "notes": "Strong DNB security against road draws.",
+          "empirical_sample": 0,
+          "empirical_win_rate": null,
+          "calibration_gap_pp": null,
+          "status_label": "Prior: TIER_1"
+        }
+      }
+    },
     "default_fallback": {
       "name": "Default Competition Fallback",
       "country": null,

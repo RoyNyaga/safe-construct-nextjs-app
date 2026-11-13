@@ -254,6 +254,8 @@ The model actively searches for evidence that challenges market viability. Warni
 
 #### F. League-Market Integrity Warnings (Gate 6)
 - `LEAGUE_INTEGRITY_RESTRICTED`: The competition is classified as `TIER_3` (Restricted / Fat-Tail Trap) for the targeted market in `league_baselines.json`. Disqualifies the fixture from Main Tickets and diverts it to the Shadow Tracking Portfolio.
+- `O1.5_LONG_PRICE_ANOMALY`: Over 1.5 odds are $\ge 1.38$ while the model estimates probability $\ge 76.0\%$. In genuine goal-scoring corridors, 76%+ probability events are priced at $1.15 - 1.25$. A bookmaker price of $1.38 - 1.45$ signals severe market skepticism and empirical zero-inflation (e.g. Egypt Second Division A pricing Over 1.5 at 1.40 where 40% of matches end 0-0/1-0). This exposes a Poisson independence breakdown on small samples. Mandates disqualification from Main Tickets and immediate diversion to the Shadow Portfolio.
+- `UNVETTED_LEAGUE_QUARANTINE`: The competition is a secondary, tertiary, or developmental domestic division not explicitly audited and registered in `league_baselines.json`. Lower-tier leagues frequently exhibit severe low-scoring tactical cynicism, poor pitches, and defensive time-wasting. Unvetted lower tiers are strictly barred from using `default_fallback` `TIER_2` status; they automatically default to `TIER_3` Restricted for Over 1.5, Over 2.5, and BTTS until an empirical 10-fixture historical sample ($N \ge 10$) is validated.
 
 
 ## 9. RECOMMENDED ACCUMULATOR CONSTRUCTION (NON-RESTRICTIVE)
@@ -299,7 +301,9 @@ Every imported ticket must preserve:
 1. `ticket_number`: Formatted as `S-*-v4.0` for selections or `A-*-v4.0` for alternatives.
 2. `model_version`: `'4.0'`
 3. `model_name`: `'roys_betting_engine_BTS_O2-5_win'`
-4. For every selection and alternative:
+4. `confidence`: Discrete confidence calibration: `'very_high'`, `'high'`, `'medium'`, `'low'`, or `'very_low'`.
+5. `confidence_notes`: Diagnostic synthesis explaining the exact drivers behind the assigned confidence level.
+6. For every selection and alternative:
    - `prob_over_1_5`: Exact Poisson Over 1.5 probability (numeric 5,4).
    - `prob_over_2_5`: Exact Poisson Over 2.5 probability (numeric 5,4).
    - `prob_btts_yes`: Exact Poisson BTTS Yes probability (numeric 5,4).

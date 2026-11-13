@@ -149,8 +149,15 @@ In real-world bookmaker pricing, fixtures with hyper-dominant offensive tempo of
   - **Tier 1 (High Reliability)**: Green light for main ticket wagers (e.g. Netherlands Eerste Divisie on Over 1.5/2.5; Germany 2. Bundesliga on Over 1.5; Japan J1 on Under 3.5).
   - **Tier 2 (Moderate / Controlled)**: Permitted on main ticket only if DCI and probability exceed primary thresholds with positive edge.
   - **Tier 3 (Restricted / Fat-Tail Trap)**: **STRICTLY DISQUALIFIED from Main Tickets (`selections`)**.
-    - *Examples*: Japan J1 League on Over 1.5 / Over 2.5 (28% 0-0/1-0 rate); France Ligue 2 on Over 1.5 / Over 2.5; Argentina Primera on Over 1.5; Spain Segunda on Over 1.5.
+    - *Examples*: Egypt Second Division A on Over 1.5/2.5/BTTS (38-42% 0-0/1-0 rate); Japan J1 League on Over 1.5 / Over 2.5 (28% 0-0/1-0 rate); France Ligue 2 on Over 1.5 / Over 2.5; Argentina Primera on Over 1.5; Spain Segunda on Over 1.5.
     - *Action*: Divert candidate fixture exclusively to the **Shadow Tracking Portfolio (`alternatives`)**. Real money capital must never be risked on a Tier 3 market corridor.
+  - **Unvetted Secondary League Quarantine (`UNVETTED_LEAGUE_QUARANTINE`)**:
+    - Any secondary, tertiary, or developmental domestic league (e.g. Division 2, Serie B, Liga 2 outside top divisions) that is **not explicitly audited and registered in `league_baselines.json`** must NOT use the `default_fallback` `TIER_2` status for Over 1.5, Over 2.5, or BTTS.
+    - Unvetted lower tiers automatically default to **`TIER_3` Restricted** until an empirical **10-fixture historical sample ($N \ge 10$)** is validated.
+  - **Rule 10: Over 1.5 Odds Ceiling Anomaly (`O1.5_LONG_PRICE_ANOMALY`)**:
+    - *The Anomaly*: When Over 1.5 odds are offered at **$\ge 1.38$** (break-even $\ge 72.5\%$) while the model calculates a high probability ($\ge 76.0\%$).
+    - *The Reality*: In genuine goal corridors, 76%+ probability events are priced at $1.15 - 1.25$. A bookmaker price of $1.38 - 1.45$ is not free "value"; it is an explicit signal of macro zero-inflation (0-0/1-0 clustering) that independent Poisson fails to detect on small samples.
+    - *Mandatory Action*: Any Over 1.5 candidate priced at $\ge 1.38$ is strictly barred from main capital tickets and diverted to shadow tracking.
 
 ---
 
@@ -161,6 +168,8 @@ In real-world bookmaker pricing, fixtures with hyper-dominant offensive tempo of
 - Apply Section 2.2 Small-Sample Regression Anchor ($N \le 5$).
 - Compute DCI and enforce the $\text{DCI} \ge 0.45$ floor for Over 2.5 and $\text{DCI} \ge 0.50$ for BTTS Yes.
 - **Enforce Gate 6 (League-Market Integrity)**: Check `league_baselines.json` and in-app empirical LMI matrix. If the match falls in a **`TIER_3`** corridor for that market, **divert to shadow alternatives immediately**.
+- **Enforce Unvetted Lower League Quarantine (`UNVETTED_LEAGUE_QUARANTINE`)**: Bar unvetted secondary/tertiary divisions ($N < 10$) from passing Gate 6 on Over 1.5/2.5/BTTS under `default_fallback`.
+- **Enforce Over 1.5 Odds Ceiling Anomaly (`O1.5_LONG_PRICE_ANOMALY`)**: Disqualify any Over 1.5 selection with odds $\ge 1.38$ from main tickets.
 - **Enforce the Reserve Squad Restriction (`RESERVE_SQUAD_RESTRICTION`)**: If either team is a reserve/academy squad ("Jong", "B", "II"), strictly prohibit straight 1X2 Match Winner picks from main tickets. Re-channel selection into Goal Markets or Draw No Bet (DNB).
 - **Enforce the Away Favorite Restriction (`AWAY_FAVORITE_RESTRICTION`)**: Strictly prohibit straight 1X2 Away Win picks from main tickets. Re-channel candidate fixtures into Goal Markets (Over 1.5, Over 2.5, BTTS) or require Draw No Bet (DNB) as a mandatory shock absorber against low-block draw traps.
 - Disqualify fixtures with unverified critical lineup absences or dead-rubber game state.
@@ -203,6 +212,19 @@ In real-world bookmaker pricing, fixtures with hyper-dominant offensive tempo of
   - *Forced 2-Leg*: Groningen BTTS (1.46, won 2-3) $\times$ Arouca O2.5 (1.83, **lost 1-0**) = LOST.
   - *3-Leg Safety Solution*: Groningen BTTS (1.46, won 2-3) $\times$ Academico de Viseu O1.5 (1.29, **won 2-1**) $\times$ Braga O1.5 (1.32, **won 3-0**) = **Combined Odds 2.49, ALL 3 LEGS WON**.
 - **Hard Cap**: Never expand beyond 3 legs under any circumstance. Maximum allowable legs on any ticket is strictly 3.
+
+### Step 4: Ticket-Level Confidence Calibration Engine
+Every constructed ticket must be assigned a discrete **`confidence`** level (`very_high`, `high`, `medium`, `low`, `very_low`) and an explanatory **`confidence_notes`** diagnostic synthesis before export. This informs Roy of the ticket's underlying conviction level and dictates recommended stake allocation:
+
+| Level | Criteria & Slate Environment | Wagering Recommendation |
+| :--- | :--- | :--- |
+| **`very_high`** | • All legs from Tier 1 audited leagues (`league_baselines.json`)<br>• Venue sample size $N \ge 10$ matches per club<br>• DCI $\ge 0.55$, compound ticket probability $\ge 80.0\%$<br>• Zero contradictory warnings across entire ticket | **FULL STAKE (100%)**<br>Maximum model conviction |
+| **`high`** | • Tier 1 or vetted Tier 2 leagues with sample $N \ge 7$<br>• Clean attacking statistics, compound probability $\ge 65.0\%$<br>• Standard odds corridor ($1.18 - 1.28$ per leg)<br>• Supportive warnings present | **FULL STAKE (100%)**<br>Standard reliable accumulator |
+| **`medium`** | • Tier 2 leagues with verified sample ($N \ge 10$)<br>• Minor contextual friction (e.g. DNB fallback used, neutral venue)<br>• Compound probability $55.0\% - 65.0\%$ | **CONTROLLED STAKE (50%–75%)**<br>Scale down exposure |
+| **`low`** | • Compromised slate (e.g. FIFA international break forcing secondary leagues)<br>• Small venue samples ($N = 5 - 6$ matches)<br>• Long-price Over 1.5 ($\ge 1.35$) or 1+ contradictory warning | **DEFENSIVE / MICRO STAKE (25%–50%)**<br>Or Paper Trade / Shadow Tracking |
+| **`very_low`** | • Unvetted secondary league ($N < 10$ matches)<br>• Over 1.5 Odds Ceiling Anomaly ($\ge 1.38$)<br>• Macro zero-inflation or severe negative EV | **DO NOT PLAY (0% Stake)**<br>Exclusively Shadow Tracking |
+
+- **`confidence_notes` Requirement**: Must state in 1–3 concise sentences the exact analytical drivers behind the confidence level (e.g. data sample size, league reliability, pricing anomalies, and stake advice).
 
 ---
 

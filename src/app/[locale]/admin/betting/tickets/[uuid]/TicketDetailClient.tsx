@@ -99,6 +99,8 @@ export default function TicketDetailClient({
   const [editNotes, setEditNotes] = useState(ticket.notes || '')
   const [editStatus, setEditStatus] = useState<TicketStatus>(ticket.status as TicketStatus)
   const [editModelId, setEditModelId] = useState<number | ''>(ticket.model_id || '')
+  const [editConfidence, setEditConfidence] = useState<string>(ticket.confidence || '')
+  const [editConfidenceNotes, setEditConfidenceNotes] = useState<string>(ticket.confidence_notes || '')
   const [isUpdatingTicket, setIsUpdatingTicket] = useState(false)
 
   // Delete Ticket State
@@ -512,6 +514,8 @@ ${warningExportJson}`
     setEditNotes(ticket.notes || '')
     setEditStatus(ticket.status as TicketStatus)
     setEditModelId(ticket.model_id || '')
+    setEditConfidence(ticket.confidence || '')
+    setEditConfidenceNotes(ticket.confidence_notes || '')
     setIsEditTicketOpen(true)
   }
 
@@ -527,8 +531,8 @@ ${warningExportJson}`
       notes: editNotes,
       status: editStatus,
       model_id: newModelId,
-
-
+      confidence: (editConfidence as any) || null,
+      confidence_notes: editConfidenceNotes || null,
     })
     setIsUpdatingTicket(false)
 
@@ -543,8 +547,8 @@ ${warningExportJson}`
         notes: editNotes,
         status: editStatus,
         model_id: newModelId,
-
-
+        confidence: (editConfidence as any) || null,
+        confidence_notes: editConfidenceNotes || null,
         betting_models: (models || []).find((m) => m.id === newModelId) || (newModelId ? ticket.betting_models : null),
         actual_result: editStatus,
       })
@@ -612,6 +616,58 @@ ${warningExportJson}`
         message: locale === 'fr' ? 'Alternative supprimée !' : 'Alternative removed!',
         type: 'success',
       })
+    }
+  }
+
+  const getConfidenceConfig = (conf?: string | null) => {
+    switch (conf) {
+      case 'very_high':
+        return {
+          label: locale === 'fr' ? 'CONFIANCE : TRÈS HAUTE' : 'CONFIDENCE: VERY HIGH',
+          shortLabel: locale === 'fr' ? 'Très Haute' : 'Very High',
+          color: '#10B981',
+          bg: alpha('#10B981', 0.15),
+          border: alpha('#10B981', 0.35),
+          advice: locale === 'fr' ? 'Mise Pleine Recommandée (100%)' : 'Full Unit Stake Recommended (100%)',
+        }
+      case 'high':
+        return {
+          label: locale === 'fr' ? 'CONFIANCE : HAUTE' : 'CONFIDENCE: HIGH',
+          shortLabel: locale === 'fr' ? 'Haute' : 'High',
+          color: '#66BB6A',
+          bg: alpha('#66BB6A', 0.15),
+          border: alpha('#66BB6A', 0.35),
+          advice: locale === 'fr' ? 'Mise Pleine Recommandée (100%)' : 'Full Unit Stake Recommended (100%)',
+        }
+      case 'medium':
+        return {
+          label: locale === 'fr' ? 'CONFIANCE : MOYENNE' : 'CONFIDENCE: MEDIUM',
+          shortLabel: locale === 'fr' ? 'Moyenne' : 'Medium',
+          color: '#F6AE2D',
+          bg: alpha('#F6AE2D', 0.15),
+          border: alpha('#F6AE2D', 0.35),
+          advice: locale === 'fr' ? 'Mise Modérée Recommandée (50%–75%)' : 'Controlled Stake Recommended (50%–75%)',
+        }
+      case 'low':
+        return {
+          label: locale === 'fr' ? 'CONFIANCE : FAIBLE' : 'CONFIDENCE: LOW',
+          shortLabel: locale === 'fr' ? 'Faible' : 'Low',
+          color: '#F26419',
+          bg: alpha('#F26419', 0.15),
+          border: alpha('#F26419', 0.35),
+          advice: locale === 'fr' ? 'Mise Défensive (25%–50%) ou Papier' : 'Defensive Micro-Stake (25%–50%) or Paper Trade',
+        }
+      case 'very_low':
+        return {
+          label: locale === 'fr' ? 'CONFIANCE : TRÈS FAIBLE' : 'CONFIDENCE: VERY LOW',
+          shortLabel: locale === 'fr' ? 'Très Faible' : 'Very Low',
+          color: '#EF5350',
+          bg: alpha('#EF5350', 0.15),
+          border: alpha('#EF5350', 0.35),
+          advice: locale === 'fr' ? 'NE PAS JOUER (0% - Risque Élevé)' : 'DO NOT PLAY (0% Stake - High Hazard)',
+        }
+      default:
+        return null
     }
   }
 
@@ -736,7 +792,7 @@ ${warningExportJson}`
         <CardContent sx={{ p: { xs: 3, md: 4 } }}>
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 2, mb: 3 }}>
             <Box>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 1 }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 1, flexWrap: 'wrap' }}>
                 <Typography variant="h3" sx={{ fontWeight: 800 }}>
                   Ticket {ticket.ticket_number ? `#${ticket.ticket_number}` : `#${ticket.id}`}
                 </Typography>
@@ -749,6 +805,18 @@ ${warningExportJson}`
                     border: `1px solid ${alpha(statusColor, 0.3)}`,
                   }}
                 />
+                {ticket.confidence && (
+                  <Chip
+                    label={getConfidenceConfig(ticket.confidence)?.label || ticket.confidence.toUpperCase()}
+                    sx={{
+                      fontWeight: 800,
+                      backgroundColor: getConfidenceConfig(ticket.confidence)?.bg,
+                      color: getConfidenceConfig(ticket.confidence)?.color,
+                      border: `1px solid ${getConfidenceConfig(ticket.confidence)?.border}`,
+                      letterSpacing: '0.04em',
+                    }}
+                  />
+                )}
               </Box>
               <Typography variant="body2" color="text.secondary">
                 {locale === 'fr' ? 'Enregistré le' : 'Created on'} {ticket.ticket_date} &bull; Model:{' '}
@@ -818,6 +886,47 @@ ${warningExportJson}`
               <Typography variant="body2" sx={{ fontStyle: 'italic', mt: 0.5 }}>
                 "{ticket.notes}"
               </Typography>
+            </Box>
+          )}
+
+          {(ticket.confidence || ticket.confidence_notes) && (
+            <Box
+              sx={{
+                mt: 2.5,
+                p: 2.5,
+                borderRadius: 2,
+                backgroundColor: ticket.confidence
+                  ? alpha(getConfidenceConfig(ticket.confidence)?.color || '#9AA3B2', 0.08)
+                  : alpha('#121824', 0.6),
+                border: `1px solid ${ticket.confidence
+                    ? alpha(getConfidenceConfig(ticket.confidence)?.color || '#9AA3B2', 0.3)
+                    : 'rgba(255, 255, 255, 0.1)'
+                  }`,
+              }}
+            >
+              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 1, mb: 1 }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <ShieldAlert size={18} color={ticket.confidence ? getConfidenceConfig(ticket.confidence)?.color : '#F6AE2D'} />
+                  <Typography
+                    variant="subtitle2"
+                    sx={{
+                      fontWeight: 800,
+                      color: ticket.confidence ? getConfidenceConfig(ticket.confidence)?.color : '#FFFFFF',
+                    }}
+                  >
+                    {ticket.confidence
+                      ? `${getConfidenceConfig(ticket.confidence)?.label} — ${getConfidenceConfig(ticket.confidence)?.advice}`
+                      : locale === 'fr'
+                        ? 'Indice de Confiance'
+                        : 'Confidence Assessment'}
+                  </Typography>
+                </Box>
+              </Box>
+              {ticket.confidence_notes && (
+                <Typography variant="body2" sx={{ color: 'text.secondary', lineHeight: 1.6 }}>
+                  {ticket.confidence_notes}
+                </Typography>
+              )}
             </Box>
           )}
         </CardContent>
@@ -3038,7 +3147,7 @@ ${warningExportJson}`
             sx={{ mb: 2 }}
           />
 
-          <Grid container spacing={2}>
+          <Grid container spacing={2} sx={{ mb: 2 }}>
             <Grid size={{ xs: 12 }}>
               <FormControl fullWidth>
                 <InputLabel>{locale === 'fr' ? 'Modèle Statistique' : 'Betting Model'}</InputLabel>
@@ -3057,6 +3166,47 @@ ${warningExportJson}`
                   ))}
                 </Select>
               </FormControl>
+            </Grid>
+          </Grid>
+
+          <Grid container spacing={2}>
+            <Grid size={{ xs: 12, sm: 5 }}>
+              <FormControl fullWidth>
+                <InputLabel>{locale === 'fr' ? 'Indice de Confiance' : 'Confidence Level'}</InputLabel>
+                <Select
+                  value={editConfidence}
+                  label={locale === 'fr' ? 'Indice de Confiance' : 'Confidence Level'}
+                  onChange={(e) => setEditConfidence(e.target.value)}
+                >
+                  <MenuItem value="">
+                    <em>{locale === 'fr' ? 'Non calibré' : 'Unspecified'}</em>
+                  </MenuItem>
+                  <MenuItem value="very_high">
+                    <span style={{ color: '#10B981', fontWeight: 700 }}>Very High</span> — 100% Full Stake
+                  </MenuItem>
+                  <MenuItem value="high">
+                    <span style={{ color: '#66BB6A', fontWeight: 700 }}>High</span> — 100% Full Stake
+                  </MenuItem>
+                  <MenuItem value="medium">
+                    <span style={{ color: '#F6AE2D', fontWeight: 700 }}>Medium</span> — 50–75% Stake
+                  </MenuItem>
+                  <MenuItem value="low">
+                    <span style={{ color: '#F26419', fontWeight: 700 }}>Low</span> — 25–50% Stake
+                  </MenuItem>
+                  <MenuItem value="very_low">
+                    <span style={{ color: '#EF5350', fontWeight: 700 }}>Very Low</span> — 0% Do Not Play
+                  </MenuItem>
+                </Select>
+              </FormControl>
+            </Grid>
+            <Grid size={{ xs: 12, sm: 7 }}>
+              <TextField
+                fullWidth
+                label={locale === 'fr' ? 'Justification de la Confiance' : 'Confidence Notes'}
+                placeholder="Reason for confidence calibration..."
+                value={editConfidenceNotes}
+                onChange={(e) => setEditConfidenceNotes(e.target.value)}
+              />
             </Grid>
           </Grid>
           <Box sx={{ display: 'none' }}

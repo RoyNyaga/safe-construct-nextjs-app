@@ -265,6 +265,7 @@ export default function TicketsClient({
                     <th style={{ padding: '14px 18px', color: '#9AA3B2', fontSize: '0.75rem', textTransform: 'uppercase', fontWeight: 600 }}>Ticket #</th>
                     <th style={{ padding: '14px 18px', color: '#9AA3B2', fontSize: '0.75rem', textTransform: 'uppercase', fontWeight: 600 }}>Date</th>
                     <th style={{ padding: '14px 18px', color: '#9AA3B2', fontSize: '0.75rem', textTransform: 'uppercase', fontWeight: 600 }}>Model</th>
+                    <th style={{ padding: '14px 18px', color: '#9AA3B2', fontSize: '0.75rem', textTransform: 'uppercase', fontWeight: 600 }}>Confidence</th>
                     <th style={{ padding: '14px 18px', color: '#9AA3B2', fontSize: '0.75rem', textTransform: 'uppercase', fontWeight: 600 }}>Legs / Matches</th>
                     <th style={{ padding: '14px 18px', color: '#9AA3B2', fontSize: '0.75rem', textTransform: 'uppercase', fontWeight: 600 }}>Odds</th>
                     <th style={{ padding: '14px 18px', color: '#9AA3B2', fontSize: '0.75rem', textTransform: 'uppercase', fontWeight: 600 }}>Stake</th>
@@ -314,6 +315,45 @@ export default function TicketsClient({
                               color: '#F26419',
                             }}
                           />
+                        </td>
+                        <td style={{ padding: '16px 18px' }}>
+                          {t.confidence ? (
+                            <Chip
+                              label={
+                                t.confidence === 'very_high' ? (locale === 'fr' ? 'Très Haute' : 'Very High') :
+                                t.confidence === 'high' ? (locale === 'fr' ? 'Haute' : 'High') :
+                                t.confidence === 'medium' ? (locale === 'fr' ? 'Moyenne' : 'Medium') :
+                                t.confidence === 'low' ? (locale === 'fr' ? 'Faible' : 'Low') :
+                                (locale === 'fr' ? 'Très Faible' : 'Very Low')
+                              }
+                              size="small"
+                              sx={{
+                                fontSize: '0.7rem',
+                                fontWeight: 800,
+                                backgroundColor:
+                                  t.confidence === 'very_high' ? alpha('#10B981', 0.15) :
+                                  t.confidence === 'high' ? alpha('#66BB6A', 0.15) :
+                                  t.confidence === 'medium' ? alpha('#F6AE2D', 0.15) :
+                                  t.confidence === 'low' ? alpha('#F26419', 0.15) :
+                                  alpha('#EF5350', 0.15),
+                                color:
+                                  t.confidence === 'very_high' ? '#10B981' :
+                                  t.confidence === 'high' ? '#66BB6A' :
+                                  t.confidence === 'medium' ? '#F6AE2D' :
+                                  t.confidence === 'low' ? '#F26419' :
+                                  '#EF5350',
+                                border: `1px solid ${
+                                  t.confidence === 'very_high' ? alpha('#10B981', 0.35) :
+                                  t.confidence === 'high' ? alpha('#66BB6A', 0.35) :
+                                  t.confidence === 'medium' ? alpha('#F6AE2D', 0.35) :
+                                  t.confidence === 'low' ? alpha('#F26419', 0.35) :
+                                  alpha('#EF5350', 0.35)
+                                }`,
+                              }}
+                            />
+                          ) : (
+                            <Typography variant="caption" color="text.secondary">—</Typography>
+                          )}
                         </td>
                         <td style={{ padding: '16px 18px' }}>
                           <Typography variant="body2" sx={{ fontWeight: 600 }}>
