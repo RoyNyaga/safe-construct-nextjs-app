@@ -117,6 +117,11 @@ graph TD
 - **Combined Odds**: $2.05 - 2.45$.
 - **Role**: Fallback architecture when no single high-odds leg meets strict safety gating, allowing the ticket to reach 2.00 odds without gambling on low-probability selections.
 
+### 3.5 Dominant Home Winner Promotion Protocol (Sweden Archetype)
+- **Context**: When navigating international breaks or continental tournament slates, road goal anchors can face severe frustration against compact low blocks (as seen in Kosovo 0-0 Israel).
+- **Protocol**: Prioritize elite European home favorites ($\text{DR} \ge 2.20$, $\Delta \text{Elo} \ge +200$, $P(\text{Home Win}) \ge 70.0\%$, e.g. Sweden vs Bosnia 3-1 @ 1.49) over fragile road goal anchors.
+- **Strategic Impact**: Backing a dominant home favorite inside their national stadium provides essential structural resilience: home crowd pressure, turf familiarity, and individual talent superiority reliably break through defensive stalemates, avoiding the fat-tail risks of away low blocks.
+
 ---
 
 ## 4. HARD DISQUALIFICATION & STOP RULES FOR TOURNAMENTS
@@ -152,9 +157,91 @@ To prevent catastrophic failures, the engine strictly halts or disqualifies sele
    - *Reason*: DNB only protects against a 90-minute draw (voiding the selection at 1.00 odds). It provides **zero capital protection against an outright home defeat**. In elite fixtures played at hostile traditional venues (e.g. Italy at San Siro, England at Wembley, Brazil at Maracanã), home crowd momentum and world-class individual attacking quality frequently overcome modest negative Elo differentials.
    - *Actionable Requirement*: In any elite away clash meeting these criteria, backing DNB is strictly forbidden. The selection must either be converted to **Double Chance (X2)** (which wins on both draw and away win) or relegated to the shadow candidate portfolio (`alternatives`).
 
+10. **The H2H Low-Goal Anti-Anchor Rule (`H2H_UNDER_1_5_TRAP`)**:
+    - In international and continental tournament fixtures, inspect the last 3 to 5 direct competitive meetings between the two nations or clubs.
+    - If **$\ge 50\%$ of past H2H meetings produced $\le 1$ goal** (e.g. 0-0, 1-0), the fixture is **STRICTLY DISQUALIFIED from serving as an Over 1.5 or Over 2.5 Anchor on main tickets**.
+    - *Empirical Proof*: In Ticket #S-3-v5.0, Kosovo vs Israel past meetings were 1-1 and 1-0 (average 1.00 goal/game, 66.7% Under 1.5 rate). Under this rule, Kosovo vs Israel would have been rejected immediately pre-match, preserving 5,000 FCFA. Relegate the fixture to shadow alternatives and flag `H2H_UNDER_1_5_TRAP`.
+11. **The Recent Scoring Drought Rule (`RECENT_SCORING_DROUGHT`)**:
+    - If either national team or club has failed to score in **3 of their last 5 competitive matches**, Over 2.5 Goals and Both Teams to Score (BTTS Yes) are **STRICTLY DISQUALIFIED from main tickets**.
+12. **The Lineup Spine Compromise Rule (`LINEUP_SPINE_COMPROMISED`)**:
+    - If a national team's primary goalscorer ($\ge 35\%$ of goals) or key defensive organizer / goalkeeper is confirmed absent through injury, suspension, or club dispute, 1X2 Match Winner and Over 2.5 selections are **STRICTLY DISQUALIFIED**. If a backup goalkeeper starts, Under 3.5 is disqualified.
+
 ---
 
-## 5. SELECTION TO EXECUTION WORKFLOW
+## 5. THE TWO-STAGE FORENSIC FUNNEL & PRE-BET DEEP DIVE PROTOCOL (TOURNAMENTS)
+
+To eliminate blind traps without exceeding processing capacity when evaluating tournament slates (15 to 25 games), the selection engine enforces a two-stage intelligence funnel:
+
+```mermaid
+flowchart TD
+    subgraph S1["STAGE 1: Macro Quantitative Sieve (15–25 Games)"]
+        Raw["Raw Tournament Slate (15–25 Fixtures)"]
+        Sieve["Quantitative Sieve:<br/>• Elo Margins & CSI League Tier Weights<br/>• Knockout Compression Factor (Ks = 0.88)<br/>• Poisson Calculation & EV Ranking"]
+        Provisional["Provisional Shortlist:<br/>• Top 3 Primary Candidates<br/>• Top 2 Backup Alternatives"]
+        Raw --> Sieve --> Provisional
+    end
+
+    subgraph S2["STAGE 2: Targeted Forensic Deep Dive (Chamber of 5)"]
+        Chamber{"Enter Deep-Dive Chamber<br/>(Targeted Intelligence Gathering)"}
+        P1["Pillar 1: Direct H2H Audit (Last 3-5 Meetings)"]
+        P2["Pillar 2: Recent Form & Scoring Consistency (Last 5 Games)"]
+        P3["Pillar 3: Squad Call-Ups & Key Spine Absences"]
+        P4["Pillar 4: Group Table Stakes & Draw Sufficiency"]
+        Provisional --> Chamber
+        Chamber --> P1 & P2 & P3 & P4
+    end
+
+    subgraph S3["STAGE 3: Swap Circuit Breaker Protocol"]
+        AuditCheck{"Did All 3 Primary Legs<br/>Pass Forensic Gates?"}
+        Disqualify["❌ Severe Warning Triggered<br/>(e.g. H2H_UNDER_1_5_TRAP, RECENT_SCORING_DROUGHT)<br/>Disqualify Leg → Relegate to Shadow Tracking"]
+        Swap["Promote Backup Alternative 1<br/>Run Through Stage 2 Chamber"]
+        Clear["✅ All Legs Formally Cleared"]
+        P1 & P2 & P3 & P4 --> AuditCheck
+        AuditCheck -->|"Severe Red Flag"| Disqualify --> Swap --> Chamber
+        AuditCheck -->|"All Clear"| Clear
+    end
+
+    subgraph S4["STAGE 4: Ticket Assembly & Calibrated Confidence"]
+        ConfFloor["Apply Compound Probability Confidence Floors:<br/>• Prob ≥ 60.0% → HIGH (100% Stake)<br/>• Prob 50.0% - 59.9% → MEDIUM (50% Stake)<br/>• Prob < 50.0% → LOW (25% Stake)"]
+        Payload["Export Final Ticket & Candidates JSON"]
+        Clear --> ConfFloor --> Payload
+    end
+```
+
+### Stage 2 Pillars for Tournament Deep Dives
+1. **Pillar 1: Direct H2H Audit**: Search `"[Team A] vs [Team B] last meetings H2H results"`. Enforce `H2H_UNDER_1_5_TRAP` ($\ge 50\%$ meetings with $\le 1$ goal bars Over 1.5/2.5).
+2. **Pillar 2: Recent Form Audit**: Search `"[Team Name] last 5 matches results scores"`. Enforce `RECENT_SCORING_DROUGHT` (3 blanks in last 5 games bars Over 2.5/BTTS).
+3. **Pillar 3: Squad Call-Up & Injury News**: Search `"[Team Name] squad injuries team news [Date]"`. Enforce `LINEUP_SPINE_COMPROMISED`.
+4. **Pillar 4: Table Stakes & Motivation**: Audit Matchday 3 qualification status (`GROUP_STAGE_DEAD_RUBBER`), mutual draw convenience, or single-leg knockout extra-time settling.
+
+### Stage 3 Swap Protocol Execution
+- When a provisional selection fails any Stage 2 pillar:
+  1. Relegate the failed match to `alternatives` with an explicit reason in its `comment`.
+  2. Elevate Backup Alternative 1 to primary candidate status (e.g. elevating Sweden Home Win @ 1.49 when Kosovo vs Israel triggers `H2H_UNDER_1_5_TRAP`).
+  3. Verify the replacement in the Stage 2 chamber. Once cleared, finalize the ticket.
+
+---
+
+## 6. STRICT COMPOUND PROBABILITY CONFIDENCE FLOORS
+
+Every constructed Model 5.0 ticket must be assigned a discrete **`confidence`** level (`very_high`, `high`, `medium`, `low`, `very_low`) and an explanatory **`confidence_notes`** diagnostic synthesis before export:
+
+| Level | Mandatory Compound Probability | Criteria & Slate Environment | Wagering Recommendation |
+| :--- | :---: | :--- | :--- |
+| **`very_high`** | **$\ge 75.0\%$** | • Pristine high-probability tournament accumulator (All legs single-leg $P \ge 88\%$, compound $P \ge 75\%$)<br>• Verified top-tier international competitions (UEFA Euro, World Cup Qualifiers)<br>• Full Stage 2 forensic clearance with zero contradictory warnings | **FULL STAKE (100%)**<br>(4,000 – 5,000 FCFA)<br>Pristine tournament accumulator |
+| **`high`** | **$\ge 60.0\%$** | • High-probability tournament accumulator (Compound probability $\ge 60.0\%$, all legs $P \ge 78\%$, odds $1.18 - 1.50$)<br>• Vetted international leagues (UEFA Nations League, Tier 1 AFCON host fortresses)<br>• Stage 2 deep dive confirmed clear across all forensic pillars | **FULL STAKE (100%)**<br>(4,000 – 5,000 FCFA)<br>Standard high-conviction ticket |
+| **`medium`** | **$50.0\% - 59.9\%$** | • Compound probability $50.0\% - 59.9\%$<br>• Moderate odds boosters or minor contextual friction (e.g. DNB fallback used, neutral venue, early round cup tie)<br>• Full Stage 2 forensic clearance | **CONTROLLED STAKE (50%)**<br>(2,000 – 2,500 FCFA)<br>Scale down exposure |
+| **`low`** | **$40.0\% - 49.9\%$** | • Compound probability $40.0\% - 49.9\%$<br>• Unvetted cup competitions (e.g. Coupe de France regional rounds) or low-tier continental qualifiers<br>• Long-price Over 1.5 ($\ge 1.35$) or 1+ contradictory warning | **DEFENSIVE / MICRO STAKE (25%)**<br>(500 – 1,000 FCFA)<br>Or Paper Trade / Shadow Tracking |
+| **`very_low`** | **$< 40.0\%$** | • Compound probability $< 40.0\%$<br>• Unvetted amateur tiers, unquoted odds traps, or Rule 10 anomaly ($\ge 1.38$)<br>• Severe negative EV or macro zero-inflation | **DO NOT PLAY (0% Stake)**<br>Exclusively Shadow Tracking |
+
+> [!IMPORTANT]
+> **THE HARD-CAP RULES (TOURNAMENTS)**:
+> 1. **The Sub-60% Compound Probability Cap**: Any ticket with compound probability **$< 60.0\%$** is **PERMANENTLY DISQUALIFIED from receiving a `high` or `very_high` rating**. It is hard-capped at **`medium`** (or lower based on probability table). Confidence strictly follows compound probability across all markets (including Over 2.5, BTTS, DNB, and 1X2).
+> 2. **The Unvetted Cup / Regional Round Cap**: Any ticket built on unvetted domestic cup knockout rounds (e.g. Coupe de France amateur rounds) is **HARD-CAPPED at `low` confidence** (max 25% stake / 500–1,000 FCFA).
+
+---
+
+## 7. SELECTION TO EXECUTION WORKFLOW
 
 ```
   ┌────────────────────────────────────────────────────────┐
@@ -175,13 +262,23 @@ To prevent catastrophic failures, the engine strictly halts or disqualifies sele
   └───────────────────────────┬────────────────────────────┘
                               │
   ┌───────────────────────────▼────────────────────────────┐
-  │   5. Construct Ticket (Archetypes 1 - 4 | Odds ≥ 2.00) │
-  │      -> Main Selections: Exactly 2 Legs (or 3 Legs)    │
-  │      -> Shadow Alternatives: Top 3 - 5 Candidate Picks │
+  │   5. Stage 1: Form Provisional Shortlist               │
+  │      -> Top 3 Primary Candidates + Top 2 Backups       │
   └───────────────────────────┬────────────────────────────┘
                               │
   ┌───────────────────────────▼────────────────────────────┐
-  │   6. Export Standard JSON (Ticket #S-X-v5.0)           │
+  │   6. Stage 2: Forensic Deep Dive (Chamber of 5)        │
+  │      -> H2H History, Recent Blanks, Lineups, Stakes    │
+  └───────────────────────────┬────────────────────────────┘
+                              │
+  ┌───────────────────────────▼────────────────────────────┐
+  │   7. Stage 3: Swap Circuit Breaker (If Red Flag Found) │
+  │      -> Relegate failed leg, promote Backup Alt 1      │
+  └───────────────────────────┬────────────────────────────┘
+                              │
+  ┌───────────────────────────▼────────────────────────────┐
+  │   8. Stage 4: Apply Compound Prob Floors & Export JSON │
+  │      (Ticket #S-X-v5.0 + Candidates Watchlist)         │
   └────────────────────────────────────────────────────────┘
 ```
 
