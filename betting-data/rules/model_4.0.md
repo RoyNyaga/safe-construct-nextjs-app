@@ -232,6 +232,10 @@ The model actively searches for evidence that challenges market viability. Warni
 #### B. Over 2.5 / Total Goals Warnings
 - `STRONG_DEFENSIVE_MATCHUP`: Both teams concede $\le 0.85$ GA/G at venue, creating high resistance to Over 2.5.
 - `H2H_LOW_GOALS`: Recurring head-to-head fixtures produce repeated 0–0, 1–0, or Under 2.5 scorelines.
+- `H2H_UNDER_1_5_TRAP`: $\ge 50\%$ of past 3–5 competitive head-to-head meetings produced $\le 1$ goal (e.g. 0-0, 1-0). Indicates deep-seated tactical friction or stylistic deadlock that suppresses goals regardless of high season averages. Strictly bars fixture from serving as Over 1.5 or Over 2.5 anchor on main tickets.
+- `RECENT_SCORING_DROUGHT`: Either team failed to score in 3 of their last 5 competitive matches. Signals cold shooting form, finishing slumps, or tactical low blocks. Disqualifies Over 2.5 and BTTS Yes from main tickets.
+- `EARLY_SEASON_BLANK_RISK`: In early-season samples ($N \le 4$), either participating club has been held scoreless (0 goals scored) in $\ge 50\%$ of active matches. Signals fragile attacking rhythm and elevated shutout risk (e.g. Montpellier 0-1 Fleury). Disqualifies Over 2.5 and BTTS Yes from main tickets; restricts Over 1.5 unless the opposing favorite has an independent rate $\lambda_{\text{favorite}} \ge 2.20$ alone.
+- `LINEUP_SPINE_COMPROMISED`: Confirmed absence of the primary goalscorer ($\ge 35\%$ of team goals), key playmaker, or defensive anchor. Disqualifies 1X2 Match Winner and Over 2.5 markets; backup GK disqualifies Under 3.5.
 - `KEY_ATTACKER_ABSENCE`: Main goal-scorer or chance-creator verified absent.
 - `TACTICAL_LOW_GOAL_RISK`: Conservative tactical approach or fixture context suppresses attacking ambition.
 
@@ -248,6 +252,7 @@ The model actively searches for evidence that challenges market viability. Warni
 
 #### E. Data Quality Warnings
 - `SMALL_SAMPLE`: Venue sample is $< 5$ matches ($< 3$ matches triggers CRITICAL / INSUFFICIENT DATA).
+- `SMALL_SAMPLE_VENUE_NOISE`: Venue sample size is $N \le 4$ matches. Activates the 40/60 Macro Regression Anchor (blending venue rates with historical multi-year competition baselines), bars mid-table teams from Over 2.5 selections, and hard-caps ticket confidence at `low` (max 25% stake).
 - `MISSING_HOME_AWAY_DATA`: Mandatory venue statistics missing (triggers mandatory Hard-Stop).
 - `CONFLICTING_SOURCES`: Significant discrepancy between data providers.
 - `TEAM_NEWS_UNVERIFIED`: Starting lineups not verified prior to match.

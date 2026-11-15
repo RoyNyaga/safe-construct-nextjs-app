@@ -237,6 +237,10 @@ Model 5.0 introduces standardized tournament-specific risk warnings:
 | `UNDERDOG_DEFENSIVE_BLOCK` | Moderate | Away underdog deploys an ultra-defensive low block (rarely attacks). | Disqualifies BTTS Yes; evaluates single-team goal lines. |
 | `ODDS_CORRIDOR_COMPRESSION` | Low / Informational | Selection odds fall below standalone viability floor ($< 1.22$). | Disqualifies from 2-leg main ticket; relegates to shadow tracking. |
 | `ELITE_AWAY_DNB_HAZARD` | High | Away favorite backed on DNB against a Top-25 Elo host ($P(\text{Home Win}) \ge 25\%$). | Disqualifies away DNB; pivots to Double Chance X2 or shadow relegation. |
+| `H2H_UNDER_1_5_TRAP` | Critical | $\ge 50\%$ of past 3–5 competitive H2H meetings produced $\le 1$ goal (e.g. 0-0, 1-0). | Strictly bars fixture from Over 1.5 or Over 2.5 main ticket anchors; relegates to alternatives. |
+| `RECENT_SCORING_DROUGHT` | High | National team or club failed to score in 3 of their last 5 competitive matches. | Strictly disqualifies Over 2.5 and BTTS Yes from main tickets. |
+| `EARLY_SEASON_BLANK_RISK` | High | In small samples ($N \le 4$), either team was held scoreless in $\ge 50\%$ of games. | Disqualifies Over 2.5 and BTTS Yes; restricts Over 1.5 unless opposing favorite averages $\ge 2.20$ alone. |
+| `LINEUP_SPINE_COMPROMISED` | Critical | Confirmed absence of top goalscorer ($\ge 35\%$ team goals) or starting goalkeeper/defensive anchor. | Strictly disqualifies 1X2 Match Winner and Over 2.5; backup GK disqualifies Under 3.5. |
 
 ---
 

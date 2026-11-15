@@ -61,6 +61,25 @@ When early in a season or when a team has played $\le 5$ matches at their home o
   $$\text{GF}_{\text{effective}} = 0.50 \times \text{Venue GF/G} + 0.50 \times \text{Overall GF/G}$$
 - **Impact**: In FC Arouca (4 home games, 8 GF = $2.00$/G vs 9 overall games, 12 GF = $1.33$/G), the unregressed $2.00$ venue rate produced an inflated $66.2\%$ Over 2.5 probability. Applying the regression anchor drops effective GF to $\mathbf{1.66}$, reducing Over 2.5 probability to $54.8\%$ and correctly preventing it from qualifying.
 
+### 2.3 Early-Season Macro Regression Anchor & Mid-Table Cap ($N \le 4$)
+
+When early in a season a club has played $\le 4$ matches at their home or away venue, small-sample variance creates severe statistical distortion (e.g. a 4-game home run like 1-2, 1-2, 2-1, 3-1 producing an illusory $100\%$ Over 2.5 record, or a 4-0 blowout inflating venue rates to $3.75$ goals/game). Matchday mean regression frequently collapses these games into 1-0 or 0-1 grinds (as seen in Hoffenheim 1-0 Freiburg and Montpellier 0-1 Fleury).
+
+- **Mandatory 40/60 Macro Regression Formula ($N \le 4$)**:
+  Whenever venue matches $N \le 4$, the engine **MUST NOT** use raw unregressed venue averages in Poisson parameters. It must automatically blend the venue rate with the historical multi-year league baseline from `league_baselines.json`:
+  $$\text{GF}_{\text{effective}} = 0.40 \times \text{Venue GF/G} + 0.60 \times \text{Historical Competition Baseline}$$
+  $$\text{GA}_{\text{effective}} = 0.40 \times \text{Venue GA/G} + 0.60 \times \text{Historical Competition Baseline}$$
+- **Mid-Table Over 2.5 Prohibition on Small Samples**:
+  - When venue sample is $N \le 4$, **Over 2.5 Goals is STRICTLY BARRED from fixtures between mid-table sides (positions 5th to 14th)**.
+  - Over 2.5 on early-season samples is **strictly restricted to fixtures featuring an elite top-3 attacking powerhouse** (e.g. Bayern Munich, Wolfsburg, PSG, Lyon, Real Madrid, Barcelona).
+  - Mid-table matches must be restricted to **Over 1.5 Anchors only** or diverted to shadow alternatives.
+- **Early-Season Blank / Shutout Risk Gate (`EARLY_SEASON_BLANK_RISK`)**:
+  - When venue sample is $N \le 4$, check whether either participating club has been held scoreless (0 goals scored) in **$\ge 50\%$ of their active league matches** (e.g. 2 blanks in 4 games):
+    - Over 2.5 Goals and BTTS Yes are **strictly disqualified from main tickets**.
+    - Over 1.5 Goals is permitted **only if the opposing favorite has an independent scoring rate $\lambda_{\text{favorite}} \ge 2.20$ alone**.
+    - If neither team averages $\ge 2.20$ venue GF/G, the fixture is flagged `EARLY_SEASON_BLANK_RISK` and barred from main capital tickets (relegated to shadow tracking). (Empirical proof: Montpellier 0-1 Fleury 91).
+- **Standardized Warnings**: Flag `SMALL_SAMPLE_VENUE_NOISE` and `EARLY_SEASON_BLANK_RISK` whenever these conditions are met.
+
 ---
 
 ## 3. MARKET SELECTION PROFILES & SAFETY THRESHOLDS
@@ -165,7 +184,8 @@ In real-world bookmaker pricing, fixtures with hyper-dominant offensive tempo of
 
 ### Step 1: Filter & Classify Candidates
 - Disqualify fixtures missing venue data (Hard-Stop Rule).
-- Apply Section 2.2 Small-Sample Regression Anchor ($N \le 5$).
+- Apply Section 2.2 Small-Sample Regression Anchor ($N \le 5$) and Section 2.3 Early-Season 40/60 Macro Regression Anchor & Mid-Table Cap ($N \le 4$).
+- **Enforce Early-Season Blank / Shutout Risk Gate (`EARLY_SEASON_BLANK_RISK`)**: When $N \le 4$, if either team was scoreless in $\ge 50\%$ of active matches, strictly disqualify Over 2.5/BTTS, and require favorite $\lambda \ge 2.20$ alone for Over 1.5.
 - Compute DCI and enforce the $\text{DCI} \ge 0.45$ floor for Over 2.5 and $\text{DCI} \ge 0.50$ for BTTS Yes.
 - **Enforce Gate 6 (League-Market Integrity)**: Check `league_baselines.json` and in-app empirical LMI matrix. If the match falls in a **`TIER_3`** corridor for that market, **divert to shadow alternatives immediately**.
 - **Enforce Unvetted Lower League Quarantine (`UNVETTED_LEAGUE_QUARANTINE`)**: Bar unvetted secondary/tertiary divisions ($N < 10$) from passing Gate 6 on Over 1.5/2.5/BTTS under `default_fallback`.
@@ -213,18 +233,85 @@ In real-world bookmaker pricing, fixtures with hyper-dominant offensive tempo of
   - *3-Leg Safety Solution*: Groningen BTTS (1.46, won 2-3) $\times$ Academico de Viseu O1.5 (1.29, **won 2-1**) $\times$ Braga O1.5 (1.32, **won 3-0**) = **Combined Odds 2.49, ALL 3 LEGS WON**.
 - **Hard Cap**: Never expand beyond 3 legs under any circumstance. Maximum allowable legs on any ticket is strictly 3.
 
-### Step 4: Ticket-Level Confidence Calibration Engine
+### Step 4: Strict Compound Probability Confidence Floors
+
 Every constructed ticket must be assigned a discrete **`confidence`** level (`very_high`, `high`, `medium`, `low`, `very_low`) and an explanatory **`confidence_notes`** diagnostic synthesis before export. This informs Roy of the ticket's underlying conviction level and dictates recommended stake allocation:
 
-| Level | Criteria & Slate Environment | Wagering Recommendation |
-| :--- | :--- | :--- |
-| **`very_high`** | • All legs from Tier 1 audited leagues (`league_baselines.json`)<br>• Venue sample size $N \ge 10$ matches per club<br>• DCI $\ge 0.55$, compound ticket probability $\ge 80.0\%$<br>• Zero contradictory warnings across entire ticket | **FULL STAKE (100%)**<br>Maximum model conviction |
-| **`high`** | • Tier 1 or vetted Tier 2 leagues with sample $N \ge 7$<br>• Clean attacking statistics, compound probability $\ge 65.0\%$<br>• Standard odds corridor ($1.18 - 1.28$ per leg)<br>• Supportive warnings present | **FULL STAKE (100%)**<br>Standard reliable accumulator |
-| **`medium`** | • Tier 2 leagues with verified sample ($N \ge 10$)<br>• Minor contextual friction (e.g. DNB fallback used, neutral venue)<br>• Compound probability $55.0\% - 65.0\%$ | **CONTROLLED STAKE (50%–75%)**<br>Scale down exposure |
-| **`low`** | • Compromised slate (e.g. FIFA international break forcing secondary leagues)<br>• Small venue samples ($N = 5 - 6$ matches)<br>• Long-price Over 1.5 ($\ge 1.35$) or 1+ contradictory warning | **DEFENSIVE / MICRO STAKE (25%–50%)**<br>Or Paper Trade / Shadow Tracking |
-| **`very_low`** | • Unvetted secondary league ($N < 10$ matches)<br>• Over 1.5 Odds Ceiling Anomaly ($\ge 1.38$)<br>• Macro zero-inflation or severe negative EV | **DO NOT PLAY (0% Stake)**<br>Exclusively Shadow Tracking |
+| Level | Mandatory Compound Probability | Criteria & Slate Environment | Wagering Recommendation |
+| :--- | :---: | :--- | :--- |
+| **`very_high`** | **$\ge 75.0\%$** | • Pristine high-probability accumulator (All legs single-leg $P \ge 88\%$, compound $P \ge 75\%$)<br>• Tier 1 audited leagues with venue sample $N \ge 10$<br>• Full Stage 2 forensic clearance with zero contradictory warnings | **FULL STAKE (100%)**<br>(4,000 – 5,000 FCFA)<br>Pristine accumulator |
+| **`high`** | **$\ge 60.0\%$** | • High-probability accumulator (Compound probability $\ge 60.0\%$, all legs $P \ge 78\%$, odds $1.18 - 1.50$)<br>• Tier 1 or vetted Tier 2 leagues with sample $N \ge 7$<br>• Stage 2 deep dive confirmed clear across all forensic pillars | **FULL STAKE (100%)**<br>(4,000 – 5,000 FCFA)<br>Standard high-conviction ticket |
+| **`medium`** | **$50.0\% - 59.9\%$** | • Compound probability $50.0\% - 59.9\%$<br>• Moderate odds boosters or minor contextual friction (e.g. DNB fallback used, neutral venue)<br>• Full Stage 2 forensic clearance | **CONTROLLED STAKE (50%)**<br>(2,000 – 2,500 FCFA)<br>Scale down exposure |
+| **`low`** | **$40.0\% - 49.9\%$** | • Compound probability $40.0\% - 49.9\%$<br>• Early-season venue samples ($N \le 4$ matches, triggering 40/60 macro regression)<br>• Unvetted women's leagues or long-price Over 1.5 ($\ge 1.35$)<br>• 1+ contradictory warning present | **DEFENSIVE / MICRO STAKE (25%)**<br>(500 – 1,000 FCFA)<br>Or Paper Trade / Shadow Tracking |
+| **`very_low`** | **$< 40.0\%$** | • Compound probability $< 40.0\%$<br>• Severe small-sample deficit ($N \le 2$ matches)<br>• Unvetted secondary league ($N < 10$) or Over 1.5 Odds Anomaly ($\ge 1.38$)<br>• Macro zero-inflation or severe negative EV | **DO NOT PLAY (0% Stake)**<br>Exclusively Shadow Tracking |
+
+> [!IMPORTANT]
+> **THE HARD-CAP RULES**:
+> 1. **The Sub-60% Compound Probability Cap**: Any ticket with an underlying compound probability **$< 60.0\%$** is **PERMANENTLY DISQUALIFIED from receiving a `high` or `very_high` rating**. It is hard-capped at **`medium`** (or lower based on probability table). Confidence strictly follows compound probability across all markets (including Over 2.5, BTTS, and Match Winner).
+> 2. **The Early-Season Small-Sample Cap ($N \le 4$)**: Any ticket built on early-season slates where venue sample sizes are $N \le 4$ is **HARD-CAPPED at `low` confidence** (max 25% stake / 500–1,000 FCFA).
 
 - **`confidence_notes` Requirement**: Must state in 1–3 concise sentences the exact analytical drivers behind the confidence level (e.g. data sample size, league reliability, pricing anomalies, and stake advice).
+
+### Step 5: The Two-Stage Forensic Funnel & Pre-Bet Deep Dive Protocol
+
+To eliminate blind traps without exceeding processing capacity when evaluating large daily slates (15 to 25 games), the selection engine enforces a two-stage intelligence funnel:
+
+```mermaid
+flowchart TD
+    subgraph S1["STAGE 1: Macro Quantitative Sieve (15–25 Games)"]
+        Raw["Raw Candidate Slate (15–25 Fixtures)"]
+        Sieve["Quantitative Filtering:<br/>• Missing Venue Hard-Stop<br/>• LMI Gate 6 Tier-3 Quarantine<br/>• DCI Floor & Rule 8 Odds Floor (≥ 1.22)<br/>• Poisson Calculation & Edge Ranking"]
+        Provisional["Provisional Shortlist:<br/>• Top 3 Primary Candidates<br/>• Top 2 Backup Alternatives"]
+        Raw --> Sieve --> Provisional
+    end
+
+    subgraph S2["STAGE 2: Targeted Forensic Deep Dive (Chamber of 5)"]
+        Chamber{"Enter Deep-Dive Chamber<br/>(Targeted Intelligence Gathering)"}
+        P1["Pillar 1: Direct H2H Audit (Last 3-5 Meetings)"]
+        P2["Pillar 2: Recent Form & Scoring Consistency (Last 5 Games)"]
+        P3["Pillar 3: Lineup Spine & Critical Absences"]
+        P4["Pillar 4: Tactical Stakes & Draw Sufficiency"]
+        Provisional --> Chamber
+        Chamber --> P1 & P2 & P3 & P4
+    end
+
+    subgraph S3["STAGE 3: Swap Circuit Breaker Protocol"]
+        AuditCheck{"Did All 3 Primary Legs<br/>Pass Forensic Gates?"}
+        Disqualify["❌ Severe Warning Triggered<br/>(e.g. H2H_UNDER_1_5_TRAP, RECENT_SCORING_DROUGHT)<br/>Disqualify Leg → Relegate to Shadow Tracking"]
+        Swap["Promote Backup Alternative 1<br/>Run Through Stage 2 Chamber"]
+        Clear["✅ All Legs Formally Cleared"]
+        P1 & P2 & P3 & P4 --> AuditCheck
+        AuditCheck -->|"Severe Red Flag"| Disqualify --> Swap --> Chamber
+        AuditCheck -->|"All Clear"| Clear
+    end
+
+    subgraph S4["STAGE 4: Ticket Assembly & Calibrated Confidence"]
+        ConfFloor["Apply Step 4 Compound Probability Confidence Floors:<br/>• Prob ≥ 60.0% → HIGH (100% Stake)<br/>• Prob 50.0% - 59.9% → MEDIUM (50% Stake)<br/>• Prob < 50.0% → LOW (25% Stake)"]
+        Payload["Export Final Ticket & Candidates JSON"]
+        Clear --> ConfFloor --> Payload
+    end
+```
+
+#### Detailed Forensic Deep-Dive Protocols (Stage 2)
+The Top 3 provisional selections and Top 2 backup alternatives must undergo four targeted checks before ticket finalization:
+1. **Pillar 1: Direct Head-to-Head (H2H) Forensic Audit (`H2H_UNDER_1_5_TRAP`)**:
+   - Audit the last 3 to 5 direct competitive meetings.
+   - **The Rule**: If $\mathbf{\ge 50\%}$ **of past competitive H2H meetings finished with $\le 1$ goal** (e.g. 0-0, 1-0), the fixture is **STRICTLY BARRED from serving as an Over 1.5 or Over 2.5 Anchor on main tickets**.
+   - Relegate compromised match to shadow alternatives and generate warning `H2H_UNDER_1_5_TRAP`.
+2. **Pillar 2: Recent Form & Scoring Consistency Audit (`RECENT_SCORING_DROUGHT`)**:
+   - Audit last 5 competitive matches across all competitions.
+   - **The Rule**: If either team has failed to score in **3 of their last 5 competitive matches**, Over 2.5 Goals and BTTS Yes are strictly disqualified from main tickets. Flag `RECENT_SCORING_DROUGHT`.
+3. **Pillar 3: Lineup Spine & Key Absences Audit (`LINEUP_SPINE_COMPROMISED`)**:
+   - Verify starting XI and confirmed injury/suspension news.
+   - **The Rule**: If a club's primary goalscorer ($\ge 35\%$ of team goals) or chief playmaker is unavailable, 1X2 Match Winner and Over 2.5 markets are disqualified. If a second-choice or youth goalkeeper starts, Under 3.5 is disqualified. Flag `LINEUP_SPINE_COMPROMISED`.
+4. **Pillar 4: Tactical Motivation & Table Context**:
+   - Verify table incentives: flag `STANDINGS_DRAW_SUFFICIENCY` if a favorite needs only a draw (downgrading straight win to DNB or Double Chance). Flag `DERBY_TACTICAL_CYNICISM` in hostile derbies.
+
+#### Stage 3: The Swap Circuit Breaker Protocol
+- If a provisional primary selection triggers `H2H_UNDER_1_5_TRAP`, `RECENT_SCORING_DROUGHT`, `LINEUP_SPINE_COMPROMISED`, or `EARLY_SEASON_BLANK_RISK`:
+  1. **Disqualify Immediately**: Strip the match of its primary selection status and move it to `alternatives` with an explanatory comment detailing the forensic failure.
+  2. **Promote Backup Alternative 1**: Move the top backup into the selection slot, verifying that combined odds still meet the $\ge 2.00$ target ($2.00 - 2.50$).
+  3. **Forensic Chamber Audit of Replacement**: Verify the replacement fixture through Pillars 1–4. If clear, finalize the ticket; if compromised, proceed to Backup Alternative 2.
 
 ---
 
@@ -261,14 +348,23 @@ Evaluate today's matches for [DATE] according to our selection process:
 [List of matches and Betmomo odds]
 ```
 
-Antigravity executes the following in a single response:
-1. Gathers venue-specific stats and runs `calculate_model.py`.
-2. Computes DCI, market probabilities, edge, and EV across all 4 markets.
-3. Automatically constructs the **optimal 2-leg (or 3-leg) ticket ($\ge 2.00$ odds)** based on safety and game openness.
-4. Populates top alternatives and generates `candidates_<date>.json` with all other qualified matches.
-5. Saves all three files:
-   - `betting-data/<month>/evaluation_<date>.md`
-   - `betting-data/<month>/candidates_<date>.json`
-   - `betting-data/<month>/ticket_<date>_001.json`
-6. Presents the **Selection Summary Table** in chat along with the ready-to-import ticket JSON.
+Antigravity executes the following two-stage selection flow in a single response:
+1. **Stage 1 (Macro Sieve across full slate)**:
+   - Gathers venue-specific stats and checks the Missing Venue Hard-Stop.
+   - Applies the 40/60 Macro Regression Anchor when $N \le 4$ and checks mid-table Over 2.5 prohibitions.
+   - Computes DCI, market probabilities, value edge, and EV across all markets.
+   - Enforces Gate 6 (LMI Matrix), Rule 10 (Odds Ceiling Anomaly), and reserve/away restrictions.
+   - Forms a **provisional shortlist of Top 3 Primary Candidates + Top 2 Backup Alternatives**.
+2. **Stage 2 (Forensic Deep Dive on Shortlist Chamber)**:
+   - Conducts targeted intelligence searches on the Top 3 provisional selections + Top 2 backups across the 4 pillars (H2H history, recent form & droughts, lineups & key absences, tactical motivation & standings).
+3. **Stage 3 (Automated Circuit Breaker & Swap Execution)**:
+   - If any provisional leg triggers `H2H_UNDER_1_5_TRAP`, `RECENT_SCORING_DROUGHT`, or `LINEUP_SPINE_COMPROMISED`, disqualifies it immediately, relegates it to `alternatives`, and promotes Backup Alternative 1 after auditing it through Stage 2.
+4. **Stage 4 (Ticket Assembly & File Export)**:
+   - Calibrates ticket `confidence` and `confidence_notes` under the strict compound probability floors ($\ge 60\%$ for `high`; $50\% - 59.9\%$ for `medium`; `low` for $N \le 4$).
+   - Generates `candidates_<date>.json` with all other qualified matches evaluated that day.
+   - Saves all three synchronized files:
+     - `betting-data/<month>/evaluation_<date>.md`
+     - `betting-data/<month>/candidates_<date>.json`
+     - `betting-data/<month>/ticket_<date>_001.json`
+   - Presents the **Selection Summary Table** in chat along with the ready-to-import ticket JSON payload.
 

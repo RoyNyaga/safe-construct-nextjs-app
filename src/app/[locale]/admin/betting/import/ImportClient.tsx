@@ -35,6 +35,7 @@ import {
   Brain,
   FileText,
   Scale,
+  ShieldAlert,
 } from 'lucide-react'
 import { TicketImportJSON, BettingModel, TicketSuggestionData } from '@/types/betting'
 import { importBettingTicket, getModelTicketNumberSuggestion } from '@/app/[locale]/actions/betting'
@@ -837,6 +838,58 @@ ${JSON.stringify(sampleJson, null, 2)}`
     }
   }
 
+  const getConfidenceConfig = (conf?: string | null) => {
+    switch (conf) {
+      case 'very_high':
+        return {
+          label: locale === 'fr' ? 'CONFIANCE : TRÈS HAUTE' : 'CONFIDENCE: VERY HIGH',
+          shortLabel: locale === 'fr' ? 'Très Haute' : 'Very High',
+          color: '#10B981',
+          bg: alpha('#10B981', 0.15),
+          border: alpha('#10B981', 0.35),
+          advice: locale === 'fr' ? 'Mise Pleine Recommandée (100%)' : 'Full Unit Stake Recommended (100%)',
+        }
+      case 'high':
+        return {
+          label: locale === 'fr' ? 'CONFIANCE : HAUTE' : 'CONFIDENCE: HIGH',
+          shortLabel: locale === 'fr' ? 'Haute' : 'High',
+          color: '#66BB6A',
+          bg: alpha('#66BB6A', 0.15),
+          border: alpha('#66BB6A', 0.35),
+          advice: locale === 'fr' ? 'Mise Pleine Recommandée (100%)' : 'Full Unit Stake Recommended (100%)',
+        }
+      case 'medium':
+        return {
+          label: locale === 'fr' ? 'CONFIANCE : MOYENNE' : 'CONFIDENCE: MEDIUM',
+          shortLabel: locale === 'fr' ? 'Moyenne' : 'Medium',
+          color: '#F6AE2D',
+          bg: alpha('#F6AE2D', 0.15),
+          border: alpha('#F6AE2D', 0.35),
+          advice: locale === 'fr' ? 'Mise Modérée Recommandée (50%–75%)' : 'Controlled Stake Recommended (50%–75%)',
+        }
+      case 'low':
+        return {
+          label: locale === 'fr' ? 'CONFIANCE : FAIBLE' : 'CONFIDENCE: LOW',
+          shortLabel: locale === 'fr' ? 'Faible' : 'Low',
+          color: '#F26419',
+          bg: alpha('#F26419', 0.15),
+          border: alpha('#F26419', 0.35),
+          advice: locale === 'fr' ? 'Mise Défensive (25%–50%) ou Papier' : 'Defensive Micro-Stake (25%–50%) or Paper Trade',
+        }
+      case 'very_low':
+        return {
+          label: locale === 'fr' ? 'CONFIANCE : TRÈS FAIBLE' : 'CONFIDENCE: VERY LOW',
+          shortLabel: locale === 'fr' ? 'Très Faible' : 'Very Low',
+          color: '#EF5350',
+          bg: alpha('#EF5350', 0.15),
+          border: alpha('#EF5350', 0.35),
+          advice: locale === 'fr' ? 'NE PAS JOUER (0% - Risque Élevé)' : 'DO NOT PLAY (0% Stake - High Hazard)',
+        }
+      default:
+        return null
+    }
+  }
+
   // Submit and create ticket
   const handleSubmit = async () => {
     if (!parsedPayload) return
@@ -1035,11 +1088,23 @@ ${JSON.stringify(sampleJson, null, 2)}`
       {parsedPayload && (
         <Box sx={{ mb: 4 }}>
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2, flexWrap: 'wrap', gap: 1 }}>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, flexWrap: 'wrap' }}>
               <CheckCircle2 size={20} color="#66BB6A" />
               <Typography variant="h5" sx={{ fontWeight: 800 }}>
                 {locale === 'fr' ? 'Aperçu du Ticket' : 'Ticket Preview'}
               </Typography>
+              {parsedPayload.ticket.confidence && (
+                <Chip
+                  label={getConfidenceConfig(parsedPayload.ticket.confidence)?.label || parsedPayload.ticket.confidence.toUpperCase()}
+                  sx={{
+                    fontWeight: 800,
+                    backgroundColor: getConfidenceConfig(parsedPayload.ticket.confidence)?.bg,
+                    color: getConfidenceConfig(parsedPayload.ticket.confidence)?.color,
+                    border: `1px solid ${getConfidenceConfig(parsedPayload.ticket.confidence)?.border}`,
+                    letterSpacing: '0.04em',
+                  }}
+                />
+              )}
             </Box>
             <LoadingButton
               variant="contained"
@@ -1071,9 +1136,25 @@ ${JSON.stringify(sampleJson, null, 2)}`
               <Grid container spacing={2.5} sx={{ alignItems: 'flex-start' }}>
                 <Grid size={{ xs: 12, sm: 3.2 }}>
                   <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 0.5 }}>
-                    <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 700 }}>
-                      Ticket #
-                    </Typography>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 700 }}>
+                        Ticket #
+                      </Typography>
+                      {parsedPayload.ticket.confidence && (
+                        <Chip
+                          label={getConfidenceConfig(parsedPayload.ticket.confidence)?.shortLabel || parsedPayload.ticket.confidence.toUpperCase()}
+                          size="small"
+                          sx={{
+                            height: 20,
+                            fontSize: '0.7rem',
+                            fontWeight: 800,
+                            backgroundColor: getConfidenceConfig(parsedPayload.ticket.confidence)?.bg,
+                            color: getConfidenceConfig(parsedPayload.ticket.confidence)?.color,
+                            border: `1px solid ${getConfidenceConfig(parsedPayload.ticket.confidence)?.border}`,
+                          }}
+                        />
+                      )}
+                    </Box>
                     {/* S / A Switcher Chips */}
                     <Box sx={{ display: 'flex', gap: 0.5 }}>
                       <CustomTooltip
@@ -1308,24 +1389,15 @@ ${JSON.stringify(sampleJson, null, 2)}`
                         </Typography>
                         {parsedPayload.ticket.confidence && (
                           <Typography variant="caption" color="text.secondary">
-                            Confidence:{' '}
+                            {locale === 'fr' ? 'Confiance' : 'Confidence'}:{' '}
                             <span
                               style={{
                                 fontWeight: 800,
                                 textTransform: 'uppercase',
-                                color:
-                                  parsedPayload.ticket.confidence === 'very_high'
-                                    ? '#10B981'
-                                    : parsedPayload.ticket.confidence === 'high'
-                                      ? '#66BB6A'
-                                      : parsedPayload.ticket.confidence === 'medium'
-                                        ? '#F6AE2D'
-                                        : parsedPayload.ticket.confidence === 'low'
-                                          ? '#F26419'
-                                          : '#EF5350',
+                                color: getConfidenceConfig(parsedPayload.ticket.confidence)?.color || '#F6AE2D',
                               }}
                             >
-                              {parsedPayload.ticket.confidence.replace('_', ' ')}
+                              {getConfidenceConfig(parsedPayload.ticket.confidence)?.shortLabel || parsedPayload.ticket.confidence.replace('_', ' ')}
                             </span>
                           </Typography>
                         )}
@@ -1364,14 +1436,53 @@ ${JSON.stringify(sampleJson, null, 2)}`
                 />
               </Box>
 
-              {(parsedPayload.ticket.confidence_notes || parsedPayload.ticket.confidence_level_note) && (
-                <Box sx={{ mt: 1.5, p: 1.5, borderRadius: 1.5, backgroundColor: alpha('#121824', 0.5), border: '1px solid rgba(255,255,255,0.06)' }}>
-                  <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 700, display: 'block', mb: 0.25 }}>
-                    {locale === 'fr' ? 'Justification de la Confiance' : 'Confidence Rationale'}:
-                  </Typography>
-                  <Typography variant="caption" sx={{ color: '#F0F2F5', fontStyle: 'italic' }}>
-                    &ldquo;{parsedPayload.ticket.confidence_notes || parsedPayload.ticket.confidence_level_note}&rdquo;
-                  </Typography>
+              {(parsedPayload.ticket.confidence || parsedPayload.ticket.confidence_notes || parsedPayload.ticket.confidence_level_note) && (
+                <Box
+                  sx={{
+                    mt: 2.5,
+                    p: 2.5,
+                    borderRadius: 2,
+                    backgroundColor: parsedPayload.ticket.confidence
+                      ? alpha(getConfidenceConfig(parsedPayload.ticket.confidence)?.color || '#9AA3B2', 0.08)
+                      : alpha('#121824', 0.6),
+                    border: `1px solid ${parsedPayload.ticket.confidence
+                      ? alpha(getConfidenceConfig(parsedPayload.ticket.confidence)?.color || '#9AA3B2', 0.3)
+                      : 'rgba(255, 255, 255, 0.1)'
+                      }`,
+                  }}
+                >
+                  <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 1, mb: 1 }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <ShieldAlert
+                        size={18}
+                        color={
+                          parsedPayload.ticket.confidence
+                            ? getConfidenceConfig(parsedPayload.ticket.confidence)?.color
+                            : '#F6AE2D'
+                        }
+                      />
+                      <Typography
+                        variant="subtitle2"
+                        sx={{
+                          fontWeight: 800,
+                          color: parsedPayload.ticket.confidence
+                            ? getConfidenceConfig(parsedPayload.ticket.confidence)?.color
+                            : '#FFFFFF',
+                        }}
+                      >
+                        {parsedPayload.ticket.confidence
+                          ? `${getConfidenceConfig(parsedPayload.ticket.confidence)?.label} — ${getConfidenceConfig(parsedPayload.ticket.confidence)?.advice}`
+                          : locale === 'fr'
+                            ? 'Indice de Confiance'
+                            : 'Confidence Assessment'}
+                      </Typography>
+                    </Box>
+                  </Box>
+                  {(parsedPayload.ticket.confidence_notes || parsedPayload.ticket.confidence_level_note) && (
+                    <Typography variant="body2" sx={{ color: 'text.secondary', lineHeight: 1.6 }}>
+                      {parsedPayload.ticket.confidence_notes || parsedPayload.ticket.confidence_level_note}
+                    </Typography>
+                  )}
                 </Box>
               )}
             </CardContent>

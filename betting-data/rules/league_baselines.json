@@ -1011,6 +1011,258 @@
         }
       }
     },
+    "germany_frauen_bundesliga": {
+      "name": "Germany Frauen-Bundesliga",
+      "country": "Germany",
+      "historical_home_avg": 1.7,
+      "historical_away_avg": 1.35,
+      "season_basis": "Multi-year aggregate (Elite attacking top tier)",
+      "market_integrity": {
+        "over_1_5": {
+          "tier": "TIER_1",
+          "baseline_hit_rate": 0.83,
+          "notes": "Elite goal pace, very low 0-0/1-0 frequency.",
+          "empirical_sample": 0,
+          "empirical_win_rate": null,
+          "calibration_gap_pp": null,
+          "status_label": "Prior: TIER_1"
+        },
+        "over_2_5": {
+          "tier": "TIER_2",
+          "baseline_hit_rate": 0.58,
+          "notes": "Strong multi-goal conversion, reliable when top powerhouses feature.",
+          "empirical_sample": 0,
+          "empirical_win_rate": null,
+          "calibration_gap_pp": null,
+          "status_label": "Prior: TIER_2"
+        },
+        "btts_yes": {
+          "tier": "TIER_2",
+          "baseline_hit_rate": 0.52,
+          "notes": "Both sides score in >50% of matches.",
+          "empirical_sample": 0,
+          "empirical_win_rate": null,
+          "calibration_gap_pp": null,
+          "status_label": "Prior: TIER_2"
+        },
+        "under_3_5": {
+          "tier": "TIER_2",
+          "baseline_hit_rate": 0.68,
+          "notes": "Standard top flight under pace.",
+          "empirical_sample": 0,
+          "empirical_win_rate": null,
+          "calibration_gap_pp": null,
+          "status_label": "Prior: TIER_2"
+        },
+        "to_win": {
+          "tier": "TIER_1",
+          "baseline_hit_rate": 0.54,
+          "notes": "Heavy favorites (Bayern, Wolfsburg) dominate cleanly.",
+          "empirical_sample": 0,
+          "empirical_win_rate": null,
+          "calibration_gap_pp": null,
+          "status_label": "Prior: TIER_1"
+        },
+        "draw_no_bet": {
+          "tier": "TIER_1",
+          "baseline_hit_rate": 0.74,
+          "notes": "Strong protection against rare draws.",
+          "empirical_sample": 0,
+          "empirical_win_rate": null,
+          "calibration_gap_pp": null,
+          "status_label": "Prior: TIER_1"
+        }
+      }
+    },
+    "france_premiere_ligue_women": {
+      "name": "France Première Ligue Women",
+      "country": "France",
+      "historical_home_avg": 1.55,
+      "historical_away_avg": 1.25,
+      "season_basis": "Multi-year aggregate (Top heavy: PSG/Lyon dominant)",
+      "market_integrity": {
+        "over_1_5": {
+          "tier": "TIER_1",
+          "baseline_hit_rate": 0.8,
+          "notes": "Consistent 2-goal output across top and mid-table clashes.",
+          "empirical_sample": 0,
+          "empirical_win_rate": null,
+          "calibration_gap_pp": null,
+          "status_label": "Prior: TIER_1"
+        },
+        "over_2_5": {
+          "tier": "TIER_2",
+          "baseline_hit_rate": 0.54,
+          "notes": "High right-tail blowouts for top-3, mid-table matches tighter.",
+          "empirical_sample": 0,
+          "empirical_win_rate": null,
+          "calibration_gap_pp": null,
+          "status_label": "Prior: TIER_2"
+        },
+        "btts_yes": {
+          "tier": "TIER_2",
+          "baseline_hit_rate": 0.48,
+          "notes": "Frequent clean sheets by top tier defenses.",
+          "empirical_sample": 0,
+          "empirical_win_rate": null,
+          "calibration_gap_pp": null,
+          "status_label": "Prior: TIER_2"
+        },
+        "under_3_5": {
+          "tier": "TIER_2",
+          "baseline_hit_rate": 0.7,
+          "notes": "Mid-table clashes frequently stay under 3.5.",
+          "empirical_sample": 0,
+          "empirical_win_rate": null,
+          "calibration_gap_pp": null,
+          "status_label": "Prior: TIER_2"
+        },
+        "to_win": {
+          "tier": "TIER_1",
+          "baseline_hit_rate": 0.52,
+          "notes": "PSG and Lyon win rates >80%.",
+          "empirical_sample": 0,
+          "empirical_win_rate": null,
+          "calibration_gap_pp": null,
+          "status_label": "Prior: TIER_1"
+        },
+        "draw_no_bet": {
+          "tier": "TIER_1",
+          "baseline_hit_rate": 0.72,
+          "notes": "High home/away favorite conversion.",
+          "empirical_sample": 0,
+          "empirical_win_rate": null,
+          "calibration_gap_pp": null,
+          "status_label": "Prior: TIER_1"
+        }
+      }
+    },
+    "spain_primera_division_women": {
+      "name": "Spain Primera División Femenina",
+      "country": "Spain",
+      "historical_home_avg": 1.65,
+      "historical_away_avg": 1.25,
+      "season_basis": "Multi-year aggregate (High mismatch variance)",
+      "market_integrity": {
+        "over_1_5": {
+          "tier": "TIER_1",
+          "baseline_hit_rate": 0.82,
+          "notes": "Very high 2-goal hit rate; low 0-0 frequency.",
+          "empirical_sample": 0,
+          "empirical_win_rate": null,
+          "calibration_gap_pp": null,
+          "status_label": "Prior: TIER_1"
+        },
+        "over_2_5": {
+          "tier": "TIER_2",
+          "baseline_hit_rate": 0.56,
+          "notes": "Reliable for top teams; mid-table requires DCI check.",
+          "empirical_sample": 0,
+          "empirical_win_rate": null,
+          "calibration_gap_pp": null,
+          "status_label": "Prior: TIER_2"
+        },
+        "btts_yes": {
+          "tier": "TIER_2",
+          "baseline_hit_rate": 0.5,
+          "notes": "Moderate both teams scoring frequency.",
+          "empirical_sample": 0,
+          "empirical_win_rate": null,
+          "calibration_gap_pp": null,
+          "status_label": "Prior: TIER_2"
+        },
+        "under_3_5": {
+          "tier": "TIER_2",
+          "baseline_hit_rate": 0.69,
+          "notes": "Balanced distribution outside blowout favorites.",
+          "empirical_sample": 0,
+          "empirical_win_rate": null,
+          "calibration_gap_pp": null,
+          "status_label": "Prior: TIER_2"
+        },
+        "to_win": {
+          "tier": "TIER_1",
+          "baseline_hit_rate": 0.53,
+          "notes": "Elite dominance by Barcelona and Real Madrid.",
+          "empirical_sample": 0,
+          "empirical_win_rate": null,
+          "calibration_gap_pp": null,
+          "status_label": "Prior: TIER_1"
+        },
+        "draw_no_bet": {
+          "tier": "TIER_1",
+          "baseline_hit_rate": 0.73,
+          "notes": "Draws are rare in Spanish women's top tier.",
+          "empirical_sample": 0,
+          "empirical_win_rate": null,
+          "calibration_gap_pp": null,
+          "status_label": "Prior: TIER_1"
+        }
+      }
+    },
+    "italy_serie_a_women": {
+      "name": "Italy Serie A Women",
+      "country": "Italy",
+      "historical_home_avg": 1.6,
+      "historical_away_avg": 1.3,
+      "season_basis": "Multi-year aggregate",
+      "market_integrity": {
+        "over_1_5": {
+          "tier": "TIER_1",
+          "baseline_hit_rate": 0.81,
+          "notes": "Solid Over 1.5 baseline across both regular and championship phases.",
+          "empirical_sample": 0,
+          "empirical_win_rate": null,
+          "calibration_gap_pp": null,
+          "status_label": "Prior: TIER_1"
+        },
+        "over_2_5": {
+          "tier": "TIER_2",
+          "baseline_hit_rate": 0.55,
+          "notes": "Moderate Over 2.5 hit rate.",
+          "empirical_sample": 0,
+          "empirical_win_rate": null,
+          "calibration_gap_pp": null,
+          "status_label": "Prior: TIER_2"
+        },
+        "btts_yes": {
+          "tier": "TIER_2",
+          "baseline_hit_rate": 0.51,
+          "notes": "Both teams score in approximately half of league games.",
+          "empirical_sample": 0,
+          "empirical_win_rate": null,
+          "calibration_gap_pp": null,
+          "status_label": "Prior: TIER_2"
+        },
+        "under_3_5": {
+          "tier": "TIER_2",
+          "baseline_hit_rate": 0.69,
+          "notes": "Controlled tempo.",
+          "empirical_sample": 0,
+          "empirical_win_rate": null,
+          "calibration_gap_pp": null,
+          "status_label": "Prior: TIER_2"
+        },
+        "to_win": {
+          "tier": "TIER_1",
+          "baseline_hit_rate": 0.51,
+          "notes": "Juventus and Roma home fortress consistency.",
+          "empirical_sample": 0,
+          "empirical_win_rate": null,
+          "calibration_gap_pp": null,
+          "status_label": "Prior: TIER_1"
+        },
+        "draw_no_bet": {
+          "tier": "TIER_1",
+          "baseline_hit_rate": 0.72,
+          "notes": "Strong protection against road draw attrition.",
+          "empirical_sample": 0,
+          "empirical_win_rate": null,
+          "calibration_gap_pp": null,
+          "status_label": "Prior: TIER_1"
+        }
+      }
+    },
     "default_fallback": {
       "name": "Default Competition Fallback",
       "country": null,
