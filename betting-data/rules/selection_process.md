@@ -92,6 +92,14 @@ The engine selects from four standard goal markets, applying specific statistica
 - **Qualifications**:
   - Model Estimated Probability: $\ge 82\%$.
   - Combined Venue Goals: $\lambda_{\text{total}} \ge 2.35$.
+  - **The Dual-Threat Standard (Roy's Balanced Scoring Gate)**:
+    - **Both teams should average at least $1.00\text{ GF/G}$** at venue (Home GF/G $\ge 1.00$ and Away GF/G $\ge 1.00$) to qualify as a natural dual-threat pair.
+  - **The Solo-Overpower Exception**:
+    - If **Team A** averages $< 1.00\text{ GF/G}$ at venue (or has been held scoreless in $\ge 40\%$ of recent matches), **Team B (the opposing favorite) MUST average strictly $\ge 2.00\text{ GF/G}$ alone** against an opponent conceding $\ge 1.50\text{ GA/G}$ to cover for Team A's scoring deficit.
+  - **Shutout Resistance Gate (`ONE_SIDED_SCORING_RISK`)**:
+    - **Hard Disqualification Gate**: If Team A does not score up to $1.00\text{ GF/G}$ AND Team B does not score up to $2.00\text{ GF/G}$ alone (e.g. favorite averages $1.70 - 1.95\text{ GF/G}$), `ONE_SIDED_SCORING_RISK` triggers **mandatory disqualification** from Over 1.5 on main tickets.
+    - *Core Tactical Principle*: Leaky opponent defense ($\text{GA} \ge 2.00$) cannot substitute for a favorite's lack of a $\ge 2.00\text{ GF/G}$ solo rate. When the underdog is blanked, a sub-2.00 favorite often scores once, shuts down the tempo, and freezes the match at 1–0 or 0–1.
+    - *Required Action*: Disqualified fixtures must be re-routed to **Draw No Bet (DNB)** or **Double Chance (1X/X2)**.
   - Zero defensive asphyxiation warnings (`STRONG_DEFENSIVE_MATCHUP`).
   - If $\text{DCI} < 0.40$ (underdog rarely scores), the favorite must have conceded in at least $35\%$ of home fixtures or average $\ge 2.10$ goals scored.
 
@@ -120,7 +128,14 @@ In real-world bookmaker pricing, fixtures with hyper-dominant offensive tempo of
   - Model Estimated Probability: $\ge 60\%$.
   - Combined Expected Goals: $\lambda_{\text{total}} \ge 2.70$.
   - **MANDATORY HARD DCI FLOOR**: $\mathbf{\text{DCI} \ge 0.45}$.
-  - **One-Sided Disqualification Rule**: If $\text{DCI} < 0.45$, Over 2.5 is **strictly disqualified from main selections**, even if Poisson probability exceeds $65\%$. Requiring a single team to score 3 goals alone when an opponent is shut out introduces unacceptable fragility (as demonstrated in Ticket S-1-v3.0 where Arouca won 1-0 against scoreless Nacional). In low-DCI fixtures, downgrade to **Over 1.5** only.
+  - **Roy's Dual-Scoring Floor (`NO_SUB_1_SCORING_ON_O2_5`)**:
+    - **Both participating teams must average at least $1.10\text{ GF/G}$** at their respective venues (Home GF/G $\ge 1.10$ and Away GF/G $\ge 1.10$).
+    - Both teams must have expected goals $\min(\lambda_{\text{home}}, \lambda_{\text{away}}) \ge 1.00$.
+  - **The "Downgrade, Don't Discard" Rule (`ONE_SIDED_GOAL_BURDEN`)**:
+    - If either team averages $< 1.00\text{ GF/G}$ at venue (e.g. FC Utrecht W at $0.75$), Over 2.5 is **strictly disqualified from main tickets** (triggering `ONE_SIDED_GOAL_BURDEN`), as a sub-1.00 team cannot reliably support a 3-goal match.
+    - *Required Action*: **DO NOT DISCARD THE FIXTURE**. Instead, **automatically downgrade the selection to Over 1.5 Goals** (if solo overpower criteria are met) or route to **Draw No Bet (DNB)**. (Empirical proof: Zwolle vs Utrecht 1-1, which failed Over 2.5 but cashed on Over 1.5).
+  - **The Elite Powerhouse Exception**:
+    - If an underdog scores $< 1.00\text{ GF/G}$, Over 2.5 is permitted *only* if the home favorite averages $\ge 2.75\text{ GF/G}$ alone and the opponent concedes $\ge 2.30\text{ GA/G}$ (e.g. Barcelona winning 4–0).
 
 ### 3.4 Market 4: Tactical Under 3.5 Goals
 - **Role**: High-probability pick for cagey tactical battles or intense derbies.
@@ -178,6 +193,34 @@ In real-world bookmaker pricing, fixtures with hyper-dominant offensive tempo of
     - *The Reality*: In genuine goal corridors, 76%+ probability events are priced at $1.15 - 1.25$. A bookmaker price of $1.38 - 1.45$ is not free "value"; it is an explicit signal of macro zero-inflation (0-0/1-0 clustering) that independent Poisson fails to detect on small samples.
     - *Mandatory Action*: Any Over 1.5 candidate priced at $\ge 1.38$ is strictly barred from main capital tickets and diverted to shadow tracking.
 
+### 3.8 Gate 7: European Women's League Governance (Pragmatic Market Routing)
+- **Role**: Prevent capital destruction caused by bimodal blowout skew, suppressed bookmaker odds (1.38–1.52), and championship friction in European women's top tiers without causing slate starvation.
+- **Empirical Reality**:
+  - Across European women's leagues (Frauen-Bundesliga, Vrouwen Eredivisie, Première Ligue, Liga F, Serie A Femminile), the multi-year baseline hit rate for Over 2.5 is only **$54\% - 57\%$** (TIER_2 in `league_baselines.json`).
+  - Bookmakers suppress Over 2.5 odds to $1.40 - 1.52$, requiring an unsustainable $66\% - 71\%$ break-even rate.
+  - Blowouts against bottom minnows (7-0, 8-1) heavily skew season goals-per-game and Poisson $\lambda$, hallucinating $75\% - 83\%$ probabilities for parity matches that frequently end 1-0, 0-1, or 1-1.
+- **Enforceable Pragmatic Routing Rules ("Downgrade, Don't Discard")**:
+  1. **Top-3 Championship Title Clashes**:
+     - Whenever both teams reside in the top-3 (e.g. Twente vs PSV 0-1, Wolfsburg vs Bayern 0-1/1-4) with stingy defenses ($\le 1.00\text{ GA/G}$), Over 2.5 is barred.
+     - *Mandatory Action*: Do not discard the match; **route selection to Over 1.5 Goals** (@ $1.20 - 1.28$) or **Draw No Bet (DNB)**.
+  2. **Mid-Table Parity Fixtures**:
+     - Check Roy's Dual-Scoring Floor: if both teams average $\ge 1.10\text{ GF/G}$, Over 2.5 is permitted. If *either* team averages $< 1.00\text{ GF/G}$ (like Utrecht 0.75, Nürnberg 0.75), Over 2.5 is barred and **automatically downgraded to Over 1.5** (provided solo overpower criteria are met; otherwise route to DNB).
+  3. **The Asymmetric Mismatch Exception**:
+     - In women's football, `Over 2.5 Goals` is greenlit on main tickets when an elite top-3 club (e.g. Bayern, Wolfsburg, Frankfurt, Lyon, PSG, Barcelona, Twente) faces a lower-half opponent (rank $\ge 7$, Goal Difference $\le -5$). (Empirical proof: Eintracht Frankfurt 1–5 RB Leipzig).
+  4. **Suppression of Sub-1.55 Odds Squeezes**:
+     - In women's leagues, reject any Over 2.5 priced below **1.55** unless the favored team averages **$\ge 2.50\text{ GF/G}$ alone** at venue.
+
+### 3.9 Double-Header Reverse Fixture Tactical Caution (`REVERSE_FIXTURE_CAUTION`)
+- **Role**: Protect capital against extreme low-scoring mean-reversion in compressed 2-game series.
+- **Trigger**: When two teams face each other for the second time within 5 days (e.g. back-to-back domestic cup ties, playoff elimination rounds, or compressed league/continental double-headers) after Game 1 resulted in a blowout ($\ge 3$ goal margin, e.g. 4-1, 3-0, 5-0).
+- **Tactical Dynamics**:
+  - The team that suffered the Game 1 blowout undergoes radical defensive counter-adjustments: transitioning into a deep 5-man low block, packing the central box, and prioritizing physical disruption to prevent further embarrassment.
+  - The blowout winner frequently conserves energy, manages game state, and protects their aggregate/lead without pressing high.
+  - This dynamic creates severe low-scoring variance (0-0, 1-0, 0-1) where independent Poisson goal models falsely project another blowout.
+- **Mandatory Action**:
+  - Over 1.5 Goals and Over 2.5 Goals are **strictly disqualified from Main Capital Tickets (`selections`)**.
+  - Candidate fixtures must be re-routed to **Draw No Bet (DNB)** or **Double Chance (1X/X2)**, or diverted to the **Shadow Tracking Portfolio (`alternatives`)**.
+
 ---
 
 ## 4. TICKET PORTFOLIO CONSTRUCTION LOGIC
@@ -186,9 +229,17 @@ In real-world bookmaker pricing, fixtures with hyper-dominant offensive tempo of
 - Disqualify fixtures missing venue data (Hard-Stop Rule).
 - Apply Section 2.2 Small-Sample Regression Anchor ($N \le 5$) and Section 2.3 Early-Season 40/60 Macro Regression Anchor & Mid-Table Cap ($N \le 4$).
 - **Enforce Early-Season Blank / Shutout Risk Gate (`EARLY_SEASON_BLANK_RISK`)**: When $N \le 4$, if either team was scoreless in $\ge 50\%$ of active matches, strictly disqualify Over 2.5/BTTS, and require favorite $\lambda \ge 2.20$ alone for Over 1.5.
+- **Enforce Roy's Balanced Scoring Gate & Shutout Resistance Gate (`ONE_SIDED_SCORING_RISK` & `ONE_SIDED_GOAL_BURDEN`)**:
+  - For **Over 1.5 Goals**: Both teams should average $\ge 1.00\text{ GF/G}$ at venue. If Team A averages $< 1.00\text{ GF/G}$ (or blank rate $\ge 40\%$), Team B (favorite) must average strictly $\ge 2.00\text{ GF/G}$ alone against an opponent conceding $\ge 1.50\text{ GA/G}$. If Team A $< 1.00$ AND Team B $< 2.00$ alone (e.g. favorite is $1.70 - 1.95$), `ONE_SIDED_SCORING_RISK` triggers mandatory disqualification from main tickets (route to DNB or Double Chance). Opponent concession cannot compensate for lack of solo firepower.
+  - For **Over 2.5 Goals**: Both teams must average $\ge 1.10\text{ GF/G}$ at venue with expected goals $\lambda \ge 1.00$ each ($\text{DCI} \ge 0.45$). If either team averages $< 1.00\text{ GF/G}$, **do not discard the match—automatically downgrade to Over 1.5 Goals** (if solo overpower criteria are met) or route to DNB.
+- **Enforce Double-Header Reverse Fixture Tactical Caution (`REVERSE_FIXTURE_CAUTION`)**: Disqualify Over 1.5 and Over 2.5 from main tickets if two teams play within 5 days following a $\ge 3$ goal blowout in Game 1. Route to DNB or Double Chance.
 - Compute DCI and enforce the $\text{DCI} \ge 0.45$ floor for Over 2.5 and $\text{DCI} \ge 0.50$ for BTTS Yes.
 - **Enforce Gate 6 (League-Market Integrity)**: Check `league_baselines.json` and in-app empirical LMI matrix. If the match falls in a **`TIER_3`** corridor for that market, **divert to shadow alternatives immediately**.
 - **Enforce Unvetted Lower League Quarantine (`UNVETTED_LEAGUE_QUARANTINE`)**: Bar unvetted secondary/tertiary divisions ($N < 10$) from passing Gate 6 on Over 1.5/2.5/BTTS under `default_fallback`.
+- **Enforce Gate 7: European Women's League Governance ("Downgrade, Don't Discard")**:
+  - Title clashes with stingy defenses route to Over 1.5 or DNB.
+  - Mid-table parity fixtures with sub-1.00 scoring teams route to Over 1.5.
+  - Asymmetric mismatches (elite top-3 vs lower half) retain Over 2.5.
 - **Enforce Over 1.5 Odds Ceiling Anomaly (`O1.5_LONG_PRICE_ANOMALY`)**: Disqualify any Over 1.5 selection with odds $\ge 1.38$ from main tickets.
 - **Enforce the Reserve Squad Restriction (`RESERVE_SQUAD_RESTRICTION`)**: If either team is a reserve/academy squad ("Jong", "B", "II"), strictly prohibit straight 1X2 Match Winner picks from main tickets. Re-channel selection into Goal Markets or Draw No Bet (DNB).
 - **Enforce the Away Favorite Restriction (`AWAY_FAVORITE_RESTRICTION`)**: Strictly prohibit straight 1X2 Away Win picks from main tickets. Re-channel candidate fixtures into Goal Markets (Over 1.5, Over 2.5, BTTS) or require Draw No Bet (DNB) as a mandatory shock absorber against low-block draw traps.
@@ -271,16 +322,17 @@ flowchart TD
         P2["Pillar 2: Recent Form & Scoring Consistency (Last 5 Games)"]
         P3["Pillar 3: Lineup Spine & Critical Absences"]
         P4["Pillar 4: Tactical Stakes & Draw Sufficiency"]
+        P5["Pillar 5: Rapid Reverse Fixture Tactical Audit"]
         Provisional --> Chamber
-        Chamber --> P1 & P2 & P3 & P4
+        Chamber --> P1 & P2 & P3 & P4 & P5
     end
 
     subgraph S3["STAGE 3: Swap Circuit Breaker Protocol"]
         AuditCheck{"Did All 3 Primary Legs<br/>Pass Forensic Gates?"}
-        Disqualify["❌ Severe Warning Triggered<br/>(e.g. H2H_UNDER_1_5_TRAP, RECENT_SCORING_DROUGHT)<br/>Disqualify Leg → Relegate to Shadow Tracking"]
+        Disqualify["❌ Severe Warning Triggered<br/>(e.g. H2H_UNDER_1_5_TRAP, REVERSE_FIXTURE_CAUTION)<br/>Disqualify Leg → Relegate to Shadow Tracking"]
         Swap["Promote Backup Alternative 1<br/>Run Through Stage 2 Chamber"]
         Clear["✅ All Legs Formally Cleared"]
-        P1 & P2 & P3 & P4 --> AuditCheck
+        P1 & P2 & P3 & P4 & P5 --> AuditCheck
         AuditCheck -->|"Severe Red Flag"| Disqualify --> Swap --> Chamber
         AuditCheck -->|"All Clear"| Clear
     end
@@ -293,7 +345,7 @@ flowchart TD
 ```
 
 #### Detailed Forensic Deep-Dive Protocols (Stage 2)
-The Top 3 provisional selections and Top 2 backup alternatives must undergo four targeted checks before ticket finalization:
+The Top 3 provisional selections and Top 2 backup alternatives must undergo five targeted checks before ticket finalization:
 1. **Pillar 1: Direct Head-to-Head (H2H) Forensic Audit (`H2H_UNDER_1_5_TRAP`)**:
    - Audit the last 3 to 5 direct competitive meetings.
    - **The Rule**: If $\mathbf{\ge 50\%}$ **of past competitive H2H meetings finished with $\le 1$ goal** (e.g. 0-0, 1-0), the fixture is **STRICTLY BARRED from serving as an Over 1.5 or Over 2.5 Anchor on main tickets**.
@@ -306,12 +358,15 @@ The Top 3 provisional selections and Top 2 backup alternatives must undergo four
    - **The Rule**: If a club's primary goalscorer ($\ge 35\%$ of team goals) or chief playmaker is unavailable, 1X2 Match Winner and Over 2.5 markets are disqualified. If a second-choice or youth goalkeeper starts, Under 3.5 is disqualified. Flag `LINEUP_SPINE_COMPROMISED`.
 4. **Pillar 4: Tactical Motivation & Table Context**:
    - Verify table incentives: flag `STANDINGS_DRAW_SUFFICIENCY` if a favorite needs only a draw (downgrading straight win to DNB or Double Chance). Flag `DERBY_TACTICAL_CYNICISM` in hostile derbies.
+5. **Pillar 5: Rapid Reverse Fixture Tactical Audit (`REVERSE_FIXTURE_CAUTION`)**:
+   - Audit whether the fixture is Game 2 of a rapid back-to-back series within 5 days.
+   - **The Rule**: If Game 1 resulted in a blowout ($\ge 3$ goal margin, e.g. 4-1, 3-0), flag `REVERSE_FIXTURE_CAUTION`. The losing side shifts into an emergency defensive low block while the winning side manages game state/aggregate, triggering low-scoring mean-reversion. Strictly bars Over 1.5 and Over 2.5 from main tickets; route to Draw No Bet (DNB) or Double Chance (1X/X2).
 
 #### Stage 3: The Swap Circuit Breaker Protocol
-- If a provisional primary selection triggers `H2H_UNDER_1_5_TRAP`, `RECENT_SCORING_DROUGHT`, `LINEUP_SPINE_COMPROMISED`, or `EARLY_SEASON_BLANK_RISK`:
+- If a provisional primary selection triggers `H2H_UNDER_1_5_TRAP`, `RECENT_SCORING_DROUGHT`, `LINEUP_SPINE_COMPROMISED`, `EARLY_SEASON_BLANK_RISK`, `ONE_SIDED_SCORING_RISK`, or `REVERSE_FIXTURE_CAUTION`:
   1. **Disqualify Immediately**: Strip the match of its primary selection status and move it to `alternatives` with an explanatory comment detailing the forensic failure.
   2. **Promote Backup Alternative 1**: Move the top backup into the selection slot, verifying that combined odds still meet the $\ge 2.00$ target ($2.00 - 2.50$).
-  3. **Forensic Chamber Audit of Replacement**: Verify the replacement fixture through Pillars 1–4. If clear, finalize the ticket; if compromised, proceed to Backup Alternative 2.
+  3. **Forensic Chamber Audit of Replacement**: Verify the replacement fixture through Pillars 1–5. If clear, finalize the ticket; if compromised, proceed to Backup Alternative 2.
 
 ---
 
@@ -354,11 +409,12 @@ Antigravity executes the following two-stage selection flow in a single response
    - Applies the 40/60 Macro Regression Anchor when $N \le 4$ and checks mid-table Over 2.5 prohibitions.
    - Computes DCI, market probabilities, value edge, and EV across all markets.
    - Enforces Gate 6 (LMI Matrix), Rule 10 (Odds Ceiling Anomaly), and reserve/away restrictions.
+   - Enforces the Balanced Dual-Threat Standard & Solo-Overpower Floor on Over 1.5.
    - Forms a **provisional shortlist of Top 3 Primary Candidates + Top 2 Backup Alternatives**.
 2. **Stage 2 (Forensic Deep Dive on Shortlist Chamber)**:
-   - Conducts targeted intelligence searches on the Top 3 provisional selections + Top 2 backups across the 4 pillars (H2H history, recent form & droughts, lineups & key absences, tactical motivation & standings).
+   - Conducts targeted intelligence searches on the Top 3 provisional selections + Top 2 backups across the 5 pillars (H2H history, recent form & droughts, lineups & key absences, tactical motivation & standings, rapid reverse fixtures).
 3. **Stage 3 (Automated Circuit Breaker & Swap Execution)**:
-   - If any provisional leg triggers `H2H_UNDER_1_5_TRAP`, `RECENT_SCORING_DROUGHT`, or `LINEUP_SPINE_COMPROMISED`, disqualifies it immediately, relegates it to `alternatives`, and promotes Backup Alternative 1 after auditing it through Stage 2.
+   - If any provisional leg triggers `H2H_UNDER_1_5_TRAP`, `RECENT_SCORING_DROUGHT`, `LINEUP_SPINE_COMPROMISED`, `ONE_SIDED_SCORING_RISK`, or `REVERSE_FIXTURE_CAUTION`, disqualifies it immediately, relegates it to `alternatives`, and promotes Backup Alternative 1 after auditing it through Stage 2.
 4. **Stage 4 (Ticket Assembly & File Export)**:
    - Calibrates ticket `confidence` and `confidence_notes` under the strict compound probability floors ($\ge 60\%$ for `high`; $50\% - 59.9\%$ for `medium`; `low` for $N \le 4$).
    - Generates `candidates_<date>.json` with all other qualified matches evaluated that day.

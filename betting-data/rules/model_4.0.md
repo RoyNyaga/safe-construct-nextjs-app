@@ -174,7 +174,11 @@ $$P(\text{BTTS No}) = 1 - P(\text{BTTS Yes})$$
 ### 6.6 Dual Contribution Index (DCI) & Game Openness
 $$\text{DCI} = \frac{\min(\lambda_{\text{home}}, \lambda_{\text{away}})}{\max(\lambda_{\text{home}}, \lambda_{\text{away}})}$$
 - **BTTS Yes Hard Floor**: $\text{DCI} \ge 0.50$ (Both sides must reliably generate goal threats).
-- **Over 2.5 Hard Floor**: $\text{DCI} \ge 0.45$ (Disqualifies one-sided fixtures where a shutout forces one side to score 3 goals alone).
+- **Over 2.5 Hard Floor & Dual-Scoring Floor**: $\text{DCI} \ge 0.45$. In addition, both participating clubs must have venue scoring rates $\text{GF/G} \ge 1.10$ and expected goals $\min(\lambda_{\text{home}}, \lambda_{\text{away}}) \ge 1.00$. If either side averages $< 1.00\text{ GF/G}$ at venue, Over 2.5 is strictly barred (triggering `ONE_SIDED_GOAL_BURDEN`) and automatically downgraded to Over 1.5.
+- **Over 1.5 Balanced Scoring Gate & Solo-Overpower Floor (Roy's Balanced Standard)**:
+  - Both participating teams should average $\ge 1.00\text{ GF/G}$ at venue to qualify as a natural dual-threat pair.
+  - If **Team A** averages $< 1.00\text{ GF/G}$ (or has been held scoreless in $\ge 40\%$ of recent matches), **Team B (the opposing favorite) MUST average strictly $\ge 2.00\text{ GF/G}$ alone** against an opponent conceding $\ge 1.50\text{ GA/G}$ to cover for Team A's scoring deficit (**The Solo-Overpower Exception**).
+  - **Shutout Resistance Gate (`ONE_SIDED_SCORING_RISK`)**: If Team A does not score up to $1.00\text{ GF/G}$ AND Team B does not score up to $2.00\text{ GF/G}$ alone (e.g. favorite averages $1.70 - 1.95\text{ GF/G}$), `ONE_SIDED_SCORING_RISK` triggers **mandatory disqualification** from Over 1.5 on main tickets. Opponent defensive concession ($\text{GA} \ge 2.00$) cannot substitute for a favorite's lack of a $\ge 2.00\text{ GF/G}$ solo rate. When the underdog is blanked, a sub-2.00 favorite frequently stalls at 1–0. Disqualified fixtures must be re-routed to **Draw No Bet (DNB)** or **Double Chance (1X/X2)**.
 - **Small-Sample Venue Regression Anchor ($N \le 5$)**: When venue sample is $\le 5$ matches and venue scoring rate exceeds season-overall rate by $> 35\%$, regress $\text{GF}_{\text{effective}} = 0.50 \times \text{Venue GF/G} + 0.50 \times \text{Overall GF/G}$.
 
 ### 6.7 Bivariate Poisson Match Winner (1X2) & Draw No Bet Probabilities
@@ -229,7 +233,10 @@ The model actively searches for evidence that challenges market viability. Warni
 - `LOW_AWAY_SCORING`: The away team averages $< 0.85$ GF/G away from home, endangering BTTS Yes.
 - `LOW_HOME_SCORING`: The home team averages $< 1.00$ GF/G at home.
 
-#### B. Over 2.5 / Total Goals Warnings
+#### B. Over 1.5 & Over 2.5 / Total Goals Warnings
+- `ONE_SIDED_GOAL_BURDEN`: Either participating team averages $< 1.00\text{ GF/G}$ at venue (or $\lambda < 1.00$), forcing the opponent to carry an asymmetric 3-goal solo burden for Over 2.5 (e.g. FC Utrecht W averaging 0.75 away GF/G in Zwolle vs Utrecht 1-1). Over 2.5 is strictly prohibited; mandates automatic downgrade to Over 1.5 Goals.
+- `ONE_SIDED_SCORING_RISK`: Team A averages $< 1.00\text{ GF/G}$ at venue (or recent blank rate $\ge 40\%$) AND Team B (favorite) averages $< 2.00\text{ GF/G}$ alone (e.g. favorite is $1.70 - 1.95\text{ GF/G}$). Opponent concession cannot compensate for lack of solo firepower. Strictly bars Over 1.5 from main tickets; routes candidate to Draw No Bet (DNB) or Double Chance (1X/X2).
+- `REVERSE_FIXTURE_CAUTION`: Two teams meet for the 2nd time within 5 days (e.g. back-to-back cup legs, playoffs, or compressed double-headers) after a blowout ($\ge 3$ goal margin in Game 1). The losing side shifts to an emergency deep low block while the winner manages clock/lead, causing severe low-scoring mean-reversion. Strictly disqualifies Over 1.5 and Over 2.5 on main tickets; routes to Draw No Bet (DNB) or Double Chance (1X/X2).
 - `STRONG_DEFENSIVE_MATCHUP`: Both teams concede $\le 0.85$ GA/G at venue, creating high resistance to Over 2.5.
 - `H2H_LOW_GOALS`: Recurring head-to-head fixtures produce repeated 0–0, 1–0, or Under 2.5 scorelines.
 - `H2H_UNDER_1_5_TRAP`: $\ge 50\%$ of past 3–5 competitive head-to-head meetings produced $\le 1$ goal (e.g. 0-0, 1-0). Indicates deep-seated tactical friction or stylistic deadlock that suppresses goals regardless of high season averages. Strictly bars fixture from serving as Over 1.5 or Over 2.5 anchor on main tickets.
