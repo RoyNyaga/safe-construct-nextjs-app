@@ -31,6 +31,8 @@ import {
   LeagueMarketIntegrityRecord,
   LeagueIntegrityCompetitionSummary,
   LeagueIntegrityMatrixPayload,
+  LeagueSelectionDetailItem,
+  LeagueCompetitionDetailPayload,
 } from '@/types/betting'
 import { autoSettleSelection, calculateTicketStatus, calculateProfitLoss } from '@/utils/bettingSettlement'
 import { checkVenueStatsMismatch } from '@/utils/bettingValidation'
@@ -2390,19 +2392,117 @@ const STANDARD_LMI_MARKETS = [
   'under_3_5',
   'to_win',
   'draw_no_bet',
+  'double_chance',
 ] as const
 
-function normalizeLMIMarketKey(rawMarket?: string | null, rawSelection?: string | null): string {
-  if (!rawMarket) return 'other'
-  const m = rawMarket.trim().toLowerCase()
-  const s = (rawSelection || '').trim().toLowerCase()
+const GENERIC_LEAGUE_NAMES = new Set([
+  'premier league',
+  'serie a',
+  'serie b',
+  'primera division',
+  'primera división',
+  'first division',
+  'second division',
+  'super league',
+  'superliga',
+  'liga 1',
+  'liga 2',
+  'ligue 1',
+  'ligue 2',
+  'championship',
+  'league one',
+  'league two',
+  'national league',
+  'cup',
+])
 
-  if (m.includes('1.5') && (m.includes('over') || s.includes('over'))) return 'over_1_5'
-  if (m.includes('2.5') && (m.includes('over') || s.includes('over'))) return 'over_2_5'
-  if (m.includes('3.5') && (m.includes('under') || s.includes('under'))) return 'under_3_5'
-  if (m.includes('btts') || m.includes('both teams to score') || m.includes('bts')) return 'btts_yes'
-  if (m.includes('draw no bet') || m.includes('dnb') || s.includes('draw no bet') || s.includes('dnb')) return 'draw_no_bet'
-  if (m.includes('win') || m.includes('1x2') || m.includes('winner') || m.includes('to win') || s.includes('to win')) return 'to_win'
+function normalizeCountryName(raw?: string | null): string {
+  const c = (raw || '').trim().toLowerCase()
+  if (!c) return ''
+  if (c === 'usa' || c === 'us' || c === 'united states of america') return 'united states'
+  if (c === 'holland') return 'netherlands'
+  if (c === 'czech republic') return 'czechia'
+  if (c === 'türkiye' || c === 'turkiye') return 'turkey'
+  if (c === 'ivory coast' || c === "côte d'ivoire" || c === "cote d'ivoire") return 'cote divoire'
+  if (c === 'south korea' || c === 'korea republic') return 'south korea'
+  return c
+}
+
+function countriesAreCompatible(itemCountry?: string | null, compCountry?: string | null): boolean {
+  const c1 = normalizeCountryName(itemCountry)
+  const c2 = normalizeCountryName(compCountry)
+  if (!c1 || !c2) return true
+  return c1 === c2
+}
+
+function normalizeLMIMarketKey(rawMarket?: string | null, rawSelection?: string | null): string {
+  const m = (rawMarket || '').trim().toLowerCase()
+  const s = (rawSelection || '').trim().toLowerCase()
+  const combined = `${m} ${s}`.trim()
+  if (!combined) return 'other'
+
+  // Check Over/Under goal lines across BOTH market and selection fields
+  const isOver =
+    s.includes('over') ||
+    m.includes('over 1.5') ||
+    m.includes('over 2.5') ||
+    m.includes('over 3.5') ||
+    (m.includes('over') && !s.includes('under'))
+  const isUnder =
+    s.includes('under') ||
+    m.includes('under 3.5') ||
+    m.includes('under 2.5') ||
+    m.includes('under 1.5') ||
+    (m.includes('under') && !s.includes('over'))
+
+  if (combined.includes('1.5') && isOver) return 'over_1_5'
+  if (combined.includes('2.5') && isOver) return 'over_2_5'
+  if (combined.includes('3.5') && isUnder) return 'under_3_5'
+  if (combined.includes('3.5') && isOver) return 'over_3_5'
+  if (combined.includes('2.5') && isUnder) return 'under_2_5'
+  if (combined.includes('1.5') && isUnder) return 'under_1_5'
+
+  // Both Teams to Score (distinguish Yes vs No)
+  if (m.includes('btts') || m.includes('both teams to score') || m.includes('bts') || s.includes('btts')) {
+    if (s === 'no' || s.includes('btts no') || s.endsWith(' no')) return 'btts_no'
+    return 'btts_yes'
+  }
+
+  // Double Chance (check before 1X2 / To Win)
+  if (
+    m.includes('double chance') ||
+    s.includes('double chance') ||
+    s === '1x' ||
+    s === 'x2' ||
+    s === '12' ||
+    /\b(1x|x2|12)\b/.test(s)
+  ) {
+    return 'double_chance'
+  }
+
+  // To Qualify
+  if (m.includes('qualify') || s.includes('qualify') || m.includes('advance') || s.includes('advance')) {
+    return 'to_qualify'
+  }
+
+  // Draw No Bet
+  if (m.includes('draw no bet') || m.includes('dnb') || s.includes('draw no bet') || s.includes('dnb')) {
+    return 'draw_no_bet'
+  }
+
+  // Match Winner / 1X2
+  if (
+    m.includes('win') ||
+    m.includes('1x2') ||
+    m.includes('winner') ||
+    m.includes('to win') ||
+    m.includes('moneyline') ||
+    s.includes('home win') ||
+    s.includes('away win') ||
+    s.includes('to win')
+  ) {
+    return 'to_win'
+  }
 
   return m.replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '') || 'other'
 }
@@ -2414,13 +2514,25 @@ function getLMIMarketLabel(marketKey: string): string {
     case 'over_2_5':
       return 'Over 2.5 Goals'
     case 'btts_yes':
-      return 'Both Teams to Score'
+      return 'BTTS Yes'
+    case 'btts_no':
+      return 'BTTS No'
     case 'under_3_5':
       return 'Under 3.5 Goals'
+    case 'over_3_5':
+      return 'Over 3.5 Goals'
+    case 'under_2_5':
+      return 'Under 2.5 Goals'
+    case 'under_1_5':
+      return 'Under 1.5 Goals'
     case 'to_win':
       return 'To Win (1X2)'
     case 'draw_no_bet':
       return 'Draw No Bet (DNB)'
+    case 'double_chance':
+      return 'Double Chance'
+    case 'to_qualify':
+      return 'To Qualify'
     default:
       return marketKey.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase())
   }
@@ -2432,19 +2544,40 @@ function matchBaselineCompetition(
   baselinesCompetitions?: Record<string, any>
 ): { key: string; name: string; country: string | null; meta?: any } {
   const normLeague = (leagueName || '').trim().toLowerCase()
-  const normCountry = (countryName || '').trim().toLowerCase()
+  const normCountry = normalizeCountryName(countryName)
+  const qualifiedLeague = normCountry && !normLeague.includes(normCountry) ? `${normCountry} ${normLeague}` : normLeague
 
   if (baselinesCompetitions) {
-    for (const [key, comp] of Object.entries(baselinesCompetitions)) {
-      if (key === 'default_fallback') continue
-      const compName = (comp.name || '').toLowerCase()
+    const entries = Object.entries(baselinesCompetitions).filter(([key]) => key !== 'default_fallback')
 
-      // Direct full or exact matches
-      if (normLeague === compName || normLeague.includes(compName) || compName.includes(normLeague)) {
+    // Pass 1: Exact name match (or country + league exact match) with country compatibility
+    for (const [key, comp] of entries) {
+      const compName = (comp.name || '').trim().toLowerCase()
+      const compCountry = normalizeCountryName(comp.country)
+      if (!countriesAreCompatible(normCountry, compCountry)) continue
+
+      if (normLeague === compName || qualifiedLeague === compName) {
+        return { key, name: comp.name, country: comp.country || countryName || null, meta: comp }
+      }
+    }
+
+    // Pass 2: Country-guarded containment & keyword matching
+    for (const [key, comp] of entries) {
+      const compName = (comp.name || '').trim().toLowerCase()
+      const compCountry = normalizeCountryName(comp.country)
+
+      if (!countriesAreCompatible(normCountry, compCountry)) continue
+
+      // Safe containment: never match a bare generic league name without a matching country
+      const isGeneric = GENERIC_LEAGUE_NAMES.has(normLeague)
+      if (
+        normLeague.includes(compName) ||
+        (compName.includes(normLeague) && (!isGeneric || (normCountry !== '' && normCountry === compCountry)))
+      ) {
         return { key, name: comp.name, country: comp.country || countryName || null, meta: comp }
       }
 
-      // Keyword based matching
+      // Specific keyword based matching (strictly country-compatible)
       if (normLeague.includes('eerste') && key.includes('eerste')) return { key, name: comp.name, country: comp.country, meta: comp }
       if (normLeague.includes('2. bundesliga') && key.includes('2_bundesliga')) return { key, name: comp.name, country: comp.country, meta: comp }
       if ((normLeague.includes('j1') || normLeague.includes('j-league') || normLeague.includes('j league')) && key.includes('j1')) {
@@ -2459,32 +2592,236 @@ function matchBaselineCompetition(
       if ((normLeague.includes('league two') || normLeague.includes('league 2')) && key.includes('league_two')) {
         return { key, name: comp.name, country: comp.country, meta: comp }
       }
-      if ((normLeague.includes('premier') || normLeague.includes('pl')) && (normCountry.includes('england') || normLeague.includes('england'))) {
+      if (
+        (normLeague.includes('premier') || normLeague === 'epl' || normLeague === 'pl') &&
+        (normCountry === 'england' || normLeague.includes('england') || normLeague.includes('english'))
+      ) {
         if (key.includes('premier_league')) return { key, name: comp.name, country: comp.country, meta: comp }
       }
-      if (normLeague.includes('la liga') || normLeague.includes('primera division')) {
-        if (key.includes('la_liga')) return { key, name: comp.name, country: comp.country, meta: comp }
+      if ((normLeague.includes('la liga') || (normLeague.includes('primera') && normCountry === 'spain')) && key.includes('la_liga')) {
+        return { key, name: comp.name, country: comp.country, meta: comp }
       }
       if (normLeague.includes('segunda') && key.includes('segunda')) return { key, name: comp.name, country: comp.country, meta: comp }
-      if (normLeague.includes('serie a') && (normCountry.includes('ecuador') || normLeague.includes('ecuador'))) {
+      if (normLeague.includes('serie a') && (normCountry === 'ecuador' || normLeague.includes('ecuador'))) {
         if (key.includes('ecuador')) return { key, name: comp.name, country: comp.country, meta: comp }
       }
-      if ((normLeague.includes('argentina') || normCountry.includes('argentina')) && key.includes('argentina')) {
+      if ((normLeague.includes('argentina') || normCountry === 'argentina') && key.includes('argentina')) {
         return { key, name: comp.name, country: comp.country, meta: comp }
       }
     }
   }
 
-  // Dynamic fallback slug
-  const fallbackKey = (leagueName || 'unknown_league')
+  // Dynamic fallback slug: include country prefix for generic league names to avoid cross-country collisions
+  const leagueSlug = (leagueName || 'unknown_league')
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, '_')
     .replace(/^_+|_+$/g, '')
+  const countrySlug = normCountry
+    .replace(/[^a-z0-9]+/g, '_')
+    .replace(/^_+|_+$/g, '')
+
+  const needsCountryPrefix = countrySlug && !leagueSlug.startsWith(countrySlug) && GENERIC_LEAGUE_NAMES.has(normLeague)
+  const fallbackKey = needsCountryPrefix ? `${countrySlug}_${leagueSlug}` : leagueSlug || 'unknown_league'
+  const fallbackName =
+    needsCountryPrefix && countryName
+      ? `${countryName.trim()} ${(leagueName || '').trim()}`
+      : leagueName || 'Unknown League'
 
   return {
     key: fallbackKey,
-    name: leagueName || 'Unknown League',
+    name: fallbackName,
     country: countryName || null,
+  }
+}
+
+function buildLMIMarketRecord(
+  compName: string,
+  mKey: string,
+  matchingItems: LeagueIntegrityBetItem[],
+  macroPrior?: any
+): LeagueMarketIntegrityRecord {
+  const wonCount = matchingItems.filter((i) => i.result === 'won').length
+  const lostCount = matchingItems.filter((i) => i.result === 'lost').length
+  const voidCount = matchingItems.filter((i) => i.result === 'void').length
+  const pendingCount = matchingItems.filter((i) => i.result === 'pending').length
+  const totalSettled = wonCount + lostCount
+
+  const actualWinRate = totalSettled > 0 ? Number(((wonCount / totalSettled) * 100).toFixed(1)) : null
+
+  const probItems = matchingItems.filter(
+    (i) => i.estimated_probability != null && (i.result === 'won' || i.result === 'lost')
+  )
+  const predictedAvgProb =
+    probItems.length > 0
+      ? Number(
+        ((probItems.reduce((acc, i) => acc + Number(i.estimated_probability), 0) / probItems.length) * 100).toFixed(1)
+      )
+      : null
+
+  const calibrationGapPp =
+    actualWinRate !== null && predictedAvgProb !== null ? Number((actualWinRate - predictedAvgProb).toFixed(1)) : null
+
+  const priorHitRate = macroPrior?.baseline_hit_rate ? Number((macroPrior.baseline_hit_rate * 100).toFixed(1)) : null
+  const priorTier: LeagueMarketTier = macroPrior?.tier || 'UNTESTED'
+
+  let tier: LeagueMarketTier = priorTier
+  let statusLabel = ''
+
+  if (totalSettled === 0) {
+    tier = priorTier
+    statusLabel = macroPrior?.notes ? `Prior: ${priorTier}` : 'Untested'
+  } else if (totalSettled < 5) {
+    if (lostCount >= 2 && wonCount === 0) {
+      tier = 'TIER_3'
+      statusLabel = `Caution (0/${totalSettled} Won) - Fat Tail Trap`
+    } else if (priorTier !== 'UNTESTED') {
+      tier = priorTier
+      statusLabel = `Low Sample (N=${totalSettled}) - Prior Weighted`
+    } else {
+      const rate = actualWinRate ?? 0
+      tier = rate >= 78 ? 'TIER_1' : rate >= 60 ? 'TIER_2' : 'TIER_3'
+      statusLabel = `Low Sample (N=${totalSettled})`
+    }
+  } else if (totalSettled < 15) {
+    const empiricalRate = actualWinRate ?? 50
+    const priorRate = priorHitRate ?? empiricalRate
+    const blended = priorRate * 0.5 + empiricalRate * 0.5
+
+    if (blended >= 78) {
+      tier = 'TIER_1'
+    } else if (blended >= 65) {
+      tier = 'TIER_2'
+    } else {
+      tier = 'TIER_3'
+    }
+    statusLabel = `Calibrating (N=${totalSettled}, Blended ${blended.toFixed(1)}%)`
+  } else {
+    const rate = actualWinRate ?? 0
+    if (rate >= 80 && (calibrationGapPp === null || calibrationGapPp >= -8)) {
+      tier = 'TIER_1'
+    } else if (rate >= 65 && (calibrationGapPp === null || calibrationGapPp >= -12)) {
+      tier = 'TIER_2'
+    } else {
+      tier = 'TIER_3'
+    }
+    statusLabel = `Empirical Confirmed (N=${totalSettled})`
+  }
+
+  return {
+    league: compName,
+    market: getLMIMarketLabel(mKey),
+    market_key: mKey,
+    tier,
+    total_evaluated: matchingItems.length,
+    total_settled: totalSettled,
+    won_count: wonCount,
+    lost_count: lostCount,
+    void_count: voidCount,
+    pending_count: pendingCount,
+    actual_win_rate: actualWinRate,
+    predicted_avg_prob: predictedAvgProb,
+    calibration_gap_pp: calibrationGapPp,
+    macro_prior_win_rate: priorHitRate,
+    status_label: statusLabel,
+    items: matchingItems,
+  }
+}
+
+function buildCompetitionSummary(
+  compKey: string,
+  compData: {
+    key: string
+    name: string
+    country: string | null
+    meta?: any
+    items: LeagueIntegrityBetItem[]
+  }
+): LeagueIntegrityCompetitionSummary {
+  const marketsRecord: Record<string, LeagueMarketIntegrityRecord> = {}
+  const extraMarketsRecord: Record<string, LeagueMarketIntegrityRecord> = {}
+  const compItems = compData.items
+  const baselineMarkets = compData.meta?.market_integrity || {}
+  const standardSet = new Set<string>(STANDARD_LMI_MARKETS)
+
+  // Group items by normalized market key so 100% of selections are accounted for
+  const groupedByMarket: Record<string, LeagueIntegrityBetItem[]> = {}
+  for (const item of compItems) {
+    const mKey = item.market_key || normalizeLMIMarketKey(item.market, item.selection)
+    if (!groupedByMarket[mKey]) groupedByMarket[mKey] = []
+    groupedByMarket[mKey].push(item)
+  }
+
+  // Build standard markets
+  for (const mKey of STANDARD_LMI_MARKETS) {
+    const matchingItems = groupedByMarket[mKey] || []
+    marketsRecord[mKey] = buildLMIMarketRecord(compData.name, mKey, matchingItems, baselineMarkets[mKey])
+  }
+
+  // Build any extra/non-standard markets that have selections in this competition
+  for (const [mKey, matchingItems] of Object.entries(groupedByMarket)) {
+    if (standardSet.has(mKey)) continue
+    extraMarketsRecord[mKey] = buildLMIMarketRecord(compData.name, mKey, matchingItems, baselineMarkets[mKey])
+  }
+
+  // Competition overall totals (strictly matching sum of market records)
+  const compWon = compItems.filter((i) => i.result === 'won').length
+  const compLost = compItems.filter((i) => i.result === 'lost').length
+  const compVoid = compItems.filter((i) => i.result === 'void').length
+  const compPending = compItems.filter((i) => i.result === 'pending').length
+  const compSettled = compWon + compLost
+  const compWinRate = compSettled > 0 ? Number(((compWon / compSettled) * 100).toFixed(1)) : null
+
+  // Determine overall tier
+  let overallTier: LeagueMarketTier = 'TIER_2'
+  if (compSettled >= 5) {
+    if ((compWinRate ?? 0) >= 75) overallTier = 'TIER_1'
+    else if ((compWinRate ?? 0) < 60) overallTier = 'TIER_3'
+    else overallTier = 'TIER_2'
+  } else if (compSettled > 0 && Object.keys(baselineMarkets).length === 0) {
+    if ((compWinRate ?? 0) >= 75) overallTier = 'TIER_1'
+    else if ((compWinRate ?? 0) < 60) overallTier = 'TIER_3'
+    else overallTier = 'TIER_2'
+  } else {
+    const tiers = Object.values(marketsRecord)
+      .filter((m) => m.tier !== 'UNTESTED')
+      .map((m) => m.tier)
+    const tier3Count = tiers.filter((t) => t === 'TIER_3').length
+    const tier1Count = tiers.filter((t) => t === 'TIER_1').length
+    if (tiers.length === 0) overallTier = 'UNTESTED'
+    else if (tier3Count >= 3) overallTier = 'TIER_3'
+    else if (tier1Count >= 3) overallTier = 'TIER_1'
+    else overallTier = 'TIER_2'
+  }
+
+  return {
+    competition_key: compKey,
+    name: compData.name,
+    country: compData.country,
+    historical_home_avg: compData.meta?.historical_home_avg ?? null,
+    historical_away_avg: compData.meta?.historical_away_avg ?? null,
+    markets: marketsRecord,
+    extra_markets: Object.keys(extraMarketsRecord).length > 0 ? extraMarketsRecord : undefined,
+    overall_tier: overallTier,
+    total_bets: compItems.length,
+    settled_bets: compSettled,
+    pending_bets: compPending,
+    void_bets: compVoid,
+    won_bets: compWon,
+    lost_bets: compLost,
+    win_rate: compWinRate,
+    items: compItems,
+  }
+}
+
+async function loadBaselinesCompetitions(): Promise<Record<string, any>> {
+  const baselinesPath = path.join(process.cwd(), 'betting-data', 'rules', 'league_baselines.json')
+  try {
+    const fileRaw = await fs.readFile(baselinesPath, 'utf-8')
+    const baselinesJson = JSON.parse(fileRaw)
+    return baselinesJson.competitions || {}
+  } catch (err) {
+    console.warn('Could not read league_baselines.json from disk, using fallback empty baselines:', err)
+    return {}
   }
 }
 
@@ -2496,16 +2833,7 @@ export async function getLeagueMarketIntegrity(): Promise<{
     const supabase = await createClient()
 
     // 1. Load League Baselines JSON
-    let baselinesJson: any = { competitions: {} }
-    const baselinesPath = path.join(process.cwd(), 'betting-data', 'rules', 'league_baselines.json')
-    try {
-      const fileRaw = await fs.readFile(baselinesPath, 'utf-8')
-      baselinesJson = JSON.parse(fileRaw)
-    } catch (err) {
-      console.warn('Could not read league_baselines.json from disk, using fallback empty baselines:', err)
-    }
-
-    const baselineCompetitions = baselinesJson.competitions || {}
+    const baselineCompetitions = await loadBaselinesCompetitions()
 
     // 2. Fetch all selections and alternatives from Supabase
     const [selRes, altRes] = await Promise.all([
@@ -2528,6 +2856,7 @@ export async function getLeagueMarketIntegrity(): Promise<{
           actual_away_score,
           result,
           betting_tickets (
+            uuid,
             ticket_number
           )
         `)
@@ -2551,6 +2880,7 @@ export async function getLeagueMarketIntegrity(): Promise<{
           actual_away_score,
           result,
           betting_tickets (
+            uuid,
             ticket_number
           )
         `)
@@ -2567,11 +2897,13 @@ export async function getLeagueMarketIntegrity(): Promise<{
     const allBetItems: LeagueIntegrityBetItem[] = []
 
     for (const s of selRes.data || []) {
+      const ticketObj = Array.isArray(s.betting_tickets) ? s.betting_tickets[0] : (s.betting_tickets as any)
       allBetItems.push({
         id: s.id,
         uuid: s.uuid,
         ticket_id: s.ticket_id,
-        ticket_number: (s.betting_tickets as any)?.ticket_number || null,
+        ticket_uuid: ticketObj?.uuid || null,
+        ticket_number: ticketObj?.ticket_number || null,
         source_type: 'selection',
         match_date: s.match_date,
         home_team: s.home_team,
@@ -2579,6 +2911,7 @@ export async function getLeagueMarketIntegrity(): Promise<{
         country: s.country,
         league: s.league,
         market: s.market,
+        market_key: normalizeLMIMarketKey(s.market, s.selection),
         selection: s.selection,
         odds: s.odds ? Number(s.odds) : null,
         estimated_probability: s.estimated_probability ? Number(s.estimated_probability) : null,
@@ -2589,11 +2922,13 @@ export async function getLeagueMarketIntegrity(): Promise<{
     }
 
     for (const a of altRes.data || []) {
+      const ticketObj = Array.isArray(a.betting_tickets) ? a.betting_tickets[0] : (a.betting_tickets as any)
       allBetItems.push({
         id: a.id,
         uuid: a.uuid,
         ticket_id: a.ticket_id,
-        ticket_number: (a.betting_tickets as any)?.ticket_number || null,
+        ticket_uuid: ticketObj?.uuid || null,
+        ticket_number: ticketObj?.ticket_number || null,
         source_type: 'alternative',
         match_date: a.match_date,
         home_team: a.home_team,
@@ -2601,6 +2936,7 @@ export async function getLeagueMarketIntegrity(): Promise<{
         country: a.country,
         league: a.league,
         market: a.market,
+        market_key: normalizeLMIMarketKey(a.market, a.selection),
         selection: a.selection,
         odds: a.odds ? Number(a.odds) : null,
         estimated_probability: a.estimated_probability ? Number(a.estimated_probability) : null,
@@ -2622,7 +2958,7 @@ export async function getLeagueMarketIntegrity(): Promise<{
       }
     > = {}
 
-    // Pre-populate with baseline competitions so they appear even before first bet
+    // Pre-populate with baseline competitions so they appear even before first selection
     for (const [key, comp] of Object.entries(baselineCompetitions)) {
       if (key === 'default_fallback') continue
       competitionsMap[key] = {
@@ -2634,7 +2970,7 @@ export async function getLeagueMarketIntegrity(): Promise<{
       }
     }
 
-    // Map each bet item into its matched competition
+    // Map each selection into its matched competition
     for (const item of allBetItems) {
       if (!item.league) continue
       const matched = matchBaselineCompetition(item.league, item.country, baselineCompetitions)
@@ -2655,140 +2991,15 @@ export async function getLeagueMarketIntegrity(): Promise<{
     const summaries: LeagueIntegrityCompetitionSummary[] = []
 
     for (const [compKey, compData] of Object.entries(competitionsMap)) {
-      const marketsRecord: Record<string, LeagueMarketIntegrityRecord> = {}
-      const compItems = compData.items
-      const baselineMarkets = compData.meta?.market_integrity || {}
-
-      // Calculate for each standard market
-      for (const mKey of STANDARD_LMI_MARKETS) {
-        const matchingItems = compItems.filter((i) => normalizeLMIMarketKey(i.market, i.selection) === mKey)
-        const settledItems = matchingItems.filter((i) => i.result === 'won' || i.result === 'lost' || i.result === 'void')
-        const wonCount = settledItems.filter((i) => i.result === 'won').length
-        const lostCount = settledItems.filter((i) => i.result === 'lost').length
-        const voidCount = settledItems.filter((i) => i.result === 'void').length
-        const totalSettled = wonCount + lostCount
-        totalSettledRecords += totalSettled
-
-        const actualWinRate = totalSettled > 0 ? Number(((wonCount / totalSettled) * 100).toFixed(1)) : null
-
-        const probItems = settledItems.filter((i) => i.estimated_probability != null && (i.result === 'won' || i.result === 'lost'))
-        const predictedAvgProb =
-          probItems.length > 0
-            ? Number(((probItems.reduce((acc, i) => acc + Number(i.estimated_probability), 0) / probItems.length) * 100).toFixed(1))
-            : null
-
-        const calibrationGapPp =
-          actualWinRate !== null && predictedAvgProb !== null ? Number((actualWinRate - predictedAvgProb).toFixed(1)) : null
-
-        const macroPrior = baselineMarkets[mKey]
-        const priorHitRate = macroPrior?.baseline_hit_rate ? Number((macroPrior.baseline_hit_rate * 100).toFixed(1)) : null
-        const priorTier: LeagueMarketTier = macroPrior?.tier || 'UNTESTED'
-
-        let tier: LeagueMarketTier = priorTier
-        let statusLabel = ''
-
-        if (totalSettled === 0) {
-          tier = priorTier
-          statusLabel = macroPrior?.notes ? `Prior: ${priorTier}` : 'Untested'
-        } else if (totalSettled < 5) {
-          const empiricalRate = actualWinRate ?? (priorHitRate ?? 50)
-          const priorRate = priorHitRate ?? 50
-          const blended = priorRate * 0.8 + empiricalRate * 0.2
-
-          if (lostCount >= 2 && wonCount === 0) {
-            tier = 'TIER_3'
-            statusLabel = `Caution (0/${totalSettled} Won) - Fat Tail Trap`
-          } else {
-            tier = priorTier
-            statusLabel = `Low Sample (N=${totalSettled}) - Prior Weighted`
-          }
-        } else if (totalSettled < 15) {
-          const empiricalRate = actualWinRate ?? 50
-          const priorRate = priorHitRate ?? 50
-          const blended = priorRate * 0.5 + empiricalRate * 0.5
-
-          if (blended >= 78) {
-            tier = 'TIER_1'
-          } else if (blended >= 65) {
-            tier = 'TIER_2'
-          } else {
-            tier = 'TIER_3'
-          }
-          statusLabel = `Calibrating (N=${totalSettled}, Blended ${blended.toFixed(1)}%)`
-        } else {
-          const rate = actualWinRate ?? 0
-          if (rate >= 80 && (calibrationGapPp === null || calibrationGapPp >= -8)) {
-            tier = 'TIER_1'
-          } else if (rate >= 65 && (calibrationGapPp === null || calibrationGapPp >= -12)) {
-            tier = 'TIER_2'
-          } else {
-            tier = 'TIER_3'
-          }
-          statusLabel = `Empirical Confirmed (N=${totalSettled})`
-        }
-
-        marketsRecord[mKey] = {
-          league: compData.name,
-          market: getLMIMarketLabel(mKey),
-          market_key: mKey,
-          tier,
-          total_evaluated: matchingItems.length,
-          total_settled: totalSettled,
-          won_count: wonCount,
-          lost_count: lostCount,
-          void_count: voidCount,
-          actual_win_rate: actualWinRate,
-          predicted_avg_prob: predictedAvgProb,
-          calibration_gap_pp: calibrationGapPp,
-          macro_prior_win_rate: priorHitRate,
-          status_label: statusLabel,
-          items: matchingItems,
-        }
-      }
-
-      // Competition overall totals
-      const compSettled = compItems.filter((i) => i.result === 'won' || i.result === 'lost')
-      const compWon = compSettled.filter((i) => i.result === 'won').length
-      const compLost = compSettled.filter((i) => i.result === 'lost').length
-      const compWinRate = compSettled.length > 0 ? Number(((compWon / compSettled.length) * 100).toFixed(1)) : null
-
-      // Determine overall tier
-      let overallTier: LeagueMarketTier = 'TIER_2'
-      if (compSettled.length >= 5) {
-        if ((compWinRate ?? 0) >= 75) overallTier = 'TIER_1'
-        else if ((compWinRate ?? 0) < 60) overallTier = 'TIER_3'
-        else overallTier = 'TIER_2'
-      } else {
-        // Fall back to baseline macro average tier
-        const tiers = Object.values(marketsRecord).map((m) => m.tier)
-        const tier3Count = tiers.filter((t) => t === 'TIER_3').length
-        const tier1Count = tiers.filter((t) => t === 'TIER_1').length
-        if (tier3Count >= 3) overallTier = 'TIER_3'
-        else if (tier1Count >= 3) overallTier = 'TIER_1'
-        else overallTier = 'TIER_2'
-      }
-
-      summaries.push({
-        competition_key: compKey,
-        name: compData.name,
-        country: compData.country,
-        historical_home_avg: compData.meta?.historical_home_avg ?? null,
-        historical_away_avg: compData.meta?.historical_away_avg ?? null,
-        markets: marketsRecord,
-        overall_tier: overallTier,
-        total_bets: compItems.length,
-        won_bets: compWon,
-        lost_bets: compLost,
-        win_rate: compWinRate,
-        items: compItems,
-      })
+      const summary = buildCompetitionSummary(compKey, compData)
+      totalSettledRecords += summary.settled_bets
+      summaries.push(summary)
     }
 
-    // Sort: competitions with empirical settled bets first, then alphabetical
+    // Sort: competitions with empirical settled selections first, then total selections, then alphabetical
     summaries.sort((a, b) => {
-      const aSettled = a.won_bets + a.lost_bets
-      const bSettled = b.won_bets + b.lost_bets
-      if (bSettled !== aSettled) return bSettled - aSettled
+      if (b.settled_bets !== a.settled_bets) return b.settled_bets - a.settled_bets
+      if (b.total_bets !== a.total_bets) return b.total_bets - a.total_bets
       return a.name.localeCompare(b.name)
     })
 
@@ -2811,6 +3022,255 @@ export async function getLeagueMarketIntegrity(): Promise<{
       },
       error: err.message || 'Unknown error calculating league market integrity',
     }
+  }
+}
+
+export async function getLeagueCompetitionDetail(competitionKey: string): Promise<{
+  data: LeagueCompetitionDetailPayload | null
+  error?: string
+}> {
+  try {
+    const supabase = await createClient()
+    const targetKey = decodeURIComponent(competitionKey).trim()
+    const baselineCompetitions = await loadBaselinesCompetitions()
+
+    // Fetch full selection + alternative snapshots and warnings
+    const [selRes, altRes, warnRes] = await Promise.all([
+      supabase
+        .from('betting_selections')
+        .select(`
+          *,
+          betting_tickets (
+            id,
+            uuid,
+            ticket_number,
+            ticket_date,
+            status,
+            betting_models (
+              id,
+              name,
+              version
+            )
+          )
+        `)
+        .order('match_date', { ascending: false })
+        .order('created_at', { ascending: false }),
+      supabase
+        .from('betting_alternatives')
+        .select(`
+          *,
+          betting_tickets (
+            id,
+            uuid,
+            ticket_number,
+            ticket_date,
+            status,
+            betting_models (
+              id,
+              name,
+              version
+            )
+          )
+        `)
+        .order('match_date', { ascending: false })
+        .order('created_at', { ascending: false }),
+      supabase.from('betting_warnings').select('*'),
+    ])
+
+    if (selRes.error) console.error('Failed to fetch betting_selections for league detail:', selRes.error)
+    if (altRes.error) console.error('Failed to fetch betting_alternatives for league detail:', altRes.error)
+
+    const allWarnings = (warnRes.data || []) as BettingWarning[]
+    const warningsBySelection = new Map<number, BettingWarning[]>()
+    const warningsByAlternative = new Map<number, BettingWarning[]>()
+    for (const w of allWarnings) {
+      if (w.selection_id) {
+        const list = warningsBySelection.get(w.selection_id) || []
+        list.push(w)
+        warningsBySelection.set(w.selection_id, list)
+      } else if (w.alternative_id) {
+        const list = warningsByAlternative.get(w.alternative_id) || []
+        list.push(w)
+        warningsByAlternative.set(w.alternative_id, list)
+      }
+    }
+
+    // Track all known competition keys for accurate StatisticsSubNav badge count
+    const knownKeys = new Set<string>(
+      Object.keys(baselineCompetitions).filter((k) => k !== 'default_fallback')
+    )
+
+    let matchedCompInfo: { key: string; name: string; country: string | null; meta?: any } | null = null
+    if (baselineCompetitions[targetKey]) {
+      const meta = baselineCompetitions[targetKey]
+      matchedCompInfo = {
+        key: targetKey,
+        name: meta.name || targetKey,
+        country: meta.country || null,
+        meta,
+      }
+    }
+
+    const detailSelections: LeagueSelectionDetailItem[] = []
+    const summaryBetItems: LeagueIntegrityBetItem[] = []
+
+    const mapRow = (row: any, sourceType: 'selection' | 'alternative') => {
+      if (!row.league) return
+      const matched = matchBaselineCompetition(row.league, row.country, baselineCompetitions)
+      knownKeys.add(matched.key)
+
+      if (matched.key !== targetKey) return
+      if (!matchedCompInfo) {
+        matchedCompInfo = matched
+      }
+
+      const ticketObj = Array.isArray(row.betting_tickets) ? row.betting_tickets[0] : row.betting_tickets
+      const modelObj = ticketObj
+        ? Array.isArray(ticketObj.betting_models)
+          ? ticketObj.betting_models[0]
+          : ticketObj.betting_models
+        : null
+
+      const marketKey = normalizeLMIMarketKey(row.market, row.selection)
+      const marketLabel = getLMIMarketLabel(marketKey)
+
+      summaryBetItems.push({
+        id: row.id,
+        uuid: row.uuid,
+        ticket_id: row.ticket_id,
+        ticket_uuid: ticketObj?.uuid || null,
+        ticket_number: ticketObj?.ticket_number || null,
+        source_type: sourceType,
+        match_date: row.match_date || ticketObj?.ticket_date || '',
+        home_team: row.home_team,
+        away_team: row.away_team,
+        country: row.country,
+        league: row.league,
+        market: row.market,
+        market_key: marketKey,
+        selection: row.selection,
+        odds: row.odds != null ? Number(row.odds) : null,
+        estimated_probability: row.estimated_probability != null ? Number(row.estimated_probability) : null,
+        actual_home_score: row.actual_home_score,
+        actual_away_score: row.actual_away_score,
+        result: row.result,
+      })
+
+      detailSelections.push({
+        id: row.id,
+        uuid: row.uuid,
+        ticket_id: row.ticket_id,
+        ticket_uuid: ticketObj?.uuid || null,
+        ticket_number: ticketObj?.ticket_number || null,
+        ticket_date: ticketObj?.ticket_date || null,
+        ticket_status: ticketObj?.status || null,
+        model_version: modelObj?.version || null,
+        model_name: modelObj?.name || null,
+        source_type: sourceType,
+        match_date: row.match_date || ticketObj?.ticket_date || null,
+        country: row.country || null,
+        league: row.league || null,
+        home_team: row.home_team,
+        away_team: row.away_team,
+        home_league_position: row.home_league_position ?? null,
+        away_league_position: row.away_league_position ?? null,
+        home_matches_played: row.home_matches_played ?? null,
+        away_matches_played: row.away_matches_played ?? null,
+        home_goals_scored: row.home_goals_scored ?? null,
+        home_goals_conceded: row.home_goals_conceded ?? null,
+        away_goals_scored: row.away_goals_scored ?? null,
+        away_goals_conceded: row.away_goals_conceded ?? null,
+        home_goals_per_game: row.home_goals_per_game ?? null,
+        home_conceded_per_game: row.home_conceded_per_game ?? null,
+        away_goals_per_game: row.away_goals_per_game ?? null,
+        away_conceded_per_game: row.away_conceded_per_game ?? null,
+        home_overall_matches_played: row.home_overall_matches_played ?? null,
+        home_overall_goals_scored: row.home_overall_goals_scored ?? null,
+        home_overall_goals_conceded: row.home_overall_goals_conceded ?? null,
+        home_overall_goals_per_game: row.home_overall_goals_per_game ?? null,
+        home_overall_conceded_per_game: row.home_overall_conceded_per_game ?? null,
+        away_overall_matches_played: row.away_overall_matches_played ?? null,
+        away_overall_goals_scored: row.away_overall_goals_scored ?? null,
+        away_overall_goals_conceded: row.away_overall_goals_conceded ?? null,
+        away_overall_goals_per_game: row.away_overall_goals_per_game ?? null,
+        away_overall_conceded_per_game: row.away_overall_conceded_per_game ?? null,
+        market: row.market,
+        market_key: marketKey,
+        market_label: marketLabel,
+        selection: row.selection,
+        odds: row.odds != null ? Number(row.odds) : null,
+        estimated_probability: row.estimated_probability != null ? Number(row.estimated_probability) : null,
+        breakeven_probability: row.breakeven_probability != null ? Number(row.breakeven_probability) : null,
+        edge_percentage_points: row.edge_percentage_points != null ? Number(row.edge_percentage_points) : null,
+        expected_value: row.expected_value != null ? Number(row.expected_value) : null,
+        current_league_home_avg: row.current_league_home_avg ?? null,
+        current_league_away_avg: row.current_league_away_avg ?? null,
+        historical_league_home_avg: row.historical_league_home_avg ?? null,
+        historical_league_away_avg: row.historical_league_away_avg ?? null,
+        historical_estimated_probability: row.historical_estimated_probability ?? null,
+        alignment_delta_pp: row.alignment_delta_pp ?? null,
+        alignment_remark: row.alignment_remark ?? null,
+        edge_remark: row.edge_remark ?? null,
+        prob_over_1_5: row.prob_over_1_5 ?? null,
+        prob_over_2_5: row.prob_over_2_5 ?? null,
+        prob_btts_yes: row.prob_btts_yes ?? null,
+        prob_under_3_5: row.prob_under_3_5 ?? null,
+        prob_home_win: row.prob_home_win ?? null,
+        prob_away_win: row.prob_away_win ?? null,
+        prob_draw: row.prob_draw ?? null,
+        is_neutral_venue: row.is_neutral_venue ?? null,
+        competition_type: row.competition_type ?? null,
+        stage: row.stage ?? null,
+        elo_home: row.elo_home ?? null,
+        elo_away: row.elo_away ?? null,
+        actual_home_score: row.actual_home_score ?? null,
+        actual_away_score: row.actual_away_score ?? null,
+        result: row.result,
+        comment: row.comment ?? null,
+        notes: row.notes ?? null,
+        warnings:
+          sourceType === 'selection'
+            ? warningsBySelection.get(row.id) || []
+            : warningsByAlternative.get(row.id) || [],
+      })
+    }
+
+    for (const s of selRes.data || []) mapRow(s, 'selection')
+    for (const a of altRes.data || []) mapRow(a, 'alternative')
+
+    if (!matchedCompInfo) {
+      return { data: null, error: 'Competition not found' }
+    }
+
+    // Sort selections newest first
+    detailSelections.sort((a, b) => {
+      const dateA = a.match_date || ''
+      const dateB = b.match_date || ''
+      if (dateB !== dateA) return dateB.localeCompare(dateA)
+      return b.id - a.id
+    })
+
+    const summary = buildCompetitionSummary(targetKey, {
+      ...matchedCompInfo,
+      items: summaryBetItems,
+    })
+
+    const marketSummaries: LeagueMarketIntegrityRecord[] = [
+      ...STANDARD_LMI_MARKETS.map((k) => summary.markets[k]).filter(Boolean),
+      ...Object.values(summary.extra_markets || {}),
+    ]
+
+    return {
+      data: {
+        competition: summary,
+        market_summaries: marketSummaries,
+        selections: detailSelections,
+        total_competitions: knownKeys.size,
+      },
+    }
+  } catch (err: any) {
+    console.error('Error in getLeagueCompetitionDetail:', err)
+    return { data: null, error: err.message || 'Failed to load competition details' }
   }
 }
 

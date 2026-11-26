@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useTransition, useMemo } from 'react'
+import Link from 'next/link'
 import {
   Box,
   Card,
@@ -33,6 +34,7 @@ import {
   Select,
   FormControl,
   InputLabel,
+  Tooltip,
 } from '@mui/material'
 import {
   ShieldCheck,
@@ -51,6 +53,7 @@ import {
   Check,
   Calendar,
   Layers,
+  ArrowUpRight,
 } from 'lucide-react'
 import {
   LeagueIntegrityMatrixPayload,
@@ -234,6 +237,7 @@ export default function LeagueIntegrityClient({
     { key: 'under_3_5', label: 'Under 3.5' },
     { key: 'to_win', label: 'To Win (1X2)' },
     { key: 'draw_no_bet', label: 'Draw No Bet' },
+    { key: 'double_chance', label: 'Double Chance' },
   ]
 
   return (
@@ -360,13 +364,13 @@ export default function LeagueIntegrityClient({
           >
             <CardContent sx={{ p: 2.5 }}>
               <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600, textTransform: 'uppercase' }}>
-                Total Evaluated
+                {locale === 'fr' ? 'Sélections Évaluées' : 'Total Selections'}
               </Typography>
               <Typography variant="h4" sx={{ fontWeight: 800, mt: 0.5, color: '#60A5FA' }}>
                 {kpis.totalEmpiricalBets}
               </Typography>
               <Typography variant="caption" color="text.secondary">
-                Main + Shadow Bets
+                {locale === 'fr' ? 'Principales + Alternatives' : 'Main + Alternative Selections'}
               </Typography>
             </CardContent>
           </Card>
@@ -561,7 +565,7 @@ export default function LeagueIntegrityClient({
             <TableBody>
               {filteredCompetitions.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={8} align="center" sx={{ py: 6 }}>
+                  <TableCell colSpan={9} align="center" sx={{ py: 6 }}>
                     <Typography variant="body2" color="text.secondary">
                       {locale === 'fr'
                         ? 'Aucune compétition ne correspond aux critères de filtre.'
@@ -572,6 +576,10 @@ export default function LeagueIntegrityClient({
               ) : (
                 filteredCompetitions.map((comp) => {
                   const overallColors = TIER_COLORS[comp.overall_tier] || TIER_COLORS.UNTESTED
+                  const leagueHref = `/${locale}/admin/betting/statistics/league-integrity/${encodeURIComponent(comp.competition_key)}`
+                  const extraMarketsCount = comp.extra_markets
+                    ? Object.values(comp.extra_markets).reduce((acc, m) => acc + m.total_evaluated, 0)
+                    : 0
 
                   return (
                     <TableRow
@@ -585,54 +593,109 @@ export default function LeagueIntegrityClient({
                     >
                       {/* Competition info */}
                       <TableCell sx={{ py: 2 }}>
-                        <Box
-                          sx={{ cursor: 'pointer' }}
-                          onClick={() => setSelectedRecord({ competition: comp })}
-                        >
-                          <Typography
-                            variant="body2"
-                            sx={{
-                              fontWeight: 700,
-                              color: '#FFFFFF',
-                              '&:hover': { color: '#60A5FA', textDecoration: 'underline' },
-                            }}
-                          >
-                            {comp.name}
-                          </Typography>
-                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 0.25 }}>
-                            {comp.country && (
-                              <Typography variant="caption" sx={{ color: '#94A3B8' }}>
-                                {comp.country}
-                              </Typography>
-                            )}
-                            {comp.historical_home_avg && (
-                              <Typography variant="caption" sx={{ color: 'rgba(255, 255, 255, 0.4)' }}>
-                                • Baselines: {comp.historical_home_avg}H / {comp.historical_away_avg}A
-                              </Typography>
-                            )}
+                        <Link href={leagueHref} style={{ textDecoration: 'none' }}>
+                          <Box sx={{ cursor: 'pointer' }}>
+                            <Typography
+                              variant="body2"
+                              sx={{
+                                fontWeight: 700,
+                                color: '#FFFFFF',
+                                '&:hover': { color: '#60A5FA', textDecoration: 'underline' },
+                              }}
+                            >
+                              {comp.name}
+                            </Typography>
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 0.25, flexWrap: 'wrap' }}>
+                              {comp.country && (
+                                <Typography variant="caption" sx={{ color: '#94A3B8' }}>
+                                  {comp.country}
+                                </Typography>
+                              )}
+                              {comp.historical_home_avg && (
+                                <Typography variant="caption" sx={{ color: 'rgba(255, 255, 255, 0.4)' }}>
+                                  • Baselines: {comp.historical_home_avg}H / {comp.historical_away_avg}A
+                                </Typography>
+                              )}
+                            </Box>
                           </Box>
-                        </Box>
+                        </Link>
                       </TableCell>
 
-                      {/* Overall tier */}
-                      <TableCell align="center" sx={{ py: 2 }}>
-                        <Chip
-                          size="small"
-                          label={comp.overall_tier.replace('_', ' ')}
-                          sx={{
-                            fontWeight: 700,
-                            fontSize: '0.72rem',
-                            backgroundColor: overallColors.bg,
-                            color: overallColors.text,
-                            border: `1px solid ${overallColors.border}`,
-                          }}
-                        />
-                        <Typography
-                          variant="caption"
-                          sx={{ display: 'block', color: '#94A3B8', mt: 0.5, fontSize: '0.68rem' }}
+                      {/* Clickable Overall Status -> Dedicated League Selections Page */}
+                      <TableCell align="center" sx={{ py: 1.5, px: 1 }}>
+                        <Tooltip
+                          title={
+                            locale === 'fr'
+                              ? 'Voir toutes les sélections et statistiques par marché de cette ligue'
+                              : 'Open all selections & market stats for this league'
+                          }
+                          arrow
                         >
-                          {comp.total_bets} bets ({comp.win_rate !== null ? `${comp.win_rate}%` : 'N/A'})
-                        </Typography>
+                          <Link href={leagueHref} style={{ textDecoration: 'none' }}>
+                            <Box
+                              sx={{
+                                p: 1,
+                                borderRadius: 2,
+                                display: 'inline-flex',
+                                flexDirection: 'column',
+                                alignItems: 'center',
+                                minWidth: 108,
+                                cursor: 'pointer',
+                                border: '1px solid transparent',
+                                transition: 'all 0.18s ease',
+                                '&:hover': {
+                                  backgroundColor: alpha('#60A5FA', 0.1),
+                                  borderColor: alpha('#60A5FA', 0.45),
+                                  transform: 'translateY(-1px)',
+                                },
+                              }}
+                            >
+                              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                                <Chip
+                                  size="small"
+                                  label={comp.overall_tier.replace('_', ' ')}
+                                  sx={{
+                                    fontWeight: 700,
+                                    fontSize: '0.72rem',
+                                    backgroundColor: overallColors.bg,
+                                    color: overallColors.text,
+                                    border: `1px solid ${overallColors.border}`,
+                                    cursor: 'pointer',
+                                  }}
+                                />
+                                <ArrowUpRight size={13} color="#60A5FA" />
+                              </Box>
+                              <Typography
+                                variant="caption"
+                                sx={{
+                                  display: 'block',
+                                  color: '#E2E8F0',
+                                  mt: 0.5,
+                                  fontSize: '0.7rem',
+                                  fontWeight: 600,
+                                }}
+                              >
+                                {comp.settled_bets > 0
+                                  ? `${comp.win_rate}% (${comp.won_bets}/${comp.settled_bets})`
+                                  : `${comp.total_bets} ${locale === 'fr' ? 'sél.' : 'sel.'}`}
+                              </Typography>
+                              {(comp.pending_bets > 0 || comp.void_bets > 0 || extraMarketsCount > 0) && (
+                                <Typography
+                                  variant="caption"
+                                  sx={{ display: 'block', color: '#94A3B8', fontSize: '0.62rem', mt: 0.15 }}
+                                >
+                                  {[
+                                    comp.pending_bets > 0 ? `+${comp.pending_bets} pend.` : null,
+                                    comp.void_bets > 0 ? `${comp.void_bets} void` : null,
+                                    extraMarketsCount > 0 ? `${extraMarketsCount} other` : null,
+                                  ]
+                                    .filter(Boolean)
+                                    .join(' • ')}
+                                </Typography>
+                              )}
+                            </Box>
+                          </Link>
+                        </Tooltip>
                       </TableCell>
 
                       {/* Standard Markets Columns */}
@@ -707,11 +770,13 @@ export default function LeagueIntegrityClient({
                                   mt: 0.4,
                                 }}
                               >
-                                {rec?.actual_win_rate !== null
+                                {rec?.actual_win_rate !== null && rec?.actual_win_rate !== undefined
                                   ? `${rec.actual_win_rate}% (${rec.won_count}/${rec.total_settled})`
-                                  : rec?.macro_prior_win_rate !== null && rec?.macro_prior_win_rate !== undefined
-                                    ? `~${rec.macro_prior_win_rate}% prior`
-                                    : 'Untested'}
+                                  : rec?.pending_count && rec.pending_count > 0
+                                    ? `${rec.pending_count} pending`
+                                    : rec?.macro_prior_win_rate !== null && rec?.macro_prior_win_rate !== undefined
+                                      ? `~${rec.macro_prior_win_rate}% prior`
+                                      : 'Untested'}
                               </Typography>
 
                               {rec?.calibration_gap_pp !== null && rec?.calibration_gap_pp !== undefined && (
@@ -776,15 +841,33 @@ export default function LeagueIntegrityClient({
               </Box>
 
               {selectedRecord.record && (
-                <Chip
-                  label={selectedRecord.record.tier.replace('_', ' ')}
-                  sx={{
-                    fontWeight: 800,
-                    backgroundColor: TIER_COLORS[selectedRecord.record.tier].bg,
-                    color: TIER_COLORS[selectedRecord.record.tier].text,
-                    border: `1px solid ${TIER_COLORS[selectedRecord.record.tier].border}`,
-                  }}
-                />
+                <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
+                  <Chip
+                    label={selectedRecord.record.tier.replace('_', ' ')}
+                    sx={{
+                      fontWeight: 800,
+                      backgroundColor: TIER_COLORS[selectedRecord.record.tier].bg,
+                      color: TIER_COLORS[selectedRecord.record.tier].text,
+                      border: `1px solid ${TIER_COLORS[selectedRecord.record.tier].border}`,
+                    }}
+                  />
+                  <Button
+                    component={Link}
+                    href={`/${locale}/admin/betting/statistics/league-integrity/${encodeURIComponent(selectedRecord.competition.competition_key)}`}
+                    size="small"
+                    variant="outlined"
+                    endIcon={<ArrowUpRight size={14} />}
+                    sx={{
+                      textTransform: 'none',
+                      fontWeight: 700,
+                      borderRadius: 2,
+                      borderColor: alpha('#60A5FA', 0.4),
+                      color: '#60A5FA',
+                    }}
+                  >
+                    {locale === 'fr' ? 'Page Ligue' : 'League Page'}
+                  </Button>
+                </Stack>
               )}
             </Box>
 
@@ -877,11 +960,11 @@ export default function LeagueIntegrityClient({
               </Box>
             )}
 
-            {/* Settled Bets History List */}
+            {/* Selections History List */}
             <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 1.5 }}>
               {selectedRecord.record
-                ? `Historical Fixtures Evaluated (${selectedRecord.record.items?.length || 0})`
-                : `All Fixtures in Competition (${selectedRecord.competition.items?.length || 0})`}
+                ? `Selections Evaluated (${selectedRecord.record.items?.length || 0})`
+                : `All Selections in Competition (${selectedRecord.competition.items?.length || 0})`}
             </Typography>
 
             {(() => {
@@ -917,10 +1000,10 @@ export default function LeagueIntegrityClient({
                           borderRadius: 2,
                           backgroundColor: alpha('#1E2635', 0.6),
                           border: `1px solid ${isWon
-                              ? 'rgba(34, 197, 94, 0.3)'
-                              : isLost
-                                ? 'rgba(239, 68, 68, 0.3)'
-                                : 'rgba(255, 255, 255, 0.08)'
+                            ? 'rgba(34, 197, 94, 0.3)'
+                            : isLost
+                              ? 'rgba(239, 68, 68, 0.3)'
+                              : 'rgba(255, 255, 255, 0.08)'
                             }`,
                         }}
                       >
@@ -934,7 +1017,7 @@ export default function LeagueIntegrityClient({
                           <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
                             <Chip
                               size="small"
-                              label={item.source_type === 'selection' ? 'Main Leg' : 'Shadow Alt'}
+                              label={item.source_type === 'selection' ? 'Main Selection' : 'Alternative'}
                               sx={{
                                 height: 20,
                                 fontSize: '0.65rem',

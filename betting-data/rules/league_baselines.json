@@ -1263,6 +1263,69 @@
         }
       }
     },
+    "netherlands_vrouwen_eredivisie": {
+      "name": "Netherlands Vrouwen Eredivisie",
+      "country": "Netherlands",
+      "historical_home_avg": 1.70,
+      "historical_away_avg": 1.35,
+      "season_basis": "Multi-year aggregate (Top-heavy: Twente/Ajax/PSV dominant)",
+      "market_integrity": {
+        "over_1_5": {
+          "tier": "TIER_1",
+          "baseline_hit_rate": 0.82,
+          "notes": "Strong 2-goal foundation across all fixtures.",
+          "empirical_sample": 0,
+          "empirical_win_rate": null,
+          "calibration_gap_pp": null,
+          "status_label": "Prior: TIER_1"
+        },
+        "over_2_5": {
+          "tier": "TIER_2",
+          "baseline_hit_rate": 0.56,
+          "notes": "TIER_2 Controlled: Restricted to asymmetric mismatches; barred in top-3 title clashes and mid-table parity.",
+          "empirical_sample": 2,
+          "empirical_win_rate": 0.0,
+          "calibration_gap_pp": -74.8,
+          "status_label": "Empirical Warning: Under 2.5 in Parity Matches"
+        },
+        "btts_yes": {
+          "tier": "TIER_2",
+          "baseline_hit_rate": 0.52,
+          "notes": "Solid when underdogs host top-tier offenses.",
+          "empirical_sample": 0,
+          "empirical_win_rate": null,
+          "calibration_gap_pp": null,
+          "status_label": "Prior: TIER_2"
+        },
+        "under_3_5": {
+          "tier": "TIER_2",
+          "baseline_hit_rate": 0.68,
+          "notes": "Parity and title matches frequently stay under.",
+          "empirical_sample": 0,
+          "empirical_win_rate": null,
+          "calibration_gap_pp": null,
+          "status_label": "Prior: TIER_2"
+        },
+        "to_win": {
+          "tier": "TIER_1",
+          "baseline_hit_rate": 0.53,
+          "notes": "High favorite conversion by Twente and Ajax.",
+          "empirical_sample": 0,
+          "empirical_win_rate": null,
+          "calibration_gap_pp": null,
+          "status_label": "Prior: TIER_1"
+        },
+        "draw_no_bet": {
+          "tier": "TIER_1",
+          "baseline_hit_rate": 0.73,
+          "notes": "Strong protection against road draw attrition.",
+          "empirical_sample": 0,
+          "empirical_win_rate": null,
+          "calibration_gap_pp": null,
+          "status_label": "Prior: TIER_1"
+        }
+      }
+    },
     "default_fallback": {
       "name": "Default Competition Fallback",
       "country": null,
