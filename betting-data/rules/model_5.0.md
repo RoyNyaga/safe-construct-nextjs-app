@@ -33,7 +33,7 @@ Model 4.0 explicitly halts calculations for these fixtures under Section 3 and S
 5. **Dominant Match Winner (1X2)** — typical market odds: $1.35 - 1.85$ (Gated by $\Delta \text{Elo} \ge 250$ or Dominance Ratio $\ge 3.0$; strictly gated against rotated away favorites)
 6. **Under 3.5 Goals — Knockout Fortress** — typical market odds: $1.30 - 1.55$ (High-stakes tactical knockouts)
 7. **Both Teams to Score (BTTS Yes)** — typical market odds: $1.65 - 2.10$ (Restricted to closely matched competitive pairings)
-8. **Over 2.5 Goals** — typical market odds: $1.60 - 2.20$ (Restricted to high-tempo group matches with proven offensive balance)
+8. **Over 2.5 Goals** — typical market odds: $1.30 - 2.20$ (Restricted to high-tempo group/league-phase matches with proven offensive balance; Edge $\ge +3.0\text{pp}$ when priced $\le 1.35$)
 
 ---
 
@@ -46,7 +46,7 @@ Model 4.0 explicitly halts calculations for these fixtures under Section 3 and S
 5. **Neutral Venue Protocol**: Major tournament fixtures played at neutral venues receive zero venue bonus ($H_{\text{venue}} = 0$). Only genuine host nations playing in their home stadiums receive host advantage ($H_{\text{venue}} = +100$).
 6. **Knockout Stage Regular-Time Discipline**: All standard match markets settle strictly in regular time (90 minutes + stoppage time). Model 5.1 applies the Knockout Compression Factor ($K_s = 0.88$) to account for single-elimination risk aversion.
 7. **Rotation Haircut Protocol**: When an elite club rotates $\ge 4$ starting players in an away cup match, `SQUAD_ROTATION_MONITORING` acts as a `DIRECT` penalty, transferring win probability to draw and home win.
-8. **Anti-Odds-Chasing Invariant**: Never downgrade a selection from a high-probability, high-EV market (e.g. Over 1.5 or To Qualify) to a high-variance market (e.g. 1X2 straight win) merely to hit an arbitrary 2-leg ticket odds floor.
+8. **Anti-Odds-Chasing & Same-Match Safety Invariant**: Never downgrade a selection from a high-probability, positive-EV market (e.g. Over 1.5, Over 2.5, or To Qualify) to a lower-probability tri-state market (`1X2` straight win) merely to hit an arbitrary 2-leg ticket odds floor. Whenever a +EV Goal Market on the same match exceeds `P(1X2)` by $\ge 5.0\text{pp}$, the Goal Market strictly takes priority.
 9. **Permanent Companion & Matrix Tracking**: For every analysed tournament fixture, companion probabilities and complete market evaluation matrices (`market_evaluations`) must be populated.
 
 ---
@@ -257,6 +257,8 @@ Model 5.0 evaluates all standard markets but enforces specific gating tailored t
   - Model Win Probability: $\ge 72\%$.
   - **Knockout Stage Hard-Stop**: Match Winner 1X2 is **strictly forbidden in single-leg knockouts** between evenly matched teams ($|\Delta \text{Elo}| < 150$). Use DNB, Double Chance, or To Qualify instead.
   - **Rotated Away Favorite Hard-Stop**: In single-leg domestic cup ties, straight 1X2 Away Win bets are **STRICTLY PROHIBITED** if the visiting favorite rotates $\ge 4$ regular starters (`SQUAD_ROTATION_MONITORING`). The selection must be rerouted to **To Qualify**, **Double Chance (X2)**, or **Over 1.5 Goals**.
+  - **Shootout Underdog Hard-Stop (`HIGH_SCORING_UNDERDOG_DRAW_TRAP`)**: Straight `1X2 Home Win` is **STRICTLY DISQUALIFIED** if the visiting underdog averages $\ge 1.75\text{ GF/G}$ in the active tournament AND the home favorite concedes $\ge 1.00\text{ GA/G}$ in the active tournament (e.g. PSG vs AS Roma $2\text{--}2$). Reroute to **Over 2.5 Goals** (if Dual-Scoring Floor clears) or **Draw No Bet (DNB)**.
+  - **Same-Match Market Safety Hierarchy (`SAME_MATCH_SAFETY_HIERARCHY`)**: If a positive-EV Goal Market (`Over 1.5` or `Over 2.5`, Edge $\ge +3.0\text{pp}$, odds $\ge 1.22$) on the same fixture exceeds `P(1X2)` by $\ge 5.0\text{pp}$, the Goal Market strictly overrides straight `1X2` for active capital (invoking the flexible $1.75 - 1.99$ combined odds floor when required).
 
 ### 5.5 Market 5: Under 3.5 Goals — Knockout Fortress
 - **Role**: Protective shield for defensive tournament clashes.
@@ -277,8 +279,8 @@ Model 5.0 evaluates all standard markets but enforces specific gating tailored t
   - *Warning*: Strictly disqualified in heavy mismatches ($\Delta \text{Elo} \ge 200$) due to high clean-sheet shutout frequency (e.g. 3-0, 4-0).
 
 ### 5.7 Market 7: Over 2.5 Goals in Tournaments
-- **Role**: High-yield selection for proven open group matches or high-tempo continental clashes.
-- **Target Odds**: $1.60 - 2.20$.
+- **Role**: High-yield or shootout-override selection for proven open group/league-phase matches and high-tempo continental clashes.
+- **Target Odds**: $1.30 - 2.20$ (when priced $\le 1.35$, must strictly clear the $\ge +3.0\text{pp}$ Minimum Edge Floor).
 - **Qualifications**:
   - Combined Expected Goals: $\lambda_{\text{total}} \ge 2.70$.
   - Dual Contribution Index: $\text{DCI} \ge 0.45$.
@@ -331,6 +333,8 @@ Model 5.1 introduces standardized tournament-specific risk warnings:
 | `KNOCKOUT_CAGEYNESS_RISK` | High | Single-elimination domestic cup tie meeting both: (1) regional/derby rivalry status, AND (2) competitive parity ($|\Delta \text{Elo}| \le 100$). Market Relevance: **DIRECT**. | Strictly bars Over 1.5 and Over 2.5 on main tickets. Prohibits `REGIONAL_CUP_MOMENTUM` from acting as a supportive override. Routes to `Under 3.5` or `Double Chance`. |
 | `LOW_ODDS_EDGE_NOISE` | High | Selection odds $\le 1.35$ carry an estimated value edge $< +3.0\text{pp}$ on samples $n < 12$. | Strictly disqualifies pick from main tickets as statistical noise. Requires minimum $+3.0\text{pp}$ edge floor. |
 | `QUALITATIVE_OVERRIDE_CAP` | Moderate / Guardrail | Narrative-only downward probability adjustment is applied without confirmed spine absences. | Caps qualitative-only downward haircuts to at most $-4.0\text{pp}$ from mathematical Poisson/Elo expectation. |
+| `HIGH_SCORING_UNDERDOG_DRAW_TRAP` | High | Visiting underdog averages $\ge 1.75\text{ GF/G}$ in-tournament AND home favorite concedes $\ge 1.00\text{ GA/G}$ in-tournament. Market Relevance: **DIRECT** for 1X2. | Strictly disqualifies straight `1X2 Home Win` despite Elo/DR dominance; reroutes to `Over 2.5 Goals` or `Draw No Bet (DNB)`. |
+| `SAME_MATCH_SAFETY_HIERARCHY` | Moderate / Guardrail | A positive-EV Goal Market (`Over 1.5` or `Over 2.5`, Edge $\ge +3.0\text{pp}$, odds $\ge 1.22$) on the same fixture exceeds `P(1X2)` by $\ge 5.0\text{pp}$. | Overrides straight `1X2` in favor of the higher-probability Goal Market, authorizing the flexible $1.75 - 1.99$ combined odds floor rather than chasing $2.00+$ odds. |
 
 ---
 

@@ -805,6 +805,7 @@ export interface LeagueIntegrityBetItem {
   id: number
   uuid: string
   ticket_id?: number | null
+  ticket_uuid?: string | null
   ticket_number?: string | null
   source_type: 'selection' | 'alternative'
   match_date: string
@@ -813,6 +814,7 @@ export interface LeagueIntegrityBetItem {
   country?: string | null
   league: string
   market: string
+  market_key?: string
   selection: string
   odds?: number | null
   estimated_probability?: number | null
@@ -831,6 +833,7 @@ export interface LeagueMarketIntegrityRecord {
   won_count: number
   lost_count: number
   void_count: number
+  pending_count?: number
   actual_win_rate: number | null
   predicted_avg_prob: number | null
   calibration_gap_pp: number | null
@@ -846,8 +849,12 @@ export interface LeagueIntegrityCompetitionSummary {
   historical_home_avg?: number | null
   historical_away_avg?: number | null
   markets: Record<string, LeagueMarketIntegrityRecord>
+  extra_markets?: Record<string, LeagueMarketIntegrityRecord>
   overall_tier: LeagueMarketTier
   total_bets: number
+  settled_bets: number
+  pending_bets: number
+  void_bets: number
   won_bets: number
   lost_bets: number
   win_rate: number | null
@@ -859,6 +866,88 @@ export interface LeagueIntegrityMatrixPayload {
   total_competitions: number
   total_settled_records: number
   competitions: LeagueIntegrityCompetitionSummary[]
+}
+
+export interface LeagueSelectionDetailItem {
+  id: number
+  uuid: string
+  ticket_id: number
+  ticket_uuid: string | null
+  ticket_number: string | null
+  ticket_date: string | null
+  ticket_status: TicketStatus | null
+  model_version: string | null
+  model_name: string | null
+  source_type: 'selection' | 'alternative'
+  match_date: string | null
+  country: string | null
+  league: string | null
+  home_team: string
+  away_team: string
+  home_league_position?: number | null
+  away_league_position?: number | null
+  home_matches_played?: number | null
+  away_matches_played?: number | null
+  home_goals_scored?: number | null
+  home_goals_conceded?: number | null
+  away_goals_scored?: number | null
+  away_goals_conceded?: number | null
+  home_goals_per_game?: number | null
+  home_conceded_per_game?: number | null
+  away_goals_per_game?: number | null
+  away_conceded_per_game?: number | null
+  home_overall_matches_played?: number | null
+  home_overall_goals_scored?: number | null
+  home_overall_goals_conceded?: number | null
+  home_overall_goals_per_game?: number | null
+  home_overall_conceded_per_game?: number | null
+  away_overall_matches_played?: number | null
+  away_overall_goals_scored?: number | null
+  away_overall_goals_conceded?: number | null
+  away_overall_goals_per_game?: number | null
+  away_overall_conceded_per_game?: number | null
+  market: string
+  market_key: string
+  market_label: string
+  selection: string
+  odds: number | null
+  estimated_probability: number | null
+  breakeven_probability: number | null
+  edge_percentage_points: number | null
+  expected_value: number | null
+  current_league_home_avg?: number | null
+  current_league_away_avg?: number | null
+  historical_league_home_avg?: number | null
+  historical_league_away_avg?: number | null
+  historical_estimated_probability?: number | null
+  alignment_delta_pp?: number | null
+  alignment_remark?: AlignmentRemark | null
+  edge_remark?: EdgeRemark | null
+  prob_over_1_5?: number | null
+  prob_over_2_5?: number | null
+  prob_btts_yes?: number | null
+  prob_under_3_5?: number | null
+  prob_home_win?: number | null
+  prob_away_win?: number | null
+  prob_draw?: number | null
+  is_neutral_venue?: boolean | null
+  competition_type?: 'domestic_league' | 'continental_club' | 'national_team' | null
+  stage?: string | null
+  elo_home?: number | null
+  elo_away?: number | null
+  actual_home_score: number | null
+  actual_away_score: number | null
+  result: SelectionResultStatus
+  comment: string | null
+  notes: string | null
+  warnings: BettingWarning[]
+}
+
+export interface LeagueCompetitionDetailPayload {
+  competition: LeagueIntegrityCompetitionSummary
+  market_summaries: LeagueMarketIntegrityRecord[]
+  selections: LeagueSelectionDetailItem[]
+  total_competitions: number
 }
 
 

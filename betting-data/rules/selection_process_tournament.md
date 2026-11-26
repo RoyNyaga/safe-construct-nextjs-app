@@ -143,21 +143,23 @@ graph TD
 - **Role**: Fallback architecture when no single high-odds leg meets strict safety gating, allowing the ticket to reach 2.00 odds without gambling on low-probability selections.
 
 ### 3.6 Flexible Combined Odds Floor ($1.75 - 2.00$) & No-Bet Discipline
-- **The Anti-Downgrade Mandate**: The engine must **NEVER** downgrade selection safety or trade positive EV for lower hit-rate markets (e.g. replacing an $83\%$ Over 1.5 with a $70\%$ rotated 1X2 win) strictly to reach $2.00$ odds in two legs.
+- **The Anti-Downgrade Mandate**: The engine must **NEVER** downgrade selection safety or trade positive EV for lower hit-rate markets (e.g. replacing an $83\%$ Over 1.5 with a $70\%$ rotated 1X2 win, or replacing a $78.5\%$ Over 2.5 @ $1.35$ with a $73.0\%$ 1X2 Home Win @ $1.50$) strictly to reach $2.00$ odds in two legs.
+- **Same-Match Safety Priority**: When a fixture yields both a positive-EV `1X2` win and a positive-EV Goal Market (`Over 1.5` or `Over 2.5`, Edge $\ge +3.0\text{pp}$, odds $\ge 1.22$) whose probability exceeds `1X2` by $\ge 5.0\text{pp}$, the engine **MUST** select the Goal Market and invoke the flexible $1.75 - 1.99$ floor if combined odds land in that band (see Rule 19).
 - **Protocol**:
   1. If two vetted legs produce combined odds in the range **$1.75 - 1.99$** and no vetted third leg is available, Model 5.1 allows ticket execution under **controlled stake (50% allocation)** rather than forcing high-risk selections.
   2. If combined odds fall below $1.75$ and Archetype 1B cannot be formed with clean candidates, the engine declares **NO BET** for active capital and logs all fixtures to shadow tracking (`alternatives`). Bankroll preservation is paramount.
 
 ### 3.7 Dominant Home Winner Promotion Protocol (Sweden Archetype)
 - **Context**: When navigating international breaks or continental tournament slates, road goal anchors can face severe frustration against compact low blocks (as seen in Kosovo 0-0 Israel).
-- **Protocol**: Prioritize elite European home favorites ($\text{DR} \ge 2.20$, $\Delta \text{Elo} \ge +200$, $P(\text{Home Win}) \ge 70.0\%$, e.g. Sweden vs Bosnia 3-1 @ 1.49) over fragile road goal anchors.
-- **Strategic Impact**: Backing a dominant home favorite inside their national stadium provides essential structural resilience: home crowd pressure, turf familiarity, and individual talent superiority reliably break through defensive stalemates, avoiding the fat-tail risks of away low blocks.
+- **Protocol**: Prioritize elite European home favorites ($\text{DR} \ge 2.20$, $\Delta \text{Elo} \ge +200$, $P(\text{Home Win}) \ge 70.0\%$, e.g. Sweden vs Bosnia 3-1 @ 1.49, Inter Milan vs VfB Stuttgart 2-0 @ 1.39) over fragile road goal anchors.
+- **Mandatory Defensive-Control Filter (`HIGH_SCORING_UNDERDOG_DRAW_TRAP`)**: Straight `1X2 Home Win` promotion is **STRICTLY BARRED** when the visiting underdog averages $\ge 1.75\text{ GF/G}$ in the active tournament AND the home favorite concedes $\ge 1.00\text{ GA/G}$ in the active tournament (e.g., PSG conceding $1.25\text{ GA/G}$ vs AS Roma scoring $2.50\text{ GF/G}$ in Ticket `S-7-v5.1`, which finished $2\text{--}2$). In mutual-firepower shootouts, route the fixture to **`Over 2.5 Goals`** or **`Draw No Bet (DNB)`** instead of straight `1X2`.
+- **Strategic Impact**: Reserving straight `1X2 Home Win` for defensive-control home fortresses preserves structural resilience while routing high-scoring shootouts into draw-proof goal markets.
 
 ---
 
 ## 4. HARD DISQUALIFICATION & STOP RULES FOR TOURNAMENTS
 
-To prevent catastrophic failures, the engine strictly halts or disqualifies selections under these 18 conditions:
+To prevent catastrophic failures, the engine strictly halts or disqualifies selections under these 20 conditions:
 
 1. **The Knockout Match Winner Hard-Stop**:
    - In a single-leg knockout fixture between two balanced nations or clubs ($|\Delta \text{Elo}| < 150$), **straight 1X2 Match Winner bets are strictly DISQUALIFIED**. 
@@ -225,6 +227,16 @@ To prevent catastrophic failures, the engine strictly halts or disqualifies sele
     - For any candidate anchor priced $\le 1.35$, the selection is strictly disqualified from main tickets unless it clears a **minimum value edge of $\ge +3.0\text{pp}$** above bookmaker break-even probability ($P_{\text{model}} - P_{\text{breakeven}} \ge 0.030$).
     - Furthermore, if either club has played fewer than 12 competitive matches in the current cycle ($n < 12$), empirical scoring rates must be shrunken toward the domestic tier baseline using Bayesian weight $w = n / (n + 6)$.
     - *Reason*: On short odds ($\le 1.35$), edges of $+1.0\text{pp}$ to $+2.5\text{pp}$ on small samples ($n \le 10$) represent statistical estimation noise. Backing low-margin odds on unproven sample sizes destroys accumulator compounding over the long run.
+19. **Same-Match Market Safety Hierarchy (`SAME_MATCH_SAFETY_HIERARCHY`)**:
+    - Whenever a fixture offers BOTH a positive-EV straight `1X2` Match Winner and a positive-EV Goal Market (`Over 1.5` or `Over 2.5`, Edge $\ge +3.0\text{pp}$, odds $\ge 1.22$), **strictly prioritize the Goal Market whenever its calibrated probability exceeds `1X2` by $\ge 5.0\text{pp}$**.
+    - *Empirical Proof*: In Ticket `S-7-v5.1` (PSG vs AS Roma), `Over 2.5 @ 1.35` (`78.5%`, `+4.4pp` Edge) outperformed `Home Win 1X2 @ 1.50` (`73.0%`, `+6.3pp` Edge) by $+5.5\text{pp}$ in probability. Pairing Inter `1X2 @ 1.39` with PSG `Over 2.5 @ 1.35` yields `1.88` odds (valid under Section 3.6's flexible `1.75–1.99` floor) at `58.5%` compound probability and **won (`2–2`)**, whereas chasing `2.09` odds via `PSG 1X2` dropped compound probability to `54.4%` and **lost**.
+    - *Mandatory Action*: Never downgrade single-leg probability by $\ge 5.0\text{pp}$ into a tri-state `1X2` market solely to push a 2-leg accumulator above $2.00$ odds.
+20. **Shootout Underdog Draw Trap (`HIGH_SCORING_UNDERDOG_DRAW_TRAP`)**:
+    - Even if a home favorite clears $\Delta \text{Elo} \ge +200$ and Dominance Ratio $\ge 3.0$ under Section 3.7, straight `1X2 Home Win` is **STRICTLY DISQUALIFIED from main tickets** whenever BOTH conditions hold:
+      1. The visiting underdog averages **$\ge 1.75\text{ GF/G}$** in the active tournament (e.g. AS Roma `2.50 GF/G` in UCL), AND
+      2. The home favorite concedes **$\ge 1.00\text{ GA/G}$** in the active tournament (e.g. PSG `1.25 GA/G` in UCL).
+    - *The Tactical Trap*: Mutual offensive potency paired with non-elite home defensive suppression inflates `2–2` and `3–3` shootout draw risk, destroying straight `1X2` bets even when the favorite scores 2+ goals.
+    - *Mandatory Action*: Automatically reroute the fixture to **`Over 2.5 Goals`** (if Rule 13 Dual-Scoring Floor clears) or **`Draw No Bet (DNB)`**.
 
 ---
 
@@ -278,7 +290,7 @@ flowchart TD
 4. **Pillar 4: Table Stakes, Knockout Cageyness & Tie Resolution**: Audit Matchday 3 qualification status (`GROUP_STAGE_DEAD_RUBBER`), mutual draw convenience, or single-leg knockout extra-time settling. If regional derby and $|\Delta\text{Elo}| \le 100$, enforce Rule 16 `KNOCKOUT_CAGEYNESS_RISK` and disqualify Over 1.5/2.5. If evaluating `To Qualify`, confirm bookmaker vig $\le 7.5\%$.
 5. **Pillar 5: Dual-Scoring Floor & Shutout Resistance Audit**: Verify that if Team A averages $< 1.00\text{ GF}^*$, Team B averages strictly $\ge 2.00\text{ GF}^*$ alone. If Team A $< 1.00$ and Team B $< 2.00$, enforce `ONE_SIDED_SCORING_RISK` and disqualify Over 1.5 from main tickets. Enforce `ONE_SIDED_GOAL_BURDEN` (downgrading Over 2.5 to Over 1.5).
 6. **Pillar 6: Double-Header Reverse Fixture Audit**: For international qualification windows, check if teams met within the past 5 days. If Game 1 was a blowout ($\ge 3$ goal margin), enforce `REVERSE_FIXTURE_CAUTION` and disqualify Over 1.5 and Over 2.5.
-7. **Pillar 7: Minimum Edge & Bayesian Sample Shrinkage Audit**: For any anchor priced $\le 1.35$, enforce Rule 18 `LOW_ODDS_EDGE_FLOOR` ($\ge +3.0\text{pp}$ required). If sample size $n < 12$, verify Bayesian shrinkage was applied.
+7. **Pillar 7: Minimum Edge, Same-Match Hierarchy & Shootout Audit**: For any anchor priced $\le 1.35$, enforce Rule 18 `LOW_ODDS_EDGE_FLOOR` ($\ge +3.0\text{pp}$ required) and verify Bayesian shrinkage when $n < 12$. Before approving any straight `1X2` leg, verify Rule 19 (`SAME_MATCH_SAFETY_HIERARCHY` — no +EV Goal Market on the same match exceeds `1X2` probability by $\ge 5.0\text{pp}$) and Rule 20 (`HIGH_SCORING_UNDERDOG_DRAW_TRAP` — visiting underdog $< 1.75\text{ GF/G}$ or home favorite $< 1.00\text{ GA/G}$ in-tournament).
 
 ### Stage 3 Swap Protocol Execution
 - When a provisional selection fails any Stage 2 pillar:
@@ -324,7 +336,7 @@ Every constructed Model 5.1 ticket must be assigned a discrete **`confidence`** 
   └───────────────────────────┬────────────────────────────┘
                               │
   ┌───────────────────────────▼────────────────────────────┐
-  │   4. Apply Hard-Stops & Disqualification Rules (1-18)  │
+  │   4. Apply Hard-Stops & Disqualification Rules (1-20)  │
   └───────────────────────────┬────────────────────────────┘
                               │
   ┌───────────────────────────▼────────────────────────────┐
